@@ -15,12 +15,16 @@
 
 ## 特性
 
-- **自动翻译**：使用 LLM API 高质量翻译技术文档
-- **增量更新**：基于文件内容 hash 的增量翻译，节省 API 费用
+- **自动翻译**：使用 LLM API 高质量翻译技术文档和代码文本
+- **多文件类型**：自动识别 Markdown / HTML / YAML / Python，按文件类型构建专用 prompt
+- **块感知分段**：大文件智能分段，不在代码块、HTML 标签对、YAML 结构内部切分
+- **增量更新**：基于 SHA-256 hash 的增量翻译，上游未变更的文件不会重复翻译
+- **RPM + TPM 双限速**：请求级记账的滑动窗口限速器，精确控制 API 用量
+- **多线程并发**：ThreadPoolExecutor 并行翻译，默认 5 线程
 - **自动同步**：每日检测上游更新，自动翻译变更内容
 - **双轨发布**：Nightly 自动构建 + 稳定版手动发布
-- **术语一致**：通过术语表确保翻译一致性
-- **兼容广泛**：支持任意 OpenAI 兼容 API 服务
+- **术语一致**：通过术语表确保翻译一致性，verify.py 自动校验合规
+- **兼容广泛**：支持任意 OpenAI 兼容 API 服务（OpenAI、DeepSeek、通义千问等）
 
 ## 翻译范围
 
@@ -28,9 +32,9 @@
 |--------|------|------|
 | P0 | 核心文档（README、CONTRIBUTING、AGENTS.md） | 进行中 |
 | P0 | 文档站（website/docs/ ~70 个文件） | 进行中 |
-| P1 | CLI 用户界面文本（banner、tips、setup 等） | 计划中 |
-| P1 | Landing Page | 计划中 |
-| P1 | GitHub Issue/PR 模板 | 计划中 |
+| P1 | CLI 用户界面文本（banner、tips、setup、commands、doctor） | 进行中 |
+| P1 | Landing Page（整文件翻译） | 进行中 |
+| P1 | GitHub Issue/PR 模板（YAML/Markdown） | 进行中 |
 
 ## 快速开始
 
@@ -128,7 +132,12 @@ hermes-agent-zh/
 1. **翻译覆盖层**：不 fork 上游，仓库只存翻译内容和自动化脚本
 2. **构建时合并**：CI/CD 中克隆上游源码，将翻译覆盖上去
 3. **增量翻译**：通过 SHA-256 hash 追踪文件变更，仅翻译变化的内容
-4. **双轨发布**：
+4. **多文件类型翻译**：
+   - **Markdown/HTML**：整文件翻译（file_override），按结构边界智能分段
+   - **Python 代码**：提取用户面向字符串，生成 JSON 替换规则（string_replace）
+   - **YAML 模板**：整文件翻译，保持 YAML 结构，只翻译值文本
+5. **RPM + TPM 双限速**：请求级记账（reservation_id），发送前预估 token、发送后用 API 实际 usage 修正
+6. **双轨发布**：
    - **Nightly**：每日自动检测上游 → 翻译变更 → 构建 → 发布
    - **Stable**：手动打 tag 触发稳定版发布
 
