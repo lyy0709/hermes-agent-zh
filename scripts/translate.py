@@ -257,9 +257,27 @@ def should_translate(source_path: str, source_file: Path, cache: dict, force: bo
 # Prompt 构建
 # ──────────────────────────────────────────
 
-def build_system_prompt(glossary_text: str) -> str:
-    """构建翻译 system prompt"""
-    return f"""你是一个专业的技术文档翻译员。将以下英文内容翻译为简体中文。
+def build_system_prompt(glossary_text: str, file_path: str = "") -> str:
+    """构建翻译 system prompt，根据文件类型调整规则。"""
+    ext = Path(file_path).suffix.lower() if file_path else ""
+
+    if ext in (".yml", ".yaml"):
+        return f"""你是一个专业的技术文档翻译员。将以下 YAML 文件中的英文内容翻译为简体中文。
+
+规则：
+1. 只翻译 YAML 值中的英文文本（name、description、label、placeholder、value 等字段）
+2. 保持 YAML 结构和缩进完全不变
+3. 不翻译 YAML 的 key 名称（如 type、id、required、validations 等）
+4. 不翻译 type 字段的值（如 textarea、input、dropdown、markdown 等）
+5. 不翻译 URL、GitHub 链接
+6. 保持 YAML 多行字符串格式（| 和 > 标记）
+7. 技术术语按照术语表翻译
+8. 只输出翻译后的完整 YAML，不要添加任何解释
+
+术语表：
+{glossary_text}"""
+    else:
+        return f"""你是一个专业的技术文档翻译员。将以下英文内容翻译为简体中文。
 
 规则：
 1. 保持 Markdown 格式不变（标题、列表、代码块、链接、图片等）
@@ -277,9 +295,53 @@ def build_system_prompt(glossary_text: str) -> str:
 {glossary_text}"""
 
 
-def build_string_extract_prompt(glossary_text: str) -> str:
-    """构建字符串提取和翻译的 system prompt"""
-    return f"""你是一个专业的技术文档翻译员。你需要从 Python 源代码中提取用户面向的字符串，并翻译为简体中文。
+def _detect_file_lang(filename: str) -> tuple[str, str]:
+    """根据文件后缀检测语言类型，返回 (语言名, 代码块标记)。"""
+    ext = Path(filename).suffix.lower()
+    lang_map = {
+        ".py": ("Python", "python"),
+        ".html": ("HTML", "html"),
+        ".htm": ("HTML", "html"),
+        ".js": ("JavaScript", "javascript"),
+        ".ts": ("TypeScript", "typescript"),
+        ".yml": ("YAML", "yaml"),
+        ".yaml": ("YAML", "yaml"),
+        ".json": ("JSON", "json"),
+        ".sh": ("Shell", "bash"),
+        ".css": ("CSS", "css"),
+    }
+    return lang_map.get(ext, ("源代码", ""))
+
+
+def build_string_extract_prompt(glossary_text: str, lang_name: str = "Python") -> str:
+    """构建字符串提取和翻译的 system prompt，根据文件类型调整。"""
+    if lang_name == "HTML":
+        return f"""你是一个专业的技术文档翻译员。你需要从 HTML 页面中提取用户可见的文本，并翻译为简体中文。
+
+任务：
+1. 识别 HTML 中所有用户可见的文本（标题、段落、按钮文字、meta description、alt 属性等）
+2. 忽略：HTML 标签名、CSS 类名、JavaScript 代码逻辑、URL、技术属性
+3. 对每段需要翻译的文本，输出 JSON 替换规则
+
+输出格式（严格 JSON）：
+{{
+  "file": "文件路径",
+  "description": "页面功能描述",
+  "replacements": {{
+    "原始英文文本": "翻译后的中文文本"
+  }}
+}}
+
+规则：
+- key 是 HTML 中的原始英文文本（完整包含引号或标签内容）
+- value 是对应的中文翻译
+- 保持 HTML 实体和特殊字符不变
+- 只输出 JSON，不要添加任何解释
+
+术语表：
+{glossary_text}"""
+    else:
+        return f"""你是一个专业的技术文档翻译员。你需要从{lang_name}源代码中提取用户面向的字符串，并翻译为简体中文。
 
 任务：
 1. 识别代码中所有用户可见的字符串（提示信息、错误消息、描述文本、标签等）
@@ -402,13 +464,14 @@ class TranslationError(Exception):
 def translate_markdown_file(
     client: OpenAI,
     model: str,
-    system_prompt: str,
+    glossary_text: str,
     source_file: Path,
     target_file: Path,
     rate_limiter: RateLimiter,
     timeout: int = 300,
 ):
-    """翻译 Markdown 文件"""
+    """翻译 Markdown/YAML 等文本文件（整文件翻译模式）。"""
+    system_prompt = build_system_prompt(glossary_text, str(source_file))
     content = source_file.read_text(encoding="utf-8")
     sections = split_markdown_sections(content)
 
@@ -427,16 +490,18 @@ def translate_markdown_file(
 def translate_code_strings(
     client: OpenAI,
     model: str,
-    system_prompt: str,
+    glossary_text: str,
     source_file: Path,
     target_file: Path,
     rate_limiter: RateLimiter,
     timeout: int = 300,
 ):
-    """提取并翻译代码中的用户面向字符串。翻译失败时抛出 TranslationError。"""
+    """提取并翻译代码/HTML中的用户面向字符串。自动检测文件类型。"""
     content = source_file.read_text(encoding="utf-8")
+    lang_name, code_tag = _detect_file_lang(source_file.name)
+    system_prompt = build_string_extract_prompt(glossary_text, lang_name)
 
-    prompt = f"以下是 Python 源代码文件 `{source_file.name}`:\n\n```python\n{content}\n```"
+    prompt = f"以下是{lang_name}文件 `{source_file.name}`:\n\n```{code_tag}\n{content}\n```"
     result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
 
     # 提取 JSON（支持多种 LLM 输出格式）
@@ -513,8 +578,7 @@ def _translate_one(
     total: int,
     client: OpenAI,
     model: str,
-    md_prompt: str,
-    code_prompt: str,
+    glossary_text: str,
     rate_limiter: RateLimiter,
     timeout: int,
     cache: dict,
@@ -529,12 +593,12 @@ def _translate_one(
     try:
         if f["type"] == "file_override":
             translate_markdown_file(
-                client, model, md_prompt, f["source_file"], f["target_file"],
+                client, model, glossary_text, f["source_file"], f["target_file"],
                 rate_limiter, timeout,
             )
         elif f["type"] == "string_replace":
             translate_code_strings(
-                client, model, code_prompt, f["source_file"], f["target_file"],
+                client, model, glossary_text, f["source_file"], f["target_file"],
                 rate_limiter, timeout,
             )
 
@@ -631,10 +695,7 @@ def main():
     model = env["model"]
     rate_limiter = RateLimiter(rpm=rpm, tpm=tpm)
 
-    md_system_prompt = build_system_prompt(glossary_text)
-    code_system_prompt = build_string_extract_prompt(glossary_text)
-
-    # 执行翻译（并发）
+    # 执行翻译（并发）— glossary_text 传入每个任务，由任务根据文件类型构建 prompt
     success = 0
     failed = 0
     total = len(to_translate)
@@ -644,7 +705,7 @@ def main():
             executor.submit(
                 _translate_one,
                 f, i + 1, total,
-                client, model, md_system_prompt, code_system_prompt,
+                client, model, glossary_text,
                 rate_limiter, timeout, cache,
             ): f
             for i, f in enumerate(to_translate)
