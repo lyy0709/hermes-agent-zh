@@ -1,0 +1,65 @@
+name: PR 质量检查
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: 验证翻译文件
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: JSON 格式验证
+        run: |
+          echo "验证所有 JSON 文件..."
+          find translations/ -name '*.json' -exec python -m json.tool {} > /dev/null \;
+          echo "✅ 所有 JSON 文件格式正确"
+
+      - name: 翻译配置验证
+        run: |
+          python -c "
+          import json
+          with open('translations/config.json') as f:
+              config = json.load(f)
+          assert 'upstream' in config, '缺少 upstream 配置'
+          assert 'modules' in config, '缺少 modules 配置'
+          for m in config['modules']:
+              assert 'name' in m, f'模块缺少 name 字段'
+              assert 'type' in m, f'模块 {m[\"name\"]} 缺少 type 字段'
+          print('✅ 翻译配置验证通过')
+          "
+
+      - name: 术语表验证
+        run: |
+          python -c "
+          import json
+          with open('translations/glossary.json') as f:
+              glossary = json.load(f)
+          terms = glossary.get('terms', {})
+          assert len(terms) > 0, '术语表为空'
+          for en, zh in terms.items():
+              assert isinstance(en, str) and len(en) > 0, f'无效的英文术语: {en}'
+              assert isinstance(zh, str) and len(zh) > 0, f'无效的中文翻译: {zh}'
+          print(f'✅ 术语表验证通过 ({len(terms)} 个术语)')
+          "
+
+      - name: Python 脚本语法检查
+        run: |
+          python -m py_compile scripts/translate.py
+          python -m py_compile scripts/apply.py
+          python -m py_compile scripts/detect_changes.py
+          python -m py_compile scripts/verify.py
+          python -m py_compile scripts/extract_strings.py
+          python -m py_compile scripts/build.py
+          echo "✅ 所有 Python 脚本语法正确"

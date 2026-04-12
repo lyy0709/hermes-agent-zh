@@ -1,0 +1,107 @@
+{
+  "_comment": "翻译主配置 - 定义所有需要翻译的文件和模块",
+  "upstream": {
+    "repo": "NousResearch/hermes-agent",
+    "branch": "main",
+    "url": "https://github.com/NousResearch/hermes-agent.git"
+  },
+  "modules": [
+    {
+      "name": "readme",
+      "description": "核心文档（README、CONTRIBUTING、AGENTS.md）",
+      "priority": "P0",
+      "type": "file_override",
+      "files": [
+        {
+          "source": "README.md",
+          "translation": "translations/readme/README.md"
+        },
+        {
+          "source": "CONTRIBUTING.md",
+          "translation": "translations/readme/CONTRIBUTING.md"
+        },
+        {
+          "source": "AGENTS.md",
+          "translation": "translations/readme/AGENTS.md"
+        }
+      ]
+    },
+    {
+      "name": "docs",
+      "description": "文档站（website/docs/）",
+      "priority": "P0",
+      "type": "file_override",
+      "source_dir": "website/docs",
+      "translation_dir": "translations/docs",
+      "pattern": "**/*.md"
+    },
+    {
+      "name": "cli",
+      "description": "CLI 用户界面文本",
+      "priority": "P1",
+      "type": "string_replace",
+      "files": [
+        {
+          "source": "hermes_cli/banner.py",
+          "translation": "translations/cli/banner.json"
+        },
+        {
+          "source": "hermes_cli/tips.py",
+          "translation": "translations/cli/tips.json"
+        },
+        {
+          "source": "hermes_cli/setup.py",
+          "translation": "translations/cli/setup.json"
+        },
+        {
+          "source": "hermes_cli/commands.py",
+          "translation": "translations/cli/commands.json"
+        },
+        {
+          "source": "hermes_cli/doctor.py",
+          "translation": "translations/cli/doctor.json"
+        },
+        {
+          "source": "hermes_cli/default_soul.py",
+          "translation": "translations/cli/default_soul.json"
+        }
+      ]
+    },
+    {
+      "name": "landing",
+      "description": "Landing Page",
+      "priority": "P1",
+      "type": "string_replace",
+      "files": [
+        {
+          "source": "landingpage/index.html",
+          "translation": "translations/landing/index.json"
+        }
+      ]
+    },
+    {
+      "name": "github",
+      "description": "GitHub 模板",
+      "priority": "P1",
+      "type": "file_override",
+      "files": [
+        {
+          "source": ".github/ISSUE_TEMPLATE/bug_report.yml",
+          "translation": "translations/github/bug_report.yml"
+        },
+        {
+          "source": ".github/ISSUE_TEMPLATE/feature_request.yml",
+          "translation": "translations/github/feature_request.yml"
+        },
+        {
+          "source": ".github/ISSUE_TEMPLATE/setup_help.yml",
+          "translation": "translations/github/setup_help.yml"
+        },
+        {
+          "source": ".github/PULL_REQUEST_TEMPLATE.md",
+          "translation": "translations/github/PULL_REQUEST_TEMPLATE.md"
+        }
+      ]
+    }
+  ]
+}

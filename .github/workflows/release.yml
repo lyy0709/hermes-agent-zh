@@ -1,0 +1,113 @@
+name: 稳定版发布
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      upstream_tag:
+        description: '上游版本 tag（如 v2026.4.8）'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPO: NousResearch/hermes-agent
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  build:
+    name: 构建稳定版
+    runs-on: ubuntu-latest
+    outputs:
+      upstream_version: ${{ steps.info.outputs.upstream_version }}
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+
+      - name: 确定上游版本
+        id: info
+        run: |
+          if [ -n "${{ inputs.upstream_tag }}" ]; then
+            echo "upstream_version=${{ inputs.upstream_tag }}" >> "$GITHUB_OUTPUT"
+          elif [ -f .last-synced-version ]; then
+            echo "upstream_version=$(cat .last-synced-version)" >> "$GITHUB_OUTPUT"
+          else
+            echo "错误: 无法确定上游版本"
+            exit 1
+          fi
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 克隆上游仓库
+        run: |
+          UPSTREAM_VERSION="${{ steps.info.outputs.upstream_version }}"
+          echo "克隆上游版本: $UPSTREAM_VERSION"
+          if ! git clone --branch "$UPSTREAM_VERSION" --depth 1 https://github.com/${{ env.UPSTREAM_REPO }}.git upstream; then
+            echo "错误: 无法克隆指定版本 $UPSTREAM_VERSION，中止构建"
+            exit 1
+          fi
+
+      - name: 应用翻译
+        run: python scripts/apply.py --upstream upstream --verbose
+
+      - name: 验证翻译
+        run: python scripts/verify.py --upstream upstream --strict
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: hermes-agent-zh-stable
+          path: upstream/
+          retention-days: 30
+
+  release:
+    name: 发布稳定版
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: hermes-agent-zh-stable
+          path: upstream/
+
+      - name: 创建 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME:-${{ inputs.upstream_tag }}-zh}"
+          UPSTREAM_VERSION="${{ needs.build.outputs.upstream_version }}"
+
+          gh release create "$TAG" \
+            --title "hermes-agent 中文版 $TAG" \
+            --notes "$(cat <<EOF
+          ## hermes-agent 中文版 稳定版发布
+
+          - 上游版本: ${UPSTREAM_VERSION}
+          - 翻译版本: ${TAG}
+
+          ### 翻译内容
+          - 核心文档（README、CONTRIBUTING、AGENTS.md）
+          - 文档站（website/docs/）
+          - CLI 用户界面文本
+          - Landing Page
+          - GitHub 模板
+
+          ### 安装使用
+          请参阅 [README](https://github.com/${{ github.repository }}) 获取安装说明。
+          EOF
+          )" \
+            --latest

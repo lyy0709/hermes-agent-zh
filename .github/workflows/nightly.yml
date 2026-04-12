@@ -1,0 +1,202 @@
+name: Nightly 自动翻译构建
+
+on:
+  schedule:
+    # 每日 UTC 02:00 (北京时间 10:00) 检测上游更新
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      force_translate:
+        description: '强制重新翻译所有文件'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPO: NousResearch/hermes-agent
+  UPSTREAM_BRANCH: main
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  check-upstream:
+    name: 检测上游更新
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+      upstream_sha: ${{ steps.check.outputs.upstream_sha }}
+      upstream_version: ${{ steps.check.outputs.upstream_version }}
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+
+      - name: 检测上游变更
+        id: check
+        run: |
+          # 获取上游最新 commit SHA
+          UPSTREAM_SHA=$(git ls-remote https://github.com/${{ env.UPSTREAM_REPO }}.git refs/heads/${{ env.UPSTREAM_BRANCH }} | cut -f1)
+          echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
+
+          # 获取上游最新 tag (版本号，过滤 ^{} 后缀)
+          UPSTREAM_VERSION=$(git ls-remote --tags --sort=-v:refname https://github.com/${{ env.UPSTREAM_REPO }}.git 'v*' | grep -v '\^{}' | head -1 | sed 's|.*refs/tags/||')
+          echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+
+          # 读取上次同步的 SHA
+          LAST_SHA=""
+          if [ -f .last-synced-sha ]; then
+            LAST_SHA=$(cat .last-synced-sha)
+          fi
+
+          # 比较
+          if [ "$UPSTREAM_SHA" = "$LAST_SHA" ] && [ "${{ inputs.force_translate }}" != "true" ]; then
+            echo "上游无变更，跳过构建"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "检测到上游变更: $LAST_SHA -> $UPSTREAM_SHA"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  translate:
+    name: 增量翻译
+    needs: check-upstream
+    if: needs.check-upstream.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 克隆上游仓库
+        run: |
+          git clone --depth 100 https://github.com/${{ env.UPSTREAM_REPO }}.git upstream
+          cd upstream
+          echo "上游 SHA: $(git rev-parse HEAD)"
+          echo "上游最新 tag: $(git describe --tags --abbrev=0 2>/dev/null || echo 'none')"
+
+      - name: 检测变更文件
+        run: python scripts/detect_changes.py --upstream upstream
+
+      - name: 执行增量翻译
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          TRANSLATION_MODEL: ${{ secrets.TRANSLATION_MODEL }}
+          TRANSLATION_WORKERS: ${{ secrets.TRANSLATION_WORKERS }}
+          TRANSLATION_RPM: ${{ secrets.TRANSLATION_RPM }}
+          TRANSLATION_TPM: ${{ secrets.TRANSLATION_TPM }}
+          TRANSLATION_TIMEOUT: ${{ secrets.TRANSLATION_TIMEOUT }}
+        run: |
+          FORCE_FLAG=""
+          if [ "${{ inputs.force_translate }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+          python scripts/translate.py --upstream upstream $FORCE_FLAG
+
+      - name: 更新同步状态
+        run: |
+          echo "${{ needs.check-upstream.outputs.upstream_sha }}" > .last-synced-sha
+          echo "${{ needs.check-upstream.outputs.upstream_version }}" > .last-synced-version
+
+      - name: 提交翻译结果
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add translations/ .last-synced-sha .last-synced-version
+          if git diff --staged --quiet; then
+            echo "无翻译变更需要提交"
+          else
+            git commit -m "chore: 自动翻译更新 (upstream: ${{ needs.check-upstream.outputs.upstream_sha }})"
+            git push
+          fi
+
+  build:
+    name: 构建验证
+    needs: [check-upstream, translate]
+    if: always() && needs.check-upstream.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出本仓库（最新）
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 克隆上游仓库
+        run: git clone --depth 1 https://github.com/${{ env.UPSTREAM_REPO }}.git upstream
+
+      - name: 应用翻译
+        run: python scripts/apply.py --upstream upstream --verbose
+
+      - name: 验证翻译
+        run: python scripts/verify.py --upstream upstream --strict
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: hermes-agent-zh-nightly
+          path: upstream/
+          retention-days: 7
+
+  release-nightly:
+    name: 发布 Nightly
+    needs: [check-upstream, build]
+    if: always() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: hermes-agent-zh-nightly
+          path: upstream/
+
+      - name: 创建 Nightly Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          UPSTREAM_VERSION="${{ needs.check-upstream.outputs.upstream_version }}"
+          UPSTREAM_SHA="${{ needs.check-upstream.outputs.upstream_sha }}"
+          TIMESTAMP=$(date -u +%Y%m%d%H%M)
+          TAG="nightly-${TIMESTAMP}"
+
+          # 删除旧的 nightly release（保留最近 5 个）
+          gh release list --limit 20 | grep 'nightly-' | tail -n +6 | awk '{print $1}' | while read tag; do
+            gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+          done
+
+          # 创建新的 nightly release
+          gh release create "$TAG" \
+            --title "Nightly ${TIMESTAMP}" \
+            --notes "$(cat <<EOF
+          ## hermes-agent 中文版 Nightly 构建
+
+          - 上游版本: ${UPSTREAM_VERSION}
+          - 上游 SHA: ${UPSTREAM_SHA}
+          - 构建时间: $(date -u +%Y-%m-%d\ %H:%M\ UTC)
+
+          <!-- upstream_sha:${UPSTREAM_SHA} -->
+          EOF
+          )" \
+            --prerelease
