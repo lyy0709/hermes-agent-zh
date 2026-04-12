@@ -19,6 +19,7 @@ env:
   UPSTREAM_REPO: NousResearch/hermes-agent
   UPSTREAM_BRANCH: main
   PYTHON_VERSION: '3.12'
+  PYTHONUNBUFFERED: '1'
 
 jobs:
   check-upstream:

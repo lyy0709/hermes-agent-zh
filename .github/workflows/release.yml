@@ -16,6 +16,7 @@ permissions:
 
 env:
   UPSTREAM_REPO: NousResearch/hermes-agent
+  PYTHONUNBUFFERED: '1'
   PYTHON_VERSION: '3.12'
 
 jobs:
