@@ -91,12 +91,12 @@ def get_tracked_files(config: dict) -> set[str]:
 
 def detect_changes(upstream_dir: Path, force_hash_check: bool = False) -> dict:
     """
-    检测需要���译的文件变更。
+    检测需要翻译的文件变更。
 
     返回:
         {
-            "needs_translation": [...],   # 需��翻译的文件
-            "new_files": [...],           # 新增的未翻��文件
+            "needs_translation": [...],   # 需要翻译的文件
+            "new_files": [...],           # 新增的未翻译文件
             "unchanged": [...],           # 未变更的文件
         }
     """
@@ -188,7 +188,7 @@ def main():
         }
         print(json.dumps(output, indent=2, ensure_ascii=False))
     else:
-        print(f"需要重新翻��: {len(result['needs_translation'])} 个文件")
+        print(f"需要重新翻译: {len(result['needs_translation'])} 个文件")
         for e in result["needs_translation"]:
             print(f"  [变更] {e['source_path']}")
 

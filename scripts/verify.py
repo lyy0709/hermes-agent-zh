@@ -3,9 +3,9 @@
 翻译验证 - 验证翻译完整性和质量。
 
 检查项:
-1. ��译覆盖率：所有配置中的文件是否都有翻译
+1. 翻译覆盖率：所有配置中的文件是否都有翻译
 2. JSON 格式验证：所有 JSON 翻译文件格式是否正确
-3. 替换规则验证：string_replace 类型的规则是否能匹配上游源���
+3. 替换规则验证：string_replace 类型的规则是否能匹配上游源码
 """
 
 import argparse
@@ -84,7 +84,7 @@ def check_json_format() -> list[dict]:
 
 
 def check_replacements(config: dict, upstream_dir: Path, strict: bool = False) -> list[dict]:
-    """验证字符串替换规则能否匹��上游源码"""
+    """验证字符串替换规则能否匹配上游源码"""
     issues = []
     level = "error" if strict else "warning"
 
