@@ -1,0 +1,26 @@
+{
+  "file": "banner.py",
+  "description": "Python 文件字符串翻译",
+  "replacements": {
+    "\"Welcome banner, ASCII art, skills summary, and update check for the CLI.\n\nPure display functions with no HermesCLI state dependency.\"": "\"CLI的欢迎横幅、ASCII艺术、技能摘要和更新检查功能。\n\n纯显示函数，不依赖HermesCLI状态。\"",
+    "\"behind\"": "\"behind\"",
+    "\"ts\"": "\"ts\"",
+    "\"upstream\"": "\"upstream\"",
+    "\"local\"": "\"local\"",
+    "\"ahead\"": "\"ahead\"",
+    "\"commit\"": "\"提交\"",
+    "\"commits\"": "\"提交\"",
+    "\"unknown\"": "\"未知\"",
+    "\"Available Tools\"": "\"可用工具\"",
+    "\"Session: \"": "\"会话：\"",
+    "\"(and {remaining_toolsets} more toolsets...)\"": "\"(以及 {remaining_toolsets} 个更多工具集...)\"",
+    "\"MCP Servers\"": "\"MCP 服务器\"",
+    "\" — failed\"": "\" — 失败\"",
+    "\"Available Skills\"": "\"可用技能\"",
+    "\"No skills installed\"": "\"未安装任何技能\"",
+    "\"/help for commands\"": "\"/help 查看命令\"",
+    "\"Profile:\"": "\"配置文件:\"",
+    "\"⚠ {behind} {commits_word} behind\"": "\"⚠ 落后 {behind} 个 {commits_word}\"",
+    "\" — run [bold]{recommended_update_command()}[/bold] to update\"": "\" — 运行 [bold]{recommended_update_command()}[/bold] 以更新\""
+  }
+}
