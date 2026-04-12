@@ -415,24 +415,50 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
         return _split_by_blank_lines(content, max_chars)
 
 
+def _emit(sections: list[str], current: list[str]):
+    """将当前行缓冲区提交为一个段（跳过空段）。"""
+    text = "\n".join(current)
+    if text.strip():
+        sections.append(text)
+
+
 def _split_markdown(content: str, max_chars: int) -> list[str]:
-    """Markdown 分段：按 heading 分割，但跳过 ``` 代码块内部。"""
+    """
+    Markdown 分段：按 heading 分割，跳过代码块内部。
+
+    安全兜底：当段超过 max_chars 且不在代码块内时，在空行处切分。
+    代码块追踪：记录 fence 标记长度（支持 ```/````/````` 等嵌套写法）。
+    """
     lines = content.split("\n")
     sections: list[str] = []
     current: list[str] = []
     current_len = 0
-    in_code_block = False
+    fence_len = 0  # 当前代码块 fence 的反引号数量，0 表示不在代码块内
 
     for line in lines:
-        # 追踪代码块状态
-        if line.strip().startswith("```"):
-            in_code_block = not in_code_block
-
-        is_heading = not in_code_block and re.match(r"^#{1,3}\s", line)
+        stripped = line.strip()
         line_len = len(line) + 1
 
+        # 代码块状态追踪（支持不同长度的 fence）
+        if stripped.startswith("```"):
+            backtick_count = len(stripped) - len(stripped.lstrip("`"))
+            if fence_len == 0:
+                fence_len = backtick_count  # 进入代码块
+            elif backtick_count >= fence_len:
+                fence_len = 0  # 离开代码块（关闭 fence 长度 >= 开启 fence）
+
+        in_code_block = fence_len > 0
+        is_heading = not in_code_block and re.match(r"^#{1,3}\s", line)
+        is_blank = not in_code_block and not stripped
+
+        # 优先在 heading 处切分
         if is_heading and current_len > max_chars // 2:
-            sections.append("\n".join(current))
+            _emit(sections, current)
+            current = [line]
+            current_len = line_len
+        # 兜底：超过 max_chars 且在安全位置（空行、非代码块）切分
+        elif is_blank and current_len > max_chars:
+            _emit(sections, current)
             current = [line]
             current_len = line_len
         else:
@@ -440,12 +466,12 @@ def _split_markdown(content: str, max_chars: int) -> list[str]:
             current_len += line_len
 
     if current:
-        sections.append("\n".join(current))
+        _emit(sections, current)
     return sections if sections else [content]
 
 
 def _split_html(content: str, max_chars: int) -> list[str]:
-    """HTML 分段：按顶层块标签分割。"""
+    """HTML 分段：按顶层块标签分割，兜底在空行处切分。"""
     lines = content.split("\n")
     sections: list[str] = []
     current: list[str] = []
@@ -458,10 +484,15 @@ def _split_html(content: str, max_chars: int) -> list[str]:
 
     for line in lines:
         is_boundary = block_pattern.match(line)
+        is_blank = not line.strip()
         line_len = len(line) + 1
 
         if is_boundary and current_len > max_chars // 2:
-            sections.append("\n".join(current))
+            _emit(sections, current)
+            current = [line]
+            current_len = line_len
+        elif is_blank and current_len > max_chars:
+            _emit(sections, current)
             current = [line]
             current_len = line_len
         else:
@@ -469,7 +500,7 @@ def _split_html(content: str, max_chars: int) -> list[str]:
             current_len += line_len
 
     if current:
-        sections.append("\n".join(current))
+        _emit(sections, current)
     return sections if sections else [content]
 
 
@@ -488,7 +519,7 @@ def _split_yaml(content: str, max_chars: int) -> list[str]:
         line_len = len(line) + 1
 
         if is_top_key and current_len > max_chars // 2:
-            sections.append("\n".join(current))
+            _emit(sections, current)
             current = [line]
             current_len = line_len
         else:
@@ -496,7 +527,7 @@ def _split_yaml(content: str, max_chars: int) -> list[str]:
             current_len += line_len
 
     if current:
-        sections.append("\n".join(current))
+        _emit(sections, current)
     return sections if sections else [content]
 
 
@@ -512,7 +543,7 @@ def _split_by_blank_lines(content: str, max_chars: int) -> list[str]:
         line_len = len(line) + 1
 
         if is_blank and current_len > max_chars // 2:
-            sections.append("\n".join(current))
+            _emit(sections, current)
             current = [line]
             current_len = line_len
         else:
@@ -520,7 +551,7 @@ def _split_by_blank_lines(content: str, max_chars: int) -> list[str]:
             current_len += line_len
 
     if current:
-        sections.append("\n".join(current))
+        _emit(sections, current)
     return sections if sections else [content]
 
 
