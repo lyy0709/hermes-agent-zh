@@ -71,11 +71,11 @@
       "name": "landing",
       "description": "Landing Page",
       "priority": "P1",
-      "type": "string_replace",
+      "type": "file_override",
       "files": [
         {
           "source": "landingpage/index.html",
-          "translation": "translations/landing/index.json"
+          "translation": "translations/landing/index.html"
         }
       ]
     },

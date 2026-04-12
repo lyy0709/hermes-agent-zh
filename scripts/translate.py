@@ -261,16 +261,33 @@ def build_system_prompt(glossary_text: str, file_path: str = "") -> str:
     """构建翻译 system prompt，根据文件类型调整规则。"""
     ext = Path(file_path).suffix.lower() if file_path else ""
 
-    if ext in (".yml", ".yaml"):
+    if ext in (".html", ".htm"):
+        return f"""你是一个专业的技术文档翻译员。将以下 HTML 页面中的英文内容翻译为简体中文。
+
+规则：
+1. 保持所有 HTML 标签、属性名、CSS 类名完全不变
+2. 翻译标签内的用户可见文本（标题、段落、按钮、链接文字等）
+3. 翻译 meta 标签的 content 属性中的描述性文本
+4. 翻译 alt 属性和 title 属性中的文本
+5. 不翻译 JavaScript 代码逻辑
+6. 不翻译 URL、href、src 属性值
+7. 不翻译 CSS 样式
+8. 保持 HTML 结构和缩进完全不变
+9. 技术术语按照术语表翻译
+10. 只输出翻译后的完整 HTML，不要添加任何解释
+
+术语表：
+{glossary_text}"""
+    elif ext in (".yml", ".yaml"):
         return f"""你是一个专业的技术文档翻译员。将以下 YAML 文件中的英文内容翻译为简体中文。
 
 规则：
-1. 只翻译 YAML 值中的英文文本（name、description、label、placeholder、value 等字段）
+1. 只翻译 YAML 值中的用户可见文本（name、description、label、placeholder 等字段的值）
 2. 保持 YAML 结构和缩进完全不变
-3. 不翻译 YAML 的 key 名称（如 type、id、required、validations 等）
-4. 不翻译 type 字段的值（如 textarea、input、dropdown、markdown 等）
+3. 不翻译 YAML 的 key 名称
+4. 不翻译以下机器字段的值：type、id、required、validations、render、assignees、labels（方括号内的标签名）
 5. 不翻译 URL、GitHub 链接
-6. 保持 YAML 多行字符串格式（| 和 > 标记）
+6. 保持 YAML 多行字符串格式（| 和 > 标记）不变
 7. 技术术语按照术语表翻译
 8. 只输出翻译后的完整 YAML，不要添加任何解释
 
@@ -310,7 +327,7 @@ def _detect_file_lang(filename: str) -> tuple[str, str]:
         ".sh": ("Shell", "bash"),
         ".css": ("CSS", "css"),
     }
-    return lang_map.get(ext, ("源代码", ""))
+    return lang_map.get(ext, ("未知类型", "text"))
 
 
 def build_string_extract_prompt(glossary_text: str, lang_name: str = "Python") -> str:
