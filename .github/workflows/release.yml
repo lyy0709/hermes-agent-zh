@@ -16,18 +16,18 @@ permissions:
 
 env:
   UPSTREAM_REPO: NousResearch/hermes-agent
-  PYTHONUNBUFFERED: '1'
   PYTHON_VERSION: '3.12'
+  PYTHONUNBUFFERED: '1'
 
 jobs:
-  build:
-    name: 构建稳定版
+  build-and-release:
+    name: 构建 + 发布稳定版
     runs-on: ubuntu-latest
-    outputs:
-      upstream_version: ${{ steps.info.outputs.upstream_version }}
     steps:
       - name: 检出本仓库
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 确定上游版本
         id: info
@@ -64,51 +64,53 @@ jobs:
       - name: 验证翻译
         run: python scripts/verify.py --upstream upstream --strict
 
-      - name: 上传构建产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: hermes-agent-zh-stable
-          path: upstream/
-          retention-days: 30
+      # ── 推送到 release 分支 ──
+      - name: 推送到 release 分支
+        run: |
+          UPSTREAM_VERSION="${{ steps.info.outputs.upstream_version }}"
 
-  release:
-    name: 发布稳定版
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: 检出本仓库
-        uses: actions/checkout@v4
+          cd upstream
 
-      - name: 下载构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: hermes-agent-zh-stable
-          path: upstream/
+          # 覆盖安装脚本
+          cp ../scripts/install.sh scripts/install.sh 2>/dev/null || true
+          cp ../scripts/install.ps1 scripts/install.ps1 2>/dev/null || true
+
+          rm -rf .git
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b release
+          git add -A
+          git commit -m "release: hermes-agent 中文版 ${UPSTREAM_VERSION}-zh"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push --force origin release
 
       - name: 创建 Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${GITHUB_REF_NAME:-${{ inputs.upstream_tag }}-zh}"
-          UPSTREAM_VERSION="${{ needs.build.outputs.upstream_version }}"
+          UPSTREAM_VERSION="${{ steps.info.outputs.upstream_version }}"
 
           gh release create "$TAG" \
-            --title "hermes-agent 中文版 $TAG" \
+            --title "Hermes Agent 中文版 $TAG" \
             --notes "$(cat <<EOF
-          ## hermes-agent 中文版 稳定版发布
+          ## Hermes Agent 中文版 稳定版发布
 
           - 上游版本: ${UPSTREAM_VERSION}
           - 翻译版本: ${TAG}
 
-          ### 翻译内容
-          - 核心文档（README、CONTRIBUTING、AGENTS.md）
-          - 文档站（website/docs/）
-          - CLI 用户界面文本
-          - Landing Page
-          - GitHub 模板
+          ### 一键安装
 
-          ### 安装使用
-          请参阅 [README](https://github.com/${{ github.repository }}) 获取安装说明。
+          **Linux / macOS:**
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | bash
+          \`\`\`
+
+          **Windows (PowerShell):**
+          \`\`\`powershell
+          irm https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.ps1 | iex
+          \`\`\`
           EOF
           )" \
             --latest

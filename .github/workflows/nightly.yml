@@ -2,7 +2,6 @@ name: Nightly 自动翻译构建
 
 on:
   schedule:
-    # 每日 UTC 02:00 (北京时间 10:00) 检测上游更新
     - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
@@ -36,21 +35,17 @@ jobs:
       - name: 检测上游变更
         id: check
         run: |
-          # 获取上游最新 commit SHA
           UPSTREAM_SHA=$(git ls-remote https://github.com/${{ env.UPSTREAM_REPO }}.git refs/heads/${{ env.UPSTREAM_BRANCH }} | cut -f1)
           echo "upstream_sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
 
-          # 获取上游最新 tag (版本号，过滤 ^{} 后缀)
           UPSTREAM_VERSION=$(git ls-remote --tags --sort=-v:refname https://github.com/${{ env.UPSTREAM_REPO }}.git 'v*' | grep -v '\^{}' | head -1 | sed 's|.*refs/tags/||')
           echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
 
-          # 读取上次同步的 SHA
           LAST_SHA=""
           if [ -f .last-synced-sha ]; then
             LAST_SHA=$(cat .last-synced-sha)
           fi
 
-          # 比较
           if [ "$UPSTREAM_SHA" = "$LAST_SHA" ] && [ "${{ inputs.force_translate }}" != "true" ]; then
             echo "上游无变更，跳过构建"
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
@@ -59,8 +54,8 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-  translate:
-    name: 增量翻译
+  translate-and-publish:
+    name: 翻译 + 构建 + 发布到 release 分支
     needs: check-upstream
     if: needs.check-upstream.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
@@ -69,6 +64,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: 设置 Python
         uses: actions/setup-python@v5
@@ -78,6 +74,7 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
+      # ── 克隆上游 ──
       - name: 克隆上游仓库
         run: |
           git clone --depth 100 https://github.com/${{ env.UPSTREAM_REPO }}.git upstream
@@ -85,6 +82,7 @@ jobs:
           echo "上游 SHA: $(git rev-parse HEAD)"
           echo "上游最新 tag: $(git describe --tags --abbrev=0 2>/dev/null || echo 'none')"
 
+      # ── 增量翻译 ──
       - name: 检测变更文件
         run: python scripts/detect_changes.py --upstream upstream
 
@@ -104,13 +102,11 @@ jobs:
           fi
           python scripts/translate.py --upstream upstream $FORCE_FLAG
 
-      - name: 更新同步状态
+      # ── 保存翻译结果到 main 分支 ──
+      - name: 提交翻译结果到 main
         run: |
           echo "${{ needs.check-upstream.outputs.upstream_sha }}" > .last-synced-sha
           echo "${{ needs.check-upstream.outputs.upstream_version }}" > .last-synced-version
-
-      - name: 提交翻译结果
-        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add translations/ .last-synced-sha .last-synced-version
@@ -118,61 +114,40 @@ jobs:
             echo "无翻译变更需要提交"
           else
             git commit -m "chore: 自动翻译更新 (upstream: ${{ needs.check-upstream.outputs.upstream_sha }})"
-            git push
+            git push origin main
           fi
 
-  build:
-    name: 构建验证
-    needs: [check-upstream, translate]
-    if: always() && needs.check-upstream.outputs.has_changes == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: 检出本仓库（最新）
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: 设置 Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 安装依赖
-        run: pip install -r requirements.txt
-
-      - name: 克隆上游仓库
-        run: git clone --depth 1 https://github.com/${{ env.UPSTREAM_REPO }}.git upstream
-
+      # ── 应用翻译到上游源码 ──
       - name: 应用翻译
         run: python scripts/apply.py --upstream upstream --verbose
 
       - name: 验证翻译
         run: python scripts/verify.py --upstream upstream --strict
 
-      - name: 上传构建产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: hermes-agent-zh-nightly
-          path: upstream/
-          retention-days: 7
+      # ── 将翻译后的完整源码推送到 release 分支 ──
+      - name: 推送到 release 分支
+        run: |
+          UPSTREAM_VERSION="${{ needs.check-upstream.outputs.upstream_version }}"
+          UPSTREAM_SHA="${{ needs.check-upstream.outputs.upstream_sha }}"
 
-  release-nightly:
-    name: 发布 Nightly
-    needs: [check-upstream, build]
-    if: always() && needs.build.result == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - name: 检出本仓库
-        uses: actions/checkout@v4
-        with:
-          ref: main
+          cd upstream
 
-      - name: 下载构建产物
-        uses: actions/download-artifact@v4
-        with:
-          name: hermes-agent-zh-nightly
-          path: upstream/
+          # 将安装脚本复制到上游源码中（覆盖原版）
+          cp ../scripts/install.sh scripts/install.sh 2>/dev/null || true
+          cp ../scripts/install.ps1 scripts/install.ps1 2>/dev/null || true
 
+          # 初始化为独立 git 仓库并推送到 release 分支
+          rm -rf .git
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b release
+          git add -A
+          git commit -m "release: hermes-agent 中文版 (upstream: ${UPSTREAM_VERSION}, sha: ${UPSTREAM_SHA:0:12})"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push --force origin release
+
+      # ── 创建 Release ──
       - name: 创建 Nightly Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -187,15 +162,26 @@ jobs:
             gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
           done
 
-          # 创建新的 nightly release
           gh release create "$TAG" \
-            --title "Nightly ${TIMESTAMP}" \
+            --title "Hermes Agent 中文版 Nightly ${TIMESTAMP}" \
             --notes "$(cat <<EOF
-          ## hermes-agent 中文版 Nightly 构建
+          ## Hermes Agent 中文版 Nightly 构建
 
           - 上游版本: ${UPSTREAM_VERSION}
-          - 上游 SHA: ${UPSTREAM_SHA}
+          - 上游 SHA: \`${UPSTREAM_SHA}\`
           - 构建时间: $(date -u +%Y-%m-%d\ %H:%M\ UTC)
+
+          ### 一键安装
+
+          **Linux / macOS:**
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.sh | bash
+          \`\`\`
+
+          **Windows (PowerShell):**
+          \`\`\`powershell
+          irm https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.ps1 | iex
+          \`\`\`
 
           <!-- upstream_sha:${UPSTREAM_SHA} -->
           EOF

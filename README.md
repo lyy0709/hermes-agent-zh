@@ -36,7 +36,30 @@
 | P1 | Landing Page（整文件翻译） | 进行中 |
 | P1 | GitHub Issue/PR 模板（YAML/Markdown） | 进行中 |
 
-## 快速开始
+## 一键安装
+
+安装体验与官方 hermes-agent 完全一致，只是安装的是中文翻译版。
+
+**Linux / macOS:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lyy0709/hermes-agent-zh/main/scripts/install.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/lyy0709/hermes-agent-zh/main/scripts/install.ps1 | iex
+```
+
+安装完成后运行 `hermes` 即可启动中文版。
+
+## 开发者指南（翻译维护）
+
+以下内容面向翻译维护者，普通用户只需使用上方的一键安装命令。
+
+<details>
+<summary>展开翻译维护说明</summary>
 
 ### 环境要求
 
@@ -55,8 +78,6 @@ pip install -r requirements.txt
 cp .env.example .env
 # 编辑 .env 文件，填入你的 API 配置
 ```
-
-环境变量说明：
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
@@ -80,12 +101,14 @@ python scripts/translate.py --force
 # 只翻译指定文件
 python scripts/translate.py --file README.md
 
-# 自定义并发和限速（适配你的 API 套餐）
+# 自定义并发和限速
 python scripts/translate.py --workers 5 --rpm 1000 --tpm 100000 --timeout 600
 
 # 串行模式（调试用）
 python scripts/translate.py --serial
 ```
+
+</details>
 
 ### 构建中文版
 
@@ -137,8 +160,9 @@ hermes-agent-zh/
    - **Python 代码**：提取用户面向字符串，生成 JSON 替换规则（string_replace）
    - **YAML 模板**：整文件翻译，保持 YAML 结构，只翻译值文本
 5. **RPM + TPM 双限速**：请求级记账（reservation_id），发送前预估 token、发送后用 API 实际 usage 修正
-6. **双轨发布**：
-   - **Nightly**：每日自动检测上游 → 翻译变更 → 构建 → 发布
+6. **完整源码发布**：翻译后的完整 hermes-agent 源码推送到 `release` 分支，安装脚本直接从该分支拉取
+7. **双轨发布**：
+   - **Nightly**：每日自动检测上游 → 翻译 → 应用到源码 → 推送 `release` 分支 → 创建 Release
    - **Stable**：手动打 tag 触发稳定版发布
 
 ## 贡献
