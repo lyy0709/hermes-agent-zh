@@ -385,24 +385,60 @@ def build_string_extract_prompt(glossary_text: str, lang_name: str = "Python") -
 
 
 # ──────────────────────────────────────────
-# Markdown 分段
+# 智能分段（按文件类型选择分割策略）
 # ──────────────────────────────────────────
 
-def split_markdown_sections(content: str, max_chars: int = 12000) -> list[str]:
-    """将大型 Markdown 文件按 heading 分割为多段"""
+def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> list[str]:
+    """
+    将大文件按结构化边界分割为多段，避免单段超过 token 限制。
+
+    策略：
+    - Markdown (.md): 按 # heading 分割
+    - HTML (.html): 按 <section>/<header>/<main>/<footer>/<div class> 等顶层块分割
+    - YAML (.yml): 按顶层 key（无缩进行）分割
+    - 通用 fallback: 按空行分割
+    """
     if len(content) <= max_chars:
         return [content]
 
+    ext = Path(file_path).suffix.lower() if file_path else ""
+
+    if ext in (".html", ".htm"):
+        return _split_by_pattern(
+            content, max_chars,
+            # HTML 顶层块标签
+            r"^\s*<(?:section|header|main|footer|article|nav|aside|div\s+(?:class|id))[>\s]",
+        )
+    elif ext in (".yml", ".yaml"):
+        return _split_by_pattern(
+            content, max_chars,
+            # YAML 顶层 key（行首无缩进，后跟冒号）
+            r"^[a-zA-Z_][\w-]*\s*:",
+        )
+    elif ext == ".md":
+        return _split_by_pattern(
+            content, max_chars,
+            # Markdown heading
+            r"^#{1,3}\s",
+        )
+    else:
+        # 通用 fallback：按空行分割
+        return _split_by_pattern(content, max_chars, r"^\s*$")
+
+
+def _split_by_pattern(content: str, max_chars: int, boundary_pattern: str) -> list[str]:
+    """按正则匹配的行边界分割文本，确保每段不超过 max_chars。"""
+    lines = content.split("\n")
     sections = []
-    current = []
+    current: list[str] = []
     current_len = 0
 
-    lines = content.split("\n")
     for line in lines:
-        is_heading = re.match(r"^#{1,3}\s", line)
+        is_boundary = re.match(boundary_pattern, line)
         line_len = len(line) + 1
 
-        if is_heading and current_len > max_chars // 2:
+        # 在边界处且当前段已超过半限，切分
+        if is_boundary and current_len > max_chars // 2:
             sections.append("\n".join(current))
             current = [line]
             current_len = line_len
@@ -410,10 +446,16 @@ def split_markdown_sections(content: str, max_chars: int = 12000) -> list[str]:
             current.append(line)
             current_len += line_len
 
+            # 硬限：即使没有遇到边界，也不能让单段无限增长
+            if current_len > max_chars:
+                sections.append("\n".join(current))
+                current = []
+                current_len = 0
+
     if current:
         sections.append("\n".join(current))
 
-    return sections
+    return sections if sections else [content]
 
 
 # ──────────────────────────────────────────
@@ -487,10 +529,10 @@ def translate_markdown_file(
     rate_limiter: RateLimiter,
     timeout: int = 300,
 ):
-    """翻译 Markdown/YAML 等文本文件（整文件翻译模式）。"""
+    """翻译 Markdown/HTML/YAML 等文本文件（整文件翻译模式，自动分段）。"""
     system_prompt = build_system_prompt(glossary_text, str(source_file))
     content = source_file.read_text(encoding="utf-8")
-    sections = split_markdown_sections(content)
+    sections = split_content(content, str(source_file))
 
     translated_parts = []
     for i, section in enumerate(sections):
@@ -513,28 +555,45 @@ def translate_code_strings(
     rate_limiter: RateLimiter,
     timeout: int = 300,
 ):
-    """提取并翻译代码/HTML中的用户面向字符串。自动检测文件类型。"""
+    """提取并翻译代码中的用户面向字符串。大文件自动分段，合并结果。"""
     content = source_file.read_text(encoding="utf-8")
     lang_name, code_tag = _detect_file_lang(source_file.name)
     system_prompt = build_string_extract_prompt(glossary_text, lang_name)
 
-    prompt = f"以下是{lang_name}文件 `{source_file.name}`:\n\n```{code_tag}\n{content}\n```"
-    result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
+    # 大文件分段处理
+    max_code_chars = 10000  # 代码文件的分段阈值（比文档小，因为还有 prompt 开销）
+    sections = split_content(content, str(source_file), max_chars=max_code_chars)
 
-    # 提取 JSON（支持多种 LLM 输出格式）
-    json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", result)
-    if json_match:
-        result = json_match.group(1)
+    all_replacements: dict[str, str] = {}
+    for i, section in enumerate(sections):
+        if len(sections) > 1:
+            print(f"  提取分段 {i + 1}/{len(sections)}...")
 
-    # 验证 JSON 格式 — 失败时抛异常，不写入缓存
-    try:
-        data = json.loads(result)
-    except json.JSONDecodeError as e:
-        raise TranslationError(f"LLM 返回的不是有效 JSON: {e}") from e
+        prompt = f"以下是{lang_name}文件 `{source_file.name}` 的第 {i + 1} 部分:\n\n```{code_tag}\n{section}\n```"
+        result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
 
-    if not data.get("replacements"):
-        raise TranslationError("LLM 返回的 replacements 为空")
+        # 提取 JSON（支持多种 LLM 输出格式）
+        json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", result)
+        if json_match:
+            result = json_match.group(1)
 
+        try:
+            part_data = json.loads(result)
+            part_replacements = part_data.get("replacements", {})
+            all_replacements.update(part_replacements)
+        except json.JSONDecodeError:
+            if len(sections) == 1:
+                raise TranslationError(f"LLM 返回的不是有效 JSON") from None
+            print(f"  警告: 分段 {i + 1} JSON 解析失败，跳过", file=sys.stderr)
+
+    if not all_replacements:
+        raise TranslationError("所有分段均未返回有效的 replacements")
+
+    data = {
+        "file": str(source_file.name),
+        "description": f"{lang_name} 文件字符串翻译",
+        "replacements": all_replacements,
+    }
     target_file.parent.mkdir(parents=True, exist_ok=True)
     with open(target_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
