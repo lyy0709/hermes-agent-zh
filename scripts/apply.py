@@ -13,6 +13,9 @@ import shutil
 import sys
 from pathlib import Path
 
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 TRANSLATIONS_DIR = ROOT_DIR / "translations"
 CONFIG_FILE = TRANSLATIONS_DIR / "config.json"

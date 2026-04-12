@@ -30,6 +30,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
+# CI 环境下强制禁用 stdout/stderr 缓冲，确保日志实时输出
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 # 项目根目录
 ROOT_DIR = Path(__file__).resolve().parent.parent
 TRANSLATIONS_DIR = ROOT_DIR / "translations"
