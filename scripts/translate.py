@@ -385,17 +385,19 @@ def build_string_extract_prompt(glossary_text: str, lang_name: str = "Python") -
 
 
 # ──────────────────────────────────────────
-# 智能分段（按文件类型选择分割策略）
+# 块感知智能分段
 # ──────────────────────────────────────────
 
 def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> list[str]:
     """
     将大文件按结构化边界分割为多段，避免单段超过 token 限制。
 
+    块感知：不会在代码块、HTML 标签对、YAML block scalar 内部切分。
+
     策略：
-    - Markdown (.md): 按 # heading 分割
-    - HTML (.html): 按 <section>/<header>/<main>/<footer>/<div class> 等顶层块分割
-    - YAML (.yml): 按顶层 key（无缩进行）分割
+    - Markdown (.md): 按 # heading 分割，跳过 ``` 代码块内部
+    - HTML (.html): 按顶层块标签分割
+    - YAML (.yml): 按顶层 key 分割，跳过 block scalar 内部
     - 通用 fallback: 按空行分割
     """
     if len(content) <= max_chars:
@@ -403,41 +405,61 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
 
     ext = Path(file_path).suffix.lower() if file_path else ""
 
-    if ext in (".html", ".htm"):
-        return _split_by_pattern(
-            content, max_chars,
-            # HTML 顶层块标签
-            r"^\s*<(?:section|header|main|footer|article|nav|aside|div\s+(?:class|id))[>\s]",
-        )
+    if ext == ".md":
+        return _split_markdown(content, max_chars)
+    elif ext in (".html", ".htm"):
+        return _split_html(content, max_chars)
     elif ext in (".yml", ".yaml"):
-        return _split_by_pattern(
-            content, max_chars,
-            # YAML 顶层 key（行首无缩进，后跟冒号）
-            r"^[a-zA-Z_][\w-]*\s*:",
-        )
-    elif ext == ".md":
-        return _split_by_pattern(
-            content, max_chars,
-            # Markdown heading
-            r"^#{1,3}\s",
-        )
+        return _split_yaml(content, max_chars)
     else:
-        # 通用 fallback：按空行分割
-        return _split_by_pattern(content, max_chars, r"^\s*$")
+        return _split_by_blank_lines(content, max_chars)
 
 
-def _split_by_pattern(content: str, max_chars: int, boundary_pattern: str) -> list[str]:
-    """按正则匹配的行边界分割文本，确保每段不超过 max_chars。"""
+def _split_markdown(content: str, max_chars: int) -> list[str]:
+    """Markdown 分段：按 heading 分割，但跳过 ``` 代码块内部。"""
     lines = content.split("\n")
-    sections = []
+    sections: list[str] = []
+    current: list[str] = []
+    current_len = 0
+    in_code_block = False
+
+    for line in lines:
+        # 追踪代码块状态
+        if line.strip().startswith("```"):
+            in_code_block = not in_code_block
+
+        is_heading = not in_code_block and re.match(r"^#{1,3}\s", line)
+        line_len = len(line) + 1
+
+        if is_heading and current_len > max_chars // 2:
+            sections.append("\n".join(current))
+            current = [line]
+            current_len = line_len
+        else:
+            current.append(line)
+            current_len += line_len
+
+    if current:
+        sections.append("\n".join(current))
+    return sections if sections else [content]
+
+
+def _split_html(content: str, max_chars: int) -> list[str]:
+    """HTML 分段：按顶层块标签分割。"""
+    lines = content.split("\n")
+    sections: list[str] = []
     current: list[str] = []
     current_len = 0
 
+    block_pattern = re.compile(
+        r"^\s*<(?:section|header|main|footer|article|nav|aside|div\s+(?:class|id))[>\s]",
+        re.IGNORECASE,
+    )
+
     for line in lines:
-        is_boundary = re.match(boundary_pattern, line)
+        is_boundary = block_pattern.match(line)
         line_len = len(line) + 1
 
-        # 在边界处且当前段已超过半限，切分
         if is_boundary and current_len > max_chars // 2:
             sections.append("\n".join(current))
             current = [line]
@@ -446,15 +468,59 @@ def _split_by_pattern(content: str, max_chars: int, boundary_pattern: str) -> li
             current.append(line)
             current_len += line_len
 
-            # 硬限：即使没有遇到边界，也不能让单段无限增长
-            if current_len > max_chars:
-                sections.append("\n".join(current))
-                current = []
-                current_len = 0
+    if current:
+        sections.append("\n".join(current))
+    return sections if sections else [content]
+
+
+def _split_yaml(content: str, max_chars: int) -> list[str]:
+    """YAML 分段：按顶层 key 分割，跳过 block scalar (| / >) 和列表内部。"""
+    lines = content.split("\n")
+    sections: list[str] = []
+    current: list[str] = []
+    current_len = 0
+
+    # 顶层 key：行首非空白字符开头，后跟冒号
+    top_key_pattern = re.compile(r"^[^\s#].*:")
+
+    for line in lines:
+        is_top_key = top_key_pattern.match(line) and not line.startswith(" ") and not line.startswith("\t")
+        line_len = len(line) + 1
+
+        if is_top_key and current_len > max_chars // 2:
+            sections.append("\n".join(current))
+            current = [line]
+            current_len = line_len
+        else:
+            current.append(line)
+            current_len += line_len
 
     if current:
         sections.append("\n".join(current))
+    return sections if sections else [content]
 
+
+def _split_by_blank_lines(content: str, max_chars: int) -> list[str]:
+    """通用 fallback：按空行分割。"""
+    lines = content.split("\n")
+    sections: list[str] = []
+    current: list[str] = []
+    current_len = 0
+
+    for line in lines:
+        is_blank = not line.strip()
+        line_len = len(line) + 1
+
+        if is_blank and current_len > max_chars // 2:
+            sections.append("\n".join(current))
+            current = [line]
+            current_len = line_len
+        else:
+            current.append(line)
+            current_len += line_len
+
+    if current:
+        sections.append("\n".join(current))
     return sections if sections else [content]
 
 
@@ -565,6 +631,7 @@ def translate_code_strings(
     sections = split_content(content, str(source_file), max_chars=max_code_chars)
 
     all_replacements: dict[str, str] = {}
+    failed_sections = 0
     for i, section in enumerate(sections):
         if len(sections) > 1:
             print(f"  提取分段 {i + 1}/{len(sections)}...")
@@ -580,11 +647,20 @@ def translate_code_strings(
         try:
             part_data = json.loads(result)
             part_replacements = part_data.get("replacements", {})
+            # 检查 key 冲突
+            for key in part_replacements:
+                if key in all_replacements and all_replacements[key] != part_replacements[key]:
+                    print(f"  警告: 分段 key 冲突 '{key[:50]}...'，使用后段翻译", file=sys.stderr)
             all_replacements.update(part_replacements)
         except json.JSONDecodeError:
+            failed_sections += 1
             if len(sections) == 1:
-                raise TranslationError(f"LLM 返回的不是有效 JSON") from None
-            print(f"  警告: 分段 {i + 1} JSON 解析失败，跳过", file=sys.stderr)
+                raise TranslationError("LLM 返回的不是有效 JSON") from None
+            print(f"  警告: 分段 {i + 1} JSON 解析失败", file=sys.stderr)
+
+    # 任一分段失败 → 整体失败，不写入 hash cache
+    if failed_sections > 0:
+        raise TranslationError(f"{failed_sections}/{len(sections)} 个分段解析失败，中止以避免部分翻译")
 
     if not all_replacements:
         raise TranslationError("所有分段均未返回有效的 replacements")
