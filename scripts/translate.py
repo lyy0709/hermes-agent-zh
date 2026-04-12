@@ -426,7 +426,7 @@ def _split_markdown(content: str, max_chars: int) -> list[str]:
     """
     Markdown 分段：按 heading 分割，跳过代码块内部。
 
-    安全兜底：当段超过 max_chars 且不在代码块内时，在空行处切分。
+    安全兜底：当段超过 max_chars//2 且不在代码块内时，在空行处切分。
     代码块追踪：记录 fence 标记长度（支持 ```/````/````` 等嵌套写法）。
     """
     lines = content.split("\n")
