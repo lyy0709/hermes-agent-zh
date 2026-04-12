@@ -456,8 +456,8 @@ def _split_markdown(content: str, max_chars: int) -> list[str]:
             _emit(sections, current)
             current = [line]
             current_len = line_len
-        # 兜底：超过 max_chars 且在安全位置（空行、非代码块）切分
-        elif is_blank and current_len > max_chars:
+        # 兜底：超过半限且在安全位置（空行、非代码块）切分
+        elif is_blank and current_len > max_chars // 2:
             _emit(sections, current)
             current = [line]
             current_len = line_len
@@ -491,7 +491,7 @@ def _split_html(content: str, max_chars: int) -> list[str]:
             _emit(sections, current)
             current = [line]
             current_len = line_len
-        elif is_blank and current_len > max_chars:
+        elif is_blank and current_len > max_chars // 2:
             _emit(sections, current)
             current = [line]
             current_len = line_len
