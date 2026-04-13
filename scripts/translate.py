@@ -27,8 +27,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
+import httpx
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import APIConnectionError, OpenAI
 
 # CI 环境下强制禁用 stdout/stderr 缓冲，确保日志实时输出
 sys.stdout.reconfigure(line_buffering=True)
@@ -63,6 +64,43 @@ def estimate_tokens(text: str) -> int:
 
 class TokenBudgetExceeded(Exception):
     """单个请求的 token 预估超过 TPM 上限，不可重试。"""
+
+
+class CircuitBreaker:
+    """
+    连接熔断器：连续 N 次连接失败后中止翻译，避免无效等待。
+
+    仅追踪 APIConnectionError（真正的连接不可达），不追踪超时或服务端错误。
+    线程安全：多线程并发调用时自动同步。
+    """
+
+    def __init__(self, threshold: int = 10):
+        self.threshold = threshold
+        self._consecutive_failures = 0
+        self._lock = threading.Lock()
+        self._tripped = False
+
+    def record_success(self):
+        with self._lock:
+            self._consecutive_failures = 0
+
+    def record_connection_failure(self):
+        with self._lock:
+            self._consecutive_failures += 1
+            if self._consecutive_failures >= self.threshold:
+                self._tripped = True
+                print(
+                    f"\n⚠ 熔断器触发: 连续 {self._consecutive_failures} 次连接失败，API 可能不可达，中止翻译",
+                    file=sys.stderr,
+                )
+
+    @property
+    def is_tripped(self) -> bool:
+        return self._tripped
+
+    @property
+    def failure_count(self) -> int:
+        return self._consecutive_failures
 
 
 class RateLimiter:
@@ -169,8 +207,13 @@ class RateLimiter:
                         self._cond.notify_all()  # 唤醒可能因公平性被阻塞的小请求
                         return rid
 
-                    # 等待：被 release/report_actual 唤醒，或最多等 5s 轮询一次
-                    self._cond.wait(timeout=5.0)
+                    # 精确计算等待时间（避免固定 5s 导致 httpx 连接池 idle 过期）
+                    if not tpm_ok and estimated_tokens > 0:
+                        wait_time = self.time_until_capacity(estimated_tokens)
+                        wait_time = max(0.5, min(wait_time, 30.0))
+                    else:
+                        wait_time = 2.0
+                    self._cond.wait(timeout=wait_time)
         except Exception:
             if is_large and registered:
                 with self._cond:
@@ -694,17 +737,33 @@ def translate_text(
     rate_limiter: RateLimiter,
     timeout: int = 300,
     max_retries: int = 5,
+    circuit_breaker: CircuitBreaker | None = None,
 ) -> str:
     """调用 LLM API 翻译文本，带 RPM+TPM 限速、指数退避重试（5 次）。
 
     TokenBudgetExceeded 不会被重试，直接向上抛出。
     退避间隔：10s, 20s, 40s, 80s（指数退避，基数 10s）
+    连接熔断：连续连接失败超过阈值时中止。
     """
+    if circuit_breaker and circuit_breaker.is_tripped:
+        raise ConnectionError("熔断器已触发，跳过 API 调用")
+
     input_tokens = estimate_tokens(system_prompt) + estimate_tokens(text)
     output_estimate = int(input_tokens * 0.9)
     estimated_total = input_tokens + output_estimate
 
+    # 分离连接超时和读取超时（防止连接不可达时等 300s）
+    request_timeout = httpx.Timeout(
+        connect=30.0,
+        read=float(timeout),
+        write=30.0,
+        pool=60.0,
+    )
+
     for attempt in range(max_retries):
+        if circuit_breaker and circuit_breaker.is_tripped:
+            raise ConnectionError("熔断器已触发，跳过 API 调用")
+
         rid = rate_limiter.acquire(estimated_tokens=estimated_total)
         try:
             response = client.chat.completions.create(
@@ -714,18 +773,32 @@ def translate_text(
                     {"role": "user", "content": text},
                 ],
                 temperature=0.1,
-                timeout=timeout,
+                timeout=request_timeout,
             )
             actual_total = getattr(response.usage, "total_tokens", None) if response.usage else None
             if isinstance(actual_total, int) and actual_total >= 0:
                 rate_limiter.report_actual(rid, actual_total)
 
+            if circuit_breaker:
+                circuit_breaker.record_success()
+
             content = response.choices[0].message.content
             return content if content else ""
+        except APIConnectionError as e:
+            rate_limiter.release(rid)
+            if circuit_breaker:
+                circuit_breaker.record_connection_failure()
+                if circuit_breaker.is_tripped:
+                    raise ConnectionError("熔断器已触发，API 不可达") from e
+            if attempt < max_retries - 1:
+                wait_time = 10 * (2 ** attempt)
+                print(f"  连接失败，{wait_time}s 后重试 ({attempt+2}/{max_retries}): {e}", file=sys.stderr)
+                time.sleep(wait_time)
+            else:
+                raise
         except Exception as e:
             rate_limiter.release(rid)
             if attempt < max_retries - 1:
-                # 指数退避：10s, 20s, 40s, 80s（网络问题需要更长恢复时间）
                 wait_time = 10 * (2 ** attempt)
                 print(f"  API 调用失败 ({type(e).__name__})，{wait_time}s 后重试 ({attempt+2}/{max_retries}): {e}", file=sys.stderr)
                 time.sleep(wait_time)
@@ -750,6 +823,7 @@ def translate_markdown_file(
     target_file: Path,
     rate_limiter: RateLimiter,
     timeout: int = 300,
+    circuit_breaker: CircuitBreaker | None = None,
 ):
     """翻译 Markdown/HTML/YAML 等文本文件（整文件翻译模式，自动分段）。"""
     system_prompt = build_system_prompt(glossary_text, str(source_file))
@@ -764,7 +838,8 @@ def translate_markdown_file(
         section_timeout = timeout
         if source_file.suffix == ".py" and len(section) > 6000:
             section_timeout = max(timeout, timeout + len(section) // 1000 * 30)
-        translated = translate_text(client, model, system_prompt, section, rate_limiter, section_timeout)
+        translated = translate_text(client, model, system_prompt, section, rate_limiter, section_timeout,
+                                    circuit_breaker=circuit_breaker)
         translated_parts.append(translated)
 
     result = "\n".join(translated_parts)
@@ -788,6 +863,7 @@ def translate_code_strings(
     target_file: Path,
     rate_limiter: RateLimiter,
     timeout: int = 300,
+    circuit_breaker: CircuitBreaker | None = None,
 ):
     """提取并翻译代码中的用户面向字符串。大文件自动分段，合并结果。"""
     content = source_file.read_text(encoding="utf-8")
@@ -808,7 +884,8 @@ def translate_code_strings(
 
         # 每段：先调用 LLM，JSON 解析失败时尝试轻量修复（不重发源码）
         parsed = False
-        result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
+        result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout,
+                                circuit_breaker=circuit_breaker)
 
         # 提取 JSON（支持多种 LLM 输出格式）
         json_text = result
@@ -822,7 +899,8 @@ def translate_code_strings(
             # 轻量修复：让 LLM 修复 JSON 格式（不重发整段源码，节省 TPM）
             print(f"  分段 {i + 1} JSON 解析失败，尝试轻量修复...", file=sys.stderr)
             fix_prompt = f"以下文本应该是 JSON 但格式有误，请修复为有效 JSON 并只输出 JSON：\n\n{result[:3000]}"
-            fix_result = translate_text(client, model, "你是 JSON 格式修复工具。只输出修复后的有效 JSON。", fix_prompt, rate_limiter, timeout)
+            fix_result = translate_text(client, model, "你是 JSON 格式修复工具。只输出修复后的有效 JSON。", fix_prompt, rate_limiter, timeout,
+                                       circuit_breaker=circuit_breaker)
             fix_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", fix_result)
             if fix_match:
                 fix_result = fix_match.group(1)
@@ -958,6 +1036,7 @@ def _translate_one(
     rate_limiter: RateLimiter,
     timeout: int,
     cache: dict,
+    circuit_breaker: CircuitBreaker | None = None,
 ) -> tuple[str, bool, str]:
     """
     翻译单个文件。返回 (source_path, 是否成功, 错误信息)。
@@ -968,6 +1047,10 @@ def _translate_one(
     max_file_retries = 3 if is_python else 1  # Python 语法错误可重试
 
     for file_attempt in range(max_file_retries):
+        # 熔断器检查：API 已确认不可达时立即跳过
+        if circuit_breaker and circuit_breaker.is_tripped:
+            return source_path, False, "熔断器已触发，跳过"
+
         if file_attempt > 0:
             print(f"\n[{index}/{total}] 重试翻译 {source_path} ({file_attempt + 1}/{max_file_retries})...")
         else:
@@ -977,12 +1060,12 @@ def _translate_one(
             if f["type"] == "file_override":
                 translate_markdown_file(
                     client, model, glossary_text, f["source_file"], f["target_file"],
-                    rate_limiter, timeout,
+                    rate_limiter, timeout, circuit_breaker=circuit_breaker,
                 )
             elif f["type"] == "string_replace":
                 translate_code_strings(
                     client, model, glossary_text, f["source_file"], f["target_file"],
-                    rate_limiter, timeout,
+                    rate_limiter, timeout, circuit_breaker=circuit_breaker,
                 )
 
             # 更新 hash 缓存（线程安全）
@@ -1003,6 +1086,11 @@ def _translate_one(
                 time.sleep(10)
                 continue
             print(f"  失败 ✗ (共尝试 {max_file_retries} 次): {e}", file=sys.stderr)
+            return source_path, False, str(e)
+
+        except ConnectionError as e:
+            # 熔断器触发的连接中止，不重试
+            print(f"  中止 ✗: {e}", file=sys.stderr)
             return source_path, False, str(e)
 
         except Exception as e:
@@ -1091,10 +1179,19 @@ def main():
         print("所有文件均为最新，无需翻译。")
         return
 
-    # 初始化
-    client = OpenAI(api_key=env["api_key"], base_url=env["base_url"])
+    # 初始化（自定义 httpx 连接池：延长 keepalive 避免限速等待期间连接过期）
+    http_client = httpx.Client(
+        timeout=httpx.Timeout(connect=30.0, read=float(timeout), write=30.0, pool=60.0),
+        limits=httpx.Limits(
+            max_connections=100,
+            max_keepalive_connections=20,
+            keepalive_expiry=30.0,  # 默认 5s 太短，限速等待期间会过期
+        ),
+    )
+    client = OpenAI(api_key=env["api_key"], base_url=env["base_url"], http_client=http_client)
     model = env["model"]
     rate_limiter = RateLimiter(rpm=rpm, tpm=tpm)
+    circuit_breaker = CircuitBreaker(threshold=10)
 
     # 执行翻译（并发）— glossary_text 传入每个任务，由任务根据文件类型构建 prompt
     success = 0
@@ -1108,12 +1205,13 @@ def main():
                 f, i + 1, total,
                 client, model, glossary_text,
                 rate_limiter, timeout, cache,
+                circuit_breaker,
             ): f
             for i, f in enumerate(to_translate)
         }
 
         for future in as_completed(futures):
-            _, ok, err = future.result()
+            _, ok, _ = future.result()
             if ok:
                 success += 1
             else:
