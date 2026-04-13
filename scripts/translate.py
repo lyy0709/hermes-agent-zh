@@ -90,6 +90,8 @@ class RateLimiter:
         self._token_ledger: dict[int, tuple[float, int]] = {}
         self._next_id = 0
         self._lock = threading.Lock()
+        self._cond = threading.Condition(self._lock)  # 用于唤醒等待线程
+        self._large_waiters = 0
 
     def _cleanup(self, now: float):
         """清理滑动窗口外的旧记录"""
@@ -125,53 +127,66 @@ class RateLimiter:
         return self.window
 
     def acquire(self, estimated_tokens: int = 0) -> int:
-        """阻塞直到 RPM 和 TPM 配额均可用。使用安全水位（80% TPM）。"""
+        """阻塞直到 RPM 和 TPM 配额均可用。大请求有公平性保证。"""
         if estimated_tokens > self.tpm:
             raise TokenBudgetExceeded(
                 f"单个请求预估 {estimated_tokens:,} tokens 超过 TPM 上限 {self.tpm:,}，"
                 f"请缩小文件分段或提高 TPM 配额"
             )
 
-        while True:
-            with self._lock:
-                now = time.monotonic()
-                self._cleanup(now)
+        is_large = estimated_tokens > self.tpm_safe
+        registered = False
 
-                rpm_ok = len(self._req_records) < self.rpm
-                tpm_ok = (self._tokens_in_window() + estimated_tokens) <= self.tpm_safe
+        try:
+            with self._cond:
+                while True:
+                    now = time.monotonic()
+                    self._cleanup(now)
 
-                if rpm_ok and tpm_ok:
-                    self._req_records.append(now)
-                    rid = self._next_id
-                    self._next_id += 1
-                    if estimated_tokens > 0:
-                        self._token_ledger[rid] = (now, estimated_tokens)
-                    return rid
+                    if is_large and not registered:
+                        self._large_waiters += 1
+                        registered = True
 
-                # 精确计算等待时间
-                wait_seconds = 0.5
-                if not rpm_ok and self._req_records:
-                    wait_seconds = max(wait_seconds, self._req_records[0] + self.window - now)
-                if not tpm_ok:
-                    wait_seconds = max(wait_seconds, self.time_until_capacity(estimated_tokens))
+                    rpm_ok = len(self._req_records) < self.rpm
+                    current_tokens = self._tokens_in_window()
 
-            time.sleep(min(wait_seconds + 0.1, 30.0))
+                    if is_large:
+                        effective_limit = self.tpm if current_tokens == 0 else self.tpm_safe
+                    elif self._large_waiters > 0:
+                        effective_limit = 0
+                    else:
+                        effective_limit = self.tpm_safe
+                    tpm_ok = (current_tokens + estimated_tokens) <= effective_limit
+
+                    if rpm_ok and tpm_ok:
+                        self._req_records.append(now)
+                        rid = self._next_id
+                        self._next_id += 1
+                        if estimated_tokens > 0:
+                            self._token_ledger[rid] = (now, estimated_tokens)
+                        if is_large and registered:
+                            self._large_waiters -= 1
+                        self._cond.notify_all()  # 唤醒可能因公平性被阻塞的小请求
+                        return rid
+
+                    # 等待：被 release/report_actual 唤醒，或最多等 5s 轮询一次
+                    self._cond.wait(timeout=5.0)
+        except Exception:
+            if is_large and registered:
+                with self._cond:
+                    self._large_waiters = max(0, self._large_waiters - 1)
+                    self._cond.notify_all()
+            raise
 
     def release(self, reservation_id: int):
         """释放指定 reservation 的全部 token（请求失败时调用）。"""
-        with self._lock:
+        with self._cond:
             self._token_ledger.pop(reservation_id, None)
-
-    def release_cautious(self, reservation_id: int):
-        """谨慎释放：可能已被上游消耗的请求，只释放 50% token。"""
-        with self._lock:
-            if reservation_id in self._token_ledger:
-                ts, tokens = self._token_ledger[reservation_id]
-                self._token_ledger[reservation_id] = (ts, tokens // 2)
+            self._cond.notify_all()  # 唤醒等待线程
 
     def report_actual(self, reservation_id: int, actual_tokens: int):
         """用 API 返回的实际 token 数替换预估值。"""
-        with self._lock:
+        with self._cond:
             if reservation_id not in self._token_ledger:
                 return
             ts, _ = self._token_ledger[reservation_id]
@@ -179,6 +194,7 @@ class RateLimiter:
                 del self._token_ledger[reservation_id]
             else:
                 self._token_ledger[reservation_id] = (ts, actual_tokens)
+            self._cond.notify_all()
 
 
 # ──────────────────────────────────────────
@@ -705,17 +721,13 @@ def translate_text(
             content = response.choices[0].message.content
             return content if content else ""
         except Exception as e:
-            # 区分异常类型决定释放策略
-            err_name = type(e).__name__
-            if "timeout" in err_name.lower() or "reset" in err_name.lower() or "connect" in err_name.lower():
-                # 超时/连接重置：可能上游已消耗 token，谨慎释放 50%
-                rate_limiter.release_cautious(rid)
-            else:
-                # 其他错误（如认证失败）：确定未消耗，完全释放
-                rate_limiter.release(rid)
+            # 释放 token：timeout/失败意味着本次请求没有成功完成。
+            # 虽然理论上上游可能已开始处理，但不释放会导致 TPM 窗口累积→重试卡死。
+            # 权衡：宁可偶尔低估 TPM（上游 429 会自动限流），也不能让翻译进程卡死。
+            rate_limiter.release(rid)
             if attempt < max_retries - 1:
                 wait_time = 2 ** (attempt + 1)
-                print(f"  API 调用失败 ({err_name})，{wait_time}s 后重试: {e}", file=sys.stderr)
+                print(f"  API 调用失败 ({type(e).__name__})，{wait_time}s 后重试: {e}", file=sys.stderr)
                 time.sleep(wait_time)
             else:
                 raise
