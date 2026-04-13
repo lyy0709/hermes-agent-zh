@@ -458,13 +458,17 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
     - YAML (.yml): 按顶层 key 分割，跳过 block scalar 内部
     - 通用 fallback: 按空行分割
     """
-    if len(content) <= max_chars:
-        return [content]
-
     ext = Path(file_path).suffix.lower() if file_path else ""
 
+    # Python 用更小的分段阈值（代码翻译需要更多 API 时间，段越小越不容易超时）
     if ext == ".py":
-        return _split_python(content, max_chars)
+        py_max = min(max_chars, 6000)
+        if len(content) <= py_max:
+            return [content]
+        return _split_python(content, py_max)
+
+    if len(content) <= max_chars:
+        return [content]
     elif ext == ".md":
         return _split_markdown(content, max_chars)
     elif ext in (".html", ".htm"):
@@ -756,7 +760,11 @@ def translate_markdown_file(
     for i, section in enumerate(sections):
         if len(sections) > 1:
             print(f"  翻译分段 {i + 1}/{len(sections)}...")
-        translated = translate_text(client, model, system_prompt, section, rate_limiter, timeout)
+        # Python 大段动态增加 timeout（每 1000 chars 额外 30s），非 Python 保持原值
+        section_timeout = timeout
+        if source_file.suffix == ".py" and len(section) > 6000:
+            section_timeout = max(timeout, timeout + len(section) // 1000 * 30)
+        translated = translate_text(client, model, system_prompt, section, rate_limiter, section_timeout)
         translated_parts.append(translated)
 
     result = "\n".join(translated_parts)
