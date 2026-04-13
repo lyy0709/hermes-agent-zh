@@ -58,6 +58,13 @@ jobs:
             exit 1
           fi
 
+      - name: 翻译缺失文件（确保 .py 翻译产物存在）
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          TRANSLATION_MODEL: ${{ secrets.TRANSLATION_MODEL }}
+        run: python scripts/translate.py --upstream upstream
+
       - name: 验证翻译（apply 之前）
         run: python scripts/verify.py --upstream upstream --strict
 

@@ -39,8 +39,10 @@ def check_coverage(config: dict, upstream_dir: Path) -> list[dict]:
                 source_file = upstream_dir / f["source"]
 
                 if source_file.exists() and not trans_file.exists():
+                    # file_override 缺失是硬错误（会导致中文翻译静默失效）
+                    level = "error" if module.get("type") == "file_override" else "warning"
                     issues.append({
-                        "level": "warning",
+                        "level": level,
                         "module": module["name"],
                         "file": f["source"],
                         "message": f"缺少翻译: {f['translation']}",
@@ -63,6 +65,22 @@ def check_coverage(config: dict, upstream_dir: Path) -> list[dict]:
                             "message": f"缺少翻译: {module['translation_dir']}/{rel}",
                         })
 
+    return issues
+
+
+def check_python_syntax() -> list[dict]:
+    """验证所有 .py 翻译产物的语法合法性"""
+    issues = []
+    for py_file in TRANSLATIONS_DIR.rglob("*.py"):
+        try:
+            content = py_file.read_text(encoding="utf-8")
+            compile(content, str(py_file), "exec")
+        except SyntaxError as e:
+            issues.append({
+                "level": "error",
+                "file": str(py_file.relative_to(ROOT_DIR)),
+                "message": f"Python 语法错误 (L{e.lineno}): {e.msg}",
+            })
     return issues
 
 
@@ -232,6 +250,9 @@ def main():
 
     # JSON 格式检查（不需要上游目录）
     all_issues.extend(check_json_format())
+
+    # Python 翻译产物语法检查（不需要上游目录）
+    all_issues.extend(check_python_syntax())
 
     # 术语表合规检查（不需要上游目录）
     all_issues.extend(check_glossary_compliance())

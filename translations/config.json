@@ -37,33 +37,33 @@
     },
     {
       "name": "cli",
-      "description": "CLI 用户界面文本",
+      "description": "CLI 用户界面文本（整文件翻译模式）",
       "priority": "P1",
-      "type": "string_replace",
+      "type": "file_override",
       "files": [
         {
           "source": "hermes_cli/banner.py",
-          "translation": "translations/cli/banner.json"
+          "translation": "translations/cli/banner.py"
         },
         {
           "source": "hermes_cli/tips.py",
-          "translation": "translations/cli/tips.json"
+          "translation": "translations/cli/tips.py"
         },
         {
           "source": "hermes_cli/setup.py",
-          "translation": "translations/cli/setup.json"
+          "translation": "translations/cli/setup.py"
         },
         {
           "source": "hermes_cli/commands.py",
-          "translation": "translations/cli/commands.json"
+          "translation": "translations/cli/commands.py"
         },
         {
           "source": "hermes_cli/doctor.py",
-          "translation": "translations/cli/doctor.json"
+          "translation": "translations/cli/doctor.py"
         },
         {
           "source": "hermes_cli/default_soul.py",
-          "translation": "translations/cli/default_soul.json"
+          "translation": "translations/cli/default_soul.py"
         }
       ]
     },

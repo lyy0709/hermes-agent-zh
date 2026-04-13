@@ -544,11 +544,6 @@
     "translated_at": "2026-04-13T04:14:31.754802+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
-  "hermes_cli/banner.py": {
-    "source_hash": "sha256:9b6bcd6a0ba448391a4f93fe073bbe7c46a304feeceae220314d89537bee17c2",
-    "translated_at": "2026-04-13T04:14:54.122240+00:00",
-    "model": "deepseek-ai/DeepSeek-V3.2"
-  },
   "website/docs/user-guide/sessions.md": {
     "source_hash": "sha256:e9758202b79355b279420edaaba3d481853fe335a0363525750b012fb717f07f",
     "translated_at": "2026-04-13T04:16:48.628761+00:00",
@@ -562,16 +557,6 @@
   "website/docs/user-guide/security.md": {
     "source_hash": "sha256:6614daee28ccd6ac91a29bf0c6098d7b62e857af713796b3e193d1f1782be6f7",
     "translated_at": "2026-04-13T04:18:02.067392+00:00",
-    "model": "deepseek-ai/DeepSeek-V3.2"
-  },
-  "hermes_cli/default_soul.py": {
-    "source_hash": "sha256:697fe40db8b9bb8bdb23f998943f49ffbc2e5aa9701704ab70bd00da2fd235fa",
-    "translated_at": "2026-04-13T04:18:15.731833+00:00",
-    "model": "deepseek-ai/DeepSeek-V3.2"
-  },
-  "hermes_cli/commands.py": {
-    "source_hash": "sha256:cabc91de82eb2837a8913e7487de62ce4010c615c414bf64c4e809532ae95400",
-    "translated_at": "2026-04-13T05:49:47.130447+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   ".github/ISSUE_TEMPLATE/bug_report.yml": {
@@ -597,21 +582,6 @@
   "landingpage/index.html": {
     "source_hash": "sha256:f5ee4355705ecd6f60c3254090b8450ae17f81e98ec8a3db1a0d79da4f28b313",
     "translated_at": "2026-04-13T04:22:00.252543+00:00",
-    "model": "deepseek-ai/DeepSeek-V3.2"
-  },
-  "hermes_cli/doctor.py": {
-    "source_hash": "sha256:6f7cc74b00bb41886c80be60f9feb270a69c834c6b436958051a10811cfeee36",
-    "translated_at": "2026-04-13T04:20:45.340631+00:00",
-    "model": "deepseek-ai/DeepSeek-V3.2"
-  },
-  "hermes_cli/tips.py": {
-    "source_hash": "sha256:289e78f4ad4b1d0b15bcf84f6bf5d313b474330bcf9ced25306829904b31f7d5",
-    "translated_at": "2026-04-13T04:23:18.065160+00:00",
-    "model": "deepseek-ai/DeepSeek-V3.2"
-  },
-  "hermes_cli/setup.py": {
-    "source_hash": "sha256:8e4663f5d0cfcc704fd4412c06b6a340791d90e95bd12c5aa156f3563a715d47",
-    "translated_at": "2026-04-13T06:00:55.026299+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/web-dashboard.md": {

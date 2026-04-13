@@ -126,14 +126,23 @@ def main():
     print(f"  SHA: {info['sha'][:12]}")
     print(f"  版本: {info['version']}")
 
-    # Step 3: 应用翻译
+    # Step 3: 翻译缺失文件（确保 .py 翻译产物存在）
+    print("\n🔄 翻译缺失文件...")
+    translate_result = subprocess.run(
+        [sys.executable, str(ROOT_DIR / "scripts" / "translate.py"), "--upstream", str(UPSTREAM_DIR)],
+        capture_output=False
+    )
+    if translate_result.returncode != 0:
+        print("⚠ 部分翻译失败（不阻断构建）", file=sys.stderr)
+
+    # Step 4: 应用翻译
     print("\n🔄 应用翻译...")
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from apply import apply_all
     stats = apply_all(UPSTREAM_DIR, verbose=args.verbose)
     print(f"\n📊 应用统计: {stats['applied']} 应用, {stats['existed']} 已存在, {stats['skipped']} 跳过, {stats['failed']} 失败")
 
-    # Step 4: 验证
+    # Step 5: 验证
     print("\n🔍 验证翻译...")
     verify_result = subprocess.run(
         [sys.executable, str(ROOT_DIR / "scripts" / "verify.py"), "--upstream", str(UPSTREAM_DIR), "--strict"],
@@ -147,7 +156,7 @@ def main():
         print("❌ 翻译验证失败，不保存同步状态", file=sys.stderr)
         sys.exit(1)
 
-    # Step 5: 保存同步状态（仅在验证通过后）
+    # Step 6: 保存同步状态（仅在验证通过后）
     save_sync_state(info["sha"], info["version"])
     print(f"\n✅ 构建完成! 同步状态已保存。")
     print(f"  上游版本: {info['version']}")

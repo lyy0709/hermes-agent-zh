@@ -297,6 +297,25 @@ def build_system_prompt(glossary_text: str, file_path: str = "") -> str:
 
 术语表：
 {glossary_text}"""
+    elif ext == ".py":
+        return f"""你是一个专业的 Python 代码翻译员。将以下 Python 源代码中的用户面向字符串翻译为简体中文。
+
+核心原则：只翻译字符串内容，绝不修改任何代码逻辑。
+
+规则：
+1. 翻译所有用户可见的字符串字面量（提示信息、错误消息、UI 文本、描述等）
+2. 绝对不修改：变量名、函数名、类名、参数名、导入语句、装饰器
+3. 绝对不修改：代码逻辑、条件判断、循环、缩进、空行
+4. 绝对不修改：注释和 docstring（保留英文原文）
+5. 保持字符串中的格式占位符不变：{{}}、%s、%d、\\n、\\t、f-string 的 {{变量}}
+6. 保持字符串中的 Rich markup 标签不变：[bold]、[red]、[/]、[dim]等
+7. 保持英文括号 () 不变，不要替换为中文全角括号（）
+8. 保持字符串的引号类型不变（单引号、双引号、三引号）
+9. 技术术语按照术语表翻译，未收录的术语保留英文
+10. 只输出翻译后的代码片段（保持与输入完全相同的结构），不要添加任何解释、不要补全缺失的 import 或上下文
+
+术语表：
+{glossary_text}"""
     elif ext in (".yml", ".yaml"):
         return f"""你是一个专业的技术文档翻译员。将以下 YAML 文件中的英文内容翻译为简体中文。
 
@@ -417,6 +436,7 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
     块感知：不会在代码块、HTML 标签对、YAML block scalar 内部切分。
 
     策略：
+    - Python (.py): 按顶层 def/class 边界分割
     - Markdown (.md): 按 # heading 分割，跳过 ``` 代码块内部
     - HTML (.html): 按顶层块标签分割
     - YAML (.yml): 按顶层 key 分割，跳过 block scalar 内部
@@ -427,7 +447,9 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
 
     ext = Path(file_path).suffix.lower() if file_path else ""
 
-    if ext == ".md":
+    if ext == ".py":
+        return _split_python(content, max_chars)
+    elif ext == ".md":
         return _split_markdown(content, max_chars)
     elif ext in (".html", ".htm"):
         return _split_html(content, max_chars)
@@ -435,6 +457,69 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
         return _split_yaml(content, max_chars)
     else:
         return _split_by_blank_lines(content, max_chars)
+
+
+def _split_python(content: str, max_chars: int) -> list[str]:
+    """
+    Python 分段：按顶层 def/class 边界分割，确保每段是完整的代码块。
+
+    - 装饰器与其后的 def/class 绑定为一个不可分割单元
+    - 超过 max_chars//2 时在下一个顶层定义处切分
+    """
+    lines = content.split("\n")
+    sections: list[str] = []
+    current: list[str] = []
+    current_len = 0
+    in_decorator_block = False
+    in_triple_quote = False  # 跟踪三引号字符串状态
+
+    for line in lines:
+        line_len = len(line) + 1
+
+        # 跟踪三引号状态（避免在字符串内部误切）
+        triple_count = line.count('"""') + line.count("'''")
+        if triple_count % 2 == 1:
+            in_triple_quote = not in_triple_quote
+
+        # 三引号字符串内部不做任何切段判断
+        if in_triple_quote:
+            current.append(line)
+            current_len += line_len
+            continue
+
+        # 顶层装饰器或定义：行首 @/def/class/async def（不缩进）
+        is_decorator = re.match(r"^@", line) and not line.startswith(" ") and not line.startswith("\t")
+        is_toplevel_def = re.match(r"^(def |class |async def )", line)
+
+        # 在新的 decorated block 开始处切段
+        if is_decorator and not in_decorator_block and current_len > max_chars // 2:
+            _emit(sections, current)
+            current = [line]
+            current_len = line_len
+            in_decorator_block = True
+            continue
+
+        if is_decorator:
+            in_decorator_block = True
+            current.append(line)
+            current_len += line_len
+            continue
+
+        # 顶层定义（无装饰器的）
+        if is_toplevel_def and current_len > max_chars // 2 and not in_decorator_block:
+            _emit(sections, current)
+            current = [line]
+            current_len = line_len
+        else:
+            current.append(line)
+            current_len += line_len
+
+        if is_toplevel_def:
+            in_decorator_block = False
+
+    if current:
+        _emit(sections, current)
+    return sections if sections else [content]
 
 
 def _emit(sections: list[str], current: list[str]):
@@ -667,6 +752,14 @@ def translate_markdown_file(
         translated_parts.append(translated)
 
     result = "\n".join(translated_parts)
+
+    # Python 文件：翻译后验证语法合法性
+    if source_file.suffix == ".py":
+        try:
+            compile(result, str(source_file), "exec")
+        except SyntaxError as e:
+            raise TranslationError(f"翻译后 Python 语法错误 (L{e.lineno}): {e.msg}") from e
+
     target_file.parent.mkdir(parents=True, exist_ok=True)
     target_file.write_text(result, encoding="utf-8")
 

@@ -157,7 +157,7 @@ hermes-agent-zh/
 3. **增量翻译**：通过 SHA-256 hash 追踪文件变更，仅翻译变化的内容
 4. **多文件类型翻译**：
    - **Markdown/HTML**：整文件翻译（file_override），按结构边界智能分段
-   - **Python 代码**：提取用户面向字符串，生成 JSON 替换规则（string_replace）
+   - **Python 代码**：整文件翻译（file_override），按顶层 def/class 边界分段，只翻译字符串字面量
    - **YAML 模板**：整文件翻译，保持 YAML 结构，只翻译值文本
 5. **RPM + TPM 双限速**：请求级记账（reservation_id），发送前预估 token、发送后用 API 实际 usage 修正
 6. **完整源码发布**：翻译后的完整 hermes-agent 源码推送到 `release` 分支，安装脚本直接从该分支拉取
