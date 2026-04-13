@@ -1098,11 +1098,10 @@ def main():
                 failed += 1
 
     print(f"\n翻译完成: 成功 {success}, 失败 {failed}, 跳过 {skipped}")
-    if failed > 0 and success == 0:
-        # 全部失败才退出，部分成功时继续（已成功的翻译会被提交）
+    if failed > 0:
+        # 有失败就退出（阻止发布），但已成功的翻译已写入磁盘，CI 可在后续步骤提交保存
+        print(f"⚠ {failed} 个文件翻译失败，已成功的 {success} 个已保存到磁盘", file=sys.stderr)
         sys.exit(1)
-    elif failed > 0:
-        print(f"⚠ {failed} 个文件翻译失败（API 连接问题），{success} 个已成功，继续发布", file=sys.stderr)
 
 
 if __name__ == "__main__":

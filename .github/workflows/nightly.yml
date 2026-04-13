@@ -101,10 +101,11 @@ jobs:
           if [ "${{ inputs.force_translate }}" = "true" ]; then
             FORCE_FLAG="--force"
           fi
-          python scripts/translate.py --upstream upstream $FORCE_FLAG
+          python scripts/translate.py --upstream upstream $FORCE_FLAG || echo "TRANSLATE_FAILED=true" >> "$GITHUB_ENV"
 
-      # ── 保存翻译结果到 main 分支 ──
+      # ── 保存已成功的翻译到 main（即使部分失败也提交）──
       - name: 提交翻译结果到 main
+        if: always()
         run: |
           echo "${{ needs.check-upstream.outputs.upstream_sha }}" > .last-synced-sha
           echo "${{ needs.check-upstream.outputs.upstream_version }}" > .last-synced-version
@@ -118,15 +119,18 @@ jobs:
             git push origin main
           fi
 
-      # ── 验证 + 应用翻译到上游源码 ──
+      # ── 验证 + 应用翻译到上游源码（翻译全部成功才执行）──
       - name: 验证翻译（apply 之前，检查替换规则有效性）
+        if: env.TRANSLATE_FAILED != 'true'
         run: python scripts/verify.py --upstream upstream --strict
 
       - name: 应用翻译
+        if: env.TRANSLATE_FAILED != 'true'
         run: python scripts/apply.py --upstream upstream --verbose
 
-      # ── 将翻译后的完整源码推送到 release 分支 ──
+      # ── 将翻译后的完整源码推送到 release 分支（翻译全部成功才发布）──
       - name: 推送到 release 分支
+        if: env.TRANSLATE_FAILED != 'true'
         run: |
           UPSTREAM_VERSION="${{ needs.check-upstream.outputs.upstream_version }}"
           UPSTREAM_SHA="${{ needs.check-upstream.outputs.upstream_sha }}"
@@ -151,8 +155,9 @@ jobs:
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git push --force origin release
 
-      # ── 创建 Release ──
+      # ── 创建 Release（翻译全部成功才发布）──
       - name: 创建 Nightly Release
+        if: env.TRANSLATE_FAILED != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
