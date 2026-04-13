@@ -70,8 +70,9 @@ class RateLimiter:
     RPM + TPM 双滑动窗口限速器（请求级记账）。
 
     - RPM：每分钟最大请求数
-    - TPM：每分钟最大 token 数
+    - TPM：每分钟最大 token 数（使用安全水位 80% 为并发/重试保留余量）
     - 每次 acquire() 返回 reservation_id，release/report 通过 ID 精确操作
+    - time_until_capacity() 精确计算需要等待的时间
 
     线程安全：多线程并发调用时自动排队等待。
     """
@@ -83,9 +84,9 @@ class RateLimiter:
             raise ValueError(f"TPM 必须为正整数，当前值: {tpm}")
         self.rpm = rpm
         self.tpm = tpm
+        self.tpm_safe = int(tpm * 0.8)  # 安全水位：为重试/并发保留 20% 余量
         self.window = 60.0
         self._req_records: list[float] = []
-        # 请求级记账：{reservation_id: (timestamp, tokens)}
         self._token_ledger: dict[int, tuple[float, int]] = {}
         self._next_id = 0
         self._lock = threading.Lock()
@@ -98,22 +99,33 @@ class RateLimiter:
             del self._token_ledger[rid]
 
     def _tokens_in_window(self) -> int:
-        """当前窗口内已使用的 token 总数"""
         return sum(n for _, n in self._token_ledger.values())
 
+    def time_until_capacity(self, needed_tokens: int) -> float:
+        """计算需要等待多少秒才能释放出 needed_tokens 的额度。
+
+        返回 0 表示立即可用，返回 >0 表示需等待的精确秒数。
+        必须在持锁状态下调用。
+        """
+        now = time.monotonic()
+        current = self._tokens_in_window()
+        shortfall = (current + needed_tokens) - self.tpm_safe
+        if shortfall <= 0:
+            return 0.0
+
+        # 按时间顺序累加即将过期的 token，直到释放够
+        records_by_time = sorted(self._token_ledger.values(), key=lambda x: x[0])
+        freed = 0
+        for ts, tokens in records_by_time:
+            expire_at = ts + self.window
+            freed += tokens
+            if freed >= shortfall:
+                return max(0.0, expire_at - now + 0.1)
+        # 所有记录都过期也不够（不应发生，因为 acquire 已检查单请求上限）
+        return self.window
+
     def acquire(self, estimated_tokens: int = 0) -> int:
-        """
-        阻塞直到 RPM 和 TPM 配额均可用。
-
-        参数:
-            estimated_tokens: 本次请求预估消耗的 token 数（输入+输出）
-
-        返回:
-            reservation_id: 用于后续 release/report 精确操作
-
-        异常:
-            TokenBudgetExceeded: 单个请求超过 TPM 上限（不可重试）
-        """
+        """阻塞直到 RPM 和 TPM 配额均可用。使用安全水位（80% TPM）。"""
         if estimated_tokens > self.tpm:
             raise TokenBudgetExceeded(
                 f"单个请求预估 {estimated_tokens:,} tokens 超过 TPM 上限 {self.tpm:,}，"
@@ -126,7 +138,7 @@ class RateLimiter:
                 self._cleanup(now)
 
                 rpm_ok = len(self._req_records) < self.rpm
-                tpm_ok = (self._tokens_in_window() + estimated_tokens) <= self.tpm
+                tpm_ok = (self._tokens_in_window() + estimated_tokens) <= self.tpm_safe
 
                 if rpm_ok and tpm_ok:
                     self._req_records.append(now)
@@ -136,19 +148,26 @@ class RateLimiter:
                         self._token_ledger[rid] = (now, estimated_tokens)
                     return rid
 
+                # 精确计算等待时间
                 wait_seconds = 0.5
                 if not rpm_ok and self._req_records:
                     wait_seconds = max(wait_seconds, self._req_records[0] + self.window - now)
-                if not tpm_ok and self._token_ledger:
-                    earliest = min(t for t, _ in self._token_ledger.values())
-                    wait_seconds = max(wait_seconds, earliest + self.window - now)
+                if not tpm_ok:
+                    wait_seconds = max(wait_seconds, self.time_until_capacity(estimated_tokens))
 
-            time.sleep(min(wait_seconds + 0.1, 5.0))
+            time.sleep(min(wait_seconds + 0.1, 30.0))
 
     def release(self, reservation_id: int):
         """释放指定 reservation 的全部 token（请求失败时调用）。"""
         with self._lock:
             self._token_ledger.pop(reservation_id, None)
+
+    def release_cautious(self, reservation_id: int):
+        """谨慎释放：可能已被上游消耗的请求，只释放 50% token。"""
+        with self._lock:
+            if reservation_id in self._token_ledger:
+                ts, tokens = self._token_ledger[reservation_id]
+                self._token_ledger[reservation_id] = (ts, tokens // 2)
 
     def report_actual(self, reservation_id: int, actual_tokens: int):
         """用 API 返回的实际 token 数替换预估值。"""
@@ -601,11 +620,17 @@ def translate_text(
             content = response.choices[0].message.content
             return content if content else ""
         except Exception as e:
-            # API 调用失败：精确释放本次 reservation 的 token
-            rate_limiter.release(rid)
+            # 区分异常类型决定释放策略
+            err_name = type(e).__name__
+            if "timeout" in err_name.lower() or "reset" in err_name.lower() or "connect" in err_name.lower():
+                # 超时/连接重置：可能上游已消耗 token，谨慎释放 50%
+                rate_limiter.release_cautious(rid)
+            else:
+                # 其他错误（如认证失败）：确定未消耗，完全释放
+                rate_limiter.release(rid)
             if attempt < max_retries - 1:
                 wait_time = 2 ** (attempt + 1)
-                print(f"  API 调用失败，{wait_time}s 后重试: {e}", file=sys.stderr)
+                print(f"  API 调用失败 ({err_name})，{wait_time}s 后重试: {e}", file=sys.stderr)
                 time.sleep(wait_time)
             else:
                 raise
@@ -672,31 +697,40 @@ def translate_code_strings(
 
         prompt = f"以下是{lang_name}文件 `{source_file.name}` 的第 {i + 1} 部分:\n\n```{code_tag}\n{section}\n```"
 
-        # 每段最多尝试 3 次（LLM 输出 JSON 不稳定是常态）
+        # 每段：先调用 LLM，JSON 解析失败时尝试轻量修复（不重发源码）
         parsed = False
-        for attempt in range(3):
-            result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
+        result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
 
-            # 提取 JSON（支持多种 LLM 输出格式）
-            json_text = result
-            json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", result)
-            if json_match:
-                json_text = json_match.group(1)
+        # 提取 JSON（支持多种 LLM 输出格式）
+        json_text = result
+        json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", result)
+        if json_match:
+            json_text = json_match.group(1)
 
+        try:
+            part_data = json.loads(json_text)
+        except json.JSONDecodeError:
+            # 轻量修复：让 LLM 修复 JSON 格式（不重发整段源码，节省 TPM）
+            print(f"  分段 {i + 1} JSON 解析失败，尝试轻量修复...", file=sys.stderr)
+            fix_prompt = f"以下文本应该是 JSON 但格式有误，请修复为有效 JSON 并只输出 JSON：\n\n{result[:3000]}"
+            fix_result = translate_text(client, model, "你是 JSON 格式修复工具。只输出修复后的有效 JSON。", fix_prompt, rate_limiter, timeout)
+            fix_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", fix_result)
+            if fix_match:
+                fix_result = fix_match.group(1)
             try:
-                part_data = json.loads(json_text)
-                part_replacements = part_data.get("replacements", {})
-                if isinstance(part_replacements, dict):
-                    for key in part_replacements:
-                        if key in all_replacements and all_replacements[key] != part_replacements[key]:
-                            print(f"  警告: 分段 key 冲突 '{key[:50]}...'，使用后段翻译", file=sys.stderr)
-                    all_replacements.update(part_replacements)
-                    parsed = True
-                    break
+                part_data = json.loads(fix_result)
             except json.JSONDecodeError:
-                if attempt < 2:
-                    print(f"  分段 {i + 1} JSON 解析失败，等待 30s 后重试 {attempt + 2}/3（等待 TPM 窗口释放）...", file=sys.stderr)
-                    time.sleep(30)
+                part_data = None
+                print(f"  分段 {i + 1} 轻量修复也失败", file=sys.stderr)
+
+        if part_data is not None:
+            part_replacements = part_data.get("replacements", {})
+            if isinstance(part_replacements, dict):
+                for key in part_replacements:
+                    if key in all_replacements and all_replacements[key] != part_replacements[key]:
+                        print(f"  警告: 分段 key 冲突 '{key[:50]}...'，使用后段翻译", file=sys.stderr)
+                all_replacements.update(part_replacements)
+                parsed = True
 
         if not parsed:
             failed_sections += 1
@@ -878,6 +912,13 @@ def main():
 
     if args.serial:
         workers = 1
+    else:
+        # 自适应：根据 TPM 限制调整并发数，避免线程争抢导致全部阻塞
+        # 假设平均每请求 ~5000 tokens，每分钟最多 tpm/5000 个请求
+        max_useful_workers = max(1, tpm // 5000)
+        if workers > max_useful_workers:
+            print(f"提示: 根据 TPM {tpm:,} 自动调整并发从 {workers} 降为 {max_useful_workers}", file=sys.stderr)
+            workers = max_useful_workers
 
     # 确定上游目录
     upstream_dir = Path(args.upstream) if args.upstream else ROOT_DIR / "upstream"
