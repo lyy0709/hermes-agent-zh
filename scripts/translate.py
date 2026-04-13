@@ -695,8 +695,8 @@ def translate_code_strings(
                     break
             except json.JSONDecodeError:
                 if attempt < 2:
-                    print(f"  分段 {i + 1} JSON 解析失败，重试 {attempt + 2}/3...", file=sys.stderr)
-                    time.sleep(2)
+                    print(f"  分段 {i + 1} JSON 解析失败，等待 30s 后重试 {attempt + 2}/3（等待 TPM 窗口释放）...", file=sys.stderr)
+                    time.sleep(30)
 
         if not parsed:
             failed_sections += 1
