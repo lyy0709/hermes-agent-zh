@@ -93,11 +93,11 @@ done
 print_banner() {
     echo ""
     echo -e "${MAGENTA}${BOLD}"
-    echo "┌─────────────────────────────────────────────────────────┐"
-    echo "│             ⚕ Hermes Agent Installer                    │"
-    echo "├─────────────────────────────────────────────────────────┤"
-    echo "│  An open source AI agent by Nous Research.              │"
-    echo "└─────────────────────────────────────────────────────────┘"
+    echo "┌──────────────────────────────────────────────────────────────┐"
+    echo "│          ⚕ Hermes Agent 中文版安装程序                      │"
+    echo "├──────────────────────────────────────────────────────────────┤"
+    echo "│  由 Nous Research 构建的开源 AI Agent（中文翻译版）          │"
+    echo "└──────────────────────────────────────────────────────────────┘"
     echo -e "${NC}"
 }
 
@@ -174,18 +174,18 @@ detect_os() {
         CYGWIN*|MINGW*|MSYS*)
             OS="windows"
             DISTRO="windows"
-            log_error "Windows detected. Please use the PowerShell installer:"
-            log_info "  irm https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1 | iex"
+            log_error "检测到 Windows，请使用 PowerShell 安装脚本："
+            log_info "  irm https://raw.githubusercontent.com/lyy0709/hermes-agent-zh/main/scripts/install.ps1 | iex"
             exit 1
             ;;
         *)
             OS="unknown"
             DISTRO="unknown"
-            log_warn "Unknown operating system"
+            log_warn "未知操作系统"
             ;;
     esac
 
-    log_success "Detected: $OS ($DISTRO)"
+    log_success "检测到系统: $OS ($DISTRO)"
 }
 
 # ============================================================================
@@ -199,13 +199,13 @@ install_uv() {
         return 0
     fi
 
-    log_info "Checking for uv package manager..."
+    log_info "检查 uv 包管理器..."
 
     # Check common locations for uv
     if command -v uv &> /dev/null; then
         UV_CMD="uv"
         UV_VERSION=$($UV_CMD --version 2>/dev/null)
-        log_success "uv found ($UV_VERSION)"
+        log_success "找到 uv ($UV_VERSION)"
         return 0
     fi
 
@@ -226,7 +226,7 @@ install_uv() {
     fi
 
     # Install uv
-    log_info "Installing uv (fast Python package manager)..."
+    log_info "安装 uv（快速 Python 包管理器）..."
     if curl -LsSf https://astral.sh/uv/install.sh | sh 2>/dev/null; then
         # uv installs to ~/.local/bin by default
         if [ -x "$HOME/.local/bin/uv" ]; then
@@ -256,7 +256,7 @@ check_python() {
             PYTHON_PATH="$(command -v python)"
             if "$PYTHON_PATH" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' 2>/dev/null; then
                 PYTHON_FOUND_VERSION=$($PYTHON_PATH --version 2>/dev/null)
-                log_success "Python found: $PYTHON_FOUND_VERSION"
+                log_success "找到 Python: $PYTHON_FOUND_VERSION"
                 return 0
             fi
         fi
@@ -269,14 +269,14 @@ check_python() {
         return 0
     fi
 
-    log_info "Checking Python $PYTHON_VERSION..."
+    log_info "检查 Python $PYTHON_VERSION..."
 
     # Let uv handle Python — it can download and manage Python versions
     # First check if a suitable Python is already available
     if $UV_CMD python find "$PYTHON_VERSION" &> /dev/null; then
         PYTHON_PATH=$($UV_CMD python find "$PYTHON_VERSION")
         PYTHON_FOUND_VERSION=$($PYTHON_PATH --version 2>/dev/null)
-        log_success "Python found: $PYTHON_FOUND_VERSION"
+        log_success "找到 Python: $PYTHON_FOUND_VERSION"
         return 0
     fi
 
@@ -294,11 +294,11 @@ check_python() {
 }
 
 check_git() {
-    log_info "Checking Git..."
+    log_info "检查 Git..."
 
     if command -v git &> /dev/null; then
         GIT_VERSION=$(git --version | awk '{print $3}')
-        log_success "Git $GIT_VERSION found"
+        log_success "找到 Git $GIT_VERSION"
         return 0
     fi
 
@@ -346,7 +346,7 @@ check_git() {
 }
 
 check_node() {
-    log_info "Checking Node.js (for browser tools)..."
+    log_info "检查 Node.js（用于浏览器工具）..."
 
     if command -v node &> /dev/null; then
         local found_ver=$(node --version)
@@ -488,7 +488,7 @@ install_system_packages() {
     local need_ripgrep=false
     local need_ffmpeg=false
 
-    log_info "Checking ripgrep (fast file search)..."
+    log_info "检查 ripgrep（快速文件搜索）..."
     if command -v rg &> /dev/null; then
         log_success "$(rg --version | head -1) found"
         HAS_RIPGREP=true
@@ -496,7 +496,7 @@ install_system_packages() {
         need_ripgrep=true
     fi
 
-    log_info "Checking ffmpeg (TTS voice messages)..."
+    log_info "检查 ffmpeg（TTS 语音消息）..."
     if command -v ffmpeg &> /dev/null; then
         local ffmpeg_ver=$(ffmpeg -version 2>/dev/null | head -1 | awk '{print $3}')
         log_success "ffmpeg $ffmpeg_ver found"
@@ -678,25 +678,26 @@ show_manual_install_hint() {
 # ============================================================================
 
 clone_repo() {
-    log_info "Installing to $INSTALL_DIR..."
+    log_info "安装到 $INSTALL_DIR..."
 
     if [ -d "$INSTALL_DIR" ]; then
         if [ -d "$INSTALL_DIR/.git" ]; then
-            log_info "Existing installation found, updating..."
+            log_info "发现已有安装，正在更新..."
             cd "$INSTALL_DIR"
 
             local autostash_ref=""
             if [ -n "$(git status --porcelain)" ]; then
                 local stash_name
                 stash_name="hermes-install-autostash-$(date -u +%Y%m%d-%H%M%S)"
-                log_info "Local changes detected, stashing before update..."
+                log_info "检测到本地修改，更新前暂存..."
                 git stash push --include-untracked -m "$stash_name"
                 autostash_ref="$(git rev-parse --verify refs/stash)"
             fi
 
             git fetch origin
             git checkout "$BRANCH"
-            git pull --ff-only origin "$BRANCH"
+            # release 分支是 force-push 的，需要 reset 而非 pull
+            git reset --hard "origin/$BRANCH"
 
             if [ -n "$autostash_ref" ]; then
                 local restore_now="yes"
@@ -738,17 +739,17 @@ clone_repo() {
         # Try SSH first (for private repo access), fall back to HTTPS
         # GIT_SSH_COMMAND disables interactive prompts and sets a short timeout
         # so SSH fails fast instead of hanging when no key is configured.
-        log_info "Trying SSH clone..."
+        log_info "尝试 SSH 克隆..."
         if GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=5" \
            git clone --branch "$BRANCH" "$REPO_URL_SSH" "$INSTALL_DIR" 2>/dev/null; then
-            log_success "Cloned via SSH"
+            log_success "通过 SSH 克隆完成"
         else
             rm -rf "$INSTALL_DIR" 2>/dev/null  # Clean up partial SSH clone
-            log_info "SSH failed, trying HTTPS..."
+            log_info "SSH 失败，尝试 HTTPS..."
             if git clone --branch "$BRANCH" "$REPO_URL_HTTPS" "$INSTALL_DIR"; then
-                log_success "Cloned via HTTPS"
+                log_success "通过 HTTPS 克隆完成"
             else
-                log_error "Failed to clone repository"
+                log_error "克隆仓库失败"
                 exit 1
             fi
         fi
@@ -756,43 +757,43 @@ clone_repo() {
 
     cd "$INSTALL_DIR"
 
-    log_success "Repository ready"
+    log_success "仓库准备就绪"
 }
 
 setup_venv() {
     if [ "$USE_VENV" = false ]; then
-        log_info "Skipping virtual environment (--no-venv)"
+        log_info "跳过虚拟环境（--no-venv）"
         return 0
     fi
 
     if [ "$DISTRO" = "termux" ]; then
-        log_info "Creating virtual environment with Termux Python..."
+        log_info "创建虚拟环境 with Termux Python..."
 
         if [ -d "venv" ]; then
-            log_info "Virtual environment already exists, recreating..."
+            log_info "虚拟环境已存在，重新创建..."
             rm -rf venv
         fi
 
         "$PYTHON_PATH" -m venv venv
-        log_success "Virtual environment ready ($(./venv/bin/python --version 2>/dev/null))"
+        log_success "虚拟环境就绪 ($(./venv/bin/python --version 2>/dev/null))"
         return 0
     fi
 
-    log_info "Creating virtual environment with Python $PYTHON_VERSION..."
+    log_info "创建虚拟环境 with Python $PYTHON_VERSION..."
 
     if [ -d "venv" ]; then
-        log_info "Virtual environment already exists, recreating..."
+        log_info "虚拟环境已存在，重新创建..."
         rm -rf venv
     fi
 
     # uv creates the venv and pins the Python version in one step
     $UV_CMD venv venv --python "$PYTHON_VERSION"
 
-    log_success "Virtual environment ready (Python $PYTHON_VERSION)"
+    log_success "虚拟环境就绪 (Python $PYTHON_VERSION)"
 }
 
 install_deps() {
-    log_info "Installing dependencies..."
+    log_info "安装依赖..."
 
     if [ "$DISTRO" = "termux" ]; then
         if [ "$USE_VENV" = true ]; then
@@ -822,7 +823,7 @@ install_deps() {
             fi
         fi
 
-        log_success "Main package installed"
+        log_success "主包安装完成"
         log_info "Termux note: browser/WhatsApp tooling is not installed by default; see the Termux guide for optional follow-up steps."
 
         if [ -d "tinker-atropos" ] && [ -f "tinker-atropos/pyproject.toml" ]; then
@@ -830,7 +831,7 @@ install_deps() {
             log_info "  To install later: $PIP_PYTHON -m pip install -e \"./tinker-atropos\""
         fi
 
-        log_success "All dependencies installed"
+        log_success "所有依赖安装完成"
         return 0
     fi
 
@@ -877,7 +878,7 @@ install_deps() {
         log_info "Reason: $(tail -5 "$ALL_INSTALL_LOG" | head -3)"
         rm -f "$ALL_INSTALL_LOG"
         if ! $UV_CMD pip install -e "."; then
-            log_error "Package installation failed."
+            log_error "包安装失败。"
             log_info "Check that build tools are installed: sudo apt install build-essential python3-dev"
             log_info "Then re-run: cd $INSTALL_DIR && uv pip install -e '.[all]'"
             exit 1
@@ -886,7 +887,7 @@ install_deps() {
         rm -f "$ALL_INSTALL_LOG"
     fi
 
-    log_success "Main package installed"
+    log_success "主包安装完成"
 
     # tinker-atropos (RL training) is optional — skip by default.
     # To enable RL tools: git submodule update --init tinker-atropos && uv pip install -e "./tinker-atropos"
@@ -895,7 +896,7 @@ install_deps() {
         log_info "  To install: $UV_CMD pip install -e \"./tinker-atropos\""
     fi
 
-    log_success "All dependencies installed"
+    log_success "所有依赖安装完成"
 }
 
 setup_path() {
@@ -1153,7 +1154,7 @@ install_node_deps() {
 
 run_setup_wizard() {
     if [ "$RUN_SETUP" = false ]; then
-        log_info "Skipping setup wizard (--skip-setup)"
+        log_info "跳过设置向导（--skip-setup）"
         return 0
     fi
 
@@ -1166,7 +1167,7 @@ run_setup_wizard() {
     fi
 
     echo ""
-    log_info "Starting setup wizard..."
+    log_info "启动设置向导..."
     echo ""
 
     cd "$INSTALL_DIR"
