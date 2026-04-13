@@ -464,7 +464,7 @@ def split_content(content: str, file_path: str = "", max_chars: int = 12000) -> 
     ext = Path(file_path).suffix.lower() if file_path else ""
 
     if ext == ".py":
-        return _split_python(content, min(max_chars, 6000))  # Python 用更小的分段阈值
+        return _split_python(content, max_chars)
     elif ext == ".md":
         return _split_markdown(content, max_chars)
     elif ext in (".html", ".htm"):
@@ -535,19 +535,7 @@ def _split_python(content: str, max_chars: int) -> list[str]:
 
     if current:
         _emit(sections, current)
-
-    # 二次分割：对超大段按空行再切（处理超长单函数体）
-    max_hard = max_chars * 2  # 超过 2 倍阈值才二次分割
-    final_sections: list[str] = []
-    for section in (sections if sections else [content]):
-        if len(section) <= max_hard:
-            final_sections.append(section)
-        else:
-            # 按空行分割超大段
-            sub = _split_by_blank_lines(section, max_chars)
-            final_sections.extend(sub)
-
-    return final_sections if final_sections else [content]
+    return sections if sections else [content]
 
 
 def _emit(sections: list[str], current: list[str]):
