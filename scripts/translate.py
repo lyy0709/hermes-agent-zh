@@ -689,19 +689,18 @@ def translate_text(
     text: str,
     rate_limiter: RateLimiter,
     timeout: int = 300,
-    max_retries: int = 3,
+    max_retries: int = 5,
 ) -> str:
-    """调用 LLM API 翻译文本，带 RPM+TPM 限速、超时和指数退避重试。
+    """调用 LLM API 翻译文本，带 RPM+TPM 限速、指数退避重试（5 次）。
 
     TokenBudgetExceeded 不会被重试，直接向上抛出。
+    退避间隔：10s, 20s, 40s, 80s（指数退避，基数 10s）
     """
-    # 预估 token：system prompt + 用户文本 + 预留输出
     input_tokens = estimate_tokens(system_prompt) + estimate_tokens(text)
     output_estimate = int(input_tokens * 0.9)
     estimated_total = input_tokens + output_estimate
 
     for attempt in range(max_retries):
-        # acquire 可能抛 TokenBudgetExceeded（不在 try 内，不会被重试）
         rid = rate_limiter.acquire(estimated_tokens=estimated_total)
         try:
             response = client.chat.completions.create(
@@ -713,7 +712,6 @@ def translate_text(
                 temperature=0.1,
                 timeout=timeout,
             )
-            # 用 API 返回的实际 token 数修正本次 reservation（安全处理 None）
             actual_total = getattr(response.usage, "total_tokens", None) if response.usage else None
             if isinstance(actual_total, int) and actual_total >= 0:
                 rate_limiter.report_actual(rid, actual_total)
@@ -721,13 +719,11 @@ def translate_text(
             content = response.choices[0].message.content
             return content if content else ""
         except Exception as e:
-            # 释放 token：timeout/失败意味着本次请求没有成功完成。
-            # 虽然理论上上游可能已开始处理，但不释放会导致 TPM 窗口累积→重试卡死。
-            # 权衡：宁可偶尔低估 TPM（上游 429 会自动限流），也不能让翻译进程卡死。
             rate_limiter.release(rid)
             if attempt < max_retries - 1:
-                wait_time = 2 ** (attempt + 1)
-                print(f"  API 调用失败 ({type(e).__name__})，{wait_time}s 后重试: {e}", file=sys.stderr)
+                # 指数退避：10s, 20s, 40s, 80s（网络问题需要更长恢复时间）
+                wait_time = 10 * (2 ** attempt)
+                print(f"  API 调用失败 ({type(e).__name__})，{wait_time}s 后重试 ({attempt+2}/{max_retries}): {e}", file=sys.stderr)
                 time.sleep(wait_time)
             else:
                 raise

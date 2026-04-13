@@ -103,15 +103,23 @@ jobs:
           fi
           python scripts/translate.py --upstream upstream $FORCE_FLAG || echo "TRANSLATE_FAILED=true" >> "$GITHUB_ENV"
 
-      # ── 保存已成功的翻译到 main（即使部分失败也提交）──
+      # ── 保存已成功的翻译到 main（仅在翻译步骤执行过时）──
       - name: 提交翻译结果到 main
-        if: always()
+        if: always() && (env.TRANSLATE_FAILED == 'true' || success())
         run: |
-          echo "${{ needs.check-upstream.outputs.upstream_sha }}" > .last-synced-sha
-          echo "${{ needs.check-upstream.outputs.upstream_version }}" > .last-synced-version
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add translations/ .last-synced-sha .last-synced-version
+
+          # 只有翻译全部成功才更新同步游标（失败时不更新，确保下次重试）
+          if [ "$TRANSLATE_FAILED" != "true" ]; then
+            echo "${{ needs.check-upstream.outputs.upstream_sha }}" > .last-synced-sha
+            echo "${{ needs.check-upstream.outputs.upstream_version }}" > .last-synced-version
+            git add translations/ .last-synced-sha .last-synced-version
+          else
+            echo "⚠ 翻译部分失败，只保存已成功的翻译，不更新同步游标"
+            git add translations/
+          fi
+
           if git diff --staged --quiet; then
             echo "无翻译变更需要提交"
           else
