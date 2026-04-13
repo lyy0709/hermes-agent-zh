@@ -53,27 +53,35 @@ def apply_string_replace(rules_file: Path, target_file: Path) -> tuple[str, int,
 
     content = target_file.read_text(encoding="utf-8")
     original_content = content
+    is_python = target_file.suffix == ".py"
     applied = 0
     existed = 0
+    skipped_syntax = 0
 
     # 按原文长度降序排列，避免短字符串替换破坏长字符串
     sorted_replacements = sorted(replacements.items(), key=lambda x: len(x[0]), reverse=True)
 
     for original, translated in sorted_replacements:
         if original in content:
-            content = content.replace(original, translated)
+            new_content = content.replace(original, translated)
+            # Python 文件：逐条验证语法，不合法则跳过该条规则
+            if is_python:
+                try:
+                    compile(new_content, str(target_file), "exec")
+                except SyntaxError:
+                    skipped_syntax += 1
+                    if skipped_syntax <= 3:
+                        print(f"  跳过语法破坏规则: {original[:50]}...", file=sys.stderr)
+                    continue
+            content = new_content
             applied += 1
         elif translated in content:
             existed += 1
 
+    if skipped_syntax > 0:
+        print(f"  ⚠ {target_file.name}: 跳过 {skipped_syntax} 条会破坏语法的规则", file=sys.stderr)
+
     if content != original_content:
-        # Python 文件：替换后验证语法是否合法，不合法则回滚
-        if target_file.suffix == ".py":
-            try:
-                compile(content, str(target_file), "exec")
-            except SyntaxError as e:
-                print(f"  ⚠ {target_file.name} 替换后语法错误 (L{e.lineno}), 回滚", file=sys.stderr)
-                return "syntax_error", 0, 0
         target_file.write_text(content, encoding="utf-8")
 
     return "applied", applied, existed
