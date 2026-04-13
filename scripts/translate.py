@@ -668,26 +668,38 @@ def translate_code_strings(
             print(f"  提取分段 {i + 1}/{len(sections)}...")
 
         prompt = f"以下是{lang_name}文件 `{source_file.name}` 的第 {i + 1} 部分:\n\n```{code_tag}\n{section}\n```"
-        result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
 
-        # 提取 JSON（支持多种 LLM 输出格式）
-        json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", result)
-        if json_match:
-            result = json_match.group(1)
+        # 每段最多尝试 3 次（LLM 输出 JSON 不稳定是常态）
+        parsed = False
+        for attempt in range(3):
+            result = translate_text(client, model, system_prompt, prompt, rate_limiter, timeout)
 
-        try:
-            part_data = json.loads(result)
-            part_replacements = part_data.get("replacements", {})
-            # 检查 key 冲突
-            for key in part_replacements:
-                if key in all_replacements and all_replacements[key] != part_replacements[key]:
-                    print(f"  警告: 分段 key 冲突 '{key[:50]}...'，使用后段翻译", file=sys.stderr)
-            all_replacements.update(part_replacements)
-        except json.JSONDecodeError:
+            # 提取 JSON（支持多种 LLM 输出格式）
+            json_text = result
+            json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", result)
+            if json_match:
+                json_text = json_match.group(1)
+
+            try:
+                part_data = json.loads(json_text)
+                part_replacements = part_data.get("replacements", {})
+                if isinstance(part_replacements, dict):
+                    for key in part_replacements:
+                        if key in all_replacements and all_replacements[key] != part_replacements[key]:
+                            print(f"  警告: 分段 key 冲突 '{key[:50]}...'，使用后段翻译", file=sys.stderr)
+                    all_replacements.update(part_replacements)
+                    parsed = True
+                    break
+            except json.JSONDecodeError:
+                if attempt < 2:
+                    print(f"  分段 {i + 1} JSON 解析失败，重试 {attempt + 2}/3...", file=sys.stderr)
+                    time.sleep(2)
+
+        if not parsed:
             failed_sections += 1
             if len(sections) == 1:
-                raise TranslationError("LLM 返回的不是有效 JSON") from None
-            print(f"  警告: 分段 {i + 1} JSON 解析失败", file=sys.stderr)
+                raise TranslationError("LLM 返回的不是有效 JSON（已重试 3 次）") from None
+            print(f"  警告: 分段 {i + 1} JSON 解析 3 次均失败", file=sys.stderr)
 
     # 任一分段失败 → 整体失败，不写入 hash cache
     if failed_sections > 0:
