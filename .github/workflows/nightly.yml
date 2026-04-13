@@ -117,12 +117,12 @@ jobs:
             git push origin main
           fi
 
-      # ── 应用翻译到上游源码 ──
+      # ── 验证 + 应用翻译到上游源码 ──
+      - name: 验证翻译（apply 之前，检查替换规则有效性）
+        run: python scripts/verify.py --upstream upstream --strict
+
       - name: 应用翻译
         run: python scripts/apply.py --upstream upstream --verbose
-
-      - name: 验证翻译
-        run: python scripts/verify.py --upstream upstream --strict
 
       # ── 将翻译后的完整源码推送到 release 分支 ──
       - name: 推送到 release 分支

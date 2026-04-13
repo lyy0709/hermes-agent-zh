@@ -58,11 +58,11 @@ jobs:
             exit 1
           fi
 
+      - name: 验证翻译（apply 之前）
+        run: python scripts/verify.py --upstream upstream --strict
+
       - name: 应用翻译
         run: python scripts/apply.py --upstream upstream --verbose
-
-      - name: 验证翻译
-        run: python scripts/verify.py --upstream upstream --strict
 
       # ── 推送到 release 分支 ──
       - name: 推送到 release 分支
