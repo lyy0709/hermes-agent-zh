@@ -735,12 +735,17 @@ def translate_code_strings(
         if not parsed:
             failed_sections += 1
             if len(sections) == 1:
-                raise TranslationError("LLM 返回的不是有效 JSON（已重试 3 次）") from None
-            print(f"  警告: 分段 {i + 1} JSON 解析 3 次均失败", file=sys.stderr)
+                raise TranslationError("LLM 返回的不是有效 JSON") from None
+            print(f"  警告: 分段 {i + 1} 解析失败（轻量修复也失败），跳过该分段", file=sys.stderr)
 
-    # 任一分段失败 → 整体失败，不写入 hash cache
-    if failed_sections > 0:
-        raise TranslationError(f"{failed_sections}/{len(sections)} 个分段解析失败，中止以避免部分翻译")
+    # 允许少量分段失败（<= 20%），超过阈值才中止
+    if len(sections) > 1 and failed_sections > 0:
+        fail_rate = failed_sections / len(sections)
+        if fail_rate > 0.2:
+            raise TranslationError(
+                f"{failed_sections}/{len(sections)} 个分段解析失败（{fail_rate:.0%} > 20%），中止"
+            )
+        print(f"  分段失败率 {fail_rate:.0%}（{failed_sections}/{len(sections)}），在容忍范围内继续", file=sys.stderr)
 
     if not all_replacements:
         raise TranslationError("所有分段均未返回有效的 replacements")
