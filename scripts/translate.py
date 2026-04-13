@@ -362,7 +362,7 @@ def build_string_extract_prompt(glossary_text: str, lang_name: str = "Python") -
 
 任务：
 1. 识别代码中所有用户可见的字符串（提示信息、错误消息、描述文本、标签等）
-2. 忽略：变量名、函数名、导入语句、注释、日志格式字符串、技术标识符
+2. 忽略：变量名、函数名、导入语句、注释、docstring、日志格式字符串、技术标识符
 3. 对每个用户面向的字符串，输出 JSON 替换规则
 
 输出格式（严格 JSON）：
@@ -370,14 +370,17 @@ def build_string_extract_prompt(glossary_text: str, lang_name: str = "Python") -
   "file": "文件路径",
   "description": "文件功能描述",
   "replacements": {{
-    "原始字符串（包含引号）": "翻译后的字符串（包含引号）"
+    "\"源码中带引号的精确原文\"": "\"翻译后的中文\""
   }}
 }}
 
-规则：
-- 替换规则中的 key 和 value 都必须包含原始代码中的引号
-- 只翻译用户面向的文本，不要翻译技术字符串
-- 保持字符串中的格式占位符（如 {{}}、%s、\\n 等）
+关键规则：
+- key 和 value 都必须包含源码中的引号（如源码是 x = "hello" 则 key 为 "hello" 包含双引号）
+- key 必须是源码中逐字连续出现的精确子串（直接从源码复制粘贴，包含引号字符）
+- 如果文本被 Rich markup 包裹（如 [bold]text[/]），key 应包含完整 markup 标签
+- 如果文本跨多行、涉及 f-string 插值 {{}} 或函数调用拼接，跳过不生成规则
+- value 是对应的中文翻译，保持格式占位符（如 {{}}、%s、\\n、Rich markup 标签）不变
+- 不要翻译 docstring 和注释
 - 只输出 JSON，不要添加任何解释
 
 术语表：
@@ -708,10 +711,41 @@ def translate_code_strings(
     if not all_replacements:
         raise TranslationError("所有分段均未返回有效的 replacements")
 
+    # ── 即时校验：过滤无法匹配源码的无效规则 ──
+    validated: dict[str, str] = {}
+    skipped_keys = 0
+    for key, value in all_replacements.items():
+        if key in content:
+            validated[key] = value
+        else:
+            # 尝试 strip 外层引号后重试
+            stripped = key.strip("'\"")
+            if stripped != key and stripped in content:
+                validated[stripped] = value
+            else:
+                skipped_keys += 1
+                if skipped_keys <= 5:
+                    print(f"  丢弃无效 key: {key[:60]}...", file=sys.stderr)
+
+    if skipped_keys > 0:
+        print(f"  即时校验: {len(validated)} 有效, {skipped_keys} 无效已丢弃", file=sys.stderr)
+
+    if not validated:
+        raise TranslationError("所有规则经校验后均无效")
+
+    # 丢弃率 >= 30% 说明 LLM 输出质量差，不标记 _validated
+    total_keys = len(all_replacements)
+    discard_rate = skipped_keys / total_keys if total_keys > 0 else 0
+    is_validated = discard_rate < 0.3
+    if not is_validated:
+        print(f"  警告: 丢弃率 {discard_rate:.0%} >= 30%，不标记 _validated", file=sys.stderr)
+
     data = {
         "file": str(source_file.name),
         "description": f"{lang_name} 文件字符串翻译",
-        "replacements": all_replacements,
+        "_validated": is_validated,
+        "_stats": {"total": total_keys, "valid": len(validated), "discarded": skipped_keys},
+        "replacements": validated,
     }
     target_file.parent.mkdir(parents=True, exist_ok=True)
     with open(target_file, "w", encoding="utf-8") as f:

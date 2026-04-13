@@ -89,8 +89,9 @@ def check_json_format() -> list[dict]:
 def check_replacements(config: dict, upstream_dir: Path, strict: bool = False) -> list[dict]:
     """验证字符串替换规则能否匹配上游源码。
 
-    注意：string_replace 的规则由 LLM 自动生成，天然存在一定的不匹配率
-    （外层引号、幻觉 key 等），因此不匹配始终为 warning，不阻断构建。
+    分级验证：
+    - _validated=true 的文件（经过生成时校验）：不匹配 = error（strict 模式）
+    - 无标记的旧格式文件：不匹配 = warning
     """
     issues = []
 
@@ -115,20 +116,34 @@ def check_replacements(config: dict, upstream_dir: Path, strict: bool = False) -
 
             content = target_file.read_text(encoding="utf-8")
             replacements = rules.get("replacements", {})
+            is_validated = rules.get("_validated", False)
 
+            # 分级：经过即时校验的文件用 strict，旧格式用 warning
+            fail_level = "error" if (strict and is_validated) else "warning"
+
+            matched = 0
+            unmatched = 0
             for original, translated in replacements.items():
                 if original in content:
-                    pass  # 原文存在，可以替换
+                    matched += 1
                 elif translated in content:
-                    pass  # 译文已存在（已被应用过）
+                    matched += 1  # 译文已存在（已被应用过）
                 else:
+                    unmatched += 1
                     issues.append({
-                        "level": "warning",  # LLM 生成的规则不匹配是常态，不阻断
+                        "level": fail_level,
                         "module": module["name"],
                         "file": f["source"],
                         "message": "替换规则失效: 原文未找到",
                         "original": original[:80],
                     })
+
+            # 输出匹配率统计
+            total = matched + unmatched
+            if total > 0:
+                rate = matched / total * 100
+                status = "validated" if is_validated else "legacy"
+                print(f"  [{module['name']}] {f['source']}: {matched}/{total} 匹配 ({rate:.0f}%) [{status}]", file=sys.stderr)
 
     return issues
 
