@@ -724,11 +724,10 @@ def translate_code_strings(
                 validated[stripped] = value
             else:
                 skipped_keys += 1
-                if skipped_keys <= 5:
-                    print(f"  丢弃无效 key: {key[:60]}...", file=sys.stderr)
+                print(f"  丢弃无效 key [{skipped_keys}]: {key[:80]}", file=sys.stderr)
 
     if skipped_keys > 0:
-        print(f"  即时校验: {len(validated)} 有效, {skipped_keys} 无效已丢弃", file=sys.stderr)
+        print(f"  即时校验汇总: {len(validated)} 有效, {skipped_keys} 无效已丢弃", file=sys.stderr)
 
     if not validated:
         raise TranslationError("所有规则经校验后均无效")

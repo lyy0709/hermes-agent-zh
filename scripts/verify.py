@@ -126,8 +126,8 @@ def check_replacements(config: dict, upstream_dir: Path, strict: bool = False) -
             for original, translated in replacements.items():
                 if original in content:
                     matched += 1
-                elif translated in content:
-                    matched += 1  # 译文已存在（已被应用过）
+                elif original != translated and translated in content:
+                    matched += 1  # 译文已存在且与原文不同（已被应用过）
                 else:
                     unmatched += 1
                     issues.append({
