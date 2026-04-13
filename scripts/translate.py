@@ -964,34 +964,52 @@ def _translate_one(
     成功时同时更新 cache（线程安全）。
     """
     source_path = f["source_path"]
-    print(f"\n[{index}/{total}] 翻译 {source_path}...")
+    is_python = f["source_file"].suffix == ".py"
+    max_file_retries = 3 if is_python else 1  # Python 语法错误可重试
 
-    try:
-        if f["type"] == "file_override":
-            translate_markdown_file(
-                client, model, glossary_text, f["source_file"], f["target_file"],
-                rate_limiter, timeout,
-            )
-        elif f["type"] == "string_replace":
-            translate_code_strings(
-                client, model, glossary_text, f["source_file"], f["target_file"],
-                rate_limiter, timeout,
-            )
+    for file_attempt in range(max_file_retries):
+        if file_attempt > 0:
+            print(f"\n[{index}/{total}] 重试翻译 {source_path} ({file_attempt + 1}/{max_file_retries})...")
+        else:
+            print(f"\n[{index}/{total}] 翻译 {source_path}...")
 
-        # 更新 hash 缓存（线程安全）
-        with _cache_lock:
-            cache[source_path] = {
-                "source_hash": compute_file_hash(f["source_file"]),
-                "translated_at": datetime.now(timezone.utc).isoformat(),
-                "model": model,
-            }
-        save_hash_cache(cache)
-        print(f"  完成 ✓")
-        return source_path, True, ""
+        try:
+            if f["type"] == "file_override":
+                translate_markdown_file(
+                    client, model, glossary_text, f["source_file"], f["target_file"],
+                    rate_limiter, timeout,
+                )
+            elif f["type"] == "string_replace":
+                translate_code_strings(
+                    client, model, glossary_text, f["source_file"], f["target_file"],
+                    rate_limiter, timeout,
+                )
 
-    except Exception as e:
-        print(f"  失败 ✗: {e}", file=sys.stderr)
-        return source_path, False, str(e)
+            # 更新 hash 缓存（线程安全）
+            with _cache_lock:
+                cache[source_path] = {
+                    "source_hash": compute_file_hash(f["source_file"]),
+                    "translated_at": datetime.now(timezone.utc).isoformat(),
+                    "model": model,
+                }
+            save_hash_cache(cache)
+            print(f"  完成 ✓")
+            return source_path, True, ""
+
+        except TranslationError as e:
+            # Python 语法错误等翻译错误：可重试
+            if file_attempt < max_file_retries - 1:
+                print(f"  翻译错误，{10}s 后重试: {e}", file=sys.stderr)
+                time.sleep(10)
+                continue
+            print(f"  失败 ✗ (共尝试 {max_file_retries} 次): {e}", file=sys.stderr)
+            return source_path, False, str(e)
+
+        except Exception as e:
+            print(f"  失败 ✗: {e}", file=sys.stderr)
+            return source_path, False, str(e)
+
+    return source_path, False, "未知错误"
 
 
 # ──────────────────────────────────────────
