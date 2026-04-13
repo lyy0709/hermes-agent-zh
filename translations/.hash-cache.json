@@ -245,8 +245,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/cli-commands.md": {
-    "source_hash": "sha256:7d79635c65b83d97ad6899856d1c13b3132239630f4b91178d9eb81470bebeb2",
-    "translated_at": "2026-04-13T03:50:28.209955+00:00",
+    "source_hash": "sha256:08075372108dfbb490e5e3244c125c56128fbd0cd932a984a291404a9f646999",
+    "translated_at": "2026-04-13T11:06:15.615241+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/environment-variables.md": {
@@ -255,8 +255,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/slash-commands.md": {
-    "source_hash": "sha256:afc312e4811c91dd9670eb2871e3068cd9d558fbb66ef895bd2c5b5c7a02f3ae",
-    "translated_at": "2026-04-13T03:52:07.270626+00:00",
+    "source_hash": "sha256:41c988a9108ad9347b2668187dfd31964df09de77279ad24102226c57adc9f5f",
+    "translated_at": "2026-04-13T11:02:40.185495+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/toolsets-reference.md": {
@@ -612,6 +612,11 @@
   "hermes_cli/setup.py": {
     "source_hash": "sha256:8e4663f5d0cfcc704fd4412c06b6a340791d90e95bd12c5aa156f3563a715d47",
     "translated_at": "2026-04-13T06:00:55.026299+00:00",
+    "model": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "website/docs/user-guide/features/web-dashboard.md": {
+    "source_hash": "sha256:1d73f4447e5af0e99dba60c4503b95e928bfd970c301a8c65b413e6a6cab1bb1",
+    "translated_at": "2026-04-13T11:01:58.194358+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   }
 }
