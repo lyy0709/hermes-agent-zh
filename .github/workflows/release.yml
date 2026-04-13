@@ -71,6 +71,9 @@ jobs:
 
           cd upstream
 
+          # 删除上游的 workflow 文件（GITHUB_TOKEN 无 workflows 写权限）
+          rm -rf .github/workflows
+
           # 覆盖安装脚本
           cp ../scripts/install.sh scripts/install.sh 2>/dev/null || true
           cp ../scripts/install.ps1 scripts/install.ps1 2>/dev/null || true

@@ -132,6 +132,9 @@ jobs:
 
           cd upstream
 
+          # 删除上游的 workflow 文件（GITHUB_TOKEN 无 workflows 写权限）
+          rm -rf .github/workflows
+
           # 将安装脚本复制到上游源码中（覆盖原版）
           cp ../scripts/install.sh scripts/install.sh 2>/dev/null || true
           cp ../scripts/install.ps1 scripts/install.ps1 2>/dev/null || true
