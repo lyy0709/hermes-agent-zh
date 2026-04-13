@@ -67,6 +67,13 @@ def apply_string_replace(rules_file: Path, target_file: Path) -> tuple[str, int,
             existed += 1
 
     if content != original_content:
+        # Python 文件：替换后验证语法是否合法，不合法则回滚
+        if target_file.suffix == ".py":
+            try:
+                compile(content, str(target_file), "exec")
+            except SyntaxError as e:
+                print(f"  ⚠ {target_file.name} 替换后语法错误 (L{e.lineno}), 回滚", file=sys.stderr)
+                return "syntax_error", 0, 0
         target_file.write_text(content, encoding="utf-8")
 
     return "applied", applied, existed
