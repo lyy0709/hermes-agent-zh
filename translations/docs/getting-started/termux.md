@@ -6,7 +6,7 @@ description: "通过 Termux 在 Android 手机上直接运行 Hermes Agent"
 
 # 在 Android 上通过 Termux 使用 Hermes
 
-这是在 Android 手机上通过 [Termux](https://termux.dev/) 直接运行 Hermes Agent 的已验证路径。
+这是通过 [Termux](https://termux.dev/) 在 Android 手机上直接运行 Hermes Agent 的已验证路径。
 
 它为你提供了一个在手机上可用的本地 CLI，以及目前已知能在 Android 上干净安装的核心附加功能。
 
@@ -31,11 +31,11 @@ python -m pip install -e '.[termux]' -c constraints-termux.txt
 一些功能仍然需要桌面/服务器风格的依赖项，这些依赖项尚未为 Android 发布，或者尚未在手机上验证：
 
 - `.[all]` 目前在 Android 上不受支持
-- `voice` 附加功能被 `faster-whisper -> ctranslate2` 阻塞，而 `ctranslate2` 没有发布 Android 预编译包
+- `voice` 附加功能被 `faster-whisper -> ctranslate2` 阻塞，而 `ctranslate2` 没有发布 Android 轮子包
 - Termux 安装程序跳过了自动浏览器 / Playwright 引导
 - 基于 Docker 的终端隔离在 Termux 内不可用
 
-这并不妨碍 Hermes 作为手机原生 CLI Agent 的良好运行——它只是意味着推荐的移动安装范围有意比桌面/服务器安装更窄。
+这并不妨碍 Hermes 作为手机原生 CLI Agent 良好运行——它只是意味着推荐的移动安装范围有意比桌面/服务器安装更窄。
 
 ---
 
@@ -70,7 +70,7 @@ pkg install -y git python clang rust make pkg-config libffi openssl nodejs ripgr
 为什么需要这些包？
 - `python` — 运行时 + 虚拟环境支持
 - `git` — 克隆/更新仓库
-- `clang`、`rust`、`make`、`pkg-config`、`libffi`、`openssl` — 在 Android 上构建一些 Python 依赖项所需
+- `clang`, `rust`, `make`, `pkg-config`, `libffi`, `openssl` — 在 Android 上构建一些 Python 依赖项所需
 - `nodejs` — 用于在已验证核心路径之外进行实验的可选 Node 运行时
 - `ripgrep` — 快速文件搜索
 - `ffmpeg` — 媒体 / TTS 转换
@@ -117,7 +117,7 @@ python -m pip install -e '.' -c constraints-termux.txt
 ln -sf "$PWD/venv/bin/hermes" "$PREFIX/bin/hermes"
 ```
 
-`$PREFIX/bin` 已经在 Termux 的 PATH 中，因此这使 `hermes` 命令能在新 shell 中持续使用，而无需每次都重新激活虚拟环境。
+`$PREFIX/bin` 已经在 Termux 的 PATH 中，因此这会使 `hermes` 命令在新 shell 中持续可用，而无需每次都重新激活虚拟环境。
 
 ### 6. 验证安装
 
@@ -158,7 +158,7 @@ hermes setup
 npm install
 ```
 
-在另有文档说明之前，请将 Android 上的浏览器 / WhatsApp 工具视为实验性的。
+在另有文档说明之前，请将 Android 上的浏览器 / WhatsApp 工具视为实验性功能。
 
 ---
 
@@ -175,7 +175,7 @@ python -m pip install -e '.[termux]' -c constraints-termux.txt
 目前的阻塞点是 `voice` 附加功能：
 - `voice` 拉取 `faster-whisper`
 - `faster-whisper` 依赖 `ctranslate2`
-- `ctranslate2` 没有发布 Android 预编译包
+- `ctranslate2` 没有发布 Android 轮子包
 
 ### `uv pip install` 在 Android 上失败
 
@@ -198,7 +198,7 @@ export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
 python -m pip install -e '.[termux]' -c constraints-termux.txt
 ```
 
-### `hermes doctor` 显示缺少 ripgrep 或 Node
+### `hermes doctor` 显示 ripgrep 或 Node 缺失
 
 使用 Termux 包安装它们：
 

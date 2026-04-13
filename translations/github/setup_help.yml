@@ -1,6 +1,6 @@
 name: "🔧 安装/配置帮助"
-description: 在安装或配置 Hermes 时遇到问题？请在这里提问。
-title: "[安装]: "
+description: 在安装或配置 Hermes 时遇到问题？请在此提问。
+title: "[Setup]: "
 labels: ["setup"]
 body:
   - type: markdown
@@ -8,7 +8,7 @@ body:
       value: |
         很抱歉您遇到了问题！请填写以下详细信息以便我们提供帮助。
 
-        **首先快速检查一下：**
+        **首先请快速检查：**
         - 运行 `hermes doctor` 并将输出包含在下方
         - 尝试 `hermes update` 以获取最新版本
         - 查看 [README 故障排除部分](https://github.com/NousResearch/hermes-agent#troubleshooting)
@@ -17,10 +17,10 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: 出了什么问题？
+      label: 出现了什么问题？
       description: 描述您尝试做什么以及在哪里失败了。
       placeholder: |
-        我运行了 `hermes setup` 并选择了 Nous Portal，但是当我尝试
+        我运行了 `hermes setup` 并选择了 Nous Portal，但当我尝试
         启动消息网关时，我遇到了...
     validations:
       required: true
@@ -28,8 +28,8 @@ body:
   - type: textarea
     id: steps
     attributes:
-      label: 已采取的步骤
-      description: 您做了什么？包括您运行的确切命令。
+      label: 已执行的步骤
+      description: 您做了什么？请包含您运行的确切命令。
       placeholder: |
         1. 运行了安装脚本：`curl -fsSL ... | bash`
         2. 运行了 `hermes setup` 并选择了“快速设置”
@@ -41,7 +41,7 @@ body:
   - type: dropdown
     id: install-method
     attributes:
-      label: 安装方法
+      label: 安装方式
       options:
         - 安装脚本 (curl | bash)
         - 手动克隆 + pip/uv 安装
@@ -70,7 +70,7 @@ body:
     id: hermes-version
     attributes:
       label: Hermes 版本
-      description: `hermes version` 的输出（如果安装已进行到这一步）
+      description: `hermes version` 的输出（如果安装进行到了这一步）
       placeholder: "2.1.0"
 
   - type: textarea
@@ -83,8 +83,8 @@ body:
   - type: textarea
     id: error-output
     attributes:
-      label: 完整错误输出
-      description: 粘贴完整的错误信息或回溯。这将自动格式化。
+      label: 完整的错误输出
+      description: 粘贴完整的错误信息或回溯信息。这将自动格式化。
       render: shell
     validations:
       required: true
@@ -92,7 +92,7 @@ body:
   - type: textarea
     id: tried
     attributes:
-      label: 我已经尝试过的
+      label: 我已尝试过的解决方法
       description: 列出您已经尝试过的任何修复方法或变通方案。
       placeholder: |
         - 运行了 `hermes update`

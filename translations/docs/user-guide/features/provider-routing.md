@@ -9,7 +9,7 @@ sidebar_position: 7
 
 当使用 [OpenRouter](https://openrouter.ai) 作为你的 LLM 提供商时，Hermes Agent 支持**提供商路由**——对哪些底层 AI 提供商处理你的请求以及它们的优先级进行细粒度控制。
 
-OpenRouter 将请求路由到许多提供商（例如，Anthropic、Google、AWS Bedrock、Together AI）。提供商路由允许你针对成本、速度、质量进行优化，或强制执行特定的提供商要求。
+OpenRouter 将请求路由到许多提供商（例如，Anthropic、Google、AWS Bedrock、Together AI）。提供商路由让你可以针对成本、速度、质量进行优化，或强制执行特定的提供商要求。
 
 ## 配置
 
@@ -39,7 +39,7 @@ provider_routing:
 |-------|-------------|
 | `"price"` | 最便宜的提供商优先 |
 | `"throughput"` | 每秒 Token 数最快的优先 |
-| `"latency"` | 首 Token 时间最低的优先 |
+| `"latency"` | 首个 Token 时间最短的优先 |
 
 ```yaml
 provider_routing:
@@ -70,7 +70,7 @@ provider_routing:
 
 ### `order`
 
-明确的优先级顺序。首先列出的提供商是首选。未列出的提供商将作为后备使用。
+明确的优先级顺序。首先列出的提供商是首选。未列出的提供商将作为备用。
 
 ```yaml
 provider_routing:
@@ -82,7 +82,7 @@ provider_routing:
 
 ### `require_parameters`
 
-当为 `true` 时，OpenRouter 将仅路由到支持你请求中**所有**参数（如 `temperature`、`top_p`、`tools` 等）的提供商。这可以避免参数被静默丢弃。
+当为 `true` 时，OpenRouter 将仅路由到支持你请求中**所有**参数（如 `temperature`、`top_p`、`tools` 等）的提供商。这避免了参数的静默丢弃。
 
 ```yaml
 provider_routing:
@@ -91,7 +91,7 @@ provider_routing:
 
 ### `data_collection`
 
-控制提供商是否可以使用你的提示词进行训练。选项是 `"allow"` 或 `"deny"`。
+控制提供商是否可以将你的提示词用于训练。选项是 `"allow"` 或 `"deny"`。
 
 ```yaml
 provider_routing:
@@ -102,7 +102,7 @@ provider_routing:
 
 ### 优化成本
 
-路由到最便宜的可用提供商。适用于高使用量和开发场景：
+路由到最便宜的可用提供商。适用于高使用量和开发：
 
 ```yaml
 provider_routing:
@@ -127,7 +127,7 @@ provider_routing:
   sort: "throughput"
 ```
 
-### 锁定特定提供商
+### 锁定到特定提供商
 
 确保所有请求都通过特定提供商以获得一致性：
 
@@ -149,9 +149,9 @@ provider_routing:
   data_collection: "deny"
 ```
 
-### 首选顺序与后备
+### 带备用方案的优先顺序
 
-首先尝试你首选的提供商，如果不可用则回退到其他提供商：
+首先尝试你偏好的提供商，如果不可用则回退到其他提供商：
 
 ```yaml
 provider_routing:
@@ -195,6 +195,6 @@ provider_routing:
 
 当没有配置 `provider_routing` 部分时（默认情况），OpenRouter 使用其自身的默认路由逻辑，该逻辑通常会自动平衡成本和可用性。
 
-:::tip 提供商路由 vs. 后备模型
-提供商路由控制 OpenRouter 内的**子提供商**处理你的请求。关于当你的主要模型失败时自动故障转移到完全不同的提供商，请参阅[后备提供商](/docs/user-guide/features/fallback-providers)。
+:::tip 提供商路由 vs. 备用模型
+提供商路由控制 **OpenRouter 内的哪些子提供商** 处理你的请求。关于当你的主模型失败时自动故障转移到完全不同的提供商，请参阅 [备用提供商](/docs/user-guide/features/fallback-providers)。
 :::

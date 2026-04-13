@@ -2,22 +2,22 @@
 sidebar_position: 9
 sidebar_label: "上下文引用"
 title: "上下文引用"
-description: "使用内联 @ 语法将文件、文件夹、git diff 和 URL 直接附加到你的消息中"
+description: "使用内联 @ 语法将文件、文件夹、git diff 和 URL 直接附加到您的消息中"
 ---
 
 # 上下文引用
 
-输入 `@` 后跟一个引用来将内容直接注入到你的消息中。Hermes 会内联展开引用，并将内容附加在 `--- 附加上下文 ---` 部分下。
+输入 `@` 后跟一个引用来将内容直接注入到您的消息中。Hermes 会内联展开引用，并将内容附加在 `--- 附加上下文 ---` 部分下。
 
 ## 支持的引用
 
 | 语法 | 描述 |
 |--------|-------------|
 | `@file:path/to/file.py` | 注入文件内容 |
-| `@file:path/to/file.py:10-25` | 注入特定行范围（从1开始计数，包含首尾行） |
+| `@file:path/to/file.py:10-25` | 注入特定行范围（1起始索引，包含首尾） |
 | `@folder:path/to/dir` | 注入目录树列表及文件元数据 |
-| `@diff` | 注入 `git diff`（未暂存的工作区变更） |
-| `@staged` | 注入 `git diff --staged`（已暂存的变更） |
+| `@diff` | 注入 `git diff`（未暂存的工作树更改） |
+| `@staged` | 注入 `git diff --staged`（已暂存的更改） |
 | `@git:5` | 注入最近 N 次提交及其补丁（最多 10 次） |
 | `@url:https://example.com` | 获取并注入网页内容 |
 
@@ -53,14 +53,14 @@ Check @file:main.py, and also @file:test.py.
 
 ## 行范围
 
-`@file:` 引用支持行范围，以便精确注入内容：
+`@file:` 引用支持行范围，用于精确注入内容：
 
 ```text
 @file:src/main.py:42        # 仅第 42 行
-@file:src/main.py:10-25     # 第 10 至 25 行（包含首尾行）
+@file:src/main.py:10-25     # 第 10 至 25 行（包含首尾）
 ```
 
-行号从 1 开始计数。无效的范围会被静默忽略（返回整个文件）。
+行号以 1 为起始索引。无效的范围会被静默忽略（返回整个文件）。
 
 ## 大小限制
 
@@ -75,21 +75,21 @@ Check @file:main.py, and also @file:test.py.
 
 ## 安全性
 
-### 敏感路径拦截
+### 敏感路径屏蔽
 
-以下路径在 `@file:` 引用中始终被拦截，以防止凭证泄露：
+以下路径在 `@file:` 引用中始终被屏蔽，以防止凭证泄露：
 
 - SSH 密钥和配置：`~/.ssh/id_rsa`, `~/.ssh/id_ed25519`, `~/.ssh/authorized_keys`, `~/.ssh/config`
 - Shell 配置文件：`~/.bashrc`, `~/.zshrc`, `~/.profile`, `~/.bash_profile`, `~/.zprofile`
 - 凭证文件：`~/.netrc`, `~/.pgpass`, `~/.npmrc`, `~/.pypirc`
 - Hermes 环境变量文件：`$HERMES_HOME/.env`
 
-以下目录被完全拦截（其中的任何文件）：
+以下目录被完全屏蔽（其中的任何文件）：
 - `~/.ssh/`, `~/.aws/`, `~/.gnupg/`, `~/.kube/`, `$HERMES_HOME/skills/.hub/`
 
 ### 路径遍历保护
 
-所有路径都相对于工作目录进行解析。解析后位于允许的工作空间根目录之外的引用将被拒绝。
+所有路径都相对于工作目录进行解析。解析到允许的工作空间根目录之外的引用将被拒绝。
 
 ### 二进制文件检测
 
@@ -97,15 +97,15 @@ Check @file:main.py, and also @file:test.py.
 
 ## 平台可用性
 
-上下文引用主要是一个 **CLI 功能**。它们在交互式 CLI 中有效，`@` 会触发标签补全，并且在消息发送给 Agent 之前会展开引用。
+上下文引用主要是一个 **CLI 功能**。它们在交互式 CLI 中工作，`@` 会触发标签补全，并且在消息发送给 Agent 之前会展开引用。
 
-在**消息平台**（Telegram、Discord 等）中，消息网关不会展开 `@` 语法——消息会原样传递。Agent 本身仍然可以通过 `read_file`、`search_files` 和 `web_extract` 等工具引用文件。
+在**消息平台**（Telegram、Discord 等）中，消息网关不会展开 `@` 语法——消息会按原样传递。Agent 本身仍然可以通过 `read_file`、`search_files` 和 `web_extract` 等工具引用文件。
 
 ## 与上下文压缩的交互
 
-当会话上下文被压缩时，展开的引用内容会被包含在压缩摘要中。这意味着：
+当会话上下文被压缩时，展开的引用内容会包含在压缩摘要中。这意味着：
 
-- 通过 `@file:` 注入的大型文件内容会占用上下文使用量
+- 通过 `@file:` 注入的大文件内容会占用上下文使用量
 - 如果稍后会话被压缩，文件内容会被摘要化（不会逐字保留）
 - 对于非常大的文件，请考虑使用行范围（`@file:main.py:100-200`）仅注入相关部分
 

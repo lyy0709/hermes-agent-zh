@@ -6,7 +6,7 @@ description: "通过 iLink Bot API 将 Hermes Agent 连接到个人微信账号"
 
 # 微信
 
-将 Hermes 连接到 [微信](https://weixin.qq.com/)，腾讯的个人即时通讯平台。该适配器使用腾讯的 **iLink Bot API** 连接个人微信账号——这与企业微信不同。消息通过长轮询方式传递，因此不需要公共端点或 Webhook。
+将 Hermes 连接到 [微信](https://weixin.qq.com/)，这是腾讯的个人即时通讯平台。该适配器使用腾讯的 **iLink Bot API** 连接个人微信账号——这与企业微信不同。消息通过长轮询方式传递，因此不需要公共端点或 Webhook。
 
 :::info
 此适配器适用于**个人微信账号**。如果您需要企业微信，请改用 [WeCom 适配器](./wecom.md)。
@@ -36,15 +36,15 @@ pip install qrcode
 hermes gateway setup
 ```
 
-提示时选择 **Weixin**。向导将：
+出现提示时选择 **Weixin**。向导将：
 
-1. 从 iLink Bot API 请求二维码
+1. 向 iLink Bot API 请求二维码
 2. 在您的终端显示二维码（或提供一个 URL）
 3. 等待您使用微信手机应用扫描二维码
 4. 提示您在手机上确认登录
 5. 自动将账号凭据保存到 `~/.hermes/weixin/accounts/`
 
-确认后，您将看到类似以下消息：
+确认后，您将看到类似以下的消息：
 
 ```
 微信连接成功，account_id=your-account-id
@@ -66,7 +66,7 @@ WEIXIN_ACCOUNT_ID=your-account-id
 WEIXIN_DM_POLICY=open
 WEIXIN_ALLOWED_USERS=user_id_1,user_id_2
 
-# 可选：恢复旧版多行分割行为
+# 可选：恢复旧版多行消息拆分行为
 # WEIXIN_SPLIT_MULTILINE_MESSAGES=true
 
 # 可选：定时任务/通知的主频道
@@ -91,8 +91,8 @@ hermes gateway
 - **AES-128-ECB 加密 CDN** — 所有媒体传输自动加密/解密
 - **上下文 Token 持久化** — 跨重启的磁盘支持回复连续性
 - **Markdown 格式化** — 标题、表格和代码块会重新格式化以提高微信可读性
-- **智能消息分块** — 消息在限制内保持为单个气泡；仅超长负载在逻辑边界处分割
-- **输入指示器** — 在 Agent 处理时在微信客户端显示“正在输入…”状态
+- **智能消息分块** — 消息在限制内保持为单个气泡；仅超长负载在逻辑边界处拆分
+- **输入状态指示器** — 在 Agent 处理时在微信客户端显示“正在输入…”状态
 - **SSRF 防护** — 下载前验证出站媒体 URL
 - **消息去重** — 5 分钟滑动窗口防止重复处理
 - **自动退避重试** — 从瞬时 API 错误中恢复
@@ -111,7 +111,7 @@ hermes gateway
 | `group_policy` | `disabled` | 群聊访问：`open`、`allowlist`、`disabled` |
 | `allow_from` | `[]` | 允许私聊的用户 ID（当 dm_policy=allowlist 时） |
 | `group_allow_from` | `[]` | 允许的群聊 ID（当 group_policy=allowlist 时） |
-| `split_multiline_messages` | `false` | 当为 `true` 时，将多行回复分割成多个聊天消息（旧版行为）。当为 `false` 时，将多行回复保持为一条消息，除非超过长度限制。 |
+| `split_multiline_messages` | `false` | 当为 `true` 时，将多行回复拆分为多个聊天消息（旧版行为）。当为 `false` 时，将多行回复保持为一条消息，除非超过长度限制。 |
 
 ## 访问策略
 
@@ -122,7 +122,7 @@ hermes gateway
 | 值 | 行为 |
 |-------|----------|
 | `open` | 任何人都可以向机器人发送私聊消息（默认） |
-| `allowlist` | 只有 `allow_from` 中的用户 ID 可以发送私聊消息 |
+| `allowlist` | 只有 `allow_from` 中的用户 ID 可以私聊 |
 | `disabled` | 忽略所有私聊消息 |
 | `pairing` | 配对模式（用于初始设置） |
 
@@ -138,7 +138,7 @@ WEIXIN_ALLOWED_USERS=user_id_1,user_id_2
 | 值 | 行为 |
 |-------|----------|
 | `open` | 机器人在所有群聊中响应 |
-| `allowlist` | 机器人只在 `group_allow_from` 中列出的群聊 ID 中响应 |
+| `allowlist` | 机器人仅在 `group_allow_from` 中列出的群聊 ID 中响应 |
 | `disabled` | 忽略所有群聊消息（默认） |
 
 ```bash
@@ -158,9 +158,9 @@ WEIXIN_GROUP_ALLOWED_USERS=group_id_1,group_id_2
 
 | 类型 | 处理方式 |
 |------|-----------------|
-| **图片** | 下载、AES 解密，并缓存为 JPEG。 |
-| **视频** | 下载、AES 解密，并缓存为 MP4。 |
-| **文件** | 下载、AES 解密，并缓存。保留原始文件名。 |
+| **图片** | 下载、AES 解密并缓存为 JPEG。 |
+| **视频** | 下载、AES 解密并缓存为 MP4。 |
+| **文件** | 下载、AES 解密并缓存。保留原始文件名。 |
 | **语音** | 如果有文本转录可用，则提取为文本。否则下载音频（SILK 格式）并缓存。 |
 
 **引用消息：** 来自引用（回复）消息的媒体也会被提取，因此 Agent 可以了解用户正在回复的内容。
@@ -170,7 +170,7 @@ WEIXIN_GROUP_ALLOWED_USERS=group_id_1,group_id_2
 
 - **入站：** 使用 `encrypted_query_param` URL 从 CDN 下载加密媒体，然后使用消息负载中提供的每个文件的密钥通过 AES-128-ECB 进行解密。
 - **出站：** 使用随机的 AES-128-ECB 密钥在本地加密文件，上传到 CDN，并将加密引用包含在出站消息中。
-- AES 密钥为 16 字节（128 位）。密钥可能以原始 base64 或十六进制编码形式到达——适配器处理这两种格式。
+- AES 密钥为 16 字节（128 位）。密钥可能以原始 base64 或十六进制编码形式到达——适配器会处理这两种格式。
 - 这需要 `cryptography` Python 包。
 
 无需配置——加密和解密会自动进行。
@@ -194,11 +194,11 @@ WEIXIN_GROUP_ALLOWED_USERS=group_id_1,group_id_2
 
 ## 上下文 Token 持久化
 
-iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token`。适配器维护一个基于磁盘的上下文 Token 存储：
+iLink Bot API 要求为给定对等方的每条出站消息回显一个 `context_token`。适配器维护一个基于磁盘的上下文 Token 存储：
 
 - Token 按账户+对等方保存到 `~/.hermes/weixin/accounts/<account_id>.context-tokens.json`
 - 启动时，会恢复之前保存的 Token
-- 每个入站消息都会更新该发送者的存储 Token
+- 每条入站消息都会更新该发送者的存储 Token
 - 出站消息自动包含最新的上下文 Token
 
 这确保了即使在消息网关重启后，回复也能保持连续性。
@@ -208,7 +208,7 @@ iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token
 微信个人聊天本身不支持完整的 Markdown 渲染。适配器会重新格式化内容以提高可读性：
 
 - **标题** (`# Title`) → 转换为 `【Title】`（一级）或 `**Title**`（二级及以上）
-- **表格** → 重新格式化为带标签的键值列表（例如，`- Column: Value`）
+- **表格** → 重新格式化为带标签的键值列表（例如，`- 列: 值`）
 - **代码块** → 保持原样（微信能很好地渲染这些）
 - **过多的空行** → 压缩为双换行符
 
@@ -217,18 +217,18 @@ iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token
 只要消息符合平台限制，就会作为单个聊天消息发送。只有过大的负载才会被拆分发送：
 
 - 最大消息长度：**4000 个字符**
-- 低于限制的消息即使包含多个段落或换行符也保持完整
+- 低于限制的消息即使包含多个段落或换行符也会保持完整
 - 过大的消息在逻辑边界（段落、空行、代码块）处拆分
 - 尽可能保持代码块完整（除非代码块本身超过限制，否则不会在块内拆分）
 - 过大的单个块会回退到基础适配器的截断逻辑
-- 发送多个块时，0.3 秒的块间延迟可防止微信速率限制导致消息丢失
+- 发送多个块时，0.3 秒的块间延迟可防止微信速率限制导致的丢弃
 
 ## 输入状态指示器
 
 适配器在微信客户端中显示输入状态：
 
 1. 当消息到达时，适配器通过 `getconfig` API 获取 `typing_ticket`
-2. 每个用户的输入票据缓存 10 分钟
+2. 输入票据按用户缓存 10 分钟
 3. `send_typing` 发送输入开始信号；`stop_typing` 发送输入停止信号
 4. 当 Agent 处理消息时，消息网关会自动触发输入状态指示器
 
@@ -239,7 +239,7 @@ iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token
 ### 工作原理
 
 1. **连接：** 验证凭据并启动轮询循环
-2. **轮询：** 调用带有 35 秒超时的 `getupdates`；服务器会保持请求直到消息到达或超时
+2. **轮询：** 调用带有 35 秒超时的 `getupdates`；服务器会保持请求直到消息到达或超时到期
 3. **分发：** 入站消息通过 `asyncio.create_task` 并发分发
 4. **同步缓冲区：** 一个持久的同步游标 (`get_updates_buf`) 被保存到磁盘，以便适配器在重启后能从正确的位置恢复
 
@@ -256,7 +256,7 @@ iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token
 
 ### 去重
 
-入站消息使用消息 ID 进行去重，时间窗口为 5 分钟。这可以防止在网络波动或轮询响应重叠时重复处理。
+入站消息使用消息 ID 进行去重，时间窗口为 5 分钟。这可以防止在网络故障或轮询响应重叠时重复处理。
 
 ### Token 锁
 
@@ -267,7 +267,7 @@ iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token
 | 变量 | 必需 | 默认值 | 描述 |
 |----------|----------|---------|-------------|
 | `WEIXIN_ACCOUNT_ID` | ✅ | — | iLink Bot 账户 ID（来自二维码登录） |
-| `WEIXIN_TOKEN` | ✅ | — | iLink Bot Token（从二维码登录自动保存） |
+| `WEIXIN_TOKEN` | ✅ | — | iLink Bot Token（二维码登录后自动保存） |
 | `WEIXIN_BASE_URL` | — | `https://ilinkai.weixin.qq.com` | iLink API 基础 URL |
 | `WEIXIN_CDN_BASE_URL` | — | `https://novac2c.cdn.weixin.qq.com/c2c` | 用于媒体传输的 CDN 基础 URL |
 | `WEIXIN_DM_POLICY` | — | `open` | 私信访问策略：`open`、`allowlist`、`disabled`、`pairing` |
@@ -294,5 +294,5 @@ iLink Bot API 要求每个出站消息都回显给定对等方的 `context_token
 | `Blocked unsafe URL (SSRF protection)` | 出站媒体 URL 指向私有/内部地址。只允许公共 URL |
 | 语音消息显示为文本 | 如果微信提供了转录文本，适配器会使用该文本。这是预期行为 |
 | 消息出现重复 | 适配器通过消息 ID 去重。如果看到重复，请检查是否运行了多个消息网关实例 |
-| `iLink POST ... HTTP 4xx/5xx` | iLink 服务的 API 错误。检查您的 Token 有效性和网络连接 |
+| `iLink POST ... HTTP 4xx/5xx` | 来自 iLink 服务的 API 错误。检查您的 Token 有效性和网络连接 |
 | 终端二维码不渲染 | 安装 `qrcode`：`pip install qrcode`。或者，打开二维码上方打印的 URL |

@@ -4,13 +4,13 @@ sidebar_position: 2
 
 # 配置文件：运行多个 Agent
 
-在同一台机器上运行多个独立的 Hermes Agent —— 每个 Agent 拥有自己的配置、API 密钥、记忆、会话、技能和消息网关。
+在同一台机器上运行多个独立的 Hermes Agent —— 每个 Agent 都拥有自己的配置、API 密钥、记忆、会话、技能和消息网关。
 
 ## 什么是配置文件？
 
-配置文件是一个完全隔离的 Hermes 执行环境。每个配置文件都有自己的目录，包含独立的 `config.yaml`、`.env`、`SOUL.md`、记忆、会话、技能、定时任务和状态数据库。配置文件让你可以为不同目的运行独立的 Agent —— 例如代码助手、个人机器人、研究 Agent —— 而不会产生任何交叉污染。
+配置文件是一个完全隔离的 Hermes 执行环境。每个配置文件都有自己的目录，包含其专属的 `config.yaml`、`.env`、`SOUL.md`、记忆、会话、技能、定时任务和状态数据库。配置文件让你可以为不同目的运行独立的 Agent —— 例如一个编码助手、一个个人机器人、一个研究 Agent —— 而不会产生任何交叉污染。
 
-当你创建一个配置文件时，它会自动成为自己的命令。创建一个名为 `coder` 的配置文件，你立即就拥有了 `coder chat`、`coder setup`、`coder gateway start` 等命令。
+当你创建一个配置文件时，它会自动成为一个独立的命令。创建一个名为 `coder` 的配置文件，你立即就拥有了 `coder chat`、`coder setup`、`coder gateway start` 等命令。
 
 ## 快速开始
 
@@ -20,7 +20,7 @@ coder setup                       # 配置 API 密钥和模型
 coder chat                        # 开始聊天
 ```
 
-就这样。`coder` 现在是一个完全独立的 Agent。它有自己的配置、自己的记忆、自己的一切。
+就是这样。`coder` 现在是一个完全独立的 Agent。它有自己的配置、自己的记忆、自己的一切。
 
 ## 创建配置文件
 
@@ -38,7 +38,7 @@ hermes profile create mybot
 hermes profile create work --clone
 ```
 
-将当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新配置文件中。使用相同的 API 密钥和模型，但会话和记忆是全新的。编辑 `~/.hermes/profiles/work/.env` 以使用不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以获得不同的人格。
+将你当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新的配置文件中。使用相同的 API 密钥和模型，但会话和记忆是全新的。编辑 `~/.hermes/profiles/work/.env` 以使用不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以获得不同的人格。
 
 ### 克隆所有内容 (`--clone-all`)
 
@@ -55,14 +55,14 @@ hermes profile create work --clone --clone-from coder
 ```
 
 :::tip Honcho 记忆 + 配置文件
-启用 Honcho 后，`--clone` 会自动为新配置文件创建一个专用的 AI 对等体，同时共享相同的用户工作空间。每个配置文件都会构建自己的观察和身份。详情请参阅 [Honcho -- 多 Agent / 配置文件](./features/memory-providers.md#honcho)。
+启用 Honcho 时，`--clone` 会自动为新配置文件创建一个专用的 AI 对等体，同时共享相同的用户工作空间。每个配置文件都会构建自己的观察和身份。详情请参阅 [Honcho -- 多 Agent / 配置文件](./features/memory-providers.md#honcho)。
 :::
 
 ## 使用配置文件
 
 ### 命令别名
 
-每个配置文件都会在 `~/.local/bin/<name>` 自动获得一个命令别名：
+每个配置文件都会自动在 `~/.local/bin/<name>` 处获得一个命令别名：
 
 ```bash
 coder chat                    # 与 coder Agent 聊天
@@ -94,9 +94,9 @@ hermes tools                  # 配置 coder 的工具
 hermes profile use default    # 切换回默认
 ```
 
-设置一个默认值，这样普通的 `hermes` 命令就会以该配置文件为目标。类似于 `kubectl config use-context`。
+设置一个默认配置文件，这样普通的 `hermes` 命令就会以该配置文件为目标。类似于 `kubectl config use-context`。
 
-### 了解当前位置
+### 了解当前状态
 
 CLI 始终显示哪个配置文件处于活动状态：
 
@@ -106,7 +106,7 @@ CLI 始终显示哪个配置文件处于活动状态：
 
 ## 运行消息网关
 
-每个配置文件都将其消息网关作为独立的进程运行，并拥有自己的机器人令牌：
+每个配置文件都将其自己的消息网关作为独立的进程运行，并拥有自己的机器人令牌：
 
 ```bash
 coder gateway start           # 启动 coder 的消息网关
@@ -127,7 +127,7 @@ nano ~/.hermes/profiles/assistant/.env
 
 ### 安全性：令牌锁
 
-如果两个配置文件意外使用了相同的机器人令牌，第二个消息网关将被阻止，并显示清晰的错误信息，指出冲突的配置文件名称。支持 Telegram、Discord、Slack、WhatsApp 和 Signal。
+如果两个配置文件意外使用了相同的机器人令牌，第二个消息网关将被阻止，并显示一个清晰的错误信息，指出冲突的配置文件名称。支持 Telegram、Discord、Slack、WhatsApp 和 Signal。
 
 ### 持久化服务
 
@@ -153,12 +153,12 @@ echo "You are a focused coding assistant." > ~/.hermes/profiles/coder/SOUL.md
 
 ## 更新
 
-`hermes update` 会拉取一次代码（共享），并自动将新的捆绑技能同步到**所有**配置文件：
+`hermes update` 会拉取一次代码（共享）并自动将新的捆绑技能同步到**所有**配置文件：
 
 ```bash
 hermes update
 # → 代码已更新 (12 次提交)
-# → 技能已同步：default (最新)，coder (+2 个新技能)，assistant (+2 个新技能)
+# → 技能已同步：default (已是最新), coder (+2 个新技能), assistant (+2 个新技能)
 ```
 
 用户修改过的技能永远不会被覆盖。

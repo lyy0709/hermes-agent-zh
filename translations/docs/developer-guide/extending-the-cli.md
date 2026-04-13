@@ -10,15 +10,15 @@ Hermes 在 `HermesCLI` 上暴露了受保护的扩展钩子，因此包装器 CL
 
 ## 扩展点
 
-有五个可用的扩展接缝：
+共有五个可用的扩展接缝：
 
-| 钩子 | 目的 | 何时覆盖... |
+| 钩子 | 用途 | 何时覆盖... |
 |------|---------|------------------|
 | `_get_extra_tui_widgets()` | 将小部件注入布局 | 您需要一个持久的 UI 元素（面板、状态行、迷你播放器） |
 | `_register_extra_tui_keybindings(kb, *, input_area)` | 添加快捷键 | 您需要热键（切换面板、传输控制、模态快捷键） |
 | `_build_tui_layout_children(**widgets)` | 完全控制小部件排序 | 您需要重新排序或包装现有小部件（罕见） |
-| `process_command()` | 添加自定义斜杠命令 | 您需要 `/mycommand` 处理（预先存在的钩子） |
-| `_build_tui_style_dict()` | 自定义 prompt_toolkit 样式 | 您需要自定义颜色或样式（预先存在的钩子） |
+| `process_command()` | 添加自定义斜杠命令 | 您需要处理 `/mycommand`（已存在的钩子） |
+| `_build_tui_style_dict()` | 自定义 prompt_toolkit 样式 | 您需要自定义颜色或样式（已存在的钩子） |
 
 前三个是新的受保护钩子。最后两个已经存在。
 
@@ -44,7 +44,7 @@ class MyCLI(HermesCLI):
         cli_ref = self
         return [
             Window(
-                FormattedTextControl(lambda: "📊 My custom panel content"),
+                FormattedTextControl(lambda: "📊 我的自定义面板内容"),
                 height=1,
                 filter=Condition(lambda: cli_ref._panel_visible),
             ),
@@ -62,8 +62,8 @@ class MyCLI(HermesCLI):
         """添加一个 /panel 斜杠命令。"""
         if cmd.strip().lower() == "/panel":
             self._panel_visible = not self._panel_visible
-            state = "visible" if self._panel_visible else "hidden"
-            print(f"Panel is now {state}")
+            state = "可见" if self._panel_visible else "隐藏"
+            print(f"面板现在 {state}")
             return True
         return super().process_command(cmd)
 
@@ -101,7 +101,7 @@ from prompt_toolkit.filters import Condition
 def _get_extra_tui_widgets(self):
     return [
         ConditionalContainer(
-            Window(FormattedTextControl("Status: connected"), height=1),
+            Window(FormattedTextControl("状态：已连接"), height=1),
             filter=Condition(lambda: self._show_status),
         ),
     ]
@@ -109,7 +109,7 @@ def _get_extra_tui_widgets(self):
 
 ### `_register_extra_tui_keybindings(kb, *, input_area)`
 
-在 Hermes 注册其自身的按键绑定之后，布局构建之前调用。将您的按键绑定添加到 `kb`。
+在 Hermes 注册其自身的按键绑定之后、布局构建之前调用。将您的按键绑定添加到 `kb`。
 
 ```python
 def _register_extra_tui_keybindings(self, kb, *, input_area):
@@ -137,7 +137,7 @@ def _register_extra_tui_keybindings(self, kb, *, input_area):
 
 ### `_build_tui_layout_children(**widgets)`
 
-仅在需要完全控制小部件排序时才覆盖此方法。大多数扩展应使用 `_get_extra_tui_widgets()`。
+仅在需要完全控制小部件排序时才覆盖此方法。大多数扩展应该使用 `_get_extra_tui_widgets()`。
 
 ```python
 def _build_tui_layout_children(self, *, sudo_widget, secret_widget,
@@ -176,15 +176,15 @@ def _build_tui_layout_children(self, *, sudo_widget, secret_widget,
 2. **分隔符**
 3. **额外小部件** — 来自 `_get_extra_tui_widgets()`
 4. **状态栏** — 模型、上下文百分比、已用时间
-5. **图像栏** — 附加图像计数
+5. **图像栏** — 附加图像数量
 6. **输入区域** — 用户提示词
 7. **语音状态** — 录音指示器
-8. **补全菜单** — 自动完成建议
+8. **自动完成菜单** — 自动完成建议
 
 ## 提示
 
 - **状态更改后使显示失效**：调用 `self._invalidate()` 以触发 prompt_toolkit 重绘。
 - **访问 Agent 状态**：`self.agent`、`self.model`、`self.conversation_history` 都可用。
 - **自定义样式**：覆盖 `_build_tui_style_dict()` 并为您的自定义样式类添加条目。
-- **斜杠命令**：覆盖 `process_command()`，处理您的命令，并为其他所有内容调用 `super().process_command(cmd)`。
+- **斜杠命令**：覆盖 `process_command()`，处理您的命令，并为其他所有命令调用 `super().process_command(cmd)`。
 - **除非绝对必要，否则不要覆盖 `run()`** — 扩展钩子的存在正是为了避免这种耦合。

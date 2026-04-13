@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: "工具与工具集"
-description: "Hermes Agent 工具概述 —— 可用工具有哪些、工具集如何工作以及终端后端"
+description: "Hermes Agent 工具概览 —— 可用工具有哪些、工具集如何工作以及终端后端"
 ---
 
 # 工具与工具集
@@ -50,7 +50,7 @@ hermes tools
 
 ## 终端后端
 
-终端工具可以在不同的执行环境中执行命令：
+终端工具可以在不同的执行环境中运行命令：
 
 | 后端 | 描述 | 使用场景 |
 |---------|-------------|----------|
@@ -59,7 +59,7 @@ hermes tools
 | `ssh` | 远程服务器 | 沙盒化，使 Agent 远离其自身代码 |
 | `singularity` | HPC 容器 | 集群计算、无 root 权限 |
 | `modal` | 云端执行 | 无服务器、可扩展 |
-| `daytona` | 云端沙盒工作空间 | 持久化的远程开发环境 |
+| `daytona` | 云端沙盒工作空间 | 持久的远程开发环境 |
 
 ### 配置
 
@@ -105,7 +105,7 @@ hermes config set terminal.backend singularity
 hermes config set terminal.singularity_image ~/python.sif
 ```
 
-### Modal（无服务器云端）
+### Modal（无服务器云）
 
 ```bash
 uv pip install modal
@@ -121,8 +121,8 @@ hermes config set terminal.backend modal
 terminal:
   backend: docker  # 或 singularity, modal, daytona
   container_cpu: 1              # CPU 核心数（默认：1）
-  container_memory: 5120        # 内存大小（MB）（默认：5GB）
-  container_disk: 51200         # 磁盘大小（MB）（默认：50GB）
+  container_memory: 5120        # 内存，单位 MB（默认：5GB）
+  container_disk: 51200         # 磁盘，单位 MB（默认：50GB）
   container_persistent: true    # 跨会话持久化文件系统（默认：true）
 ```
 
@@ -133,7 +133,7 @@ terminal:
 所有容器后端都运行在安全加固的环境中：
 
 - 只读根文件系统（Docker）
-- 所有 Linux 能力被丢弃
+- 丢弃所有 Linux 能力
 - 无权限提升
 - PID 限制（256 个进程）
 - 完整的命名空间隔离
@@ -158,11 +158,11 @@ process(action="kill", session_id="proc_abc123")   # 终止
 process(action="write", session_id="proc_abc123", data="y")  # 发送输入
 ```
 
-PTY 模式 (`pty=true`) 支持交互式 CLI 工具，如 Codex 和 Claude Code。
+PTY 模式 (`pty=true`) 启用交互式 CLI 工具，如 Codex 和 Claude Code。
 
 ## Sudo 支持
 
-如果命令需要 sudo，系统会提示你输入密码（在会话期间缓存）。或者，在 `~/.hermes/.env` 中设置 `SUDO_PASSWORD`。
+如果命令需要 sudo，系统会提示你输入密码（在会话期间缓存）。或者在 `~/.hermes/.env` 中设置 `SUDO_PASSWORD`。
 
 :::warning
 在消息传递平台上，如果 sudo 失败，输出会包含提示，建议将 `SUDO_PASSWORD` 添加到 `~/.hermes/.env`。

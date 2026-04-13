@@ -27,15 +27,15 @@ for r in results["data"]["web"]:
 print(summary)
 ```
 
-**沙盒中可用的工具：** `web_search`, `web_extract`, `read_file`, `write_file`, `search_files`, `patch`, `terminal`（仅前台模式）。
+**沙盒中可用的工具：** `web_search`, `web_extract`, `read_file`, `write_file`, `search_files`, `patch`, `terminal`（仅限前台）。
 
-## Agent 何时使用此功能
+## Agent 的使用时机
 
 当出现以下情况时，Agent 会使用 `execute_code`：
 
--   需要 **3 次以上工具调用**，且调用之间有处理逻辑
--   需要批量数据过滤或条件分支
--   需要对结果进行循环处理
+- **3 次以上的工具调用**，且调用之间存在处理逻辑
+- 批量数据过滤或条件分支
+- 对结果进行循环处理
 
 关键优势：中间工具结果永远不会进入上下文窗口 —— 只有最终的 `print()` 输出会返回，从而显著减少 Token 使用量。
 
@@ -144,24 +144,24 @@ code_execution:
   max_tool_calls: 50 # 每次执行的最大工具调用次数（默认：50）
 ```
 
-## 脚本内部工具调用如何工作
+## 脚本内部工具调用的工作原理
 
-当你的脚本调用像 `web_search("query")` 这样的函数时：
+当你的脚本调用类似 `web_search("query")` 的函数时：
 
-1.  调用被序列化为 JSON 并通过 Unix 域套接字发送到父进程
+1.  调用被序列化为 JSON，并通过 Unix 域套接字发送到父进程
 2.  父进程通过标准的 `handle_function_call` 处理程序进行分派
 3.  结果通过套接字发送回来
 4.  函数返回解析后的结果
 
-这意味着脚本内部的工具调用行为与普通工具调用完全相同 —— 相同的速率限制、相同的错误处理、相同的能力。唯一的限制是 `terminal()` 仅支持前台模式（无 `background` 或 `pty` 参数）。
+这意味着脚本内部的工具调用行为与普通工具调用完全相同 —— 相同的速率限制、相同的错误处理、相同的能力。唯一的限制是 `terminal()` 仅限前台使用（没有 `background` 或 `pty` 参数）。
 
 ## 错误处理
 
 当脚本失败时，Agent 会收到结构化的错误信息：
 
 -   **非零退出码**：标准错误包含在输出中，因此 Agent 可以看到完整的回溯信息
--   **超时**：脚本被终止，Agent 看到 `"Script timed out after 300s and was killed."`
--   **中断**：如果用户在执行期间发送新消息，脚本会被终止，Agent 看到 `[execution interrupted — user sent a new message]`
+-   **超时**：脚本被终止，Agent 会看到 `"Script timed out after 300s and was killed."`
+-   **中断**：如果用户在执行期间发送了新消息，脚本会被终止，Agent 会看到 `[execution interrupted — user sent a new message]`
 -   **工具调用限制**：当达到 50 次调用限制时，后续的工具调用会返回错误消息
 
 响应始终包含 `status`（success/error/timeout/interrupted）、`output`、`tool_calls_made` 和 `duration_seconds`。
@@ -178,7 +178,7 @@ code_execution:
 
 当技能在其 frontmatter 中声明 `required_environment_variables` 时，这些变量在技能加载后**会自动透传**到 `execute_code` 和 `terminal` 沙盒中。这使得技能可以使用其声明的 API 密钥，而不会削弱任意代码执行的安全性。
 
-对于非技能用例，你可以在 `config.yaml` 中明确地将变量加入允许列表：
+对于非技能用例，你可以在 `config.yaml` 中明确设置允许列表：
 
 ```yaml
 terminal:
@@ -201,9 +201,9 @@ terminal:
 | 运行构建或测试套件 | ❌ | ✅ |
 | 循环处理搜索结果 | ✅ | ❌ |
 | 交互式/后台进程 | ❌ | ✅ |
-| 需要环境变量中的 API 密钥 | ⚠️ 仅通过[透传](/docs/user-guide/security#environment-variable-passthrough) | ✅（大多数会透传） |
+| 需要在环境中使用 API 密钥 | ⚠️ 仅通过[透传](/docs/user-guide/security#environment-variable-passthrough) | ✅（大多数会透传） |
 
-**经验法则：** 当你需要以编程方式调用 Hermes 工具，并且在调用之间有逻辑处理时，使用 `execute_code`。对于运行 shell 命令、构建和进程，使用 `terminal`。
+**经验法则：** 当你需要以编程方式调用 Hermes 工具，并在调用之间加入逻辑时，使用 `execute_code`。对于运行 shell 命令、构建和进程，使用 `terminal`。
 
 ## 平台支持
 

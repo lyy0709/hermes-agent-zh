@@ -1,12 +1,12 @@
 ---
 sidebar_position: 9
 title: "上下文引擎插件"
-description: "如何构建一个上下文引擎插件来替代内置的 ContextCompressor"
+description: "如何构建一个上下文引擎插件来替换内置的 ContextCompressor"
 ---
 
 # 构建上下文引擎插件
 
-上下文引擎插件用于替代内置的 `ContextCompressor`，提供管理对话上下文的替代策略。例如，一个无损上下文管理（LCM）引擎，它构建知识有向无环图（DAG）而非进行有损的摘要。
+上下文引擎插件用于替换内置的 `ContextCompressor`，采用替代策略来管理对话上下文。例如，一个无损上下文管理（LCM）引擎，它构建知识有向无环图（DAG）而非进行有损摘要。
 
 ## 工作原理
 
@@ -67,7 +67,7 @@ class LCMEngine(ContextEngine):
 
 ### 引擎必须维护的类属性
 
-Agent 会直接读取这些属性用于显示和日志记录：
+Agent 直接读取这些属性用于显示和日志记录：
 
 ```python
 last_prompt_tokens: int = 0
@@ -91,11 +91,11 @@ compression_count: int = 0       # compress() 已运行的次数
 | `get_tool_schemas()` | 返回 `[]` | 你的引擎提供 Agent 可调用的工具（例如 `lcm_grep`）时 |
 | `handle_tool_call(name, args, **kwargs)` | 返回错误 JSON | 你实现了工具处理程序时 |
 | `should_compress_preflight(messages)` | 返回 `False` | 可以进行廉价的 API 调用前估算时 |
-| `get_status()` | 标准的 Token/阈值字典 | 有自定义指标需要暴露时 |
+| `get_status()` | 标准的 token/threshold 字典 | 有自定义指标需要暴露时 |
 
 ## 引擎工具
 
-上下文引擎可以暴露供 Agent 直接调用的工具。从 `get_tool_schemas()` 返回模式，并在 `handle_tool_call()` 中处理调用：
+上下文引擎可以暴露 Agent 直接调用的工具。通过 `get_tool_schemas()` 返回模式，并在 `handle_tool_call()` 中处理调用：
 
 ```python
 def get_tool_schemas(self):
@@ -118,7 +118,7 @@ def handle_tool_call(self, name, args, **kwargs):
     return json.dumps({"error": f"未知工具: {name}"})
 ```
 
-引擎工具在启动时被注入到 Agent 的工具列表中，并自动分发——无需注册表注册。
+引擎工具在启动时被注入到 Agent 的工具列表中，并自动分发——无需在注册表中注册。
 
 ## 注册
 
@@ -136,7 +136,7 @@ def register(ctx):
     ctx.register_context_engine(engine)
 ```
 
-只能注册一个引擎。第二个尝试注册的插件会被拒绝并发出警告。
+只能注册一个引擎。第二个尝试注册的插件将被拒绝并发出警告。
 
 ## 生命周期
 
@@ -160,7 +160,7 @@ context:
   engine: "lcm"   # 必须与你的引擎的 name 属性匹配
 ```
 
-`compression` 配置块（`compression.threshold`、`compression.protect_last_n` 等）是内置 `ContextCompressor` 特有的。你的引擎如果需要，应定义自己的配置格式，在初始化时从 `config.yaml` 读取。
+`compression` 配置块（`compression.threshold`、`compression.protect_last_n` 等）是内置 `ContextCompressor` 特有的。你的引擎如果需要，应定义自己的配置格式，并在初始化时从 `config.yaml` 读取。
 
 ## 测试
 
@@ -180,7 +180,7 @@ def test_compress_returns_valid_messages():
     assert all("role" in m for m in result)
 ```
 
-完整的抽象基类契约测试套件请参见 `tests/agent/test_context_engine.py`。
+完整的抽象基类合约测试套件请参见 `tests/agent/test_context_engine.py`。
 
 ## 另请参阅
 

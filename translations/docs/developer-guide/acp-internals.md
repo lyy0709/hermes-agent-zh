@@ -41,7 +41,7 @@ Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 职责：
 
 - 初始化 / 认证
-- 新建/加载/恢复/分叉/列出/取消会话方法
+- 新建/加载/恢复/分叉/列出/取消会话的方法
 - 提示词执行
 - 会话模型切换
 - 将同步 AIAgent 回调连接到 ACP 异步通知
@@ -80,7 +80,7 @@ Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 - `step_callback`
 - `message_callback`
 
-因为 `AIAgent` 在 worker 线程中运行，而 ACP I/O 位于主事件循环中，桥接使用：
+因为 `AIAgent` 在 worker 线程中运行，而 ACP I/O 位于主事件循环上，所以桥接使用：
 
 ```python
 asyncio.run_coroutine_threadsafe(...)
@@ -90,7 +90,7 @@ asyncio.run_coroutine_threadsafe(...)
 
 `acp_adapter/permissions.py` 将危险的终端审批提示适配为 ACP 权限请求。
 
-映射：
+映射关系：
 
 - `allow_once` -> Hermes `once`
 - `allow_always` -> Hermes `always`
@@ -100,7 +100,7 @@ asyncio.run_coroutine_threadsafe(...)
 
 ### 工具渲染辅助函数
 
-`acp_adapter/tools.py` 将 Hermes 工具映射到 ACP 工具种类，并构建面向编辑器的内容。
+`acp_adapter/tools.py` 将 Hermes 工具映射到 ACP 工具类型，并构建面向编辑器的内容。
 
 示例：
 
@@ -128,7 +128,7 @@ prompt(..., session_id)
 
 ### 取消
 
-`cancel(session_id)`:
+`cancel(session_id)`：
 
 - 设置会话取消事件
 - 在可用时调用 `agent.interrupt()`
@@ -136,7 +136,7 @@ prompt(..., session_id)
 
 ### 分叉
 
-`fork_session()` 将消息历史深度复制到一个新的活跃会话中，保留对话状态，同时为分叉提供自己的会话 ID 和 cwd。
+`fork_session()` 将消息历史记录深拷贝到一个新的活跃会话中，保留对话状态，同时为分叉提供自己的会话 ID 和 cwd。
 
 ## 提供商/认证行为
 
@@ -147,7 +147,7 @@ ACP 不实现自己的认证存储。
 - `acp_adapter/auth.py`
 - `hermes_cli/runtime_provider.py`
 
-因此 ACP 会通告并使用当前配置的 Hermes 提供商/凭证。
+因此 ACP 会通告并使用当前配置的 Hermes 提供商/凭据。
 
 ## 工作目录绑定
 
@@ -157,7 +157,7 @@ ACP 会话携带一个编辑器 cwd。
 
 ## 重复的同名工具调用
 
-事件桥接按工具名称 FIFO 跟踪工具 ID，而不仅仅是每个名称一个 ID。这对于以下情况很重要：
+事件桥接按工具名称以 FIFO 方式跟踪工具 ID，而不仅仅是每个名称一个 ID。这对于以下情况很重要：
 
 - 并行的同名调用
 - 一个步骤中重复的同名调用
@@ -166,7 +166,7 @@ ACP 会话携带一个编辑器 cwd。
 
 ## 审批回调恢复
 
-ACP 在提示词执行期间临时在终端工具上安装一个审批回调，然后在之后恢复之前的回调。这避免了永远全局安装 ACP 会话特定的审批处理程序。
+ACP 在提示词执行期间临时在终端工具上安装一个审批回调，然后在之后恢复之前的回调。这避免了将 ACP 会话特定的审批处理程序永久地全局安装。
 
 ## 当前限制
 

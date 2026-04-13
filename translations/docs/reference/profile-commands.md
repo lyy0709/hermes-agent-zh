@@ -32,7 +32,7 @@ hermes profile <子命令>
 hermes profile list
 ```
 
-列出所有配置文件。当前活动的配置文件会用 `*` 标记。
+列出所有配置文件。当前活动的配置文件用 `*` 标记。
 
 **示例：**
 
@@ -245,7 +245,7 @@ hermes -p <名称> <命令> [选项]
 hermes --profile <名称> <命令> [选项]
 ```
 
-全局标志，用于在特定配置文件下运行任何 Hermes 命令，而无需更改粘性默认值。这将在命令执行期间覆盖活动配置文件。
+全局标志，用于在特定配置文件下运行任何 Hermes 命令，而无需更改粘性默认值。此操作会在命令执行期间覆盖活动配置文件。
 
 | 选项 | 描述 |
 |--------|-------------|
@@ -283,7 +283,7 @@ hermes completion zsh >> ~/.zshrc
 source ~/.bashrc
 ```
 
-安装后，Tab 键补全适用于：
+安装后，Tab 补全适用于：
 - `hermes profile <TAB>` — 子命令（list, use, create 等）
 - `hermes profile use <TAB>` — 配置文件名称
 - `hermes -p <TAB>` — 配置文件名称

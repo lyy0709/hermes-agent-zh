@@ -50,7 +50,7 @@ docker run -it --rm \
 
 ## 持久化卷
 
-`/opt/data` 卷是所有 Hermes 状态的单一事实来源。它映射到宿主机上的 `~/.hermes/` 目录，包含：
+`/opt/data` 卷是所有 Hermes 状态的单一事实来源。它映射到宿主机的 `~/.hermes/` 目录，包含：
 
 | 路径 | 内容 |
 |------|----------|
@@ -118,10 +118,10 @@ Hermes 容器需要适度的资源。推荐的最低配置：
 | 资源 | 最低要求 | 推荐配置 |
 |----------|---------|-------------|
 | 内存 | 1 GB | 2–4 GB |
-| CPU | 1 核心 | 2 核心 |
+| CPU | 1 核 | 2 核 |
 | 磁盘（数据卷） | 500 MB | 2+ GB（随会话/技能增长） |
 
-浏览器自动化（Playwright/Chromium）是最耗内存的功能。如果你不需要浏览器工具，1 GB 就足够了。如果启用了浏览器工具，请至少分配 2 GB。
+浏览器自动化（Playwright/Chromium）是最耗内存的功能。如果不需要浏览器工具，1 GB 就足够了。如果启用了浏览器工具，请至少分配 2 GB。
 
 在 Docker 中设置限制：
 
@@ -136,7 +136,7 @@ docker run -d \
 
 ## Dockerfile 的作用
 
-官方镜像基于 `debian:13.4`，包含：
+官方镜像基于 `debian:13.4` 并包含：
 
 - Python 3 及所有 Hermes 依赖项 (`pip install -e ".[all]"`)
 - Node.js + npm（用于浏览器自动化和 WhatsApp 桥接）
@@ -145,7 +145,7 @@ docker run -d \
 - WhatsApp 桥接 (`scripts/whatsapp-bridge/`)
 
 入口点脚本 (`docker/entrypoint.sh`) 在首次运行时引导数据卷：
-- 创建目录结构 (`sessions/`、`memories/`、`skills/` 等)
+- 创建目录结构 (`sessions/`, `memories/`, `skills/` 等)
 - 如果不存在 `.env`，则复制 `.env.example` → `.env`
 - 如果缺少 `config.yaml`，则复制默认配置
 - 如果缺少 `SOUL.md`，则复制默认文件
@@ -175,7 +175,7 @@ docker compose up -d
 
 ## 技能和凭证文件
 
-当使用 Docker 作为执行环境时（不是上述方法，而是当 Agent 在 Docker 沙盒内运行命令时），Hermes 会自动将技能目录 (`~/.hermes/skills/`) 和技能声明的任何凭证文件作为只读卷绑定挂载到容器中。这意味着技能脚本、模板和引用在沙盒内可用，无需手动配置。
+当使用 Docker 作为执行环境时（不是上述方法，而是指 Agent 在 Docker 沙盒内运行命令时），Hermes 会自动将技能目录 (`~/.hermes/skills/`) 和技能声明的任何凭证文件作为只读卷绑定挂载到容器中。这意味着技能脚本、模板和引用在沙盒内可用，无需手动配置。
 
 SSH 和 Modal 后端也会发生相同的同步 — 技能和凭证文件会在每个命令执行前通过 rsync 或 Modal 挂载 API 上传。
 
@@ -207,7 +207,7 @@ docker run -d \
   nousresearch/hermes-agent gateway run
 ```
 
-### 网络问题后网关无法重新连接
+### 网络问题后网关未重新连接
 
 `--restart unless-stopped` 标志处理大多数瞬时故障。如果网关卡住，请重启容器：
 

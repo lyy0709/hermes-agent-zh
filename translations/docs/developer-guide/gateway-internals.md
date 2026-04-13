@@ -1,10 +1,10 @@
 ---
 sidebar_position: 7
-title: "消息网关内部机制"
+title: "消息网关内部原理"
 description: "消息网关如何启动、授权用户、路由会话和传递消息"
 ---
 
-# 消息网关内部机制
+# 消息网关内部原理
 
 消息网关是一个长期运行的进程，通过统一的架构将 Hermes 连接到 14 个以上的外部消息平台。
 
@@ -16,7 +16,7 @@ description: "消息网关如何启动、授权用户、路由会话和传递消
 | `gateway/session.py` | `SessionStore` — 对话持久化和会话键构造 |
 | `gateway/delivery.py` | 向目标平台/渠道发送出站消息 |
 | `gateway/pairing.py` | 用于用户授权的私聊配对流程 |
-| `gateway/channel_directory.py` | 为定时任务投递将聊天 ID 映射为人类可读的名称 |
+| `gateway/channel_directory.py` | 将聊天 ID 映射为人类可读的名称，用于定时任务交付 |
 | `gateway/hooks.py` | 钩子发现、加载和生命周期事件分发 |
 | `gateway/mirror.py` | 为 `send_message` 实现跨会话消息镜像 |
 | `gateway/status.py` | 用于配置文件作用域网关实例的 Token 锁管理 |
@@ -55,7 +55,7 @@ description: "消息网关如何启动、授权用户、路由会话和传递消
 
 1. **平台适配器** 接收原始事件，将其规范化为 `MessageEvent`
 2. **基础适配器** 检查活动会话守卫：
-   - 如果该会话的 Agent 正在运行 → 将消息加入队列，设置中断事件
+   - 如果此会话的 Agent 正在运行 → 将消息排队，设置中断事件
    - 如果是 `/approve`、`/deny`、`/stop` → 绕过守卫（内联分发）
 3. **GatewayRunner._handle_message()** 接收事件：
    - 通过 `_session_key_for_source()` 解析会话键（格式：`agent:main:{platform}:{chat_type}:{chat_id}`）
@@ -79,11 +79,11 @@ agent:main:{platform}:{chat_type}:{chat_id}
 
 ### 两级消息守卫
 
-当 Agent 正在积极运行时，传入的消息会经过两个连续的守卫：
+当 Agent 正在主动运行时，传入的消息会经过两个连续的守卫：
 
-1. **第 1 级 — 基础适配器** (`gateway/platforms/base.py`)：检查 `_active_sessions`。如果会话处于活动状态，则将消息加入 `_pending_messages` 队列并设置中断事件。这会在消息*到达*网关运行器之前捕获它们。
+1. **第 1 级 — 基础适配器** (`gateway/platforms/base.py`)：检查 `_active_sessions`。如果会话处于活动状态，则将消息排队到 `_pending_messages` 中并设置中断事件。这会在消息*到达*网关运行器之前捕获它们。
 
-2. **第 2 级 — 网关运行器** (`gateway/run.py`)：检查 `_running_agents`。拦截特定命令（`/stop`、`/new`、`/queue`、`/status`、`/approve`、`/deny`）并将其路由到适当位置。其他所有内容都会触发 `running_agent.interrupt()`。
+2. **第 2 级 — 网关运行器** (`gateway/run.py`)：检查 `_running_agents`。拦截特定命令（`/stop`、`/new`、`/queue`、`/status`、`/approve`、`/deny`）并将其路由到适当的位置。其他所有消息都会触发 `running_agent.interrupt()`。
 
 当 Agent 被阻塞时必须到达运行器的命令（如 `/approve`）通过 `await self._message_handler(event)` **内联**分发 — 它们绕过后台任务系统以避免竞态条件。
 
@@ -150,7 +150,7 @@ gateway/platforms/
 ├── base.py              # BaseAdapter — 所有平台的共享逻辑
 ├── telegram.py          # Telegram Bot API（长轮询或 webhook）
 ├── discord.py           # 通过 discord.py 的 Discord 机器人
-├── slack.py             # Slack Socket 模式
+├── slack.py             # Slack Socket Mode
 ├── whatsapp.py          # WhatsApp Business Cloud API
 ├── signal.py            # 通过 signal-cli REST API 的 Signal
 ├── matrix.py            # 通过 mautrix 的 Matrix（可选 E2EE）
@@ -169,23 +169,23 @@ gateway/platforms/
 
 适配器实现了一个通用接口：
 - `connect()` / `disconnect()` — 生命周期管理
-- `send_message()` — 出站消息投递
+- `send_message()` — 出站消息传递
 - `on_message()` — 入站消息规范化 → `MessageEvent`
 
 ### Token 锁
 
 使用唯一凭据连接的适配器在 `connect()` 中调用 `acquire_scoped_lock()`，在 `disconnect()` 中调用 `release_scoped_lock()`。这可以防止两个配置文件同时使用同一个机器人令牌。
 
-## 投递路径
+## 交付路径
 
-出站投递 (`gateway/delivery.py`) 处理：
+出站交付 (`gateway/delivery.py`) 处理：
 
 - **直接回复** — 将响应发送回原始聊天
-- **主频道投递** — 将定时任务输出和后台结果路由到配置的主频道
-- **显式目标投递** — `send_message` 工具指定 `telegram:-1001234567890`
-- **跨平台投递** — 投递到与原始消息不同的平台
+- **主频道交付** — 将定时任务输出和后台结果路由到配置的主频道
+- **显式目标交付** — `send_message` 工具指定 `telegram:-1001234567890`
+- **跨平台交付** — 交付到与原始消息不同的平台
 
-定时任务投递**不会**镜像到网关会话历史记录中 — 它们仅存在于自己的定时任务会话中。这是一个深思熟虑的设计选择，以避免消息交替违规。
+定时任务交付**不**镜像到网关会话历史记录中 — 它们仅存在于自己的定时任务会话中。这是一个深思熟虑的设计选择，以避免消息交替违规。
 
 ## 钩子
 
@@ -241,7 +241,7 @@ AIAgent._invoke_tool()
 
 ## 进程管理
 
-网关作为一个长期存活的进程运行，通过以下方式管理：
+网关作为一个长期运行的进程运行，通过以下方式管理：
 
 - `hermes gateway start` / `hermes gateway stop` — 手动控制
 - `systemctl` (Linux) 或 `launchctl` (macOS) — 服务管理
@@ -252,7 +252,7 @@ AIAgent._invoke_tool()
 ## 相关文档
 
 - [会话存储](./session-storage.md)
-- [定时任务内部机制](./cron-internals.md)
-- [ACP 内部机制](./acp-internals.md)
-- [Agent 循环内部机制](./agent-loop.md)
+- [定时任务内部原理](./cron-internals.md)
+- [ACP 内部原理](./acp-internals.md)
+- [Agent 循环内部原理](./agent-loop.md)
 - [消息网关（用户指南）](/docs/user-guide/messaging)

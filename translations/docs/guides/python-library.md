@@ -54,7 +54,7 @@ print(response)
 `chat()` 在内部处理完整的对话循环——工具调用、重试等所有操作——并仅返回最终的文本响应。
 
 :::warning
-将 Hermes 嵌入到您自己的代码中时，请始终设置 `quiet_mode=True`。如果不设置，Agent 会打印 CLI 加载动画、进度指示器和其他终端输出，这会干扰您应用程序的输出。
+将 Hermes 嵌入到您自己的代码中时，请始终设置 `quiet_mode=True`。如果不设置，Agent 会打印 CLI 旋转器、进度指示器和其他终端输出，这会干扰您应用程序的输出。
 :::
 
 ---
@@ -96,7 +96,7 @@ result = agent.run_conversation(
 
 ## 配置工具
 
-使用 `enabled_toolsets` 或 `disabled_toolsets` 控制 Agent 可以访问哪些工具集：
+使用 `enabled_toolsets` 或 `disabled_toolsets` 来控制 Agent 可以访问哪些工具集：
 
 ```python
 # 仅启用 Web 工具（浏览、搜索）
@@ -106,8 +106,8 @@ agent = AIAgent(
     quiet_mode=True,
 )
 
-# 启用除终端访问外的所有功能
-agent = AIAgent(
+# 启用除终端访问之外的所有功能
+agent = AIgent(
     model="anthropic/claude-sonnet-4",
     disabled_toolsets=["terminal"],
     quiet_mode=True,
@@ -122,7 +122,7 @@ agent = AIAgent(
 
 ## 多轮对话
 
-通过将消息历史记录传回，在多个轮次中维护对话状态：
+通过将消息历史记录传回，可以在多轮对话中保持对话状态：
 
 ```python
 agent = AIAgent(
@@ -170,7 +170,7 @@ agent.chat("Write a Python function to sort a list")
 使用 `ephemeral_system_prompt` 设置自定义系统提示词，以指导 Agent 的行为，但**不会**保存到轨迹文件中（保持训练数据干净）：
 
 ```python
-agent = AIgent(
+agent = AIAgent(
     model="anthropic/claude-sonnet-4",
     ephemeral_system_prompt="You are a SQL expert. Only answer database questions.",
     quiet_mode=True,
@@ -180,7 +180,7 @@ response = agent.chat("How do I write a JOIN query?")
 print(response)
 ```
 
-这对于构建专门的 Agent 非常理想——代码审查员、文档编写员、SQL 助手——所有这些都使用相同的基础工具。
+这对于构建专门的 Agent 非常理想——代码审查员、文档编写器、SQL 助手——所有这些都使用相同的基础工具。
 
 ---
 
@@ -329,8 +329,8 @@ print(review)
 
 :::tip
 - 如果您不希望从工作目录加载 `AGENTS.md` 文件到系统提示词中，请设置 **`skip_context_files=True`**。
-- 设置 **`skip_memory=True`** 以防止 Agent 读取或写入持久化记忆——推荐用于无状态的 API 端点。
-- `platform` 参数（例如 `"discord"`、`"telegram"`）会注入特定于平台的格式化提示，以便 Agent 调整其输出样式。
+- 设置 **`skip_memory=True`** 以防止 Agent 读取或写入持久化记忆——推荐用于无状态 API 端点。
+- `platform` 参数（例如 `"discord"`、`"telegram"`）会注入平台特定的格式化提示，以便 Agent 调整其输出样式。
 :::
 
 :::warning

@@ -6,7 +6,7 @@ description: "在 Linux、macOS、WSL2 或通过 Termux 在 Android 上安装 He
 
 # 安装
 
-使用一行命令安装程序在两分钟内启动并运行 Hermes Agent，或按照手动步骤以获得完全控制。
+使用一行命令安装程序，两分钟内即可启动并运行 Hermes Agent，或者按照手动步骤以获得完全控制。
 
 ## 快速安装
 
@@ -124,7 +124,7 @@ export VIRTUAL_ENV="$(pwd)/venv"
 uv pip install -e ".[all]"
 ```
 
-如果你只想要核心 Agent（无 Telegram/Discord/cron 支持）：
+如果你只想要核心 Agent（没有 Telegram/Discord/cron 支持）：
 ```bash
 uv pip install -e "."
 ```
@@ -136,7 +136,7 @@ uv pip install -e "."
 |-------|-------------|-----------------|
 | `all` | 以下所有内容 | `uv pip install -e ".[all]"` |
 | `messaging` | Telegram 和 Discord 消息网关 | `uv pip install -e ".[messaging]"` |
-| `cron` | 用于计划任务的 Cron 表达式解析 | `uv pip install -e ".[cron]"` |
+| `cron` | 用于定时任务的 Cron 表达式解析 | `uv pip install -e ".[cron]"` |
 | `cli` | 设置向导的终端菜单 UI | `uv pip install -e ".[cli]"` |
 | `modal` | Modal 云执行后端 | `uv pip install -e ".[modal]"` |
 | `tts-premium` | ElevenLabs 高级语音 | `uv pip install -e ".[tts-premium]"` |
@@ -153,7 +153,7 @@ uv pip install -e "."
 你可以组合额外包：`uv pip install -e ".[messaging,cron]"`
 
 :::tip Termux 用户
-`.[all]` 目前在 Android 上不可用，因为 `voice` 额外包会拉取 `faster-whisper`，而它依赖于 `ctranslate2` wheels，这些 wheels 没有为 Android 发布。请使用 `.[termux]` 作为经过测试的移动安装路径，然后根据需要仅添加单个额外包。
+`.[all]` 目前在 Android 上不可用，因为 `voice` 额外包会拉取 `faster-whisper`，而它依赖于 `ctranslate2` wheel，这些 wheel 没有为 Android 发布。请使用 `.[termux]` 作为经过测试的移动安装路径，然后根据需要仅添加单个额外包。
 :::
 
 </details>
@@ -169,7 +169,7 @@ uv pip install -e "./tinker-atropos"
 
 ### 步骤 5：安装 Node.js 依赖项（可选）
 
-仅当需要**浏览器自动化**（基于 Browserbase）和 **WhatsApp 桥接**时才需要：
+仅用于**浏览器自动化**（基于 Browserbase）和 **WhatsApp 桥接**：
 
 ```bash
 npm install
@@ -196,7 +196,7 @@ touch ~/.hermes/.env
 # 必需 —— 至少一个 LLM 提供商：
 OPENROUTER_API_KEY=sk-or-v1-your-key-here
 
-# 可选 —— 启用其他工具：
+# 可选 —— 启用额外工具：
 FIRECRAWL_API_KEY=fc-your-key          # 网络搜索和抓取（或自托管，见文档）
 FAL_KEY=your-fal-key                   # 图像生成（FLUX）
 ```
@@ -245,7 +245,7 @@ hermes chat -q "Hello! What tools do you have available?"
 
 ## 快速参考：手动安装（精简版）
 
-适用于只需要命令的用户：
+适用于只想看命令的人：
 
 ```bash
 # 安装 uv
@@ -286,7 +286,7 @@ hermes
 | 问题 | 解决方案 |
 |---------|----------|
 | `hermes: command not found` | 重新加载你的 shell（`source ~/.bashrc`）或检查 PATH |
-| `API key not set` | 运行 `hermes model` 来配置你的提供商，或 `hermes config set OPENROUTER_API_KEY your_key` |
+| `API key not set` | 运行 `hermes model` 配置你的提供商，或 `hermes config set OPENROUTER_API_KEY your_key` |
 | 更新后缺少配置 | 运行 `hermes config check` 然后 `hermes config migrate` |
 
-要获取更多诊断信息，请运行 `hermes doctor` —— 它会确切地告诉你缺少什么以及如何修复。
+如需更多诊断，请运行 `hermes doctor` —— 它会确切地告诉你缺少什么以及如何修复。

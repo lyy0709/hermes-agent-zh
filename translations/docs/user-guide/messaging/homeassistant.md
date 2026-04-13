@@ -44,7 +44,7 @@ HASS_URL=http://192.168.1.100:8123
 hermes gateway
 ```
 
-Home Assistant 将作为一个已连接平台出现，与其他任何消息平台（Telegram、Discord 等）并列。
+Home Assistant 将与其他任何消息平台（Telegram、Discord 等）一起显示为已连接的平台。
 
 ## 可用工具
 
@@ -55,8 +55,8 @@ Hermes Agent 注册了四个用于智能家居控制的工具：
 列出 Home Assistant 实体，可按域或区域筛选。
 
 **参数：**
-- `domain` *（可选）* — 按实体域筛选：`light`、`switch`、`climate`、`sensor`、`binary_sensor`、`cover`、`fan`、`media_player` 等。
-- `area` *（可选）* — 按区域/房间名称筛选（匹配友好名称）：`living room`、`kitchen`、`bedroom` 等。
+- `domain` *(可选)* — 按实体域筛选：`light`、`switch`、`climate`、`sensor`、`binary_sensor`、`cover`、`fan`、`media_player` 等。
+- `area` *(可选)* — 按区域/房间名称筛选（匹配友好名称）：`living room`、`kitchen`、`bedroom` 等。
 
 **示例：**
 ```
@@ -70,7 +70,7 @@ Hermes Agent 注册了四个用于智能家居控制的工具：
 获取单个实体的详细状态，包括所有属性（亮度、颜色、温度设定点、传感器读数等）。
 
 **参数：**
-- `entity_id` *（必需）* — 要查询的实体，例如 `light.living_room`、`climate.thermostat`、`sensor.temperature`
+- `entity_id` *(必需)* — 要查询的实体，例如 `light.living_room`、`climate.thermostat`、`sensor.temperature`
 
 **示例：**
 ```
@@ -84,7 +84,7 @@ climate.thermostat 的当前状态是什么？
 列出可用于设备控制的服务（操作）。显示每种设备类型可以执行哪些操作以及它们接受哪些参数。
 
 **参数：**
-- `domain` *（可选）* — 按域筛选，例如 `light`、`climate`、`switch`
+- `domain` *(可选)* — 按域筛选，例如 `light`、`climate`、`switch`
 
 **示例：**
 ```
@@ -96,10 +96,10 @@ climate 设备有哪些可用服务？
 调用 Home Assistant 服务来控制设备。
 
 **参数：**
-- `domain` *（必需）* — 服务域：`light`、`switch`、`climate`、`cover`、`media_player`、`fan`、`scene`、`script`
-- `service` *（必需）* — 服务名称：`turn_on`、`turn_off`、`toggle`、`set_temperature`、`set_hvac_mode`、`open_cover`、`close_cover`、`set_volume_level`
-- `entity_id` *（可选）* — 目标实体，例如 `light.living_room`
-- `data` *（可选）* — 作为 JSON 对象的附加参数
+- `domain` *(必需)* — 服务域：`light`、`switch`、`climate`、`cover`、`media_player`、`fan`、`scene`、`script`
+- `service` *(必需)* — 服务名称：`turn_on`、`turn_off`、`toggle`、`set_temperature`、`set_hvac_mode`、`open_cover`、`close_cover`、`set_volume_level`
+- `entity_id` *(可选)* — 目标实体，例如 `light.living_room`
+- `data` *(可选)* — 作为 JSON 对象的附加参数
 
 **示例：**
 
@@ -109,7 +109,7 @@ climate 设备有哪些可用服务？
 ```
 
 ```
-将恒温器设置为加热模式，22度
+将恒温器设置为制热模式，温度 22 度
 → ha_call_service(domain="climate", service="set_temperature",
     entity_id="climate.thermostat", data={"temperature": 22, "hvac_mode": "heat"})
 ```
@@ -153,14 +153,14 @@ platforms:
 
 | 设置 | 默认值 | 描述 |
 |---------|---------|-------------|
-| `watch_domains` | *（无）* | 仅监视这些实体域（例如 `climate`、`light`、`binary_sensor`） |
-| `watch_entities` | *（无）* | 仅监视这些特定的实体 ID |
+| `watch_domains` | *(无)* | 仅监视这些实体域（例如 `climate`、`light`、`binary_sensor`） |
+| `watch_entities` | *(无)* | 仅监视这些特定的实体 ID |
 | `watch_all` | `false` | 设置为 `true` 以接收**所有**状态更改（不建议用于大多数设置） |
-| `ignore_entities` | *（无）* | 始终忽略这些实体（在域/实体筛选器之前应用） |
+| `ignore_entities` | *(无)* | 始终忽略这些实体（在域/实体筛选器之前应用） |
 | `cooldown_seconds` | `30` | 同一实体事件之间的最小秒数间隔 |
 
 :::tip
-从一个集中的域集合开始 — `climate`、`binary_sensor` 和 `alarm_control_panel` 涵盖了最有用的自动化场景。根据需要添加更多。使用 `ignore_entities` 来抑制嘈杂的传感器，如 CPU 温度或运行时间计数器。
+从一个集中的域集合开始 — `climate`、`binary_sensor` 和 `alarm_control_panel` 涵盖了最有用的自动化。根据需要添加更多。使用 `ignore_entities` 来抑制嘈杂的传感器，如 CPU 温度或运行时间计数器。
 :::
 
 ### 事件格式化
@@ -174,7 +174,7 @@ platforms:
 | `binary_sensor` | "已触发" / "已清除" |
 | `light`、`switch`、`fan` | "已打开" / "已关闭" |
 | `alarm_control_panel` | "警报状态从 'armed_away' 更改为 'triggered'" |
-| *（其他）* | "从 'old' 更改为 'new'" |
+| *(其他)* | "从 'old' 更改为 'new'" |
 
 ### Agent 响应
 
@@ -182,10 +182,10 @@ platforms:
 
 ### 连接管理
 
-- **WebSocket** 连接，带有 30 秒心跳，用于实时事件
-- **自动重连**，采用退避策略：5s → 10s → 30s → 60s
+- **WebSocket** 带有 30 秒心跳，用于实时事件
+- **自动重连** 并采用退避策略：5s → 10s → 30s → 60s
 - **REST API** 用于出站通知（单独的会话以避免 WebSocket 冲突）
-- **授权** — HA 事件始终经过授权（不需要用户允许列表，因为 `HASS_TOKEN` 对连接进行身份验证）
+- **授权** — HA 事件始终经过授权（无需用户允许列表，因为 `HASS_TOKEN` 对连接进行身份验证）
 
 ## 安全性
 
@@ -208,10 +208,10 @@ Home Assistant 工具强制执行安全限制：
 
 ## 自动化示例
 
-### 早晨例程
+### 早晨例行程序
 
 ```
-用户：启动我的早晨例程
+用户：开始我的早晨例行程序
 
 Agent：
 1. ha_call_service(domain="light", service="turn_on",
@@ -242,7 +242,7 @@ Agent：
 当作为消息网关平台连接时，Agent 可以对事件做出反应：
 
 ```
-[Home Assistant] 前门：已触发（之前已清除）
+[Home Assistant] 前门：已触发（之前为已清除）
 
 Agent 自动：
 1. ha_get_state(entity_id="binary_sensor.front_door")

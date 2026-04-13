@@ -1,26 +1,26 @@
 ---
 sidebar_position: 11
 title: "使用 Cron 自动化一切"
-description: "使用 Hermes cron 的现实世界自动化模式 —— 监控、报告、流水线和多技能工作流"
+description: "使用 Hermes 定时任务的真实自动化模式——监控、报告、流水线和多技能工作流"
 ---
 
 # 使用 Cron 自动化一切
 
-[每日简报机器人教程](/docs/guides/daily-briefing-bot) 涵盖了基础知识。本指南更进一步 —— 介绍五种你可以适应自己工作流的现实世界自动化模式。
+[每日简报机器人教程](/docs/guides/daily-briefing-bot) 涵盖了基础知识。本指南更进一步——介绍五种真实世界的自动化模式，你可以将其适配到自己的工作流中。
 
-完整功能参考，请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。
+完整的功能参考，请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。
 
 :::info 关键概念
-Cron 任务在全新的 Agent 会话中运行，没有你当前聊天的记忆。提示词必须是**完全自包含的** —— 包含 Agent 需要知道的一切。
+定时任务在全新的 Agent 会话中运行，没有你当前聊天的记忆。提示词必须是**完全自包含的**——包含 Agent 需要知道的一切。
 :::
 
 ---
 
 ## 模式 1：网站变更监控
 
-监控 URL 的变更，仅在发生更改时收到通知。
+监控一个 URL 的变更，仅在内容发生变化时收到通知。
 
-这里的 `script` 参数是秘密武器。每次执行前都会运行一个 Python 脚本，其标准输出将成为 Agent 的上下文。脚本处理机械性工作（获取、对比）；Agent 处理推理（这个变更有趣吗？）。
+这里的 `script` 参数是秘密武器。每次执行前都会运行一个 Python 脚本，其标准输出会成为 Agent 的上下文。脚本处理机械性工作（获取、对比）；Agent 处理推理（这个变化有趣吗？）。
 
 创建监控脚本：
 
@@ -34,22 +34,22 @@ import hashlib, json, os, urllib.request
 URL = "https://example.com/pricing"
 STATE_FILE = os.path.expanduser("~/.hermes/scripts/.watch-site-state.json")
 
-# Fetch current content
+# 获取当前内容
 req = urllib.request.Request(URL, headers={"User-Agent": "Hermes-Monitor/1.0"})
 content = urllib.request.urlopen(req, timeout=30).read().decode()
 current_hash = hashlib.sha256(content.encode()).hexdigest()
 
-# Load previous state
+# 加载之前的状态
 prev_hash = None
 if os.path.exists(STATE_FILE):
     with open(STATE_FILE) as f:
         prev_hash = json.load(f).get("hash")
 
-# Save current state
+# 保存当前状态
 with open(STATE_FILE, "w") as f:
     json.dump({"hash": current_hash, "url": URL}, f)
 
-# Output for the agent
+# 输出给 Agent
 if prev_hash and prev_hash != current_hash:
     print(f"CHANGE DETECTED on {URL}")
     print(f"Previous hash: {prev_hash}")
@@ -59,21 +59,21 @@ else:
     print("NO_CHANGE")
 ```
 
-设置 cron 任务：
+设置定时任务：
 
 ```bash
 /cron add "every 1h" "If the script output says CHANGE DETECTED, summarize what changed on the page and why it might matter. If it says NO_CHANGE, respond with just [SILENT]." --script ~/.hermes/scripts/watch-site.py --name "Pricing monitor" --deliver telegram
 ```
 
 :::tip [SILENT] 技巧
-当 Agent 的最终响应包含 `[SILENT]` 时，将抑制消息发送。这意味着你只在实际发生某些事情时收到通知 —— 在安静时段没有垃圾信息。
+当 Agent 的最终响应包含 `[SILENT]` 时，将抑制消息投递。这意味着你只在实际发生事情时收到通知——在安静时段没有垃圾信息。
 :::
 
 ---
 
 ## 模式 2：每周报告
 
-将来自多个来源的信息编译成格式化的摘要。此任务每周运行一次，并发送到你的主频道。
+将来自多个来源的信息编译成格式化的摘要。这每周运行一次，并投递到你的主频道。
 
 ```bash
 /cron add "0 9 * * 1" "Generate a weekly report covering:
@@ -95,7 +95,7 @@ hermes cron create "0 9 * * 1" \
   --deliver telegram
 ```
 
-`0 9 * * 1` 是标准的 cron 表达式：每周一上午 9:00。
+`0 9 * * 1` 是一个标准的 cron 表达式：每周一上午 9:00。
 
 ---
 
@@ -118,7 +118,7 @@ Otherwise, provide a concise summary of the activity." --name "Repo watcher" --d
 ```
 
 :::warning 自包含的提示词
-注意提示词如何包含确切的 `gh` 命令。Cron Agent 没有之前运行的记忆或你的偏好 —— 请详细说明一切。
+注意提示词如何包含确切的 `gh` 命令。定时任务 Agent 没有之前运行的记忆或你的偏好——请详细说明一切。
 :::
 
 ---
@@ -134,21 +134,21 @@ from datetime import datetime
 DATA_DIR = os.path.expanduser("~/.hermes/data/prices")
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# Fetch current data (example: crypto prices)
+# 获取当前数据（示例：加密货币价格）
 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd"
 data = json.loads(urllib.request.urlopen(url, timeout=30).read())
 
-# Append to history file
+# 追加到历史文件
 entry = {"timestamp": datetime.now().isoformat(), "prices": data}
 history_file = os.path.join(DATA_DIR, "history.jsonl")
 with open(history_file, "a") as f:
     f.write(json.dumps(entry) + "\n")
 
-# Load recent history for analysis
+# 加载近期历史用于分析
 lines = open(history_file).readlines()
-recent = [json.loads(l) for l in lines[-24:]]  # Last 24 data points
+recent = [json.loads(l) for l in lines[-24:]]  # 最后 24 个数据点
 
-# Output for the agent
+# 输出给 Agent
 print(f"Current: BTC=${data['bitcoin']['usd']}, ETH=${data['ethereum']['usd']}")
 print(f"Data points collected: {len(lines)} total, showing last {len(recent)}")
 print(f"\nRecent history:")
@@ -169,13 +169,13 @@ If there's a significant move, explain what happened." \
   --deliver telegram
 ```
 
-脚本负责机械性收集；Agent 添加推理层。
+脚本负责机械性的收集；Agent 添加推理层。
 
 ---
 
 ## 模式 5：多技能工作流
 
-将多个技能链接在一起以完成复杂的定时任务。技能在提示词执行前按顺序加载。
+将多个技能链接在一起，用于复杂的定时任务。技能在提示词执行前按顺序加载。
 
 ```bash
 # 使用 arxiv 技能查找论文，然后使用 obsidian 技能保存笔记
@@ -198,7 +198,7 @@ cronjob(
 )
 ```
 
-技能按顺序加载 —— 先是 `arxiv`（教 Agent 如何搜索论文），然后是 `obsidian`（教如何写笔记）。提示词将它们联系在一起。
+技能按顺序加载——先是 `arxiv`（教 Agent 如何搜索论文），然后是 `obsidian`（教如何写笔记）。提示词将它们联系在一起。
 
 ---
 
@@ -228,13 +228,13 @@ cronjob(
 
 ---
 
-## 发送目标
+## 投递目标
 
 `--deliver` 标志控制结果发送到哪里：
 
-| 目标 | 示例 | 用例 |
+| 目标 | 示例 | 使用场景 |
 |--------|---------|----------|
-| `origin` | `--deliver origin` | 发送到创建任务的同一聊天（默认） |
+| `origin` | `--deliver origin` | 创建任务的同一聊天（默认） |
 | `local` | `--deliver local` | 仅保存到本地文件 |
 | `telegram` | `--deliver telegram` | 你的 Telegram 主频道 |
 | `discord` | `--deliver discord` | 你的 Discord 主频道 |
@@ -246,11 +246,11 @@ cronjob(
 
 ## 提示
 
-**使提示词自包含。** Cron 任务中的 Agent 没有你对话的记忆。直接在提示词中包含 URL、仓库名称、格式偏好和发送指令。
+**使提示词自包含。** 定时任务中的 Agent 没有你对话的记忆。直接在提示词中包含 URL、仓库名称、格式偏好和投递指令。
 
 **自由使用 `[SILENT]`。** 对于监控任务，始终包含类似“如果没有任何变化，请用 `[SILENT]` 响应”的指令。这可以防止通知噪音。
 
-**使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。Agent 只看到脚本的标准输出并对其应用推理。这比让 Agent 自己获取更便宜、更可靠。
+**使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。Agent 只看到脚本的标准输出并对其应用推理。这比让 Agent 自己进行获取更便宜、更可靠。
 
 **使用 `/cron run` 进行测试。** 在等待计划触发之前，使用 `/cron run <job_id>` 立即执行并验证输出是否正确。
 
@@ -258,4 +258,4 @@ cronjob(
 
 ---
 
-*完整的 cron 参考 —— 所有参数、边界情况和内部原理 —— 请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。*
+*完整的定时任务参考——所有参数、边界情况和内部原理——请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。*

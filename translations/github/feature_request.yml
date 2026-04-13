@@ -8,8 +8,8 @@ body:
       value: |
         感谢您的建议！在提交之前，请考虑：
 
-        - **这是一个新技能吗？** 大多数功能应该是[技能，而非工具](https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md#should-it-be-a-skill-or-a-tool)。如果它是一个专门的集成（加密货币、NFT、小众SaaS），它属于技能中心，而不是捆绑包。
-        - **搜索[现有议题](https://github.com/NousResearch/hermes-agent/issues)** — 可能已经有人提过这个了。
+        - **这是一个新技能吗？** 大多数功能应该是[技能，而非工具](https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md#should-it-be-a-skill-or-a-tool)。如果它是一个专门的集成（加密货币、NFT、小众SaaS），它属于技能中心，不应捆绑在内。
+        - **搜索[现有议题](https://github.com/NousResearch/hermes-agent/issues)** — 可能已经有人提过这个建议了。
 
   - type: textarea
     id: problem
@@ -17,7 +17,7 @@ body:
       label: 问题或用例
       description: 这解决了什么问题？您目前无法做到什么？
       placeholder: |
-        我尝试将 Hermes 与 [提供商/平台/工作流] 一起使用，但目前
+        我正尝试将 Hermes 与 [提供商/平台/工作流] 一起使用，但目前
         没有办法...
     validations:
       required: true
@@ -28,7 +28,7 @@ body:
       label: 建议的解决方案
       description: 您认为这应该如何工作？请尽可能具体 — CLI 标志、配置选项、UI 行为。
       placeholder: |
-        向 `hermes chat` 添加一个 `--foo` 标志，以启用...
+        向 `hermes chat` 添加一个 `--foo` 标志以启用...
         或者：添加一个配置键 `bar.baz` 来控制...
     validations:
       required: true

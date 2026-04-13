@@ -7,15 +7,15 @@ description: "构建一个包含工具、钩子、数据文件和技能的完整
 
 # 构建 Hermes 插件
 
-本指南将引导您从头开始构建一个完整的 Hermes 插件。最终您将获得一个包含多个工具、生命周期钩子、附带数据文件以及一个捆绑技能的工作插件——涵盖插件系统支持的所有功能。
+本指南将从头开始构建一个完整的 Hermes 插件。最终你将拥有一个可工作的插件，包含多个工具、生命周期钩子、附带的数据文件以及一个捆绑的技能——涵盖插件系统支持的所有功能。
 
-## 您将构建什么
+## 你将构建什么
 
 一个**计算器**插件，包含两个工具：
-- `calculate` — 计算数学表达式 (`2**16`, `sqrt(144)`, `pi * 5**2`)
-- `unit_convert` — 单位转换 (`100 F → 37.78 C`, `5 km → 3.11 mi`)
+- `calculate` — 计算数学表达式（`2**16`、`sqrt(144)`、`pi * 5**2`）
+- `unit_convert` — 单位转换（`100 F → 37.78 C`、`5 km → 3.11 mi`）
 
-此外，还包括一个记录每次工具调用的钩子，以及一个捆绑的技能文件。
+此外，还有一个记录每次工具调用的钩子，以及一个捆绑的技能文件。
 
 ## 步骤 1：创建插件目录
 
@@ -24,7 +24,7 @@ mkdir -p ~/.hermes/plugins/calculator
 cd ~/.hermes/plugins/calculator
 ```
 
-## 步骤 2：编写清单文件
+## 步骤 2：编写清单
 
 创建 `plugin.yaml`：
 
@@ -41,7 +41,7 @@ provides_hooks:
 
 这告诉 Hermes：“我是一个名为 calculator 的插件，我提供工具和钩子。” `provides_tools` 和 `provides_hooks` 字段列出了插件注册的内容。
 
-您可以添加的可选字段：
+你可以添加的可选字段：
 ```yaml
 author: Your Name
 requires_env:          # 根据环境变量控制加载；安装期间会提示
@@ -54,7 +54,7 @@ requires_env:          # 根据环境变量控制加载；安装期间会提示
 
 ## 步骤 3：编写工具模式
 
-创建 `schemas.py` — 这是 LLM 读取以决定何时调用您的工具的内容：
+创建 `schemas.py` — 这是 LLM 读取以决定何时调用你的工具的内容：
 
 ```python
 """工具模式 — LLM 看到的内容。"""
@@ -63,8 +63,8 @@ CALCULATE = {
     "name": "calculate",
     "description": (
         "计算数学表达式并返回结果。"
-        "支持算术运算 (+, -, *, /, **)、函数 (sqrt, sin, cos, "
-        "log, abs, round, floor, ceil) 和常量 (pi, e)。"
+        "支持算术（+, -, *, /, **）、函数（sqrt, sin, cos, "
+        "log, abs, round, floor, ceil）和常量（pi, e）。"
         "当用户询问任何数学问题时使用此工具。"
     ),
     "parameters": {
@@ -82,9 +82,9 @@ CALCULATE = {
 UNIT_CONVERT = {
     "name": "unit_convert",
     "description": (
-        "在单位之间转换数值。支持长度 (m, km, mi, ft, in)、"
-        "重量 (kg, lb, oz, g)、温度 (C, F, K)、数据 (B, KB, MB, GB, TB) "
-        "和时间 (s, min, hr, day)。"
+        "在单位之间转换数值。支持长度（m, km, mi, ft, in）、"
+        "重量（kg, lb, oz, g）、温度（C, F, K）、数据（B, KB, MB, GB, TB）"
+        "和时间（s, min, hr, day）。"
     ),
     "parameters": {
         "type": "object",
@@ -107,14 +107,14 @@ UNIT_CONVERT = {
 }
 ```
 
-**为什么模式很重要：** `description` 字段是 LLM 决定何时使用您的工具的依据。请具体说明它的功能和使用时机。`parameters` 定义了 LLM 传递的参数。
+**为什么模式很重要：** `description` 字段是 LLM 决定何时使用你的工具的依据。要具体说明它的功能和使用时机。`parameters` 定义了 LLM 传递的参数。
 
-## 步骤 4：编写工具处理程序
+## 步骤 4：编写工具处理器
 
-创建 `tools.py` — 这是当 LLM 调用您的工具时实际执行的代码：
+创建 `tools.py` — 这是当 LLM 调用你的工具时实际执行的代码：
 
 ```python
-"""工具处理程序 — 当 LLM 调用每个工具时运行的代码。"""
+"""工具处理器 — 当 LLM 调用每个工具时运行的代码。"""
 
 import json
 import math
@@ -133,10 +133,10 @@ _SAFE_MATH = {
 def calculate(args: dict, **kwargs) -> str:
     """安全地计算数学表达式。
 
-    处理程序的规则：
-    1. 接收 args (dict) — LLM 传递的参数
+    处理器的规则：
+    1. 接收 args（字典） — LLM 传递的参数
     2. 执行工作
-    3. 返回 JSON 字符串 — 即使出错也始终返回
+    3. 返回一个 JSON 字符串 — 即使出错也总是如此
     4. 接受 **kwargs 以保持向前兼容性
     """
     expression = args.get("expression", "").strip()
@@ -147,9 +147,9 @@ def calculate(args: dict, **kwargs) -> str:
         result = eval(expression, {"__builtins__": {}}, _SAFE_MATH)
         return json.dumps({"expression": expression, "result": result})
     except ZeroDivisionError:
-        return json.dumps({"expression": expression, "error": "除以零"})
+        return json.dumps({"expression": expression, "error": "除以零错误"})
     except Exception as e:
-        return json.dumps({"expression": expression, "error": f"无效: {e}"})
+        return json.dumps({"expression": expression, "error": f"无效表达式: {e}"})
 
 
 # 转换表 — 值以基本单位表示
@@ -160,9 +160,9 @@ _TIME = {"s": 1, "ms": 0.001, "min": 60, "hr": 3600, "day": 86400}
 
 
 def _convert_temp(value, from_u, to_u):
-    # 归一化到摄氏度
+    # 标准化为摄氏度
     c = {"F": (value - 32) * 5/9, "K": value - 273.15}.get(from_u, value)
-    # 转换到目标单位
+    # 转换为目标单位
     return {"F": c * 9/5 + 32, "K": c + 273.15}.get(to_u, c)
 
 
@@ -197,7 +197,7 @@ def unit_convert(args: dict, **kwargs) -> str:
 ```
 **处理函数的关键规则：**
 1. **签名：** `def my_handler(args: dict, **kwargs) -> str`
-2. **返回值：** 始终是一个 JSON 字符串。成功和错误情况都是如此。
+2. **返回值：** 始终是一个 JSON 字符串。无论成功还是错误。
 3. **永不抛出异常：** 捕获所有异常，返回错误 JSON 代替。
 4. **接受 `**kwargs`：** Hermes 未来可能会传递额外的上下文。
 
@@ -232,12 +232,12 @@ def register(ctx):
     ctx.register_tool(name="unit_convert", toolset="calculator",
                       schema=schemas.UNIT_CONVERT, handler=tools.unit_convert)
 
-    # 这个钩子会为所有工具调用触发，而不仅限于我们的工具
+    # 这个钩子会为所有工具调用触发，不仅限于我们的工具
     ctx.register_hook("post_tool_call", _on_post_tool_call)
 ```
 
 **`register()` 的作用：**
-- 在启动时恰好调用一次
+- 在启动时仅调用一次
 - `ctx.register_tool()` 将你的工具放入注册表 — 模型会立即看到它
 - `ctx.register_hook()` 订阅生命周期事件
 - `ctx.register_cli_command()` 注册一个 CLI 子命令（例如 `hermes my-plugin <subcommand>`）
@@ -253,7 +253,7 @@ hermes
 
 你应该能在横幅的工具列表中看到 `calculator: calculate, unit_convert`。
 
-尝试以下提示：
+尝试以下提示词：
 ```
 2 的 16 次方是多少？
 将 100 华氏度转换为摄氏度
@@ -286,7 +286,7 @@ Plugins (1):
 - **清单** 声明插件是什么
 - **模式** 为 LLM 描述工具
 - **处理函数** 实现实际逻辑
-- **注册** 将所有内容连接起来
+- **注册** 连接一切
 
 ## 插件还能做什么？
 
@@ -307,7 +307,7 @@ with open(_DATA_FILE) as f:
 
 ### 捆绑一个技能
 
-包含一个 `skill.md` 文件并在注册期间安装它：
+包含一个 `skill.md` 文件，并在注册期间安装它：
 
 ```python
 import shutil
@@ -361,7 +361,7 @@ requires_env:
 
 | 字段 | 是否必需 | 描述 |
 |-------|----------|-------------|
-| `name` | 是 | 环境变量名称 |
+| `name` | 是 | 环境变量名 |
 | `description` | 否 | 在安装提示时显示给用户 |
 | `url` | 否 | 获取凭据的地址 |
 | `secret` | 否 | 如果为 `true`，输入将被隐藏（类似密码字段） |
@@ -406,7 +406,7 @@ def register(ctx):
 | [`on_session_end`](/docs/user-guide/features/hooks#on_session_end) | 每次 `run_conversation` 调用结束时 + CLI 退出时 | `session_id: str, completed: bool, interrupted: bool, model: str, platform: str` | 忽略 |
 | [`pre_api_request`](/docs/user-guide/features/hooks#pre_api_request) | 每次向 LLM 提供商发送 HTTP 请求之前 | `method: str, url: str, headers: dict, body: dict` | 忽略 |
 | [`post_api_request`](/docs/user-guide/features/hooks#post_api_request) | 每次从 LLM 提供商收到 HTTP 响应之后 | `method: str, url: str, status_code: int, response: dict` | 忽略 |
-大多数钩子都是触发即忘的观察者——它们的返回值会被忽略。唯一的例外是 `pre_llm_call`，它可以向对话中注入上下文。
+大多数钩子都是即发即弃的观察者——它们的返回值会被忽略。唯一的例外是 `pre_llm_call`，它可以向对话中注入上下文。
 
 所有回调函数都应接受 `**kwargs` 参数以保证向前兼容性。如果钩子回调崩溃，它会被记录并跳过。其他钩子和 Agent 会继续正常运行。
 
@@ -433,9 +433,9 @@ return None
 
 注入的上下文是附加到**用户消息**，而不是系统提示词。这是一个深思熟虑的设计选择：
 
-- **提示词缓存保留** — 系统提示词在各轮次间保持相同。Anthropic 和 OpenRouter 会缓存系统提示词前缀，因此保持其稳定可以在多轮对话中节省 75% 以上的输入 Token。如果插件修改了系统提示词，每一轮都会导致缓存未命中。
+- **提示词缓存保留** — 系统提示词在多个轮次中保持相同。Anthropic 和 OpenRouter 会缓存系统提示词前缀，因此保持其稳定可以在多轮对话中节省 75% 以上的输入 Token。如果插件修改了系统提示词，每一轮都会导致缓存未命中。
 - **临时性** — 注入仅在 API 调用时发生。对话历史中的原始用户消息永远不会被修改，也不会持久化到会话数据库中。
-- **系统提示词是 Hermes 的领域** — 它包含模型特定的指导、工具强制执行规则、人格指令以及缓存的技能内容。插件通过提供与用户输入并行的上下文来做出贡献，而不是通过改变 Agent 的核心指令。
+- **系统提示词是 Hermes 的领域** — 它包含模型特定的指导、工具执行规则、人格指令以及缓存的技能内容。插件通过提供与用户输入并行的上下文来做出贡献，而不是通过改变 Agent 的核心指令。
 
 #### 示例：记忆召回插件
 
@@ -485,7 +485,7 @@ def register(ctx):
     ctx.register_hook("pre_llm_call", inject_guardrails)
 ```
 
-#### 示例：仅观察钩子（无注入）
+#### 示例：仅观察者钩子（无注入）
 
 ```python
 """Analytics plugin — tracks turn metadata without injecting context."""
@@ -505,7 +505,7 @@ def register(ctx):
 
 #### 多个插件返回上下文
 
-当多个插件从 `pre_llm_call` 返回上下文时，它们的输出会用双换行符连接起来，并一起附加到用户消息中。顺序遵循插件发现顺序（按插件目录名称字母顺序）。
+当多个插件从 `pre_llm_call` 返回上下文时，它们的输出会用双换行符连接起来，并一起附加到用户消息中。顺序遵循插件发现顺序（按插件目录名称的字母顺序）。
 
 ### 注册 CLI 命令
 
@@ -541,9 +541,9 @@ def register(ctx):
 
 注册后，用户可以运行 `hermes my-plugin status`、`hermes my-plugin config` 等命令。
 
-**记忆提供商插件**使用基于约定的方法：在你的插件的 `cli.py` 文件中添加一个 `register_cli(subparser)` 函数。记忆插件发现系统会自动找到它——不需要调用 `ctx.register_cli_command()`。详情请参阅[记忆提供商插件指南](/docs/developer-guide/memory-provider-plugin#adding-cli-commands)。
+**记忆提供商插件**使用基于约定的方法：在你的插件的 `cli.py` 文件中添加一个 `register_cli(subparser)` 函数。记忆插件发现系统会自动找到它——无需调用 `ctx.register_cli_command()`。详情请参阅[记忆提供商插件指南](/docs/developer-guide/memory-provider-plugin#adding-cli-commands)。
 
-**活跃提供商门控：** 记忆插件 CLI 命令仅在其提供商是配置中活跃的 `memory.provider` 时才会出现。如果用户没有设置你的提供商，你的 CLI 命令就不会在帮助输出中造成混乱。
+**活跃提供商门控：** 记忆插件 CLI 命令仅在其提供商是配置中活跃的 `memory.provider` 时才会出现。如果用户没有设置你的提供商，你的 CLI 命令将不会使帮助输出变得杂乱。
 
 :::tip
 本指南涵盖**通用插件**（工具、钩子、CLI 命令）。对于专门的插件类型，请参阅：
@@ -552,7 +552,7 @@ def register(ctx):
 :::
 ### 通过 pip 分发
 
-要公开分享插件，请向你的 Python 包添加一个入口点：
+要公开分享插件，请在你的 Python 包中添加一个入口点：
 
 ```toml
 # pyproject.toml
@@ -580,7 +580,7 @@ def handler(args, **kwargs):
 
 **处理程序签名中缺少 `**kwargs`：**
 ```python
-# 错误 — 如果 Hermes 传递额外的上下文会中断
+# 错误 — 如果 Hermes 传递额外的上下文，将会中断
 def handler(args):
     ...
 
@@ -591,12 +591,12 @@ def handler(args, **kwargs):
 
 **处理程序抛出异常：**
 ```python
-# 错误 — 异常传播，工具调用失败
+# 错误 — 异常会传播，工具调用失败
 def handler(args, **kwargs):
     result = 1 / int(args["value"])  # ZeroDivisionError!
     return json.dumps({"result": result})
 
-# 正确 — 捕获并返回错误 JSON
+# 正确 — 捕获异常并返回错误 JSON
 def handler(args, **kwargs):
     try:
         result = 1 / int(args.get("value", 0))
@@ -607,7 +607,7 @@ def handler(args, **kwargs):
 
 **模式描述过于模糊：**
 ```python
-# 差 — 模型不知道何时使用它
+# 不好 — 模型不知道何时使用它
 "description": "Does stuff"
 
 # 好 — 模型确切知道何时以及如何使用

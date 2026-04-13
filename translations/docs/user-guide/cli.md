@@ -63,7 +63,7 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 | 模型名称 | 当前模型（如果超过 26 个字符则截断） |
 | Token 计数 | 已使用的上下文 Token / 最大上下文窗口 |
 | 上下文条 | 带有颜色编码阈值的视觉填充指示器 |
-| 成本 | 预估的会话成本（对于未知/零价格模型显示 `n/a`） |
+| 成本 | 预估的会话成本（对于未知/零成本模型显示 `n/a`） |
 | 持续时间 | 已用会话时间 |
 
 状态栏会根据终端宽度自适应 — 在 ≥ 76 列时显示完整布局，在 52–75 列时显示紧凑布局，在低于 52 列时显示最小布局（仅模型 + 持续时间）。
@@ -77,11 +77,11 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 | 橙色 | 80–95% | 接近限制 |
 | 红色 | ≥ 95% | 即将溢出 — 考虑使用 `/compress` |
 
-使用 `/usage` 获取详细分类，包括每类成本（输入 Token 与输出 Token）。
+使用 `/usage` 获取详细分解，包括按类别（输入 Token 与输出 Token）的成本。
 
 ### 会话恢复显示
 
-当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“Previous Conversation”面板会出现在横幅和输入提示符之间，显示对话历史的紧凑摘要。详情和配置请参阅 [Sessions — Conversation Recap on Resume](sessions.md#conversation-recap-on-resume)。
+当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示符之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 — 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
 
 ## 快捷键
 
@@ -92,7 +92,7 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 | `Alt+V` | 当终端支持时，从剪贴板粘贴图像 |
 | `Ctrl+V` | 粘贴文本并视情况附加剪贴板图像 |
 | `Ctrl+B` | 当语音模式启用时，开始/停止语音录制（`voice.record_key`，默认：`ctrl+b`） |
-| `Ctrl+C` | 中断 Agent（在 2 秒内按两次以强制退出） |
+| `Ctrl+C` | 中断 Agent（2 秒内按两次强制退出） |
 | `Ctrl+D` | 退出 |
 | `Ctrl+Z` | 将 Hermes 挂起到后台（仅限 Unix）。在 shell 中运行 `fg` 以恢复。 |
 | `Tab` | 接受自动建议（幽灵文本）或自动补全斜杠命令 |
@@ -116,9 +116,9 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 | `/reasoning high` | 增加推理力度 |
 | `/title My Session` | 为当前会话命名 |
 
-完整的 CLI 和消息内置命令列表，请参阅 [Slash Commands Reference](../reference/slash-commands.md)。
+完整的 CLI 和消息内置命令列表，请参阅 [斜杠命令参考](../reference/slash-commands.md)。
 
-关于设置、提供商、静音调优以及消息平台/Discord 语音使用，请参阅 [Voice Mode](features/voice-mode.md)。
+关于设置、提供商、静音调优以及消息平台/Discord 语音使用，请参阅 [语音模式](features/voice-mode.md)。
 
 :::tip
 命令不区分大小写 — `/HELP` 与 `/help` 效果相同。已安装的技能也会自动成为斜杠命令。
@@ -139,7 +139,7 @@ quick_commands:
     command: nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv,noheader
 ```
 
-然后在任何聊天中输入 `/status` 或 `/gpu`。更多示例请参阅 [Configuration guide](/docs/user-guide/configuration#quick-commands)。
+然后，在任何聊天中输入 `/status` 或 `/gpu`。更多示例请参阅 [配置指南](/docs/user-guide/configuration#quick-commands)。
 
 ## 启动时预加载技能
 
@@ -188,7 +188,7 @@ personalities:
 
 ## 多行输入
 
-有两种方式可以输入多行消息：
+有两种方式输入多行消息：
 
 1. **`Alt+Enter` 或 `Ctrl+J`** — 插入新行
 2. **反斜杠续行** — 在行尾使用 `\` 以继续：
@@ -200,7 +200,7 @@ personalities:
 ```
 
 :::info
-支持粘贴多行文本 — 使用 `Alt+Enter` 或 `Ctrl+J` 插入换行符，或者直接粘贴内容。
+支持粘贴多行文本 — 使用 `Alt+Enter` 或 `Ctrl+J` 插入换行，或直接粘贴内容。
 :::
 
 ## 中断 Agent
@@ -208,13 +208,13 @@ personalities:
 你可以在任何时候中断 Agent：
 
 - 当 Agent 正在工作时**输入新消息并按 Enter** — 它会中断并处理你的新指令
-- **`Ctrl+C`** — 中断当前操作（在 2 秒内按两次以强制退出）
+- **`Ctrl+C`** — 中断当前操作（2 秒内按两次以强制退出）
 - 正在进行的终端命令会立即被终止（SIGTERM，1 秒后 SIGKILL）
 - 中断期间输入的多个消息会被合并为一个提示词
 
 ### 忙碌输入模式
 
-`display.busy_input_mode` 配置键控制当你在 Agent 工作时按下 Enter 时发生的情况：
+配置项 `display.busy_input_mode` 控制当你在 Agent 工作时按下 Enter 键会发生什么：
 
 | 模式 | 行为 |
 |------|----------|
@@ -231,7 +231,7 @@ display:
 
 ### 挂起到后台
 
-在 Unix 系统上，按 **`Ctrl+Z`** 将 Hermes 挂起到后台 — 就像任何终端进程一样。Shell 会打印确认信息：
+在 Unix 系统上，按 **`Ctrl+Z`** 将 Hermes 挂起到后台 — 就像任何终端进程一样。shell 会打印确认信息：
 
 ```
 Hermes Agent has been suspended. Run `fg` to bring Hermes Agent back.
@@ -261,7 +261,7 @@ CLI 会在 Agent 工作时显示动画反馈：
 
 ### 工具预览长度
 
-`display.tool_preview_length` 配置键控制在工具调用预览行（例如文件路径、终端命令）中显示的最大字符数。默认值为 `0`，表示无限制 — 显示完整路径和命令。
+配置项 `display.tool_preview_length` 控制工具调用预览行（例如文件路径、终端命令）中显示的最大字符数。默认值为 `0`，表示无限制 — 显示完整路径和命令。
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -303,18 +303,18 @@ hermes -r 20260225_143052_a1b2c3           # 简写形式
 
 ### 会话存储
 
-CLI 会话存储在 Hermes 的 SQLite 状态数据库中，位于 `~/.hermes/state.db`。数据库保存：
+CLI 会话存储在 Hermes 的 SQLite 状态数据库 `~/.hermes/state.db` 中。数据库保存：
 
 - 会话元数据（ID、标题、时间戳、Token 计数器）
-- 消息历史记录
-- 跨压缩/恢复会话的谱系
-- 由 `session_search` 使用的全文搜索索引
+- 消息历史
+- 压缩/恢复会话之间的谱系关系
+- 供 `session_search` 使用的全文搜索索引
 
-一些消息适配器也会在数据库旁边保留每个平台的转录文件，但 CLI 本身是从 SQLite 会话存储中恢复的。
+一些消息适配器也会在数据库旁边保留每个平台的转录文件，但 CLI 本身是从 SQLite 会话存储恢复的。
 
 ### 上下文压缩
 
-长对话在接近上下文限制时会自动进行总结：
+长对话在接近上下文限制时会自动总结：
 
 ```yaml
 # 在 ~/.hermes/config.yaml 中
@@ -328,7 +328,7 @@ compression:
 
 ## 后台会话
 
-在单独的**后台会话**中运行一个提示词，同时继续使用 CLI 进行其他工作：
+在单独的会话中运行一个提示词，同时继续使用 CLI 进行其他工作：
 
 ```
 /background Analyze the logs in /var/log and summarize any errors from today
@@ -345,7 +345,7 @@ Hermes 立即确认任务并返回提示：
 每个 `/background` 提示词都会在守护线程中生成一个**完全独立的 Agent 会话**：
 
 - **隔离的对话** — 后台 Agent 不知道你当前会话的历史记录。它只接收你提供的提示词。
-- **相同的配置** — 后台 Agent 继承当前会话的模型、提供商、工具集、推理设置和备用模型。
+- **相同的配置** — 后台 Agent 继承你当前会话的模型、提供商、工具集、推理设置和备用模型。
 - **非阻塞** — 你的前台会话保持完全交互性。你可以聊天、运行命令，甚至启动更多后台任务。
 - **多任务** — 你可以同时运行多个后台任务。每个任务都会获得一个编号 ID。
 
@@ -362,13 +362,13 @@ Hermes 立即确认任务并返回提示：
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
-如果任务失败，你将看到错误通知。如果你的配置中启用了 `display.bell_on_complete`，任务完成时终端会响铃。
+如果任务失败，你将看到一个错误通知。如果你的配置中启用了 `display.bell_on_complete`，任务完成时终端会响铃。
 
 ### 使用场景
 
-- **长时间运行的研究** — 在你编写代码时，执行 "/background research the latest developments in quantum error correction"
-- **文件处理** — 在你继续对话时，执行 "/background analyze all Python files in this repo and list any security issues"
-- **并行调查** — 启动多个后台任务以同时探索不同角度
+- **长时间运行的研究** — 在你编写代码时，执行“/background research the latest developments in quantum error correction”
+- **文件处理** — 在你继续对话时，执行“/background analyze all Python files in this repo and list any security issues”
+- **并行调查** — 启动多个后台任务以同时探索不同的角度
 
 :::info
 后台会话不会出现在你的主对话历史记录中。它们是独立的会话，拥有自己的任务 ID（例如 `bg_143022_a1b2c3`）。
@@ -377,9 +377,9 @@ Hermes 立即确认任务并返回提示：
 ## 静默模式
 
 默认情况下，CLI 在静默模式下运行，该模式：
-- 抑制工具的详细日志输出
+- 抑制来自工具的详细日志
 - 启用可爱风格的动画反馈
-- 保持输出简洁且用户友好
+- 保持输出简洁和用户友好
 
 如需调试输出：
 ```bash

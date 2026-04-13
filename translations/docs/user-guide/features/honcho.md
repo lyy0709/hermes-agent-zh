@@ -1,12 +1,12 @@
 ---
 sidebar_position: 99
 title: "Honcho 记忆"
-description: "通过 Honcho 实现 AI 原生持久化记忆——辩证推理、多 Agent 用户建模与深度个性化"
+description: "通过 Honcho 实现 AI 原生持久化记忆 —— 辩证推理、多 Agent 用户建模和深度个性化"
 ---
 
 # Honcho 记忆
 
-[Honcho](https://github.com/plastic-labs/honcho) 是一个 AI 原生记忆后端，它在 Hermes 内置记忆系统之上增加了辩证推理和深度用户建模功能。与简单的键值存储不同，Honcho 通过分析对话内容，持续维护一个关于用户是谁的模型——包括他们的偏好、沟通风格、目标和行为模式。
+[Honcho](https://github.com/plastic-labs/honcho) 是一个 AI 原生的记忆后端，它在 Hermes 内置的记忆系统之上增加了辩证推理和深度用户建模功能。与简单的键值存储不同，Honcho 通过在对话发生后进行推理，维护一个关于用户是谁的持续模型 —— 包括他们的偏好、沟通风格、目标和行为模式。
 
 :::info Honcho 是一个记忆提供商插件
 Honcho 已集成到[记忆提供商](./memory-providers.md)系统中。以下所有功能均可通过统一的记忆提供商接口使用。
@@ -16,16 +16,16 @@ Honcho 已集成到[记忆提供商](./memory-providers.md)系统中。以下所
 
 | 能力 | 内置记忆 | Honcho |
 |-----------|----------------|--------|
-| 跨会话持久化 | ✔ 基于文件的 MEMORY.md/USER.md | ✔ 服务器端，通过 API |
+| 跨会话持久化 | ✔ 基于文件的 MEMORY.md/USER.md | ✔ 服务器端，带 API |
 | 用户画像 | ✔ 手动 Agent 整理 | ✔ 自动辩证推理 |
-| 多 Agent 隔离 | — | ✔ 按对等体（peer）的画像分离 |
-| 观察模式 | — | ✔ 统一观察或定向观察 |
-| 结论（推导出的洞察） | — | ✔ 服务器端对模式的推理 |
-| 跨历史记录搜索 | ✔ FTS5 会话搜索 | ✔ 对结论的语义搜索 |
+| 多 Agent 隔离 | — | ✔ 按对等方（peer）进行画像分离 |
+| 观察模式 | — | ✔ 统一或定向观察 |
+| 结论（推导出的洞察） | — | ✔ 服务器端对模式进行推理 |
+| 跨历史记录搜索 | ✔ FTS5 会话搜索 | ✔ 对结论进行语义搜索 |
 
-**辩证推理**：每次对话后，Honcho 会分析交流内容并推导出“结论”——关于用户偏好、习惯和目标的洞察。这些结论随时间累积，使 Agent 获得超越用户明确表述的、不断加深的理解。
+**辩证推理**：每次对话后，Honcho 会分析交流内容并推导出“结论”——关于用户偏好、习惯和目标的洞察。这些结论随时间累积，使 Agent 获得超越用户明确陈述的、不断加深的理解。
 
-**多 Agent 画像**：当多个 Hermes 实例与同一用户对话时（例如，一个编码助手和一个个人助手），Honcho 会维护独立的“对等体”画像。每个对等体只能看到自己的观察和结论，防止上下文交叉污染。
+**多 Agent 画像**：当多个 Hermes 实例与同一用户对话时（例如，一个编码助手和一个个人助手），Honcho 会维护独立的“对等方”画像。每个对等方只能看到自己的观察和结论，防止上下文交叉污染。
 
 ## 设置
 
@@ -57,12 +57,12 @@ honcho:
 ```
 
 **观察模式：**
-- `unified` — 所有观察都进入一个统一的池。更简单，适用于单 Agent 设置。
-- `directional` — 观察会标记方向（用户→Agent，Agent→用户）。支持对对话动态进行更丰富的分析。
+- `unified` —— 所有观察进入一个统一的池。更简单，适用于单 Agent 设置。
+- `directional` —— 观察被标记方向（用户→Agent，Agent→用户）。支持对对话动态进行更丰富的分析。
 
 ## 工具
 
-当 Honcho 作为记忆提供商激活时，会额外提供四个工具：
+当 Honcho 作为记忆提供商处于活动状态时，会提供四个额外的工具：
 
 | 工具 | 用途 |
 |------|---------|
@@ -75,19 +75,19 @@ honcho:
 
 ```bash
 hermes honcho status          # 显示连接状态和配置
-hermes honcho peer            # 为多 Agent 设置更新对等体名称
+hermes honcho peer            # 为多 Agent 设置更新对等方名称
 ```
 
 ## 从 `hermes honcho` 迁移
 
-如果你之前使用独立的 `hermes honcho setup`：
+如果您之前使用过独立的 `hermes honcho setup`：
 
-1. 你现有的配置（`honcho.json` 或 `~/.honcho/config.json`）会被保留
-2. 你服务器端的数据（记忆、结论、用户画像）保持不变
+1. 您现有的配置（`honcho.json` 或 `~/.honcho/config.json`）将被保留
+2. 您的服务器端数据（记忆、结论、用户画像）保持不变
 3. 在 config.yaml 中设置 `memory.provider: honcho` 以重新激活
 
-无需重新登录或重新设置。运行 `hermes memory setup` 并选择 "honcho" —— 向导会检测到你现有的配置。
+无需重新登录或重新设置。运行 `hermes memory setup` 并选择 "honcho" —— 向导会检测到您现有的配置。
 
 ## 完整文档
 
-完整参考请参见[记忆提供商 — Honcho](./memory-providers.md#honcho)。
+完整参考请参阅[记忆提供商 —— Honcho](./memory-providers.md#honcho)。

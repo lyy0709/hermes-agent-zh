@@ -40,11 +40,11 @@ registry.register(
 )
 ```
 
-每次调用都会创建一个 `ToolEntry`，存储在单例 `ToolRegistry._tools` 字典中，以工具名作为键。如果不同工具集之间发生名称冲突，会记录警告，并且后注册的覆盖先注册的。
+每次调用都会创建一个 `ToolEntry`，存储在单例 `ToolRegistry._tools` 字典中，以工具名称为键。如果不同工具集之间发生名称冲突，会记录警告，并且后注册的覆盖先注册的。
 
 ### 发现：`_discover_tools()`
 
-当 `model_tools.py` 被导入时，它会调用 `_discover_tools()`，该函数按顺序导入每个工具模块：
+当导入 `model_tools.py` 时，它会调用 `_discover_tools()`，该函数按顺序导入每个工具模块：
 
 ```python
 _modules = [
@@ -129,13 +129,13 @@ if entry.check_fn:
 
 5.  **动态模式修补** —— 过滤之后，`execute_code` 和 `browser_navigate` 模式会被动态调整，仅引用实际通过过滤的工具（防止模型对不可用工具产生幻觉）。
 
-### 遗留工具集名称
+### 旧版工具集名称
 
 带有 `_tools` 后缀的旧工具集名称（例如 `web_tools`、`terminal_tools`）通过 `_LEGACY_TOOLSET_MAP` 映射到其现代工具名称，以保持向后兼容性。
 
 ## 分发
 
-在运行时，工具通过中央注册表分发，但对于某些 Agent 级别的工具（如记忆/待办事项/会话搜索处理）存在 Agent 循环异常。
+在运行时，工具通过中央注册表分发，但对于一些需要 Agent 级别状态的 Agent 循环工具（如 memory/todo/session-search 处理），存在 Agent 循环级别的异常。
 
 ### 分发流程：模型 tool_call → 处理程序执行
 
@@ -178,10 +178,10 @@ registry.dispatch(name, args, **kwargs)
 
 有四个工具在注册表分发之前被拦截，因为它们需要 Agent 级别的状态（TodoStore、MemoryStore 等）：
 
-- `todo` —— 规划/任务跟踪
-- `memory` —— 持久化记忆写入
-- `session_search` —— 跨会话回忆
-- `delegate_task` —— 生成子 Agent 会话
+-   `todo` —— 规划/任务跟踪
+-   `memory` —— 持久化记忆写入
+-   `session_search` —— 跨会话回忆
+-   `delegate_task` —— 生成子 Agent 会话
 
 这些工具的模式仍然在注册表中注册（用于 `get_tool_definitions`），但如果分发以某种方式直接到达它们，它们的处理程序会返回一个存根错误。
 
@@ -190,7 +190,7 @@ registry.dispatch(name, args, **kwargs)
 当工具处理程序是异步时，`_run_async()` 将其桥接到同步分发路径：
 
 -   **CLI 路径（无运行循环）** —— 使用持久事件循环来保持缓存的异步客户端存活
--   **消息网关路径（运行循环）** —— 使用 `asyncio.run()` 启动一个一次性线程
+-   **Gateway 路径（运行循环）** —— 使用 `asyncio.run()` 启动一个一次性线程
 -   **工作线程（并行工具）** —— 使用存储在线程本地存储中的每个线程的持久循环
 
 ## DANGEROUS_PATTERNS 审批流程
@@ -210,7 +210,7 @@ registry.dispatch(name, args, **kwargs)
 
 3.  **审批提示** —— 如果找到匹配项：
     -   **CLI 模式** —— 交互式提示要求用户批准、拒绝或永久允许
-    -   **消息网关模式** —— 异步审批回调将请求发送到消息平台
+    -   **Gateway 模式** —— 异步审批回调将请求发送到消息平台
     -   **智能审批** —— 可选地，辅助 LLM 可以自动批准匹配模式的低风险命令（例如，`rm -rf node_modules/` 是安全的，但匹配“递归删除”）
 
 4.  **会话状态** —— 审批按会话跟踪。一旦你为会话批准了“递归删除”，后续的 `rm -rf` 命令就不会再次提示。
@@ -221,27 +221,27 @@ registry.dispatch(name, args, **kwargs)
 
 终端系统支持多个后端：
 
-- local
-- docker
-- ssh
-- singularity
-- modal
-- daytona
+-   local
+-   docker
+-   ssh
+-   singularity
+-   modal
+-   daytona
 
 它还支持：
 
-- 每个任务的 cwd 覆盖
-- 后台进程管理
-- PTY 模式
-- 危险命令的审批回调
+-   每个任务的 cwd 覆盖
+-   后台进程管理
+-   PTY 模式
+-   危险命令的审批回调
 
 ## 并发性
 
-工具调用可能顺序执行或并发执行，具体取决于工具组合和交互要求。
+工具调用可以顺序执行或并发执行，具体取决于工具组合和交互要求。
 
 ## 相关文档
 
-- [工具集参考](../reference/toolsets-reference.md)
-- [内置工具参考](../reference/tools-reference.md)
-- [Agent 循环内部原理](./agent-loop.md)
-- [ACP 内部原理](./acp-internals.md)
+-   [工具集参考](../reference/toolsets-reference.md)
+-   [内置工具参考](../reference/tools-reference.md)
+-   [Agent 循环内部原理](./agent-loop.md)
+-   [ACP 内部原理](./acp-internals.md)

@@ -1,5 +1,5 @@
 name: "🐛 Bug 报告"
-description: 报告一个 Bug —— 某些功能损坏、崩溃或行为不正确。
+description: 报告一个 Bug —— 某些功能损坏、崩溃或行为异常。
 title: "[Bug]: "
 labels: ["bug"]
 body:
@@ -8,7 +8,7 @@ body:
       value: |
         感谢报告 Bug！请填写以下部分，以便我们能够快速复现并修复它。
 
-        **提交前，请**：
+        **提交前，请确认：**
         - [ ] 搜索[现有问题](https://github.com/NousResearch/hermes-agent/issues)以避免重复
         - [ ] 更新到最新版本 (`hermes update`) 并确认 Bug 仍然存在
 

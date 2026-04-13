@@ -7,14 +7,14 @@ description: "使用 git worktrees 和隔离的代码检出，在同一仓库上
 
 # Git Worktrees
 
-Hermes Agent 通常用于大型、长期存在的代码仓库。当您想要：
+Hermes Agent 经常用于大型、长期存在的代码仓库。当您想要：
 
 - 在同一项目上**并行运行多个 Agent**，或者
 - 将实验性的重构与主分支隔离时，
 
-Git **worktrees** 是为每个 Agent 提供独立代码检出的最安全方式，无需复制整个仓库。
+Git **worktrees** 是为每个 Agent 提供其独立代码检出的最安全方式，而无需复制整个仓库。
 
-本页介绍如何将 worktrees 与 Hermes 结合使用，以便每个会话都有一个干净、隔离的工作目录。
+本页展示了如何将 worktrees 与 Hermes 结合使用，以便每个会话都有一个干净、隔离的工作目录。
 
 ## 为什么在 Hermes 中使用 Worktrees？
 
@@ -23,7 +23,7 @@ Hermes 将**当前工作目录**视为项目根目录：
 - CLI：运行 `hermes` 或 `hermes chat` 的目录
 - 消息网关：由 `MESSAGING_CWD` 设置的目录
 
-如果您在**同一代码检出**中运行多个 Agent，它们的更改可能会相互干扰：
+如果您在**同一个代码检出**中运行多个 Agent，它们的更改可能会相互干扰：
 
 - 一个 Agent 可能会删除或重写另一个 Agent 正在使用的文件。
 - 更难理解哪些更改属于哪个实验。
@@ -65,7 +65,7 @@ Hermes 将：
 
 - 将 `../repo-feature` 视为项目根目录。
 - 使用该目录处理上下文文件、代码编辑和工具。
-- 使用**独立的检查点历史记录**进行 `/rollback`，该历史记录限定在此 worktree 内。
+- 使用一个**独立的检查点历史记录**用于 `/rollback`，其范围限定在此 worktree。
 
 ## 并行运行多个 Agent
 
@@ -93,14 +93,14 @@ hermes
 每个 Hermes 进程：
 
 - 在其自己的分支上工作（`feature/hermes-a` 与 `feature/hermes-b`）。
-- 在不同的影子仓库哈希下写入检查点（基于 worktree 路径派生）。
+- 在不同的影子仓库哈希（根据 worktree 路径派生）下写入检查点。
 - 可以独立使用 `/rollback` 而不影响另一个。
 
 这在以下情况下特别有用：
 
 - 运行批量重构。
 - 尝试同一任务的不同方法。
-- 将 CLI + 消息网关会话配对到同一上游仓库。
+- 将 CLI + 网关会话配对以针对同一上游仓库。
 
 ## 安全地清理 Worktrees
 
@@ -128,18 +128,18 @@ git worktree remove ../repo-feature
 
 - **每个 Hermes 实验使用一个 worktree**
   - 为每个实质性更改创建一个专用的分支/worktree。
-  - 这可以使差异保持专注，并使 PR 小而易于审查。
+  - 这可以使差异保持聚焦，并使 PR 小而易于审查。
 - **根据实验命名分支**
   - 例如：`feature/hermes-checkpoints-docs`、`feature/hermes-refactor-tests`。
 - **频繁提交**
   - 使用 git 提交来标记高级里程碑。
   - 使用[检查点和 /rollback](./checkpoints-and-rollback.md) 作为工具驱动编辑之间的安全网。
-- **使用 worktrees 时，避免从裸仓库根目录运行 Hermes**
-  - 优先使用 worktree 目录，以便每个 Agent 都有明确的范围。
+- **在使用 worktrees 时，避免从裸仓库根目录运行 Hermes**
+  - 更推荐使用 worktree 目录，这样每个 Agent 都有明确的范围。
 
 ## 使用 `hermes -w`（自动 Worktree 模式）
 
-Hermes 内置了一个 `-w` 标志，可以**自动创建一个一次性的 git worktree** 及其自己的分支。您无需手动设置 worktrees — 只需 `cd` 进入您的仓库并运行：
+Hermes 有一个内置的 `-w` 标志，可以**自动创建一个一次性的 git worktree** 及其自己的分支。您无需手动设置 worktrees —— 只需 `cd` 进入您的仓库并运行：
 
 ```bash
 cd /path/to/your/repo
@@ -148,7 +148,7 @@ hermes -w
 
 Hermes 将：
 
-- 在仓库内的 `.worktrees/` 下创建一个临时 worktree。
+- 在您的仓库内的 `.worktrees/` 下创建一个临时 worktree。
 - 检出到一个隔离的分支（例如 `hermes/hermes-<hash>`）。
 - 在该 worktree 内运行完整的 CLI 会话。
 
@@ -158,7 +158,7 @@ Hermes 将：
 hermes -w -q "Fix issue #123"
 ```
 
-对于并行 Agent，打开多个终端并在每个终端中运行 `hermes -w` — 每次调用都会自动获得自己的 worktree 和分支。
+对于并行 Agent，打开多个终端并在每个终端中运行 `hermes -w` —— 每次调用都会自动获得其自己的 worktree 和分支。
 
 ## 总结
 

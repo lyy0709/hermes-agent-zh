@@ -1,6 +1,6 @@
 ---
 title: 视觉与图像粘贴
-description: 将剪贴板中的图像粘贴到 Hermes CLI 中进行多模态视觉分析。
+description: 将剪贴板中的图像粘贴到 Hermes CLI 中，进行多模态视觉分析。
 sidebar_label: 视觉与图像粘贴
 sidebar_position: 7
 ---
@@ -23,7 +23,7 @@ Hermes Agent 支持**多模态视觉**功能——你可以将剪贴板中的图
 
 ## 粘贴方法
 
-附加图像的方式取决于你的终端环境。并非所有方法都适用于所有环境——以下是完整的分类说明：
+附加图像的方法取决于你的终端环境。并非所有方法都适用于所有环境——以下是完整的分类说明：
 
 ### `/paste` 命令
 
@@ -33,24 +33,24 @@ Hermes Agent 支持**多模态视觉**功能——你可以将剪贴板中的图
 /paste
 ```
 
-输入 `/paste` 并按 Enter 键。Hermes 会检查你的剪贴板中是否有图像并附加它。这种方法适用于所有环境，因为它显式调用剪贴板后端——无需担心终端快捷键拦截问题。
+输入 `/paste` 并按 Enter 键。Hermes 会检查你的剪贴板中是否有图像并附加它。这种方法适用于所有环境，因为它显式调用剪贴板后端——无需担心终端按键绑定拦截问题。
 
 ### Ctrl+V / Cmd+V（括号粘贴）
 
-当你粘贴剪贴板中与图像一起存在的文本时，Hermes 也会自动检查图像。这在以下情况下有效：
-*   你的剪贴板中**同时包含文本和图像**（某些应用在你复制时会同时将两者放入剪贴板）
+当你粘贴剪贴板中与图像一起存在的文本时，Hermes 也会自动检查是否有图像。这在以下情况下有效：
+*   你的剪贴板**同时包含文本和图像**（某些应用在你复制时会同时将两者放入剪贴板）
 *   你的终端支持括号粘贴（大多数现代终端都支持）
 
 :::warning
-如果你的剪贴板**只有图像**（没有文本），在大多数终端中按 Ctrl+V 不会有任何反应。终端只能粘贴文本——没有粘贴二进制图像数据的标准机制。请改用 `/paste` 或 Alt+V。
+如果你的剪贴板**只有图像**（没有文本），在大多数终端中按 Ctrl+V 不会有任何反应。终端只能粘贴文本——没有粘贴二进制图像数据的标准机制。请使用 `/paste` 或 Alt+V。
 :::
 
 ### Alt+V
 
-Alt 键组合键在大多数终端模拟器中都能通过（它们以 ESC + 键的形式发送，而不是被拦截）。按 `Alt+V` 可以检查剪贴板中是否有图像。
+Alt 键组合在大多数终端模拟器中都能通过（它们以 ESC + 键的形式发送，而不是被拦截）。按 `Alt+V` 可以检查剪贴板中是否有图像。
 
 :::caution
-**在 VSCode 的集成终端中无效。** VSCode 会拦截许多 Alt+键 组合键用于其自身的 UI。请改用 `/paste`。
+**在 VSCode 的集成终端中无效。** VSCode 会拦截许多 Alt+键组合用于其自身的 UI。请改用 `/paste`。
 :::
 
 ### Ctrl+V（原始模式——仅限 Linux）
@@ -69,14 +69,14 @@ Alt 键组合键在大多数终端模拟器中都能通过（它们以 ESC + 键
 | **VSCode 终端 (SSH)** | ❌² | ❌² | ❌ | 远程剪贴板不可访问 |
 | **SSH 终端 (任何)** | ❌² | ❌² | ❌² | 远程剪贴板不可访问 |
 
-¹ 仅当剪贴板同时包含文本和图像时有效（仅包含图像的剪贴板 = 无反应）
+¹ 仅当剪贴板同时包含文本和图像时有效（仅图像的剪贴板 = 无反应）
 ² 请参阅下面的 [SSH 与远程会话](#ssh--remote-sessions)
 
 ## 平台特定设置
 
 ### macOS
 
-**无需设置。** Hermes 使用 `osascript`（内置于 macOS）来读取剪贴板。为了获得更快的性能，可以选择安装 `pngpaste`：
+**无需设置。** Hermes 使用 `osascript`（macOS 内置）来读取剪贴板。为了获得更快的性能，可以选择安装 `pngpaste`：
 
 ```bash
 brew install pngpaste
@@ -121,7 +121,7 @@ echo $XDG_SESSION_TYPE
 
 ### WSL2
 
-**无需额外设置。** Hermes 会自动检测 WSL2（通过 `/proc/version`）并使用 `powershell.exe` 通过 .NET 的 `System.Windows.Forms.Clipboard` 访问 Windows 剪贴板。这是 WSL2 的 Windows 互操作功能内置的——`powershell.exe` 默认可用。
+**无需额外设置。** Hermes 会自动检测 WSL2（通过 `/proc/version`），并使用 `powershell.exe` 通过 .NET 的 `System.Windows.Forms.Clipboard` 访问 Windows 剪贴板。这是 WSL2 Windows 互操作内置的功能——`powershell.exe` 默认可用。
 
 剪贴板数据以 base64 编码的 PNG 格式通过 stdout 传输，因此不需要文件路径转换或临时文件。
 
@@ -145,11 +145,11 @@ powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms;
 
 ## SSH 与远程会话
 
-**剪贴板粘贴在 SSH 连接中无效。** 当你通过 SSH 连接到远程机器时，Hermes CLI 在远程主机上运行。所有剪贴板工具（`xclip`、`wl-paste`、`powershell.exe`、`osascript`）读取的都是它们运行所在机器的剪贴板——即远程服务器，而不是你的本地机器。你的本地剪贴板无法从远程端访问。
+**通过 SSH 无法使用剪贴板粘贴。** 当你 SSH 到远程机器时，Hermes CLI 在远程主机上运行。所有剪贴板工具（`xclip`、`wl-paste`、`powershell.exe`、`osascript`）读取的都是它们运行所在机器的剪贴板——即远程服务器，而不是你的本地机器。你的本地剪贴板在远程端是无法访问的。
 
 ### SSH 的变通方案
 
-1.  **上传图像文件**——将图像保存在本地，通过 `scp`、VSCode 的文件资源管理器（拖放）或任何文件传输方法将其上传到远程服务器。然后通过路径引用它。*（计划在未来的版本中添加 `/attach <文件路径>` 命令。）*
+1.  **上传图像文件**——将图像保存在本地，通过 `scp`、VSCode 的文件资源管理器（拖放）或任何文件传输方法将其上传到远程服务器。然后通过路径引用它。*（计划在未来的版本中添加 `/attach <filepath>` 命令。）*
 
 2.  **使用 URL**——如果图像可以在线访问，只需在消息中粘贴 URL。Agent 可以直接使用 `vision_analyze` 查看任何图像 URL。
 
@@ -169,7 +169,7 @@ powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms;
 
 如果剪贴板只包含图像（没有文本），终端就没有内容可发送。没有标准的终端转义序列用于二进制图像数据。终端根本不会做任何事情。
 
-这就是为什么 Hermes 使用单独的剪贴板检查——它不通过终端粘贴事件接收图像数据，而是通过子进程直接调用操作系统级工具（`osascript`、`powershell.exe`、`xclip`、`wl-paste`）来独立读取剪贴板。
+这就是为什么 Hermes 使用单独的剪贴板检查——它不是通过终端粘贴事件接收图像数据，而是通过子进程直接调用操作系统级工具（`osascript`、`powershell.exe`、`xclip`、`wl-paste`）来独立读取剪贴板。
 
 ## 支持的模型
 

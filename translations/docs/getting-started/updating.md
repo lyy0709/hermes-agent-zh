@@ -29,33 +29,33 @@ hermes update
 3.  **配置迁移** — 检测自你当前版本以来添加的新配置选项，并提示你设置它们
 4.  **消息网关自动重启** — 如果消息网关服务正在运行（Linux 上是 systemd，macOS 上是 launchd），它会在更新完成后**自动重启**，以便新代码立即生效
 
-预期的输出如下所示：
+预期输出如下所示：
 
 ```
 $ hermes update
 正在更新 Hermes Agent...
 📥 正在拉取最新代码...
-已经是最新的。 (或：正在更新 abc1234..def5678)
+Already up to date.  (或: Updating abc1234..def5678)
 📦 正在更新依赖项...
 ✅ 依赖项已更新
 🔍 正在检查新的配置选项...
-✅ 配置是最新的 (或：发现 2 个新选项 — 正在运行迁移...)
+✅ 配置是最新的  (或: Found 2 new options — running migration...)
 🔄 正在重启消息网关服务...
 ✅ 消息网关已重启
 ✅ Hermes Agent 更新成功！
 ```
 
-### 建议的更新后验证
+### 推荐的更新后验证
 
 `hermes update` 处理主要的更新路径，但快速验证可以确认一切是否顺利：
 
-1.  `git status --short` — 如果工作树意外地处于脏状态，请在继续之前检查
+1.  `git status --short` — 如果工作树意外地变脏，请在继续之前检查
 2.  `hermes doctor` — 检查配置、依赖项和服务健康状况
 3.  `hermes --version` — 确认版本号按预期更新
 4.  如果你使用消息网关：`hermes gateway status`
 5.  如果 `doctor` 报告 npm audit 问题：在标记的目录中运行 `npm audit fix`
 
-:::warning 更新后工作树处于脏状态
+:::warning 更新后工作树变脏
 如果 `git status --short` 在 `hermes update` 后显示意外的更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
 :::
 
@@ -71,15 +71,15 @@ hermes version
 hermes update --check
 ```
 
-### 通过消息平台更新
+### 从消息平台更新
 
-你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令进行更新：
+你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令来更新：
 
 ```
 /update
 ```
 
-这会拉取最新代码、更新依赖项并重启消息网关。机器人将在重启期间短暂离线（通常为 5-15 秒），然后恢复。
+这会拉取最新代码、更新依赖项并重启消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
 
 ### 手动更新
 
@@ -133,7 +133,7 @@ uv pip install -e ".[all]"
 如果添加了新选项，回滚可能会导致配置不兼容。回滚后运行 `hermes config check`，如果遇到错误，请从 `config.yaml` 中删除任何无法识别的选项。
 :::
 
-### 给 Nix 用户的说明
+### 给 Nix 用户的注意事项
 
 如果你通过 Nix flake 安装，更新是通过 Nix 包管理器管理的：
 
@@ -161,7 +161,7 @@ nix profile rollback
 hermes uninstall
 ```
 
-卸载程序会给你选择是否保留配置文件 (`~/.hermes/`) 以备将来重新安装。
+卸载程序会给你选择是否保留配置文件（`~/.hermes/`）以便将来重新安装。
 
 ### 手动卸载
 

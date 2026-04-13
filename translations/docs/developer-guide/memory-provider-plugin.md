@@ -25,7 +25,7 @@ plugins/memory/my-provider/
 
 ## MemoryProvider 抽象基类
 
-你的插件实现来自 `agent/memory_provider.py` 的 `MemoryProvider` 抽象基类：
+你的插件需要实现来自 `agent/memory_provider.py` 的 `MemoryProvider` 抽象基类：
 
 ```python
 from agent.memory_provider import MemoryProvider
@@ -58,7 +58,7 @@ class MyMemoryProvider(MemoryProvider):
 | 方法 | 调用时机 | 必须实现？ |
 |--------|-----------|-----------------|
 | `name` (属性) | 始终 | **是** |
-| `is_available()` | Agent 初始化，激活前 | **是** — 无网络调用 |
+| `is_available()` | Agent 初始化，激活之前 | **是** — 不进行网络调用 |
 | `initialize(session_id, **kwargs)` | Agent 启动时 | **是** |
 | `get_tool_schemas()` | 初始化后，用于工具注入 | **是** |
 | `handle_tool_call(name, args)` | 当 Agent 使用你的工具时 | **是**（如果你有工具） |
@@ -72,11 +72,11 @@ class MyMemoryProvider(MemoryProvider):
 
 ### 可选钩子
 
-| 方法 | 调用时机 | 用例 |
+| 方法 | 调用时机 | 使用场景 |
 |--------|-----------|----------|
 | `system_prompt_block()` | 系统提示词组装时 | 静态提供商信息 |
 | `prefetch(query)` | 每次 API 调用前 | 返回回忆的上下文 |
-| `queue_prefetch(query)` | 每次轮次后 | 为下一轮预热 |
+| `queue_prefetch(query)` | 每次轮次后 | 为下一轮次预热 |
 | `sync_turn(user, assistant)` | 每次完成的轮次后 | 持久化对话 |
 | `on_session_end(messages)` | 对话结束时 | 最终提取/刷新 |
 | `on_pre_compress(messages)` | 上下文压缩前 | 在丢弃前保存洞察 |
@@ -92,7 +92,7 @@ def get_config_schema(self):
     return [
         {
             "key": "api_key",
-            "description": "我的提供商 API 密钥",
+            "description": "My Provider API 密钥",
             "secret": True,           # → 写入 .env
             "required": True,
             "env_var": "MY_API_KEY",   # 显式环境变量名
@@ -115,7 +115,7 @@ def get_config_schema(self):
 带有 `secret: True` 和 `env_var` 的字段会进入 `.env`。非机密字段会传递给 `save_config()`。
 
 :::tip 最小化与完整模式
-`get_config_schema()` 中的每个字段都会在 `hermes memory setup` 期间提示用户。具有许多选项的提供商应保持模式最小化 — 仅包含用户**必须**配置的字段（API 密钥、必需凭据）。在配置文件参考中（例如 `$HERMES_HOME/myprovider.json`）记录可选设置，而不是在设置期间提示所有选项。这可以保持设置向导快速，同时仍支持高级配置。请参阅 Supermemory 提供商示例 — 它仅提示 API 密钥；所有其他选项位于 `supermemory.json` 中。
+`get_config_schema()` 中的每个字段都会在 `hermes memory setup` 期间被提示。具有许多选项的提供商应保持模式最小化 — 仅包含用户**必须**配置的字段（API 密钥、必需凭据）。在配置文件参考（例如 `$HERMES_HOME/myprovider.json`）中记录可选设置，而不是在设置期间提示所有选项。这可以保持设置向导快速，同时仍支持高级配置。请参阅 Supermemory 提供商的示例 — 它只提示 API 密钥；所有其他选项都位于 `supermemory.json` 中。
 :::
 
 ## 保存配置
@@ -206,12 +206,12 @@ mgr.shutdown_all()
 
 ### 工作原理
 
-1. 向你的插件目录添加一个 `cli.py` 文件
+1. 在你的插件目录中添加一个 `cli.py` 文件
 2. 定义一个 `register_cli(subparser)` 函数来构建 argparse 树
 3. 记忆插件系统在启动时通过 `discover_plugin_cli_commands()` 发现它
-4. 你的命令出现在 `hermes <provider-name> <subcommand>` 下
+4. 你的命令将出现在 `hermes <provider-name> <subcommand>` 下
 
-**活动提供商门控：** 你的 CLI 命令仅在你的提供商是配置中的活动 `memory.provider` 时出现。如果用户尚未配置你的提供商，你的命令将不会显示在 `hermes --help` 中。
+**活动提供商门控：** 只有当你的提供商是配置中活动的 `memory.provider` 时，你的 CLI 命令才会出现。如果用户尚未配置你的提供商，你的命令将不会显示在 `hermes --help` 中。
 
 ### 示例
 
@@ -219,7 +219,7 @@ mgr.shutdown_all()
 # plugins/memory/my-provider/cli.py
 
 def my_command(args):
-    """由 argparse 分发的处理程序。"""
+    """由 argparse 分发的处理器。"""
     sub = getattr(args, "my_command", None)
     if sub == "status":
         print("提供商处于活动状态并已连接。")
@@ -255,4 +255,4 @@ plugins/memory/my-provider/
 
 ## 单一提供商规则
 
-一次只能有一个外部记忆提供商处于活动状态。如果用户尝试注册第二个，MemoryManager 会拒绝并发出警告。这可以防止工具模式膨胀和冲突的后端。
+一次只能有一个外部记忆提供商处于活动状态。如果用户尝试注册第二个，MemoryManager 会拒绝并发出警告。这可以防止工具模式膨胀和后台冲突。

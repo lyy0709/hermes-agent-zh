@@ -7,7 +7,7 @@ sidebar_position: 9
 本指南介绍如何为 Hermes 消息网关添加新的消息平台。平台适配器将 Hermes 连接到外部消息服务（Telegram、Discord、企业微信等），使用户可以通过该服务与 Agent 交互。
 
 :::tip
-添加平台适配器涉及代码、配置和文档中的 20 多个文件。请将此指南作为清单使用——适配器文件本身通常只占工作的 40%。
+添加平台适配器涉及代码、配置和文档中的 20 多个文件。请将此指南用作清单——适配器文件本身通常只占工作的 40%。
 :::
 
 ## 架构概述
@@ -26,7 +26,7 @@ sidebar_position: 9
 
 入站消息由适配器接收，并通过 `self.handle_message(event)` 转发，基类会将其路由到网关运行器。
 
-## 逐步检查清单
+## 分步清单
 
 ### 1. 平台枚举
 
@@ -60,7 +60,7 @@ class NewPlatAdapter(BasePlatformAdapter):
         self._api_key = extra.get("api_key") or os.getenv("NEWPLAT_API_KEY", "")
 
     async def connect(self) -> bool:
-        # 建立连接，开始轮询/Webhook
+        # 建立连接，开始轮询/设置 Webhook
         self._mark_connected()
         return True
 
@@ -105,7 +105,7 @@ await self.handle_message(event)
 
 ### 4. 网关运行器 (`gateway/run.py`)
 
-五个需要修改的地方：
+六个需要修改的地方：
 
 1.  **`_create_adapter()`** — 添加 `elif platform == Platform.NEWPLAT:` 分支
 2.  **`_is_user_authorized()` allowed_users 映射** — `Platform.NEWPLAT: "NEWPLAT_ALLOWED_USERS"`
@@ -114,7 +114,7 @@ await self.handle_message(event)
 5.  **早期环境检查 `_allow_all` 元组** — 添加 `"NEWPLAT_ALLOW_ALL_USERS"`
 6.  **`_UPDATE_ALLOWED_PLATFORMS` frozenset** — 添加 `Platform.NEWPLAT`
 
-### 5. 跨平台消息投递
+### 5. 跨平台投递
 
 1.  **`gateway/platforms/webhook.py`** — 在投递类型元组中添加 `"newplat"`
 2.  **`cron/scheduler.py`** — 添加到 `_KNOWN_DELIVERY_PLATFORMS` frozenset 和 `_deliver_result()` 平台映射中
@@ -146,7 +146,7 @@ await self.handle_message(event)
 _PLATFORM_HINTS = {
     # ...
     "newplat": (
-        "你正在通过 NewPlat 聊天。它支持 Markdown 格式，但有 4000 个字符的消息长度限制。"
+        "你正在通过 NewPlat 聊天。它支持 Markdown 格式，但有 4000 字符的消息长度限制。"
     ),
 }
 ```
@@ -189,13 +189,13 @@ search_files "newplat" output_mode="files_only" file_glob="*.py"
 # 出现在第一组但不在第二组中的任何文件都是潜在的遗漏
 ```
 
-对 `.md` 和 `.ts` 文件重复此操作。调查每个遗漏——它是平台枚举（需要更新）还是平台特定引用（跳过）？
+对 `.md` 和 `.ts` 文件重复此过程。调查每个遗漏——它是平台枚举（需要更新）还是平台特定引用（跳过）？
 
 ## 常见模式
 
 ### 长轮询适配器
 
-如果你的适配器使用长轮询（如 Telegram 或微信），请使用轮询循环任务：
+如果你的适配器使用长轮询（如 Telegram 或 Weixin），请使用轮询循环任务：
 
 ```python
 async def connect(self):
@@ -226,7 +226,7 @@ async def _handle_callback(self, request):
     return web.Response(text="success")  # 立即确认
 ```
 
-对于响应截止时间严格的平台（例如，企业微信的 5 秒限制），请始终立即确认，然后稍后通过 API 主动发送 Agent 的回复。Agent 会话运行需要 3-30 分钟——在回调响应窗口内进行内联回复是不可行的。
+对于响应截止时间严格的平台（例如，企业微信的 5 秒限制），请始终立即确认，然后稍后通过 API 主动发送 Agent 的回复。Agent 会话运行时间为 3-30 分钟——在回调响应窗口内进行内联回复是不可行的。
 
 ### Token 锁
 
