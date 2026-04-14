@@ -10,8 +10,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "README.md": {
-    "source_hash": "sha256:932b7de9f3909fde0e3df542ea785601761ef6a86e3b16527929dbe1f7d15f6d",
-    "translated_at": "2026-04-13T03:29:43.731372+00:00",
+    "source_hash": "sha256:7560ab784dfc04468b9df808ca66ad76a4d7b67bb9896753c578a39da157d5fe",
+    "translated_at": "2026-04-14T05:40:33.828931+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/developer-guide/adding-tools.md": {

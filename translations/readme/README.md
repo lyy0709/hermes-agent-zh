@@ -11,17 +11,17 @@
   <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="Built by Nous Research"></a>
 </p>
 
-**由 [Nous Research](https://nousresearch.com) 构建的自我改进 AI Agent。** 它是唯一内置学习循环的 Agent —— 它从经验中创建技能，在使用中改进它们，推动自己持久化知识，搜索自己过去的对话，并在跨会话中构建一个不断加深的关于你的模型。在 5 美元的 VPS、GPU 集群或空闲时几乎不花钱的无服务器基础设施上运行它。它不局限于你的笔记本电脑 —— 当它在云 VM 上工作时，你可以从 Telegram 与它对话。
+**由 [Nous Research](https://nousresearch.com) 构建的自我改进 AI Agent。** 它是唯一内置学习循环的 Agent —— 它从经验中创建技能，在使用中改进它们，推动自身持久化知识，搜索自己过去的对话，并在跨会话中构建关于你的日益深入的模型。你可以在 5 美元的 VPS、GPU 集群或闲置时成本几乎为零的无服务器基础设施上运行它。它不局限于你的笔记本电脑 —— 当它在云虚拟机上工作时，你可以通过 Telegram 与它对话。
 
-使用你想要的任何模型 —— [Nous Portal](https://portal.nousresearch.com)、[OpenRouter](https://openrouter.ai)（200+ 模型）、[z.ai/GLM](https://z.ai)、[Kimi/Moonshot](https://platform.moonshot.ai)、[MiniMax](https://www.minimax.io)、OpenAI 或你自己的端点。使用 `hermes model` 切换 —— 无需更改代码，没有锁定。
+使用你想要的任何模型 —— [Nous Portal](https://portal.nousresearch.com)、[OpenRouter](https://openrouter.ai)（200+ 模型）、[Xiaomi MiMo](https://platform.xiaomimimo.com)、[z.ai/GLM](https://z.ai)、[Kimi/Moonshot](https://platform.moonshot.ai)、[MiniMax](https://www.minimax.io)、[Hugging Face](https://huggingface.co)、OpenAI，或你自己的端点。使用 `hermes model` 切换 —— 无需更改代码，没有锁定。
 
 <table>
-<tr><td><b>真正的终端界面</b></td><td>完整的 TUI，支持多行编辑、斜杠命令自动补全、对话历史记录、中断和重定向，以及流式工具输出。</td></tr>
+<tr><td><b>真正的终端界面</b></td><td>完整的 TUI，支持多行编辑、斜杠命令自动补全、对话历史、中断与重定向，以及流式工具输出。</td></tr>
 <tr><td><b>在你所在之处运行</b></td><td>Telegram、Discord、Slack、WhatsApp、Signal 和 CLI —— 全部来自单个消息网关进程。语音备忘录转录，跨平台对话连续性。</td></tr>
-<tr><td><b>闭环学习循环</b></td><td>Agent 管理的记忆，带有周期性提示。复杂任务后自主创建技能。技能在使用过程中自我改进。用于跨会话回忆的、带有 LLM 摘要的 FTS5 会话搜索。<a href="https://github.com/plastic-labs/honcho">Honcho</a> 辩证用户建模。兼容 <a href="https://agentskills.io">agentskills.io</a> 开放标准。</td></tr>
+<tr><td><b>闭环学习循环</b></td><td>Agent 管理的记忆，带有周期性提示。复杂任务后自主创建技能。技能在使用中自我改进。用于跨会话回忆的、带有 LLM 摘要的 FTS5 会话搜索。<a href="https://github.com/plastic-labs/honcho">Honcho</a> 辩证用户建模。兼容 <a href="https://agentskills.io">agentskills.io</a> 开放标准。</td></tr>
 <tr><td><b>定时自动化</b></td><td>内置定时任务调度器，可交付到任何平台。每日报告、夜间备份、每周审计 —— 全部使用自然语言，无人值守运行。</td></tr>
-<tr><td><b>委派和并行化</b></td><td>为并行工作流生成隔离的子 Agent。编写通过 RPC 调用工具的 Python 脚本，将多步流水线压缩为零上下文成本的回合。</td></tr>
-<tr><td><b>随处运行，不限于你的笔记本电脑</b></td><td>六个终端后端 —— 本地、Docker、SSH、Daytona、Singularity 和 Modal。Daytona 和 Modal 提供无服务器持久性 —— 你的 Agent 的执行环境在空闲时休眠，按需唤醒，在会话之间几乎不产生成本。在 5 美元的 VPS 或 GPU 集群上运行它。</td></tr>
+<tr><td><b>委派与并行化</b></td><td>为并行工作流生成隔离的子 Agent。编写通过 RPC 调用工具的 Python 脚本，将多步骤流水线压缩为零上下文成本的回合。</td></tr>
+<tr><td><b>随处运行，不限于你的笔记本电脑</b></td><td>六种终端后端 —— 本地、Docker、SSH、Daytona、Singularity 和 Modal。Daytona 和 Modal 提供无服务器持久化 —— 你的 Agent 执行环境在闲置时休眠，按需唤醒，会话间成本几乎为零。在 5 美元的 VPS 或 GPU 集群上运行它。</td></tr>
 <tr><td><b>研究就绪</b></td><td>批量轨迹生成、Atropos RL 执行环境、用于训练下一代工具调用模型的轨迹压缩。</td></tr>
 </table>
 
@@ -48,7 +48,7 @@ hermes              # 开始聊天！
 
 ---
 
-## 入门指南
+## 快速开始
 
 ```bash
 hermes              # 交互式 CLI —— 开始对话
@@ -66,13 +66,13 @@ hermes doctor       # 诊断任何问题
 
 ## CLI 与消息平台快速参考
 
-Hermes 有两个入口点：使用 `hermes` 启动终端 UI，或者运行消息网关并从 Telegram、Discord、Slack、WhatsApp、Signal 或 Email 与它对话。一旦进入对话，许多斜杠命令在两种界面中是共享的。
+Hermes 有两个入口点：使用 `hermes` 启动终端 UI，或者运行消息网关并通过 Telegram、Discord、Slack、WhatsApp、Signal 或 Email 与它对话。一旦进入对话，许多斜杠命令在两种界面中是共享的。
 
 | 操作 | CLI | 消息平台 |
 |---------|-----|---------------------|
-| 开始聊天 | `hermes` | 运行 `hermes gateway setup` + `hermes gateway start`，然后向机器人发送消息 |
+| 开始聊天 | `hermes` | 运行 `hermes gateway setup` + `hermes gateway start`，然后给机器人发送消息 |
 | 开始新对话 | `/new` 或 `/reset` | `/new` 或 `/reset` |
-| 更改模型 | `/model [provider:model]` | `/model [provider:model]` |
+| 切换模型 | `/model [provider:model]` | `/model [provider:model]` |
 | 设置人格 | `/personality [name]` | `/personality [name]` |
 | 重试或撤销上一回合 | `/retry`, `/undo` | `/retry`, `/undo` |
 | 压缩上下文 / 检查使用情况 | `/compress`, `/usage`, `/insights [--days N]` | `/compress`, `/usage`, `/insights [days]` |
@@ -94,7 +94,7 @@ Hermes 有两个入口点：使用 `hermes` 启动终端 UI，或者运行消息
 | [CLI 使用](https://hermes-agent.nousresearch.com/docs/user-guide/cli) | 命令、快捷键、人格、会话 |
 | [配置](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) | 配置文件、提供商、模型、所有选项 |
 | [消息网关](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) | Telegram、Discord、Slack、WhatsApp、Signal、Home Assistant |
-| [安全](https://hermes-agent.nousresearch.com/docs/user-guide/security) | 命令批准、DM 配对、容器隔离 |
+| [安全](https://hermes-agent.nousresearch.com/docs/user-guide/security) | 命令批准、私聊配对、容器隔离 |
 | [工具与工具集](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools) | 40+ 工具、工具集系统、终端后端 |
 | [技能系统](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) | 程序性记忆、技能中心、创建技能 |
 | [记忆](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory) | 持久化记忆、用户档案、最佳实践 |
@@ -112,7 +112,7 @@ Hermes 有两个入口点：使用 `hermes` 启动终端 UI，或者运行消息
 
 如果你来自 OpenClaw，Hermes 可以自动导入你的设置、记忆、技能和 API 密钥。
 
-**在首次设置期间：** 设置向导 (`hermes setup`) 会自动检测 `~/.openclaw` 并在配置开始前提供迁移选项。
+**首次设置期间：** 设置向导 (`hermes setup`) 会自动检测 `~/.openclaw` 并在配置开始前提供迁移选项。
 
 **安装后的任何时间：**
 
@@ -127,13 +127,13 @@ hermes claw migrate --overwrite  # 覆盖现有冲突
 - **SOUL.md** —— 人格文件
 - **记忆** —— MEMORY.md 和 USER.md 条目
 - **技能** —— 用户创建的技能 → `~/.hermes/skills/openclaw-imports/`
-- **命令允许列表** —— 批准模式
+- **命令白名单** —— 批准模式
 - **消息设置** —— 平台配置、允许的用户、工作目录
-- **API 密钥** —— 允许列表中的密钥（Telegram、OpenRouter、OpenAI、Anthropic、ElevenLabs）
+- **API 密钥** —— 白名单密钥（Telegram、OpenRouter、OpenAI、Anthropic、ElevenLabs）
 - **TTS 资源** —— 工作区音频文件
 - **工作区指令** —— AGENTS.md（使用 `--workspace-target`）
 
-查看 `hermes claw migrate --help` 获取所有选项，或使用 `openclaw-migration` 技能进行交互式 Agent 引导的迁移，并带有试运行预览。
+查看 `hermes claw migrate --help` 获取所有选项，或使用 `openclaw-migration` 技能进行交互式 Agent 引导的迁移，并带有预览。
 
 ---
 
@@ -165,8 +165,8 @@ python -m pytest tests/ -q
 
 - 💬 [Discord](https://discord.gg/NousResearch)
 - 📚 [技能中心](https://agentskills.io)
-- 🐛 [问题](https://github.com/NousResearch/hermes-agent/issues)
-- 💡 [讨论](https://github.com/NousResearch/hermes-agent/discussions)
+- 🐛 [问题反馈](https://github.com/NousResearch/hermes-agent/issues)
+- 💡 [讨论区](https://github.com/NousResearch/hermes-agent/discussions)
 - 🔌 [HermesClaw](https://github.com/AaronWong1999/hermesclaw) —— 社区微信桥接：在同一微信账号上运行 Hermes Agent 和 OpenClaw。
 
 ---
