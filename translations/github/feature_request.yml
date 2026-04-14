@@ -8,8 +8,8 @@ body:
       value: |
         感谢您的建议！在提交之前，请考虑：
 
-        - **这是一个新技能吗？** 大多数功能应该是[技能，而非工具](https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md#should-it-be-a-skill-or-a-tool)。如果它是一个专门的集成（加密货币、NFT、小众SaaS），它属于技能中心，不应捆绑在内。
-        - **搜索[现有议题](https://github.com/NousResearch/hermes-agent/issues)** — 可能已经有人提过这个建议了。
+        - **这是一个新技能吗？** 大多数功能应该是[技能，而非工具](https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md#should-it-be-a-skill-or-a-tool)。如果它是一个专门的集成（加密货币、NFT、小众SaaS），它属于技能中心，而不是捆绑包。
+        - **搜索[现有问题](https://github.com/NousResearch/hermes-agent/issues)** — 可能已经有人提过这个建议了。
 
   - type: textarea
     id: problem
@@ -71,3 +71,15 @@ body:
       label: 贡献
       options:
         - label: 我希望自己实现这个功能并提交 PR
+
+  - type: textarea
+    id: debug-report
+    attributes:
+      label: 调试报告（可选）
+      description: |
+        如果此功能请求与您遇到的问题相关，请运行 `hermes debug share` 并将链接粘贴在此处。
+        在交互式聊天会话中，您可以使用 `/debug` 命令。
+        这有助于我们了解您的执行环境和任何相关日志。
+      placeholder: |
+        报告   https://paste.rs/abc123
+      render: shell

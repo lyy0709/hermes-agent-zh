@@ -1,21 +1,22 @@
-name: "🐛 Bug 报告"
-description: 报告一个 Bug —— 某些功能损坏、崩溃或行为异常。
+name: "🐛 错误报告"
+description: 报告一个错误 —— 某些功能损坏、崩溃或行为异常。
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        感谢报告 Bug！请填写以下部分，以便我们能够快速复现并修复它。
+        感谢报告错误！请填写以下部分，以便我们快速复现并修复。
 
-        **提交前，请确认：**
+        **提交前请**：
         - [ ] 搜索[现有问题](https://github.com/NousResearch/hermes-agent/issues)以避免重复
-        - [ ] 更新到最新版本 (`hermes update`) 并确认 Bug 仍然存在
+        - [ ] 更新到最新版本 (`hermes update`) 并确认错误仍然存在
+        - [ ] 运行 `hermes debug share` 并将链接粘贴在下方（参见调试报告部分）
 
   - type: textarea
     id: description
     attributes:
-      label: Bug 描述
+      label: 错误描述
       description: 对损坏内容的清晰描述。如果相关，请包含错误信息、回溯或截图。
       placeholder: |
         发生了什么？你期望发生什么？
@@ -26,7 +27,7 @@ body:
     id: reproduction
     attributes:
       label: 复现步骤
-      description: 触发 Bug 的最小步骤。越具体，我们修复得越快。
+      description: 触发错误的最小步骤。越具体，我们修复得越快。
       placeholder: |
         1. 运行 `hermes chat`
         2. 发送消息 "..."
@@ -63,7 +64,7 @@ body:
         - 设置 / 安装
         - 工具 (终端、文件操作、网页、代码执行等)
         - 技能 (技能加载、技能中心、技能守卫)
-        - Agent 核心 (对话循环、上下文压缩、记忆)
+        - Agent 核心 (会话循环、上下文压缩、记忆)
         - 配置 (config.yaml, .env, hermes setup)
         - 其他
     validations:
@@ -82,6 +83,25 @@ body:
         - Slack
         - WhatsApp
 
+  - type: textarea
+    id: debug-report
+    attributes:
+      label: 调试报告
+      description: |
+        从你的终端运行 `hermes debug share` 并将其打印的链接粘贴在此处。
+        这会自动将你的系统信息、配置和最近日志上传到粘贴服务。
+
+        如果你在交互式聊天会话中，也可以使用 `/debug` 斜杠命令 —— 效果相同。
+
+        如果上传失败，请运行 `hermes debug share --local` 并直接粘贴输出。
+      placeholder: |
+        Report   https://paste.rs/abc123
+        agent.log   https://paste.rs/def456
+        gateway.log   https://paste.rs/ghi789
+      render: shell
+    validations:
+      required: true
+
   - type: input
     id: os
     attributes:
@@ -97,8 +117,6 @@ body:
       label: Python 版本
       description: `python --version` 的输出
       placeholder: "3.11.9"
-    validations:
-      required: true
 
   - type: input
     id: hermes-version
@@ -106,14 +124,13 @@ body:
       label: Hermes 版本
       description: `hermes version` 的输出
       placeholder: "2.1.0"
-    validations:
-      required: true
 
   - type: textarea
     id: logs
     attributes:
-      label: 相关日志 / 回溯
-      description: 粘贴任何错误输出、回溯或日志消息。这将自动格式化为代码。
+      label: 额外日志 / 回溯 (可选)
+      description: |
+        上面的调试报告已涵盖大部分日志。使用此字段填写任何 `hermes debug share` 未捕获的额外错误输出、回溯或截图。
       render: shell
 
   - type: textarea
@@ -121,10 +138,10 @@ body:
     attributes:
       label: 根本原因分析 (可选)
       description: |
-        如果你已经深入研究代码并确定了根本原因，请在此处分享。
+        如果你已深入研究代码并确定了根本原因，请在此处分享。
         如果可能，请包含文件路径、行号和代码片段。这将大大加快修复速度。
       placeholder: |
-        Bug 位于 `gateway/run.py` 第 949 行。`len(history)` 统计了 session_meta 条目，
+        错误位于 `gateway/run.py` 第 949 行。`len(history)` 统计了 session_meta 条目，
         但 `agent_messages` 是从过滤后的历史记录构建的...
 
   - type: textarea
