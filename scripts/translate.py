@@ -834,10 +834,10 @@ def translate_markdown_file(
     for i, section in enumerate(sections):
         if len(sections) > 1:
             print(f"  翻译分段 {i + 1}/{len(sections)}...")
-        # Python 大段动态增加 timeout（每 1000 chars 额外 30s），非 Python 保持原值
+        # Python 大段动态增加 timeout（每 1000 chars 额外 30s，上限 600s）
         section_timeout = timeout
         if source_file.suffix == ".py" and len(section) > 6000:
-            section_timeout = max(timeout, timeout + len(section) // 1000 * 30)
+            section_timeout = min(600, max(timeout, timeout + len(section) // 1000 * 30))
         translated = translate_text(client, model, system_prompt, section, rate_limiter, section_timeout,
                                     circuit_breaker=circuit_breaker)
         translated_parts.append(translated)
@@ -1191,7 +1191,7 @@ def main():
     client = OpenAI(api_key=env["api_key"], base_url=env["base_url"], http_client=http_client)
     model = env["model"]
     rate_limiter = RateLimiter(rpm=rpm, tpm=tpm)
-    circuit_breaker = CircuitBreaker(threshold=10)
+    circuit_breaker = CircuitBreaker(threshold=5)
 
     # 执行翻译（并发）— glossary_text 传入每个任务，由任务根据文件类型构建 prompt
     success = 0
