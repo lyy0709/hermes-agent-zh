@@ -1,5 +1,5 @@
 """
-Hermes CLI 的 Doctor 命令。
+Hermes CLI 的 doctor 命令。
 
 诊断 Hermes Agent 设置问题。
 """
@@ -24,7 +24,7 @@ if _env_path.exists():
         load_dotenv(_env_path, encoding="utf-8")
     except UnicodeDecodeError:
         load_dotenv(_env_path, encoding="latin-1")
-# 同时尝试项目 .env 作为开发回退
+# 同时尝试项目的 .env 作为开发回退
 load_dotenv(PROJECT_ROOT / ".env", override=False, encoding="utf-8")
 
 from hermes_cli.colors import Colors, color
@@ -42,6 +42,7 @@ _PROVIDER_ENV_HINTS = (
     "ZAI_API_KEY",
     "Z_AI_API_KEY",
     "KIMI_API_KEY",
+    "KIMI_CN_API_KEY",
     "MINIMAX_API_KEY",
     "MINIMAX_CN_API_KEY",
     "KILOCODE_API_KEY",
@@ -250,7 +251,7 @@ def run_doctor(args):
         if _has_provider_env_config(content):
             check_ok("API 密钥或自定义端点已配置")
         else:
-            check_warn(f"{_DHH}/.env 中未找到 API 密钥")
+            check_warn(f"在 {_DHH}/.env 中未找到 API 密钥")
             issues.append("运行 'hermes setup' 来配置 API 密钥")
     else:
         # Also check project root as fallback
@@ -336,7 +337,7 @@ def run_doctor(args):
                             raw_config.pop(k)
                     from utils import atomic_yaml_write
                     atomic_yaml_write(config_path, raw_config)
-                    check_ok("已将过时的根级键迁移到 model 部分")
+                    check_ok("已将过时的根级键迁移到模型部分")
                     fixed_count += 1
                 else:
                     issues.append("config.yaml 中存在过时的根级 provider/base_url — 运行 'hermes doctor --fix'")
@@ -390,7 +391,7 @@ def run_doctor(args):
     if shutil.which("codex"):
         check_ok("codex CLI")
     else:
-        check_warn("未找到 codex CLI", "(openai-codex 登录需要)")
+        check_warn("未找到 codex CLI", "(openai-codex 登录所需)")
 
     # =========================================================================
     # Check: Directory structure
@@ -503,7 +504,7 @@ def run_doctor(args):
                     check_ok(f"已执行 WAL 检查点 ({wal_size // 1024}K → {new_size // 1024}K)")
                     fixed_count += 1
                 else:
-                    issues.append("WAL 文件过大 — 运行 'hermes doctor --fix' 进行检查点操作")
+                    issues.append("WAL 文件过大 — 运行 'hermes doctor --fix' 以执行检查点")
             elif wal_size > 10 * 1024 * 1024:  # 10 MB
                 check_info(f"WAL 文件为 {wal_size // (1024*1024)} MB (活跃会话的正常情况)")
         except Exception:
@@ -527,7 +528,7 @@ def run_doctor(args):
     if shutil.which("rg"):
         check_ok("ripgrep (rg)", "(更快的文件搜索)")
     else:
-        check_warn("未找到 ripgrep (rg)", "(文件搜索使用 grep 回退)")
+        check_warn("未找到 ripgrep (rg)", "(文件搜索将使用 grep 回退)")
         check_info(f"安装以获得更快搜索: {_system_package_install_cmd('ripgrep')}")
     
     # Docker (optional)
@@ -545,14 +546,14 @@ def run_doctor(args):
                 check_fail("docker 守护进程未运行")
                 issues.append("启动 Docker 守护进程")
         else:
-            check_fail("未找到 docker", "(TERMINAL_ENV=docker 需要)")
+            check_fail("未找到 docker", "(TERMINAL_ENV=docker 所需)")
             issues.append("安装 Docker 或更改 TERMINAL_ENV")
     else:
         if shutil.which("docker"):
             check_ok("docker", "(可选)")
         else:
             if _is_termux():
-                check_info("Docker 后端在 Termux 内不可用 (Android 上预期如此)")
+                check_info("Docker 后端在 Termux 内不可用 (Android 上的预期情况)")
             else:
                 check_warn("未找到 docker", "(可选)")
     
@@ -576,7 +577,7 @@ def run_doctor(args):
                 check_fail(f"SSH 连接到 {ssh_host}")
                 issues.append(f"检查 {ssh_host} 的 SSH 配置")
         else:
-            check_fail("未设置 TERMINAL_SSH_HOST", "(TERMINAL_ENV=ssh 需要)")
+            check_fail("未设置 TERMINAL_SSH_HOST", "(TERMINAL_ENV=ssh 所需)")
             issues.append("在 .env 中设置 TERMINAL_SSH_HOST")
     
     # Daytona (if using daytona backend)
@@ -585,7 +586,7 @@ def run_doctor(args):
         if daytona_key:
             check_ok("Daytona API 密钥", "(已配置)")
         else:
-            check_fail("未设置 DAYTONA_API_KEY", "(TERMINAL_ENV=daytona 需要)")
+            check_fail("未设置 DAYTONA_API_KEY", "(TERMINAL_ENV=daytona 所需)")
             issues.append("设置 DAYTONA_API_KEY 环境变量")
         try:
             from daytona import Daytona  # noqa: F401 — SDK presence check
@@ -618,7 +619,7 @@ def run_doctor(args):
             for step in _termux_browser_setup_steps(node_installed=False):
                 check_info(step)
         else:
-            check_warn("未找到 Node.js", "(可选，浏览器工具需要)")
+            check_warn("未找到 Node.js", "(可选，浏览器工具所需)")
     
     # npm audit for all Node.js packages
     if shutil.which("npm"):
@@ -747,7 +748,7 @@ def run_doctor(args):
             print(f"  正在检查 {_pname} API...", end="", flush=True)
             try:
                 import httpx
-                _base = os.getenv(_base_env, "")
+                _base = os.getenv(_base_env, "") if _base_env else ""
                 # Auto-detect Kimi Code keys (sk-kimi-) → api.kimi.com
                 if not _base and _key.startswith("sk-kimi-"):
                     _base = "https://api.kimi.com/coding/v1"
@@ -845,9 +846,9 @@ def run_doctor(args):
                 import json
                 lock_data = json.loads(lock_file.read_text())
                 count = len(lock_data.get("installed", {}))
-                check_ok(f"锁文件正常 ({count} 个中心安装的技能)")
+                check_ok(f"锁定文件正常 ({count} 个中心安装的技能)")
             except Exception:
-                check_warn("锁文件", "(损坏或无法读取)")
+                check_warn("锁定文件", "(损坏或不可读)")
         quarantine = hub_dir / "quarantine"
         q_count = sum(1 for d in quarantine.iterdir() if d.is_dir()) if quarantine.exists() else 0
         if q_count > 0:
@@ -905,7 +906,7 @@ def run_doctor(args):
                     )
                 except Exception as _e:
                     check_fail("Honcho 连接失败", str(_e))
-                    issues.append(f"Honcho 无法访问: {_e}")
+                    issues.append(f"Honcho 不可达: {_e}")
         except ImportError:
             check_fail("未安装 honcho-ai", "pip install honcho-ai")
             issues.append("Honcho 被设置为记忆提供商但未安装 honcho-ai")
@@ -1016,6 +1017,6 @@ def run_doctor(args):
             print(color("  提示: 运行 'hermes doctor --fix' 以自动修复可能的问题。", Colors.DIM))
     else:
         print(color("─" * 60, Colors.GREEN))
-        print(color("  所有检查通过！🎉", Colors.GREEN, Colors.BOLD))
+        print(color("  所有检查通过! 🎉", Colors.GREEN, Colors.BOLD))
     
     print()

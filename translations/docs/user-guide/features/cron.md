@@ -6,9 +6,9 @@ description: "使用自然语言安排自动化任务，用一个 cron 工具管
 
 # 定时任务 (Cron)
 
-使用自然语言或 cron 表达式安排任务自动运行。Hermes 通过一个单一的 `cronjob` 工具暴露 cron 管理功能，采用操作风格，而不是独立的 schedule/list/remove 工具。
+使用自然语言或 cron 表达式安排任务自动运行。Hermes 通过一个单一的 `cronjob` 工具暴露 cron 管理功能，采用动作风格的操作，而不是独立的 schedule/list/remove 工具。
 
-## Cron 当前能做什么
+## 当前 cron 的功能
 
 Cron 任务可以：
 
@@ -16,10 +16,10 @@ Cron 任务可以：
 - 暂停、恢复、编辑、触发和移除任务
 - 为零个、一个或多个任务附加技能
 - 将结果发送回原始聊天、本地文件或配置的平台目标
-- 在全新的 Agent 会话中运行，使用正常的静态工具列表
+- 在具有正常静态工具列表的全新 Agent 会话中运行
 
 :::warning
-Cron 运行的会话不能递归创建更多 cron 任务。Hermes 在 cron 执行中禁用了 cron 管理工具，以防止失控的调度循环。
+Cron 运行的会话不能递归创建更多 cron 任务。Hermes 在 cron 执行中禁用 cron 管理工具，以防止失控的调度循环。
 :::
 
 ## 创建定时任务
@@ -46,10 +46,10 @@ hermes cron create "every 1h" "使用两个技能并合并结果" \
 
 ### 通过自然对话
 
-正常询问 Hermes：
+像平常一样询问 Hermes：
 
 ```text
-每天早上 9 点，检查 Hacker News 上的 AI 新闻，并通过 Telegram 发送摘要给我。
+每天早上 9 点，检查 Hacker News 上的 AI 新闻，并在 Telegram 上给我发送摘要。
 ```
 
 Hermes 将在内部使用统一的 `cronjob` 工具。
@@ -84,11 +84,11 @@ cronjob(
 )
 ```
 
-当您希望一个定时 Agent 继承可重用的工作流，而不必将完整的技能文本塞进 cron 提示词本身时，这很有用。
+当您希望计划的 Agent 继承可重用的工作流，而不必将完整的技能文本塞入 cron 提示词本身时，这很有用。
 
 ## 编辑任务
 
-您不需要为了更改任务而删除并重新创建它们。
+您不需要仅仅为了更改任务而删除并重新创建它们。
 
 ### 聊天
 
@@ -120,7 +120,7 @@ hermes cron edit <job_id> --clear-skills
 
 ## 生命周期操作
 
-Cron 任务现在拥有比仅创建/移除更完整的生命周期。
+Cron 任务现在拥有比简单的创建/移除更完整的生命周期。
 
 ### 聊天
 
@@ -153,18 +153,18 @@ hermes cron tick
 
 ## 工作原理
 
-**Cron 执行由消息网关守护进程处理。** 消息网关每 60 秒 tick 一次调度器，在隔离的 Agent 会话中运行任何到期的任务。
+**Cron 执行由消息网关守护进程处理。** 网关每 60 秒触发一次调度器，在隔离的 Agent 会话中运行任何到期的任务。
 
 ```bash
 hermes gateway install     # 安装为用户服务
-sudo hermes gateway install --system   # Linux：用于服务器的启动时系统服务
+sudo hermes gateway install --system   # Linux：为服务器安装启动时系统服务
 hermes gateway             # 或在前台运行
 
 hermes cron list
 hermes cron status
 ```
 
-### 消息网关调度器行为
+### 网关调度器行为
 
 每次 tick 时，Hermes：
 
@@ -174,7 +174,7 @@ hermes cron status
 4.  可选地将一个或多个附加技能注入到该新会话中
 5.  运行提示词直至完成
 6.  交付最终响应
-7.  更新运行元数据和下一次计划时间
+7.  更新运行元数据和下一个计划时间
 
 `~/.hermes/cron/.tick.lock` 处的文件锁可防止重叠的调度器 tick 重复运行同一批任务。
 
@@ -184,7 +184,7 @@ hermes cron status
 
 | 选项 | 描述 | 示例 |
 |--------|-------------|---------|
-| `"origin"` | 回到任务创建的地方 | 消息平台上的默认值 |
+| `"origin"` | 返回到任务创建的地方 | 消息平台上的默认值 |
 | `"local"` | 仅保存到本地文件 (`~/.hermes/cron/output/`) | CLI 上的默认值 |
 | `"telegram"` | Telegram 主频道 | 使用 `TELEGRAM_HOME_CHANNEL` |
 | `"telegram:123456"` | 按 ID 指定的特定 Telegram 聊天 | 直接交付 |
@@ -204,12 +204,13 @@ hermes cron status
 | `"wecom"` | 企业微信 | |
 | `"weixin"` | 微信 | |
 | `"bluebubbles"` | BlueBubbles (iMessage) | |
+| `"qqbot"` | QQ 机器人 (腾讯 QQ) | |
 
 Agent 的最终响应会自动交付。您不需要在 cron 提示词中调用 `send_message`。
 
 ### 响应包装
 
-默认情况下，交付的 cron 输出会带有页眉和页脚包装，以便收件人知道它来自定时任务：
+默认情况下，交付的 cron 输出会附带页眉和页脚进行包装，以便收件人知道它来自计划任务：
 
 ```
 Cronjob Response: Morning feeds
@@ -220,7 +221,7 @@ Cronjob Response: Morning feeds
 Note: The agent cannot see this message, and therefore cannot respond to it.
 ```
 
-要交付原始的 Agent 输出而不带包装，请将 `cron.wrap_response` 设置为 `false`：
+要交付原始的 Agent 输出而不进行包装，请将 `cron.wrap_response` 设置为 `false`：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -235,11 +236,11 @@ cron:
 这对于仅应在出现问题时才报告的监控任务很有用：
 
 ```text
-检查 nginx 是否在运行。如果一切正常，仅用 [SILENT] 响应。
+检查 nginx 是否正在运行。如果一切正常，仅用 [SILENT] 响应。
 否则，报告问题。
 ```
 
-失败的任务无论是否有 `[SILENT]` 标记都会交付——只有成功的运行才能被静默。
+无论是否存在 `[SILENT]` 标记，失败的任务总是会交付——只有成功的运行才能被静默。
 
 ## 脚本超时
 
@@ -255,16 +256,16 @@ cron:
 
 ## 提供商恢复
 
-Cron 任务继承您配置的回退提供商和凭据池轮换。如果主要 API 密钥受到速率限制或提供商返回错误，cron Agent 可以：
+Cron 任务继承您配置的备用提供商和凭据池轮换。如果主 API 密钥受到速率限制或提供商返回错误，cron Agent 可以：
 
 - **回退到备用提供商**，如果您在 `config.yaml` 中配置了 `fallback_providers`（或旧的 `fallback_model`）
 - **轮换到同一提供商的下一个凭据**，根据您的[凭据池策略](/docs/user-guide/configuration#credential-pool-strategies)
 
-这意味着高频率运行或在高峰时段运行的 cron 任务更具弹性——单个受速率限制的密钥不会导致整个运行失败。
+这意味着高频运行或在高峰时段运行的 cron 任务更具弹性——单个受速率限制的密钥不会导致整个运行失败。
 
 ## 计划格式
 
-Agent 的最终响应会自动交付——您**不**需要为同一目标在 cron 提示词中包含 `send_message`。如果 cron 运行调用 `send_message` 到调度器已经要交付的完全相同的目标，Hermes 会跳过该重复发送，并告诉模型将面向用户的内容放在最终响应中。仅对额外或不同的目标使用 `send_message`。
+Agent 的最终响应会自动交付——您**不**需要为同一目标在 cron 提示词中包含 `send_message`。如果 cron 运行调用 `send_message` 到调度器已经要交付的精确目标，Hermes 会跳过该重复发送，并告诉模型将面向用户的内容放在最终响应中。仅对额外或不同的目标使用 `send_message`。
 
 ### 相对延迟（一次性）
 
@@ -303,8 +304,8 @@ every 1d     → 每天
 | 计划类型 | 默认重复次数 | 行为 |
 |--------------|----------------|----------|
 | 一次性 (`30m`, 时间戳) | 1 | 运行一次 |
-| 间隔 (`every 2h`) | 永远 | 运行直到被移除 |
-| Cron 表达式 | 永远 | 运行直到被移除 |
+| 间隔 (`every 2h`) | forever | 运行直到被移除 |
+| Cron 表达式 | forever | 运行直到被移除 |
 
 您可以覆盖它：
 
@@ -339,16 +340,16 @@ cronjob(action="remove", job_id="...")
 
 存储使用原子文件写入，因此中断的写入不会留下部分写入的任务文件。
 
-## 自包含的提示词仍然很重要
+## 自包含的提示词仍然重要
 
 :::warning 重要
-Cron 任务在全新的 Agent 会话中运行。提示词必须包含 Agent 所需的一切，这些内容不是由附加技能提供的。
+Cron 任务在完全全新的 Agent 会话中运行。提示词必须包含 Agent 所需的一切，而这些内容尚未由附加技能提供。
 :::
 
 **不好：** `"检查那个服务器问题"`
 
-**好：** `"以用户 'deploy' 身份 SSH 到服务器 192.168.1.100，使用 'systemctl status nginx' 检查 nginx 是否在运行，并验证 https://example.com 返回 HTTP 200。"`
+**好：** `"以用户 'deploy' 身份 SSH 到服务器 192.168.1.100，使用 'systemctl status nginx' 检查 nginx 是否正在运行，并验证 https://example.com 返回 HTTP 200。"`
 
 ## 安全性
 
-定时任务提示词在创建和更新时会扫描提示词注入和凭据泄露模式。包含不可见 Unicode 技巧、SSH 后门尝试或明显秘密泄露有效负载的提示词会被阻止。
+计划任务提示词在创建和更新时会扫描提示词注入和凭据泄露模式。包含不可见 Unicode 技巧、SSH 后门尝试或明显秘密泄露有效负载的提示词会被阻止。

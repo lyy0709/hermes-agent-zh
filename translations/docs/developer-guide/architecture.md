@@ -6,16 +6,16 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 
 # 架构
 
-本页是 Hermes Agent 内部结构的顶层地图。使用它来熟悉代码库，然后深入特定子系统的文档以了解实现细节。
+本页面是 Hermes Agent 内部结构的顶层地图。您可以通过它来了解代码库的整体布局，然后深入阅读特定子系统的文档以获取实现细节。
 
 ## 系统概览
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        入口点                                       │
+│                        入口点                                        │
 │                                                                      │
-│  CLI (cli.py)    消息网关 (gateway/run.py)    ACP (acp_adapter/)    │
-│  批量运行器      API 服务器                   Python 库              │
+│  CLI (cli.py)    消息网关 (gateway/run.py)   ACP (acp_adapter/)     │
+│  批量运行器       API 服务器                  Python 库              │
 └──────────┬──────────────┬───────────────────────┬───────────────────┘
            │              │                       │
            ▼              ▼                       ▼
@@ -43,8 +43,8 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 │ (SQLite + FTS5)   │              │ 终端 (6 个后端)       │
 │ hermes_state.py   │              │ 浏览器 (5 个后端)     │
 │ gateway/session.py│              │ 网页 (4 个后端)       │
-└───────────────────┘              │ MCP (动态)            │
-                                   │ 文件、视觉等           │
+└───────────────────┘              │ MCP (动态)           │
+                                   │ 文件、视觉等          │
                                    └──────────────────────┘
 ```
 
@@ -53,7 +53,7 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 ```text
 hermes-agent/
 ├── run_agent.py              # AIAgent — 核心对话循环 (~10,700 行)
-├── cli.py                    # HermesCLI — 交互式终端 TUI (~10,000 行)
+├── cli.py                    # HermesCLI — 交互式终端 UI (~10,000 行)
 ├── model_tools.py            # 工具发现、模式收集、分发
 ├── toolsets.py               # 工具分组和平台预设
 ├── hermes_state.py           # 带 FTS5 的 SQLite 会话/状态数据库
@@ -103,14 +103,14 @@ hermes-agent/
 │   ├── code_execution_tool.py # execute_code 沙盒
 │   ├── delegate_tool.py      # 子 Agent 委派
 │   ├── mcp_tool.py           # MCP 客户端 (~2,200 行)
-│   ├── credential_files.py   # 基于文件的凭证透传
-│   ├── env_passthrough.py    # 沙盒环境变量透传
-│   ├── ansi_strip.py         # ANSI 转义符剥离
+│   ├── credential_files.py   # 基于文件的凭证传递
+│   ├── env_passthrough.py    # 沙盒环境变量传递
+│   ├── ansi_strip.py         # ANSI 转义序列剥离
 │   └── environments/         # 终端后端 (local, docker, ssh, modal, daytona, singularity)
 │
 ├── gateway/                  # 消息平台网关
 │   ├── run.py                # GatewayRunner — 消息分发 (~9,000 行)
-│   ├── session.py            # SessionStore — 对话持久化
+│   ├── session.py            # SessionStore — 会话持久化
 │   ├── delivery.py           # 出站消息投递
 │   ├── pairing.py            # DM 配对授权
 │   ├── hooks.py              # 钩子发现和生命周期事件
@@ -120,7 +120,7 @@ hermes-agent/
 │   └── platforms/            # 18 个适配器: telegram, discord, slack, whatsapp,
 │                             #   signal, matrix, mattermost, email, sms,
 │                             #   dingtalk, feishu, wecom, wecom_callback, weixin,
-│                             #   bluebubbles, homeassistant, webhook, api_server
+│                             #   bluebubbles, qqbot, homeassistant, webhook, api_server
 │
 ├── acp_adapter/              # ACP 服务器 (VS Code / Zed / JetBrains)
 ├── cron/                     # 调度器 (jobs.py, scheduler.py)
@@ -155,7 +155,7 @@ hermes-agent/
     → 解析会话密钥
     → 使用会话历史创建 AIAgent
     → AIAgent.run_conversation()
-    → 通过适配器传递响应
+    → 通过适配器返回响应
 ```
 
 ### 定时任务
@@ -165,7 +165,7 @@ hermes-agent/
   → 创建新的 AIAgent（无历史记录）
   → 注入附加技能作为上下文
   → 运行任务提示词
-  → 将响应传递到目标平台
+  → 将响应发送到目标平台
   → 更新任务状态和下次运行时间
 ```
 
@@ -181,7 +181,7 @@ hermes-agent/
 6. **[工具运行时](./tools-runtime.md)** — 工具注册表、分发、执行环境
 7. **[会话存储](./session-storage.md)** — SQLite 模式、FTS5、会话谱系
 8. **[网关内部机制](./gateway-internals.md)** — 消息平台网关
-9. **[上下文压缩与提示词缓存](./context-compression-and-caching.md)** — 压缩和缓存
+9. **[上下文压缩与提示词缓存](./context-compression-and-caching.md)** — 压缩与缓存
 10. **[ACP 内部机制](./acp-internals.md)** — IDE 集成
 11. **[执行环境、基准测试与数据生成](./environments.md)** — RL 训练
 
@@ -189,7 +189,7 @@ hermes-agent/
 
 ### Agent 循环
 
-同步编排引擎（`run_agent.py` 中的 `AIAgent`）。处理提供商选择、提示词构建、工具执行、重试、回退、回调、压缩和持久化。支持三种 API 模式以适配不同的提供商后端。
+同步编排引擎（`run_agent.py` 中的 `AIAgent`）。处理提供商选择、提示词构建、工具执行、重试、回退、回调、压缩和持久化。支持三种 API 模式以适应不同的提供商后端。
 
 → [Agent 循环内部机制](./agent-loop.md)
 
@@ -198,20 +198,20 @@ hermes-agent/
 在整个会话生命周期中构建和维护提示词：
 
 - **`prompt_builder.py`** — 从以下部分组装系统提示词：人格（SOUL.md）、记忆（MEMORY.md, USER.md）、技能、上下文文件（AGENTS.md, .hermes.md）、工具使用指南以及模型特定指令
-- **`prompt_caching.py`** — 应用 Anthropic 缓存断点进行前缀缓存
-- **`context_compressor.py`** — 当上下文超过阈值时，总结中间对话轮次
+- **`prompt_caching.py`** — 应用 Anthropic 缓存断点以实现前缀缓存
+- **`context_compressor.py`** — 当上下文超过阈值时，总结中间会话轮次
 
 → [提示词组装](./prompt-assembly.md), [上下文压缩与提示词缓存](./context-compression-and-caching.md)
 
 ### 提供商解析
 
-被 CLI、网关、定时任务、ACP 和辅助调用共享的运行时解析器。将 `(provider, model)` 元组映射到 `(api_mode, api_key, base_url)`。处理 18+ 个提供商、OAuth 流程、凭证池和别名解析。
+一个由 CLI、网关、定时任务、ACP 和辅助调用共享的运行时解析器。将 `(provider, model)` 元组映射到 `(api_mode, api_key, base_url)`。处理 18+ 个提供商、OAuth 流程、凭证池和别名解析。
 
 → [提供商运行时解析](./provider-runtime.md)
 
 ### 工具系统
 
-中心化工具注册表（`tools/registry.py`），包含 19 个工具集中的 47 个已注册工具。每个工具文件在导入时自行注册。注册表处理模式收集、分发、可用性检查和错误包装。终端工具支持 6 种后端（本地、Docker、SSH、Daytona、Modal、Singularity）。
+中央工具注册表（`tools/registry.py`），包含 19 个工具集中的 47 个已注册工具。每个工具文件在导入时自行注册。注册表处理模式收集、分发、可用性检查和错误包装。终端工具支持 6 种后端（本地、Docker、SSH、Daytona、Modal、Singularity）。
 
 → [工具运行时](./tools-runtime.md)
 
@@ -229,13 +229,13 @@ hermes-agent/
 
 ### 插件系统
 
-三种发现来源：`~/.hermes/plugins/`（用户）、`.hermes/plugins/`（项目）和 pip 入口点。插件通过上下文 API 注册工具、钩子和 CLI 命令。存在两种专门的插件类型：记忆提供商（`plugins/memory/`）和上下文引擎（`plugins/context_engine/`）。两者都是单选 — 每次只能激活一个，通过 `hermes plugins` 或 `config.yaml` 配置。
+三个发现来源：`~/.hermes/plugins/`（用户）、`.hermes/plugins/`（项目）和 pip 入口点。插件通过上下文 API 注册工具、钩子和 CLI 命令。存在两种专门的插件类型：记忆提供商（`plugins/memory/`）和上下文引擎（`plugins/context_engine/`）。两者都是单选 — 每次只能激活一个，通过 `hermes plugins` 或 `config.yaml` 配置。
 
 → [插件指南](/docs/guides/build-a-hermes-plugin), [记忆提供商插件](./memory-provider-plugin.md)
 
 ### 定时任务
 
-一流的 Agent 任务（非 shell 任务）。任务存储在 JSON 中，支持多种调度格式，可以附加技能和脚本，并传递到任何平台。
+一流的 Agent 任务（非 shell 任务）。任务存储在 JSON 中，支持多种调度格式，可以附加技能和脚本，并发送到任何平台。
 
 → [定时任务内部机制](./cron-internals.md)
 
@@ -256,10 +256,10 @@ hermes-agent/
 | 原则 | 实践中的含义 |
 |-----------|--------------------------|
 | **提示词稳定性** | 系统提示词在会话中途不会改变。除了明确的用户操作（`/model`）外，没有破坏缓存的变更。 |
-| **可观察的执行** | 每次工具调用都通过回调对用户可见。CLI（旋转器）和网关（聊天消息）中会更新进度。 |
-| **可中断性** | API 调用和工具执行可以被用户输入或信号中途取消。 |
-| **平台无关的核心** | 一个 AIAgent 类服务于 CLI、网关、ACP、批处理和 API 服务器。平台差异存在于入口点，而非 Agent 本身。 |
-| **松耦合** | 可选子系统（MCP、插件、记忆提供商、RL 执行环境）使用注册模式和 `check_fn` 门控，而非硬依赖。 |
+| **可观察的执行** | 每次工具调用都通过回调对用户可见。CLI（旋转器）和网关（聊天消息）中都有进度更新。 |
+| **可中断** | API 调用和工具执行可以在进行中被用户输入或信号取消。 |
+| **平台无关的核心** | 一个 AIAgent 类服务于 CLI、网关、ACP、批处理和 API 服务器。平台差异存在于入口点，而不是 Agent 中。 |
+| **松耦合** | 可选的子系统（MCP、插件、记忆提供商、RL 执行环境）使用注册模式和 `check_fn` 门控，而不是硬依赖。 |
 | **配置文件隔离** | 每个配置文件（`hermes -p <name>`）都有自己的 HERMES_HOME、配置、记忆、会话和网关 PID。多个配置文件可以并发运行。 |
 ## 文件依赖链
 
@@ -273,4 +273,4 @@ model_tools.py  (导入 tools/registry 并触发工具发现)
 run_agent.py, cli.py, batch_runner.py, environments/
 ```
 
-此依赖链意味着工具注册发生在导入时，在任何 Agent 实例创建之前。添加新工具需要在 `model_tools.py` 的 `_discover_tools()` 列表中进行导入。
+这个依赖链意味着工具注册发生在导入时，在任何 Agent 实例创建之前。任何在顶层调用 `registry.register()` 的 `tools/*.py` 文件都会被自动发现 — 无需手动维护导入列表。

@@ -1,19 +1,19 @@
 ---
 sidebar_position: 4
 title: "工具集参考"
-description: "Hermes 核心、复合、平台和动态工具集的参考文档"
+description: "Hermes 核心、组合、平台和动态工具集的参考文档"
 ---
 
 # 工具集参考
 
-工具集是命名的工具捆绑包，用于控制 Agent 可以执行的操作。它们是按平台、按会话或按任务配置工具可用性的主要机制。
+工具集是命名的工具包，用于控制 Agent 可以执行的操作。它们是按平台、按会话或按任务配置工具可用性的主要机制。
 
 ## 工具集工作原理
 
-每个工具都属于且仅属于一个工具集。当您启用一个工具集时，该捆绑包中的所有工具都可供 Agent 使用。工具集分为三种类型：
+每个工具都属于且仅属于一个工具集。当您启用一个工具集时，该包中的所有工具都可供 Agent 使用。工具集分为三种类型：
 
-- **核心** — 单个逻辑上相关的工具组（例如，`file` 捆绑了 `read_file`、`write_file`、`patch`、`search_files`）
-- **复合** — 为常见场景组合多个核心工具集（例如，`debugging` 捆绑了文件、终端和网络工具）
+- **核心** — 单个相关的逻辑工具组（例如，`file` 捆绑了 `read_file`、`write_file`、`patch`、`search_files`）
+- **组合** — 为常见场景组合多个核心工具集（例如，`debugging` 捆绑了文件、终端和网络工具）
 - **平台** — 针对特定部署上下文的完整工具配置（例如，`hermes-cli` 是交互式 CLI 会话的默认配置）
 
 ## 配置工具集
@@ -22,7 +22,7 @@ description: "Hermes 核心、复合、平台和动态工具集的参考文档"
 
 ```bash
 hermes chat --toolsets web,file,terminal
-hermes chat --toolsets debugging        # 复合工具集 — 展开为 file + terminal + web
+hermes chat --toolsets debugging        # 组合工具集 — 展开为 file + terminal + web
 hermes chat --toolsets all              # 所有工具
 ```
 
@@ -55,7 +55,7 @@ hermes tools                            # 用于按平台启用/禁用工具的 
 | `browser` | `browser_back`, `browser_click`, `browser_console`, `browser_get_images`, `browser_navigate`, `browser_press`, `browser_scroll`, `browser_snapshot`, `browser_type`, `browser_vision`, `web_search` | 完整的浏览器自动化。包含 `web_search` 作为快速查找的备用方案。 |
 | `clarify` | `clarify` | 当 Agent 需要澄清时向用户提问。 |
 | `code_execution` | `execute_code` | 运行以编程方式调用 Hermes 工具的 Python 脚本。 |
-| `cronjob` | `cronjob` | 安排和管理重复性任务。 |
+| `cronjob` | `cronjob` | 安排和管理定时任务。 |
 | `delegation` | `delegate_task` | 生成隔离的子 Agent 实例以进行并行工作。 |
 | `file` | `patch`, `read_file`, `search_files`, `write_file` | 文件读取、写入、搜索和编辑。 |
 | `homeassistant` | `ha_call_service`, `ha_get_state`, `ha_list_entities`, `ha_list_services` | 通过 Home Assistant 进行智能家居控制。仅在设置了 `HASS_TOKEN` 时可用。 |
@@ -73,7 +73,7 @@ hermes tools                            # 用于按平台启用/禁用工具的 
 | `vision` | `vision_analyze` | 通过支持视觉的模型进行图像分析。 |
 | `web` | `web_extract`, `web_search` | 网络搜索和页面内容提取。 |
 
-## 复合工具集
+## 组合工具集
 
 这些工具集会展开为多个核心工具集，为常见场景提供便捷的简写：
 
@@ -84,11 +84,11 @@ hermes tools                            # 用于按平台启用/禁用工具的 
 
 ## 平台工具集
 
-平台工具集为部署目标定义完整的工具配置。大多数消息传递平台使用与 `hermes-cli` 相同的集合：
+平台工具集定义了部署目标的完整工具配置。大多数消息平台使用与 `hermes-cli` 相同的集合：
 
 | 工具集 | 与 `hermes-cli` 的差异 |
 |---------|-------------------------------|
-| `hermes-cli` | 完整工具集 — 包含 `clarify` 在内的所有 36 个工具。交互式 CLI 会话的默认配置。 |
+| `hermes-cli` | 完整工具集 — 所有 36 个工具，包括 `clarify`。交互式 CLI 会话的默认配置。 |
 | `hermes-acp` | 移除 `clarify`、`cronjob`、`image_generate`、`send_message`、`text_to_speech`、homeassistant 工具。专注于 IDE 上下文中的编码任务。 |
 | `hermes-api-server` | 移除 `clarify`、`send_message` 和 `text_to_speech`。添加其他所有工具 — 适用于无法进行用户交互的程序化访问。 |
 | `hermes-telegram` | 与 `hermes-cli` 相同。 |
@@ -106,9 +106,10 @@ hermes tools                            # 用于按平台启用/禁用工具的 
 | `hermes-wecom-callback` | 企业微信回调工具集 — 企业自建应用消息传递（完全访问权限）。 |
 | `hermes-weixin` | 与 `hermes-cli` 相同。 |
 | `hermes-bluebubbles` | 与 `hermes-cli` 相同。 |
+| `hermes-qqbot` | 与 `hermes-cli` 相同。 |
 | `hermes-homeassistant` | 与 `hermes-cli` 相同。 |
 | `hermes-webhook` | 与 `hermes-cli` 相同。 |
-| `hermes-gateway` | 所有消息传递平台工具集的并集。当消息网关需要最广泛的工具集时在内部使用。 |
+| `hermes-gateway` | 所有消息平台工具集的并集。当消息网关需要最广泛的工具集时在内部使用。 |
 
 ## 动态工具集
 
@@ -125,7 +126,7 @@ mcp:
       args: ["-y", "@modelcontextprotocol/server-github"]
 ```
 
-这将创建一个您可以在 `--toolsets` 或平台配置中引用的 `mcp-github` 工具集。
+这将创建一个 `mcp-github` 工具集，您可以在 `--toolsets` 或平台配置中引用它。
 
 ### 插件工具集
 
@@ -153,6 +154,6 @@ custom_toolsets:
 
 ## 与 `hermes tools` 的关系
 
-`hermes tools` 命令提供了一个基于 curses 的 UI，用于按平台逐个启用或禁用工具。这是在工具级别（比工具集更精细）进行操作，并持久化到 `config.yaml`。即使启用了其所属的工具集，被禁用的工具也会被过滤掉。
+`hermes tools` 命令提供了一个基于 curses 的 UI，用于按平台切换单个工具的启用或禁用状态。这是在工具级别（比工具集更精细）进行操作，并持久化到 `config.yaml`。即使其所属的工具集已启用，被禁用的工具也会被过滤掉。
 
-另请参阅：[工具参考](./tools-reference.md) 以获取完整工具列表及其参数。
+另请参阅：[工具参考](./tools-reference.md) 以获取完整的单个工具列表及其参数。

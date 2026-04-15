@@ -1,7 +1,7 @@
 ---
 sidebar_position: 12
 title: "使用技能"
-description: "查找、安装、使用和创建技能——这些按需知识文档能教会 Hermes 新的工作流程"
+description: "查找、安装、使用和创建技能——这些按需知识文档能教会 Hermes 处理新的工作流"
 ---
 
 # 使用技能
@@ -30,7 +30,7 @@ hermes skills list
 ascii-art         使用 pyfiglet、cowsay、boxes... 生成 ASCII 艺术
 arxiv             从 arXiv 搜索和检索学术论文...
 github-pr-workflow 完整的 PR 生命周期——创建分支、提交...
-plan              计划模式——检查上下文，编写 Markdown...
+plan              计划模式——检查上下文，编写 markdown...
 excalidraw        使用 Excalidraw 创建手绘风格图表...
 ```
 
@@ -50,7 +50,7 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 # 浏览官方的可选技能
 /skills browse
 
-# 搜索中心
+# 在中心搜索
 /skills search blockchain
 ```
 
@@ -70,7 +70,7 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 /excalidraw
 ```
 
-您也可以通过自然对话触发技能——要求 Hermes 使用特定技能，它会通过 `skill_view` 工具加载它。
+您也可以通过自然对话触发技能——要求 Hermes 使用特定技能，它将通过 `skill_view` 工具加载它。
 
 ### 渐进式披露
 
@@ -102,7 +102,7 @@ hermes skills install official/research/arxiv
 3.  它变为可用的斜杠命令
 
 :::tip
-已安装的技能在新会话中生效。如果您希望它在当前会话中可用，请使用 `/reset` 重新开始，或添加 `--now` 以立即使提示词缓存失效（下一轮会消耗更多 Token）。
+已安装的技能在新会话中生效。如果您希望它在当前会话中可用，请使用 `/reset` 重新开始，或添加 `--now` 以立即使提示词缓存失效（在下一轮会消耗更多 Token）。
 :::
 
 ### 验证安装
@@ -114,6 +114,24 @@ hermes skills list | grep arxiv
 # 或在聊天中
 /skills search arxiv
 ```
+
+---
+
+## 插件提供的技能
+
+插件可以使用命名空间名称（`plugin:skill`）捆绑自己的技能。这可以防止与内置技能发生名称冲突。
+
+```bash
+# 通过其限定名称加载插件技能
+skill_view("superpowers:writing-plans")
+
+# 具有相同基础名称的内置技能不受影响
+skill_view("writing-plans")
+```
+
+插件技能**不会**列在系统提示词中，也不会出现在 `skills_list` 中。它们是选择加入的——当您知道插件提供某个技能时，请显式加载它。加载后，Agent 会看到一个横幅，列出同一插件的兄弟技能。
+
+关于如何在您自己的插件中提供技能，请参阅[构建 Hermes 插件 → 捆绑技能](/docs/guides/build-a-hermes-plugin#bundle-skills)。
 
 ---
 
@@ -131,12 +149,12 @@ metadata:
         url: "https://developers.google.com/tenor/guides/quickstart"
 ```
 
-当首次加载带有配置的技能时，Hermes 会提示您输入值。它们存储在 `config.yaml` 的 `skills.config.*` 下。
+当首次加载带有配置的技能时，Hermes 会提示您输入值。它们存储在 `config.yaml` 中的 `skills.config.*` 下。
 
 从 CLI 管理技能配置：
 
 ```bash
-# 特定技能的交互式配置
+# 为特定技能进行交互式配置
 hermes skills config gif-search
 
 # 查看所有技能配置
@@ -195,7 +213,7 @@ my-skill/
 ├── SKILL.md                    # 主技能文档
 ├── references/
 │   ├── api-docs.md             # Agent 可以查阅的 API 参考
-│   └── examples.md             # 输入/输出示例
+│   └── examples.md             # 示例输入/输出
 ├── templates/
 │   └── config.yaml             # Agent 可以使用的模板文件
 └── scripts/
@@ -238,26 +256,26 @@ hermes skills
 
 ## 技能与记忆
 
-两者都跨会话持久化，但用途不同：
+两者都跨会话持久化，但服务于不同的目的：
 
 | | 技能 | 记忆 |
 |---|---|---|
 | **是什么** | 程序性知识——如何做事情 | 事实性知识——事情是什么 |
 | **何时** | 按需加载，仅在相关时 | 自动注入到每个会话中 |
-| **大小** | 可以很大（数百行） | 应紧凑（仅关键事实） |
+| **大小** | 可以很大（数百行） | 应该紧凑（仅关键事实） |
 | **成本** | 加载前零 Token | 小但持续的 Token 成本 |
-| **示例** | "如何部署到 Kubernetes" | "用户偏好深色模式，住在太平洋标准时区" |
+| **示例** | "如何部署到 Kubernetes" | "用户偏好深色模式，住在太平洋标准时间" |
 | **创建者** | 您、Agent 或从中心安装 | Agent，基于对话 |
 
 **经验法则：** 如果您会把它放在参考文档中，它就是技能。如果您会把它写在便利贴上，它就是记忆。
 
 ---
 
-## 技巧
+## 提示
 
 **保持技能专注。** 一个试图涵盖"所有 DevOps"的技能会太长且太模糊。一个涵盖"将 Python 应用部署到 Fly.io"的技能则足够具体，真正有用。
 
-**让 Agent 创建技能。** 在完成复杂的多步骤任务后，Hermes 通常会提议将方法保存为技能。请同意——这些由 Agent 编写的技能捕获了确切的工作流程，包括沿途发现的常见问题。
+**让 Agent 创建技能。** 完成复杂的多步骤任务后，Hermes 通常会提议将方法保存为技能。请同意——这些由 Agent 编写的技能捕获了确切的工作流程，包括沿途发现的常见问题。
 
 **使用分类。** 将技能组织到子目录中（`~/.hermes/skills/devops/`、`~/.hermes/skills/research/` 等）。这使列表易于管理，并帮助 Agent 更快地找到相关技能。
 
