@@ -14,8 +14,9 @@ description: "通过 Termux 在 Android 手机上直接运行 Hermes Agent"
 
 已验证的 Termux 捆绑包安装了：
 - Hermes CLI
-- cron 支持
+- 定时任务支持
 - PTY/后台终端支持
+- Telegram 消息网关支持（手动/尽力而为的后台运行）
 - MCP 支持
 - Honcho 记忆支持
 - ACP 支持
@@ -26,22 +27,23 @@ description: "通过 Termux 在 Android 手机上直接运行 Hermes Agent"
 python -m pip install -e '.[termux]' -c constraints-termux.txt
 ```
 
-## 已验证路径目前不包括哪些功能？
+## 已验证路径目前还不包含哪些功能？
 
 一些功能仍然需要桌面/服务器风格的依赖项，这些依赖项尚未为 Android 发布，或者尚未在手机上验证：
 
 - `.[all]` 目前在 Android 上不受支持
-- `voice` 附加功能被 `faster-whisper -> ctranslate2` 阻塞，而 `ctranslate2` 没有发布 Android 的 wheel 包
+- `voice` 附加功能被 `faster-whisper -> ctranslate2` 阻塞，而 `ctranslate2` 没有发布 Android 预编译包
 - Termux 安装程序跳过了自动浏览器 / Playwright 引导
-- 基于 Docker 的终端隔离在 Termux 内部不可用
+- 基于 Docker 的终端隔离在 Termux 内不可用
+- Android 可能仍会挂起 Termux 的后台作业，因此消息网关的持久性是尽力而为的，而不是一个正常管理的服务
 
-这并不妨碍 Hermes 作为手机原生 CLI Agent 的良好运行——它只是意味着推荐的移动安装范围有意比桌面/服务器安装更窄。
+这并不妨碍 Hermes 作为一个手机原生 CLI Agent 良好运行——它只是意味着推荐的移动安装范围有意比桌面/服务器安装更窄。
 
 ---
 
 ## 选项 1：单行安装程序
 
-Hermes 现在提供了一个支持 Termux 的安装程序路径：
+Hermes 现在提供了一个支持 Termux 的安装路径：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
@@ -71,7 +73,7 @@ pkg install -y git python clang rust make pkg-config libffi openssl nodejs ripgr
 - `python` — 运行时 + 虚拟环境支持
 - `git` — 克隆/更新仓库
 - `clang`, `rust`, `make`, `pkg-config`, `libffi`, `openssl` — 在 Android 上构建一些 Python 依赖项所需
-- `nodejs` — 可选的 Node 运行时，用于在已验证的核心路径之外进行实验
+- `nodejs` — 可选的 Node 运行时，用于在已验证核心路径之外进行实验
 - `ripgrep` — 快速文件搜索
 - `ffmpeg` — 媒体 / TTS 转换
 
@@ -97,7 +99,7 @@ export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
 python -m pip install --upgrade pip setuptools wheel
 ```
 
-`ANDROID_API_LEVEL` 对于基于 Rust / maturin 的包（如 `jiter`）非常重要。
+`ANDROID_API_LEVEL` 对于基于 Rust / maturin 的包（如 `jiter`）很重要。
 
 ### 4. 安装已验证的 Termux 捆绑包
 
@@ -105,7 +107,7 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install -e '.[termux]' -c constraints-termux.txt
 ```
 
-如果你只想要最核心的 Agent，这个命令也可以：
+如果你只想要最小的核心 Agent，这个命令也有效：
 
 ```bash
 python -m pip install -e '.' -c constraints-termux.txt
@@ -117,7 +119,7 @@ python -m pip install -e '.' -c constraints-termux.txt
 ln -sf "$PWD/venv/bin/hermes" "$PREFIX/bin/hermes"
 ```
 
-`$PREFIX/bin` 已经在 Termux 的 PATH 中，因此这使 `hermes` 命令在新 shell 中持续可用，而无需每次都重新激活虚拟环境。
+`$PREFIX/bin` 已经在 Termux 的 PATH 中，因此这使 `hermes` 命令能在新的 shell 中持续使用，而无需每次都重新激活虚拟环境。
 
 ### 6. 验证安装
 
@@ -159,9 +161,9 @@ pkg install nodejs-lts
 npm install
 ```
 
-浏览器工具会自动在其 PATH 搜索中包含 Termux 目录（`/data/data/com.termux/files/usr/bin`），因此无需任何额外的 PATH 配置即可发现 `agent-browser` 和 `npx`。
+浏览器工具会自动在其 PATH 搜索中包含 Termux 目录（`/data/data/com.termux/files/usr/bin`），因此 `agent-browser` 和 `npx` 无需任何额外的 PATH 配置即可被发现。
 
-在另有文档说明之前，请将 Android 上的浏览器 / WhatsApp 工具视为实验性功能。
+在另有文档说明之前，请将 Android 上的浏览器 / WhatsApp 工具视为实验性的。
 
 ---
 
@@ -169,7 +171,7 @@ npm install
 
 ### 安装 `.[all]` 时出现 `No solution found`
 
-请改用已验证的 Termux 捆绑包：
+改用已验证的 Termux 捆绑包：
 
 ```bash
 python -m pip install -e '.[termux]' -c constraints-termux.txt
@@ -178,11 +180,11 @@ python -m pip install -e '.[termux]' -c constraints-termux.txt
 目前的阻塞点是 `voice` 附加功能：
 - `voice` 拉取 `faster-whisper`
 - `faster-whisper` 依赖 `ctranslate2`
-- `ctranslate2` 没有发布 Android 的 wheel 包
+- `ctranslate2` 没有发布 Android 预编译包
 
 ### `uv pip install` 在 Android 上失败
 
-请改用基于标准库 venv + `pip` 的 Termux 路径：
+改用标准库 venv + `pip` 的 Termux 路径：
 
 ```bash
 python -m venv venv
@@ -232,7 +234,7 @@ python -m pip install -e '.[termux]' -c constraints-termux.txt
 - 浏览器自动化设置被安装程序有意跳过
 - 一些可选的附加功能可能有效，但目前只有 `.[termux]` 被记录为已验证的 Android 捆绑包
 
-如果你遇到新的 Android 特定问题，请提交 GitHub issue 并提供：
+如果你遇到新的 Android 特定问题，请提交 GitHub issue，并包含：
 - 你的 Android 版本
 - `termux-info`
 - `python --version`

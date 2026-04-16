@@ -7,9 +7,9 @@ description: "通过插件系统，使用自定义工具、钩子和集成来扩
 
 # 插件
 
-Hermes 拥有一个插件系统，用于添加自定义工具、钩子和集成，而无需修改核心代码。
+Hermes 拥有一个插件系统，无需修改核心代码即可添加自定义工具、钩子和集成。
 
-**→ [构建 Hermes 插件](/docs/guides/build-a-hermes-plugin)** — 包含完整工作示例的分步指南。
+**→ [构建 Hermes 插件](/docs/guides/build-a-hermes-plugin)** — 包含完整工作示例的逐步指南。
 
 ## 快速概览
 
@@ -73,9 +73,9 @@ def register(ctx):
     ctx.register_hook("post_tool_call", on_tool_call)
 ```
 
-将这两个文件放入 `~/.hermes/plugins/hello-world/`，重启 Hermes，模型就可以立即调用 `hello_world`。该钩子会在每次工具调用后打印一行日志。
+将这两个文件放入 `~/.hermes/plugins/hello-world/`，重启 Hermes，模型即可立即调用 `hello_world`。该钩子会在每次工具调用后打印一行日志。
 
-位于 `./.hermes/plugins/` 下的项目本地插件默认是禁用的。只有在启动 Hermes 前设置 `HERMES_ENABLE_PROJECT_PLUGINS=true`，才能为受信任的代码仓库启用它们。
+位于 `./.hermes/plugins/` 下的项目本地插件默认是禁用的。只有在启动 Hermes 前设置 `HERMES_ENABLE_PROJECT_PLUGINS=true`，才能为受信任的代码库启用它们。
 
 ## 插件能做什么
 
@@ -83,11 +83,12 @@ def register(ctx):
 |-----------|-----|
 | 添加工具 | `ctx.register_tool(name, schema, handler)` |
 | 添加钩子 | `ctx.register_hook("post_tool_call", callback)` |
+| 添加斜杠命令 | `ctx.register_command(name, handler, description)` — 在 CLI 和消息网关会话中添加 `/name` |
 | 添加 CLI 命令 | `ctx.register_cli_command(name, help, setup_fn, handler_fn)` — 添加 `hermes <plugin> <subcommand>` |
 | 注入消息 | `ctx.inject_message(content, role="user")` — 参见 [注入消息](#injecting-messages) |
-| 提供数据文件 | `Path(__file__).parent / "data" / "file.yaml"` |
+| 附带数据文件 | `Path(__file__).parent / "data" / "file.yaml"` |
 | 捆绑技能 | `ctx.register_skill(name, path)` — 命名空间为 `plugin:skill`，通过 `skill_view("plugin:skill")` 加载 |
-| 环境变量门控 | 在 plugin.yaml 中使用 `requires_env: [API_KEY]` — 在 `hermes plugins install` 期间提示 |
+| 依赖环境变量 | `requires_env: [API_KEY]` 在 plugin.yaml 中 — 在 `hermes plugins install` 期间提示 |
 | 通过 pip 分发 | `[project.entry-points."hermes_agent.plugins"]` |
 
 ## 插件发现
@@ -117,7 +118,7 @@ Hermes 有三种插件：
 
 | 类型 | 功能 | 选择方式 | 位置 |
 |------|-------------|-----------|----------|
-| **通用插件** | 添加工具、钩子、CLI 命令 | 多选（启用/禁用） | `~/.hermes/plugins/` |
+| **通用插件** | 添加工具、钩子、斜杠命令、CLI 命令 | 多选（启用/禁用） | `~/.hermes/plugins/` |
 | **记忆提供商** | 替换或增强内置记忆 | 单选（一个激活） | `plugins/memory/` |
 | **上下文引擎** | 替换内置的上下文压缩器 | 单选（一个激活） | `plugins/context_engine/` |
 
@@ -137,7 +138,7 @@ hermes plugins disable my-plugin  # 禁用但不移除
 
 ### 交互式 UI
 
-不带参数运行 `hermes plugins` 会打开一个复合交互式屏幕：
+不带参数运行 `hermes plugins` 会打开一个复合交互式界面：
 
 ```
 插件
@@ -153,7 +154,7 @@ hermes plugins disable my-plugin  # 禁用但不移除
 ```
 
 - **通用插件部分** — 复选框，用 SPACE 切换
-- **提供商插件部分** — 显示当前选择。按 ENTER 进入单选选择器，在那里选择一个激活的提供商。
+- **提供商插件部分** — 显示当前选择。按 ENTER 进入单选选择器，选择激活的提供商。
 
 提供商插件的选择会保存到 `config.yaml`：
 
@@ -167,7 +168,7 @@ context:
 
 ### 禁用通用插件
 
-禁用的插件会保持安装状态，但在加载时会被跳过。禁用列表存储在 `config.yaml` 的 `plugins.disabled` 下：
+禁用的插件会保留安装状态，但在加载时会被跳过。禁用列表存储在 `config.yaml` 的 `plugins.disabled` 下：
 
 ```yaml
 plugins:
@@ -179,7 +180,7 @@ plugins:
 
 ## 注入消息
 
-插件可以使用 `ctx.inject_message()` 将消息注入到活动会话中：
+插件可以使用 `ctx.inject_message()` 向活跃对话注入消息：
 
 ```python
 ctx.inject_message("New data arrived from the webhook", role="user")
@@ -189,15 +190,15 @@ ctx.inject_message("New data arrived from the webhook", role="user")
 
 工作原理：
 
-- 如果 Agent 处于 **空闲** 状态（等待用户输入），消息将作为下一个输入排队，并开始新一轮对话。
-- 如果 Agent 处于 **对话中** 状态（正在主动运行），消息会中断当前操作 — 就像用户输入新消息并按 Enter 键一样。
+- 如果 Agent **空闲**（等待用户输入），消息将作为下一个输入排队并开始新一轮对话。
+- 如果 Agent **正在处理中**（主动运行），消息会中断当前操作 — 就像用户输入新消息并按 Enter 一样。
 - 对于非 `"user"` 的角色，内容会加上 `[role]` 前缀（例如 `[system] ...`）。
-- 如果消息成功排队，则返回 `True`；如果没有可用的 CLI 引用（例如在消息网关模式下），则返回 `False`。
+- 如果消息成功排队则返回 `True`，如果没有可用的 CLI 引用（例如在消息网关模式下）则返回 `False`。
 
-这使得远程控制查看器、消息桥接器或 Webhook 接收器等插件能够从外部源向会话中注入消息。
+这使得远程控制查看器、消息桥接或 Webhook 接收器等插件能够从外部源向对话中注入消息。
 
 :::note
 `inject_message` 仅在 CLI 模式下可用。在消息网关模式下，没有 CLI 引用，该方法返回 `False`。
 :::
 
-有关处理器契约、模式格式、钩子行为、错误处理和常见错误的详细信息，请参阅 **[完整指南](/docs/guides/build-a-hermes-plugin)**。
+有关处理器约定、模式格式、钩子行为、错误处理和常见错误的详细信息，请参阅 **[完整指南](/docs/guides/build-a-hermes-plugin)**。
