@@ -14,7 +14,7 @@ description: "如何将 Hermes Agent 更新到最新版本或卸载它"
 hermes update
 ```
 
-此命令会拉取最新代码、更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
+此命令会拉取最新代码，更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
 
 :::tip
 `hermes update` 会自动检测新的配置选项并提示你添加它们。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
@@ -35,11 +35,11 @@ hermes update
 $ hermes update
 正在更新 Hermes Agent...
 📥 正在拉取最新代码...
-Already up to date.  (或: Updating abc1234..def5678)
+已经是最新的。 (或: 正在更新 abc1234..def5678)
 📦 正在更新依赖项...
 ✅ 依赖项已更新
 🔍 正在检查新的配置选项...
-✅ 配置是最新的  (或: Found 2 new options — running migration...)
+✅ 配置是最新的 (或: 发现 2 个新选项 — 正在运行迁移...)
 🔄 正在重启消息网关服务...
 ✅ 消息网关已重启
 ✅ Hermes Agent 更新成功！
@@ -65,21 +65,17 @@ Already up to date.  (或: Updating abc1234..def5678)
 hermes version
 ```
 
-与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases) 上的最新版本进行比较，或检查是否有可用更新：
+与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases) 上的最新版本进行比较。
 
-```bash
-hermes update --check
-```
+### 通过消息平台更新
 
-### 从消息平台更新
-
-你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令来更新：
+你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令进行更新：
 
 ```
 /update
 ```
 
-这会拉取最新代码、更新依赖项并重启消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
+这会拉取最新代码，更新依赖项，并重启消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
 
 ### 手动更新
 
@@ -99,7 +95,7 @@ uv pip install -e "./tinker-atropos"
 
 # 检查新的配置选项
 hermes config check
-hermes config migrate   # 以交互方式添加任何缺失的选项
+hermes config migrate   # 交互式添加任何缺失的选项
 ```
 
 ### 回滚说明
@@ -133,7 +129,7 @@ uv pip install -e ".[all]"
 如果添加了新选项，回滚可能会导致配置不兼容。回滚后运行 `hermes config check`，如果遇到错误，请从 `config.yaml` 中删除任何无法识别的选项。
 :::
 
-### 给 Nix 用户的注意事项
+### 给 Nix 用户的说明
 
 如果你通过 Nix flake 安装，更新是通过 Nix 包管理器管理的：
 
@@ -141,7 +137,7 @@ uv pip install -e ".[all]"
 # 更新 flake 输入
 nix flake update hermes-agent
 
-# 或者用最新版本重建
+# 或者用最新版本重新构建
 nix profile upgrade hermes-agent
 ```
 
@@ -161,7 +157,7 @@ nix profile rollback
 hermes uninstall
 ```
 
-卸载程序会给你选择是否保留配置文件（`~/.hermes/`）以便将来重新安装。
+卸载程序会给你选择保留配置文件 (`~/.hermes/`) 以便将来重新安装。
 
 ### 手动卸载
 
