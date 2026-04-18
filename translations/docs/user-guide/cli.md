@@ -1,12 +1,16 @@
 ---
 sidebar_position: 1
 title: "CLI 界面"
-description: "掌握 Hermes Agent 终端界面——命令、快捷键、人格等"
+description: "掌握 Hermes Agent 终端界面——命令、快捷键、人格设定等"
 ---
 
 # CLI 界面
 
-Hermes Agent 的 CLI 是一个完整的终端用户界面（TUI）——而非网页 UI。它具备多行编辑、斜杠命令自动补全、对话历史、中断与重定向以及流式工具输出等功能。专为生活在终端中的人打造。
+Hermes Agent 的 CLI 是一个完整的终端用户界面（TUI）——而非网页 UI。它具备多行编辑、斜杠命令自动补全、对话历史记录、中断与重定向以及流式工具输出等功能。专为终端重度用户打造。
+
+:::tip
+Hermes 还附带了一个现代化的 TUI，支持模态叠加、鼠标选择和非阻塞输入。使用 `hermes --tui` 启动——请参阅 [TUI](tui.md) 指南。
+:::
 
 ## 运行 CLI
 
@@ -33,7 +37,7 @@ hermes chat -s github-pr-workflow -q "open a draft PR"
 
 # 恢复之前的会话
 hermes --continue             # 恢复最近的 CLI 会话 (-c)
-hermes --resume <session_id>  # 通过 ID 恢复特定会话 (-r)
+hermes --resume <session_id>  # 按 ID 恢复特定会话 (-r)
 
 # 详细模式（调试输出）
 hermes chat --verbose
@@ -45,8 +49,8 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 
 ## 界面布局
 
-<img className="docs-terminal-figure" src="/img/docs/cli-layout.svg" alt="Hermes CLI 布局的样式化预览，展示了横幅、对话区域和固定的输入提示。" />
-<p className="docs-figure-caption">Hermes CLI 横幅、对话流和固定输入提示，渲染为稳定的文档图形而非脆弱的文本艺术。</p>
+<img className="docs-terminal-figure" src="/img/docs/cli-layout.svg" alt="Hermes CLI 布局的样式化预览，展示了横幅、对话区域和固定的输入提示符。" />
+<p className="docs-figure-caption">Hermes CLI 横幅、对话流和固定输入提示符，渲染为稳定的文档图形而非脆弱的文本艺术。</p>
 
 欢迎横幅一目了然地显示您的模型、终端后端、工作目录、可用工具和已安装的技能。
 
@@ -66,7 +70,7 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 | 成本 | 预估的会话成本（对于未知/零成本模型显示为 `n/a`） |
 | 持续时间 | 已用会话时间 |
 
-状态栏会根据终端宽度自适应——在 ≥ 76 列时显示完整布局，在 52–75 列时显示紧凑布局，在低于 52 列时显示最小布局（仅模型 + 持续时间）。
+状态栏会根据终端宽度自适应——在 ≥ 76 列时显示完整布局，在 52–75 列时显示紧凑布局，在低于 52 列时显示最小布局（仅模型和持续时间）。
 
 **上下文颜色编码：**
 
@@ -81,7 +85,7 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 
 ### 会话恢复显示
 
-当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 — 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
+当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示符之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 - 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
 
 ## 快捷键
 
@@ -92,7 +96,7 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 | `Alt+V` | 当终端支持时，从剪贴板粘贴图像 |
 | `Ctrl+V` | 粘贴文本并视情况附加剪贴板图像 |
 | `Ctrl+B` | 当语音模式启用时，开始/停止语音录制（`voice.record_key`，默认：`ctrl+b`） |
-| `Ctrl+C` | 中断 Agent（在 2 秒内按两次以强制退出） |
+| `Ctrl+C` | 中断 Agent（在 2 秒内双击以强制退出） |
 | `Ctrl+D` | 退出 |
 | `Ctrl+Z` | 将 Hermes 挂起到后台（仅限 Unix）。在 shell 中运行 `fg` 以恢复。 |
 | `Tab` | 接受自动建议（幽灵文本）或自动补全斜杠命令 |
@@ -118,7 +122,7 @@ hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 
 完整的 CLI 和消息内置命令列表，请参阅 [斜杠命令参考](../reference/slash-commands.md)。
 
-关于设置、提供商、静音调整以及消息平台/Discord 语音使用，请参阅 [语音模式](features/voice-mode.md)。
+关于设置、提供商、静音调优以及消息平台/Discord 语音使用，请参阅 [语音模式](features/voice-mode.md)。
 
 :::tip
 命令不区分大小写——`/HELP` 与 `/help` 效果相同。已安装的技能也会自动成为斜杠命令。
@@ -143,17 +147,17 @@ quick_commands:
 
 ## 启动时预加载技能
 
-如果您已经知道会话中需要激活哪些技能，可以在启动时传递它们：
+如果您已经知道本次会话要激活哪些技能，可以在启动时传入：
 
 ```bash
 hermes -s hermes-agent-dev,github-auth
 hermes chat -s github-pr-workflow -s github-auth
 ```
+Hermes 会在首次交互前将每个已命名的技能加载到会话提示词中。该标志在交互模式和单次查询模式下均有效。
 
-Hermes 会在第一轮对话之前将每个命名的技能加载到会话提示词中。该标志在交互模式和单次查询模式下均有效。
 ## 技能斜杠命令
 
-安装在 `~/.hermes/skills/` 目录下的每个技能都会自动注册为斜杠命令。技能名称即成为命令：
+`~/.hermes/skills/` 目录下安装的每个技能都会自动注册为斜杠命令。技能名称即成为命令：
 
 ```
 /gif-search funny cats
@@ -207,10 +211,10 @@ personalities:
 
 你可以在任何时候中断 Agent：
 
-- 当 Agent 正在工作时**输入新消息并按 Enter** — 它会中断并处理你的新指令
+- 当 Agent 工作时**输入新消息并按 Enter** — 它会中断并处理你的新指令
 - **`Ctrl+C`** — 中断当前操作（在 2 秒内按两次以强制退出）
-- 正在进行的终端命令会立即被终止（SIGTERM，1 秒后 SIGKILL）
-- 中断期间输入的多个消息会合并为一个提示词
+- 正在进行的终端命令会立即被终止（SIGTERM，1 秒后发送 SIGKILL）
+- 中断期间输入的多个消息会被合并为一个提示词
 
 ### 忙碌输入模式
 
@@ -219,7 +223,7 @@ personalities:
 | 模式 | 行为 |
 |------|----------|
 | `"interrupt"` (默认) | 你的消息会中断当前操作并立即被处理 |
-| `"queue"` | 你的消息会被静默排队，并在 Agent 完成后作为下一轮对话发送 |
+| `"queue"` | 你的消息会被静默排队，并在 Agent 完成后作为下一轮交互发送 |
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -227,7 +231,7 @@ display:
   busy_input_mode: "queue"   # 或 "interrupt" (默认)
 ```
 
-队列模式在你想要准备后续消息而不想意外取消正在执行的工作时很有用。未知值会回退到 `"interrupt"`。
+队列模式在你想要准备后续消息而不想意外取消正在进行的工作时很有用。未知值会回退到 `"interrupt"`。
 
 ### 挂起到后台
 
@@ -297,24 +301,24 @@ hermes --resume "refactoring auth"         # 按标题恢复
 hermes -r 20260225_143052_a1b2c3           # 简写形式
 ```
 
-恢复操作会从 SQLite 中还原完整的对话历史。Agent 会看到所有先前的消息、工具调用和响应 — 就像你从未离开过一样。
+恢复会从 SQLite 中还原完整的对话历史。Agent 会看到所有先前的消息、工具调用和响应 — 就像你从未离开过一样。
 
 在聊天中使用 `/title My Session Name` 来命名当前会话，或从命令行使用 `hermes sessions rename <id> <title>`。使用 `hermes sessions list` 浏览过去的会话。
 
 ### 会话存储
 
-CLI 会话存储在 Hermes 的 SQLite 状态数据库中，位于 `~/.hermes/state.db`。数据库保存：
+CLI 会话存储在 Hermes 的 SQLite 状态数据库 `~/.hermes/state.db` 中。该数据库保存：
 
 - 会话元数据（ID、标题、时间戳、Token 计数器）
-- 消息历史记录
+- 消息历史
 - 跨压缩/恢复会话的谱系
-- `session_search` 使用的全文搜索索引
+- 由 `session_search` 使用的全文搜索索引
 
-一些消息适配器也会在数据库旁边保留每个平台的转录文件，但 CLI 本身是从 SQLite 会话存储恢复的。
+一些消息适配器也会在数据库旁边保留每个平台的转录文件，但 CLI 本身是从 SQLite 会话存储中恢复的。
 
 ### 上下文压缩
 
-长对话在接近上下文限制时会自动总结：
+长对话在接近上下文限制时会自动进行总结：
 
 ```yaml
 # 在 ~/.hermes/config.yaml 中
@@ -328,20 +332,20 @@ auxiliary:
     model: "google/gemini-3-flash-preview"  # 用于总结的模型
 ```
 
-当压缩触发时，中间的对话轮次会被总结，而前 3 轮和后 4 轮对话总是被保留。
-
+当压缩触发时，中间的交互轮次会被总结，而前 3 轮和后 4 轮交互总是会被保留。
 ## 后台会话
 
-在单独的后台会话中运行一个提示词，同时继续使用 CLI 进行其他工作：
-```
-/background 分析 /var/log 中的日志并总结今天的任何错误
-```
-
-Hermes 立即确认任务并返回提示：
+在单独的后台会话中运行提示词，同时继续使用 CLI 进行其他工作：
 
 ```
-🔄 后台任务 #1 已启动："分析 /var/log 中的日志并总结..."
-   任务 ID：bg_143022_a1b2c3
+/background Analyze the logs in /var/log and summarize any errors from today
+```
+
+Hermes 会立即确认任务并返回提示词：
+
+```
+🔄 Background task #1 started: "Analyze the logs in /var/log and summarize..."
+   Task ID: bg_143022_a1b2c3
 ```
 
 ### 工作原理
@@ -358,11 +362,11 @@ Hermes 立即确认任务并返回提示：
 当后台任务完成时，结果会以面板形式显示在你的终端中：
 
 ```
-╭─ ⚕ Hermes (后台 #1) ──────────────────────────────────╮
-│ 在今天的 syslog 中发现 3 个错误：                         │
-│ 1. OOM killer 在 03:22 被调用 — 杀死了进程 nginx        │
-│ 2. 在 07:15 于 /dev/sda1 上发生磁盘 I/O 错误                      │
-│ 3. 在 14:30 来自 192.168.1.50 的失败 SSH 登录尝试      │
+╭─ ⚕ Hermes (background #1) ──────────────────────────────────╮
+│ Found 3 errors in syslog from today:                         │
+│ 1. OOM killer invoked at 03:22 — killed process nginx        │
+│ 2. Disk I/O error on /dev/sda1 at 07:15                      │
+│ 3. Failed SSH login attempts from 192.168.1.50 at 14:30      │
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
@@ -370,9 +374,9 @@ Hermes 立即确认任务并返回提示：
 
 ### 使用场景
 
-- **长时间运行的研究** — 在你编写代码时，执行 "/background 研究量子纠错的最新进展"
-- **文件处理** — 在你继续对话时，执行 "/background 分析此仓库中的所有 Python 文件并列出任何安全问题"
-- **并行调查** — 启动多个后台任务以同时探索不同角度
+- **长时间运行的研究** — 在你编写代码时，执行 "/background research the latest developments in quantum error correction"
+- **文件处理** — 在你继续对话时，执行 "/background analyze all Python files in this repo and list any security issues"
+- **并行调查** — 启动多个后台任务，同时探索不同的角度
 
 :::info
 后台会话不会出现在你的主对话历史记录中。它们是独立的会话，拥有自己的任务 ID（例如 `bg_143022_a1b2c3`）。
@@ -382,7 +386,7 @@ Hermes 立即确认任务并返回提示：
 
 默认情况下，CLI 在静默模式下运行，该模式：
 - 抑制来自工具的详细日志记录
-- 启用 kawaii 风格的动画反馈
+- 启用可爱风格的动画反馈
 - 保持输出简洁且用户友好
 
 如需调试输出：

@@ -4,7 +4,7 @@
 
 ## 概述
 
-QQ 机器人适配器使用 [官方 QQ 机器人 API](https://bot.q.qq.com/wiki/develop/api-v2/) 来实现：
+QQ 机器人适配器使用 [官方 QQ 机器人 API](https://bot.q.qq.com/wiki/develop/api-v2/) 来：
 
 - 通过连接到 QQ 网关的持久 **WebSocket** 连接接收消息
 - 通过 **REST API** 发送文本和 Markdown 回复
@@ -14,9 +14,9 @@ QQ 机器人适配器使用 [官方 QQ 机器人 API](https://bot.q.qq.com/wiki/
 ## 前提条件
 
 1.  **QQ 机器人应用** — 在 [q.qq.com](https://q.qq.com) 注册：
-    - 创建一个新应用，并记下你的 **App ID** 和 **App Secret**
-    - 启用所需的意图：C2C 消息、群聊 @ 消息、频道消息
-    - 在沙盒模式下配置你的机器人以进行测试，或发布用于生产环境
+    - 创建一个新应用并记下你的 **App ID** 和 **App Secret**
+    - 启用所需的事件订阅：C2C 消息、群聊 @ 消息、频道消息
+    - 在沙盒模式下配置你的机器人进行测试，或发布用于生产环境
 
 2.  **依赖项** — 适配器需要 `aiohttp` 和 `httpx`：
     ```bash
@@ -48,8 +48,8 @@ QQ_CLIENT_SECRET=your-app-secret
 |---|---|---|
 | `QQ_APP_ID` | QQ 机器人 App ID (必需) | — |
 | `QQ_CLIENT_SECRET` | QQ 机器人 App Secret (必需) | — |
-| `QQ_HOME_CHANNEL` | 用于定时任务/通知发送的 OpenID | — |
-| `QQ_HOME_CHANNEL_NAME` | 主频道的显示名称 | `Home` |
+| `QQBOT_HOME_CHANNEL` | 用于定时任务/通知发送的 OpenID | — |
+| `QQBOT_HOME_CHANNEL_NAME` | 主频道的显示名称 | `Home` |
 | `QQ_ALLOWED_USERS` | 允许私信访问的用户 OpenID，用逗号分隔 | open (所有用户) |
 | `QQ_ALLOW_ALL_USERS` | 设置为 `true` 以允许所有私信 | `false` |
 | `QQ_MARKDOWN_SUPPORT` | 启用 QQ Markdown (msg_type 2) | `true` |
@@ -98,8 +98,8 @@ platforms:
 
 这通常意味着：
 - **无效的 App ID / Secret** — 在 q.qq.com 上仔细检查你的凭据
-- **缺少权限** — 确保机器人已启用所需的意图
-- **仅沙盒机器人** — 如果机器人处于沙盒模式，它只能接收来自 QQ 沙盒测试频道的消息
+- **缺少权限** — 确保机器人已启用所需的事件订阅
+- **仅限沙盒的机器人** — 如果机器人处于沙盒模式，它只能接收来自 QQ 沙盒测试频道的消息
 
 ### 语音消息未转录
 
@@ -109,13 +109,13 @@ platforms:
 
 ### 消息未送达
 
-- 在 q.qq.com 上验证机器人的**意图**是否已启用
+- 在 q.qq.com 上验证机器人的**事件订阅**是否已启用
 - 如果私信访问受限，请检查 `QQ_ALLOWED_USERS`
-- 对于群消息，确保机器人被 **@提及** (群策略可能需要允许列表)
-- 检查 `QQ_HOME_CHANNEL` 以进行定时任务/通知发送
+- 对于群消息，确保机器人被 **@提及** (群策略可能需要白名单)
+- 检查 `QQBOT_HOME_CHANNEL` 以进行定时任务/通知发送
 
 ### 连接错误
 
-- 确保已安装 `aiohttp` 和 `httpx`：`pip install aiohttp httpx`
+- 确保 `aiohttp` 和 `httpx` 已安装：`pip install aiohttp httpx`
 - 检查到 `api.sgroup.qq.com` 和 WebSocket 网关的网络连接
 - 查看消息网关日志以获取详细的错误消息和重连行为
