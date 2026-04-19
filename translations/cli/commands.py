@@ -17,8 +17,10 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-# prompt_toolkit 是一个可选的 CLI 依赖项——仅 SlashCommandCompleter 和 SlashCommandAutoSuggest 需要。
-# 缺少它的消息网关和测试环境必须仍然能够导入此模块以使用 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
+# prompt_toolkit 是一个可选的 CLI 依赖项——仅用于
+# SlashCommandCompleter 和 SlashCommandAutoSuggest。缺少它的消息网关和测试
+# 环境仍然必须能够导入此模块
+# 以用于 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
 try:
     from prompt_toolkit.auto_suggest import AutoSuggest, Suggestion
     from prompt_toolkit.completion import Completer, Completion
@@ -39,13 +41,13 @@ class CommandDef:
 
     name: str                          # 不带斜杠的规范名称："background"
     description: str                   # 人类可读的描述
-    category: str                      # "Session", "Configuration" 等
+    category: str                      # "会话"、"配置"等
     aliases: tuple[str, ...] = ()      # 替代名称：("bg",)
-    args_hint: str = ""                # 参数占位符："<prompt>", "[name]"
-    subcommands: tuple[str, ...] = ()  # 可标签补全的子命令
+    args_hint: str = ""                # 参数占位符："<prompt>"、"[name]"
+    subcommands: tuple[str, ...] = ()  # 可制表符补全的子命令
     cli_only: bool = False             # 仅在 CLI 中可用
     gateway_only: bool = False         # 仅在消息网关/消息传递中可用
-    gateway_config_gate: str | None = None  # 配置点路径；当为真值时，为消息网关覆盖 cli_only
+    gateway_config_gate: str | None = None  # 配置点路径；当为真值时，覆盖 gateway 的 cli_only
 
 
 # ---------------------------------------------------------------------------
@@ -54,123 +56,125 @@ class CommandDef:
 
 COMMAND_REGISTRY: list[CommandDef] = [
     # 会话
-    CommandDef("new", "开始一个新会话（新的会话 ID + 历史记录）", "Session",
+    CommandDef("new", "启动新会话（新的会话 ID + 历史记录）", "会话",
                aliases=("reset",)),
-    CommandDef("clear", "清屏并开始一个新会话", "Session",
+    CommandDef("clear", "清屏并启动新会话", "会话",
                cli_only=True),
-    CommandDef("history", "显示对话历史记录", "Session",
+    CommandDef("history", "显示对话历史记录", "会话",
                cli_only=True),
-    CommandDef("save", "保存当前对话", "Session",
+    CommandDef("save", "保存当前对话", "会话",
                cli_only=True),
-    CommandDef("retry", "重试最后一条消息（重新发送给 Agent）", "Session"),
-    CommandDef("undo", "移除最后一条用户/助手交换", "Session"),
-    CommandDef("title", "为当前会话设置标题", "Session",
-               args_hint="[name]"),
-    CommandDef("branch", "分支当前会话（探索不同路径）", "Session",
-               aliases=("fork",), args_hint="[name]"),
-    CommandDef("compress", "手动压缩对话上下文", "Session",
-               args_hint="[focus topic]"),
-    CommandDef("rollback", "列出或恢复文件系统检查点", "Session",
-               args_hint="[number]"),
-    CommandDef("snapshot", "创建或恢复 Hermes 配置/状态的状态快照", "Session",
+    CommandDef("retry", "重试最后一条消息（重新发送给 Agent）", "会话"),
+    CommandDef("undo", "移除最后一条用户/助手交换", "会话"),
+    CommandDef("title", "为当前会话设置标题", "会话",
+               args_hint="[名称]"),
+    CommandDef("branch", "分支当前会话（探索不同路径）", "会话",
+               aliases=("fork",), args_hint="[名称]"),
+    CommandDef("compress", "手动压缩对话上下文", "会话",
+               args_hint="[焦点主题]"),
+    CommandDef("rollback", "列出或恢复文件系统检查点", "会话",
+               args_hint="[编号]"),
+    CommandDef("snapshot", "创建或恢复 Hermes 配置/状态的状态快照", "会话",
                aliases=("snap",), args_hint="[create|restore <id>|prune]"),
-    CommandDef("stop", "终止所有正在运行的后台进程", "Session"),
-    CommandDef("approve", "批准一个待处理的危险命令", "Session",
+    CommandDef("stop", "终止所有正在运行的后台进程", "会话"),
+    CommandDef("approve", "批准一个待处理的危险命令", "会话",
                gateway_only=True, args_hint="[session|always]"),
-    CommandDef("deny", "拒绝一个待处理的危险命令", "Session",
+    CommandDef("deny", "拒绝一个待处理的危险命令", "会话",
                gateway_only=True),
-    CommandDef("background", "在后台运行一个提示词", "Session",
-               aliases=("bg",), args_hint="<prompt>"),
-    CommandDef("btw", "使用会话上下文的临时旁侧问题（无工具，不持久化）", "Session",
-               args_hint="<question>"),
-    CommandDef("agents", "显示活跃的 Agent 和运行中的任务", "Session",
+    CommandDef("background", "在后台运行一个提示词", "会话",
+               aliases=("bg",), args_hint="<提示词>"),
+    CommandDef("btw", "使用会话上下文的临时旁侧问题（无工具，不持久化）", "会话",
+               args_hint="<问题>"),
+    CommandDef("agents", "显示活跃的 Agent 和正在运行的任务", "会话",
                aliases=("tasks",)),
-    CommandDef("queue", "为下一轮排队一个提示词（不中断）", "Session",
-               aliases=("q",), args_hint="<prompt>"),
-    CommandDef("status", "显示会话信息", "Session"),
-    CommandDef("profile", "显示活跃的配置文件名和主目录", "Info"),
-    CommandDef("sethome", "将此聊天设置为主频道", "Session",
+    CommandDef("queue", "为下一轮排队一个提示词（不中断）", "会话",
+               aliases=("q",), args_hint="<提示词>"),
+    CommandDef("steer", "在下一次工具调用后注入一条消息而不中断", "会话",
+               args_hint="<提示词>"),
+    CommandDef("status", "显示会话信息", "会话"),
+    CommandDef("profile", "显示活跃的配置文件名称和主目录", "信息"),
+    CommandDef("sethome", "将此聊天设置为主频道", "会话",
                gateway_only=True, aliases=("set-home",)),
-    CommandDef("resume", "恢复一个先前命名的会话", "Session",
-               args_hint="[name]"),
+    CommandDef("resume", "恢复一个先前命名的会话", "会话",
+               args_hint="[名称]"),
 
     # 配置
-    CommandDef("config", "显示当前配置", "Configuration",
+    CommandDef("config", "显示当前配置", "配置",
                cli_only=True),
-    CommandDef("model", "为此会话切换模型", "Configuration", args_hint="[model] [--provider name] [--global]"),
+    CommandDef("model", "为此会话切换模型", "配置", args_hint="[模型] [--provider 名称] [--global]"),
     CommandDef("provider", "显示可用的提供商和当前提供商",
-               "Configuration"),
-    CommandDef("gquota", "显示 Google Gemini Code Assist 配额使用情况", "Info"),
+               "配置"),
+    CommandDef("gquota", "显示 Google Gemini Code Assist 配额使用情况", "信息"),
 
-    CommandDef("personality", "设置预定义的人格", "Configuration",
-               args_hint="[name]"),
-    CommandDef("statusbar", "切换上下文/模型状态栏", "Configuration",
+    CommandDef("personality", "设置预定义的人格", "配置",
+               args_hint="[名称]"),
+    CommandDef("statusbar", "切换上下文/模型状态栏", "配置",
                cli_only=True, aliases=("sb",)),
     CommandDef("verbose", "循环工具进度显示：关闭 -> 新 -> 全部 -> 详细",
-               "Configuration", cli_only=True,
+               "配置", cli_only=True,
                gateway_config_gate="display.tool_progress_command"),
     CommandDef("yolo", "切换 YOLO 模式（跳过所有危险命令批准）",
-               "Configuration"),
-    CommandDef("reasoning", "管理推理力度和显示", "Configuration",
-               args_hint="[level|show|hide]",
+               "配置"),
+    CommandDef("reasoning", "管理推理努力和显示", "配置",
+               args_hint="[级别|show|hide]",
                subcommands=("none", "minimal", "low", "medium", "high", "xhigh", "show", "hide", "on", "off")),
-    CommandDef("fast", "切换快速模式——OpenAI 优先处理 / Anthropic 快速模式（普通/快速）", "Configuration",
+    CommandDef("fast", "切换快速模式——OpenAI 优先处理 / Anthropic 快速模式（普通/快速）", "配置",
                args_hint="[normal|fast|status]",
                subcommands=("normal", "fast", "status", "on", "off")),
-    CommandDef("skin", "显示或更改显示皮肤/主题", "Configuration",
-               args_hint="[name]"),
-    CommandDef("voice", "切换语音模式", "Configuration",
+    CommandDef("skin", "显示或更改显示皮肤/主题", "配置",
+               args_hint="[名称]"),
+    CommandDef("voice", "切换语音模式", "配置",
                args_hint="[on|off|tts|status]", subcommands=("on", "off", "tts", "status")),
 
     # 工具 & 技能
-    CommandDef("tools", "管理工具：/tools [list|disable|enable] [name...]", "Tools & Skills",
-               args_hint="[list|disable|enable] [name...]", cli_only=True),
-    CommandDef("toolsets", "列出可用的工具集", "Tools & Skills",
+    CommandDef("tools", "管理工具：/tools [list|disable|enable] [名称...]", "工具 & 技能",
+               args_hint="[list|disable|enable] [名称...]", cli_only=True),
+    CommandDef("toolsets", "列出可用的工具集", "工具 & 技能",
                cli_only=True),
     CommandDef("skills", "搜索、安装、检查或管理技能",
-               "Tools & Skills", cli_only=True,
+               "工具 & 技能", cli_only=True,
                subcommands=("search", "browse", "inspect", "install")),
-    CommandDef("cron", "管理定时任务", "Tools & Skills",
-               cli_only=True, args_hint="[subcommand]",
+    CommandDef("cron", "管理定时任务", "工具 & 技能",
+               cli_only=True, args_hint="[子命令]",
                subcommands=("list", "add", "create", "edit", "pause", "resume", "run", "remove")),
-    CommandDef("reload", "将 .env 变量重新加载到运行中的会话", "Tools & Skills"),
-    CommandDef("reload-mcp", "从配置重新加载 MCP 服务器", "Tools & Skills",
+    CommandDef("reload", "将 .env 变量重新加载到正在运行的会话中", "工具 & 技能"),
+    CommandDef("reload-mcp", "从配置重新加载 MCP 服务器", "工具 & 技能",
                aliases=("reload_mcp",)),
-    CommandDef("browser", "通过 CDP 将浏览器工具连接到您正在运行的 Chrome", "Tools & Skills",
+    CommandDef("browser", "通过 CDP 将浏览器工具连接到您实时的 Chrome", "工具 & 技能",
                cli_only=True, args_hint="[connect|disconnect|status]",
                subcommands=("connect", "disconnect", "status")),
     CommandDef("plugins", "列出已安装的插件及其状态",
-               "Tools & Skills", cli_only=True),
+               "工具 & 技能", cli_only=True),
 
     # 信息
-    CommandDef("commands", "浏览所有命令和技能（分页）", "Info",
-               gateway_only=True, args_hint="[page]"),
-    CommandDef("help", "显示可用命令", "Info"),
-    CommandDef("restart", "在排空活跃运行后优雅地重启消息网关", "Session",
+    CommandDef("commands", "浏览所有命令和技能（分页）", "信息",
+               gateway_only=True, args_hint="[页码]"),
+    CommandDef("help", "显示可用命令", "信息"),
+    CommandDef("restart", "在排空活跃运行后优雅地重启消息网关", "会话",
                gateway_only=True),
-    CommandDef("usage", "显示当前会话的 Token 使用情况和速率限制", "Info"),
-    CommandDef("insights", "显示使用洞察和分析", "Info",
-               args_hint="[days]"),
-    CommandDef("platforms", "显示消息网关/消息传递平台状态", "Info",
+    CommandDef("usage", "显示当前会话的 Token 使用情况和速率限制", "信息"),
+    CommandDef("insights", "显示使用洞察和分析", "信息",
+               args_hint="[天数]"),
+    CommandDef("platforms", "显示消息网关/消息传递平台状态", "信息",
                cli_only=True, aliases=("gateway",)),
-    CommandDef("copy", "将最后一条助手响应复制到剪贴板", "Info",
-               cli_only=True, args_hint="[number]"),
-    CommandDef("paste", "从剪贴板附加图像", "Info",
+    CommandDef("copy", "将最后一条助手响应复制到剪贴板", "信息",
+               cli_only=True, args_hint="[编号]"),
+    CommandDef("paste", "从剪贴板附加图像", "信息",
                cli_only=True),
-    CommandDef("image", "为您的下一个提示词附加本地图像文件", "Info",
-               cli_only=True, args_hint="<path>"),
-    CommandDef("update", "将 Hermes Agent 更新到最新版本", "Info",
+    CommandDef("image", "为您的下一个提示词附加本地图像文件", "信息",
+               cli_only=True, args_hint="<路径>"),
+    CommandDef("update", "将 Hermes Agent 更新到最新版本", "信息",
                gateway_only=True),
-    CommandDef("debug", "上传调试报告（系统信息 + 日志）并获取可分享链接", "Info"),
+    CommandDef("debug", "上传调试报告（系统信息 + 日志）并获取可分享链接", "信息"),
 
     # 退出
-    CommandDef("quit", "退出 CLI", "Exit",
+    CommandDef("quit", "退出 CLI", "退出",
                cli_only=True, aliases=("exit",)),
 ]
 
 
 # ---------------------------------------------------------------------------
-# 派生查找表——在导入时构建一次，通过 rebuild_lookups() 刷新
+# 派生查找表——在导入时构建一次，由 rebuild_lookups() 刷新
 # ---------------------------------------------------------------------------
 def _build_command_lookup() -> dict[str, CommandDef]:
     """Map every name and alias to its CommandDef."""
@@ -253,10 +257,10 @@ GATEWAY_KNOWN_COMMANDS: frozenset[str] = frozenset(
 )
 
 
-# Commands that must never be queued behind an active gateway session.
-# These are explicit control/info commands handled by the gateway itself;
-# if they get queued as pending text, the safety net in gateway.run will
-# discard them before they ever reach the user.
+# Commands with explicit Level-2 running-agent handlers in gateway/run.py.
+# Listed here for introspection / tests; semantically a subset of
+# "all resolvable commands" — which is the real bypass set (see
+# should_bypass_active_session below).
 ACTIVE_SESSION_BYPASS_COMMANDS: frozenset[str] = frozenset(
     {
         "agents",
@@ -270,22 +274,39 @@ ACTIVE_SESSION_BYPASS_COMMANDS: frozenset[str] = frozenset(
         "queue",
         "restart",
         "status",
+        "steer",
         "stop",
         "update",
     }
 )
 def should_bypass_active_session(command_name: str | None) -> bool:
-    """Return True when a slash command must bypass active-session queuing."""
-    cmd = resolve_command(command_name) if command_name else None
-    return bool(cmd and cmd.name in ACTIVE_SESSION_BYPASS_COMMANDS)
+    """Return True for any resolvable slash command.
+
+    Rationale: every gateway-registered slash command either has a
+    specific Level-2 handler in gateway/run.py (/stop, /new, /model,
+    /approve, etc.) or reaches the running-agent catch-all that returns
+    a "busy — wait or /stop first" response. In both paths the command
+    is dispatched, not queued.
+
+    Queueing is always wrong for a recognized slash command because the
+    safety net in gateway.run discards any command text that reaches
+    the pending queue — which meant a mid-run /model (or /reasoning,
+    /voice, /insights, /title, /resume, /retry, /undo, /compress,
+    /usage, /provider, /reload-mcp, /sethome, /reset) would silently
+    interrupt the agent AND get discarded, producing a zero-char
+    response. See issue #5057 / PRs #6252, #10370, #4665.
+
+    ACTIVE_SESSION_BYPASS_COMMANDS remains the subset of commands with
+    explicit Level-2 handlers; the rest fall through to the catch-all.
+    """
+    return resolve_command(command_name) is not None if command_name else False
 
 
 def _resolve_config_gates() -> set[str]:
-    """Return canonical names of commands whose ``gateway_config_gate`` is truthy.
+    """返回那些 `gateway_config_gate` 为真的命令的规范名称。
 
-    Reads ``config.yaml`` and walks the dot-separated key path for each
-    config-gated command.  Returns an empty set on any error so callers
-    degrade gracefully.
+    读取 `config.yaml` 并为每个配置门控命令遍历点分隔的键路径。
+    在任何错误时返回空集，以便调用方优雅降级。
     """
     gated = [c for c in COMMAND_REGISTRY if c.gateway_config_gate]
     if not gated:
@@ -310,12 +331,11 @@ def _resolve_config_gates() -> set[str]:
 
 
 def _is_gateway_available(cmd: CommandDef, config_overrides: set[str] | None = None) -> bool:
-    """Check if *cmd* should appear in gateway surfaces (help, menus, mappings).
+    """检查 *cmd* 是否应出现在消息网关界面（帮助、菜单、映射）中。
 
-    Unconditionally available when ``cli_only`` is False.  When ``cli_only``
-    is True but ``gateway_config_gate`` is set, the command is available only
-    when the config value is truthy.  Pass *config_overrides* (from
-    ``_resolve_config_gates()``) to avoid re-reading config for every command.
+    当 `cli_only` 为 False 时无条件可用。
+    当 `cli_only` 为 True 但设置了 `gateway_config_gate` 时，命令仅在配置值为真时可用。
+    传递 *config_overrides*（来自 `_resolve_config_gates()`）以避免为每个命令重新读取配置。
     """
     if not cmd.cli_only:
         return True
@@ -326,7 +346,7 @@ def _is_gateway_available(cmd: CommandDef, config_overrides: set[str] | None = N
 
 
 def gateway_help_lines() -> list[str]:
-    """Generate gateway help text lines from the registry."""
+    """从注册表生成消息网关帮助文本行。"""
     overrides = _resolve_config_gates()
     lines: list[str] = []
     for cmd in COMMAND_REGISTRY:
@@ -335,15 +355,13 @@ def gateway_help_lines() -> list[str]:
         args = f" {cmd.args_hint}" if cmd.args_hint else ""
         alias_parts: list[str] = []
         for a in cmd.aliases:
-            # Skip internal aliases like reload_mcp (underscore variant)
+            # 跳过内部别名，如 reload_mcp（下划线变体）
             if a.replace("-", "_") == cmd.name.replace("-", "_") and a != cmd.name:
                 continue
             alias_parts.append(f"`/{a}`")
         alias_note = f" (别名: {', '.join(alias_parts)})" if alias_parts else ""
         lines.append(f"`/{cmd.name}{args}` -- {cmd.description}{alias_note}")
     return lines
-
-
 def telegram_bot_commands() -> list[tuple[str, str]]:
     """Return (command_name, description) pairs for Telegram setMyCommands.
 
@@ -372,6 +390,8 @@ _TG_NAME_LIMIT = _CMD_NAME_LIMIT
 # command names.  This regex strips everything else after initial conversion.
 _TG_INVALID_CHARS = re.compile(r"[^a-z0-9_]")
 _TG_MULTI_UNDERSCORE = re.compile(r"_{2,}")
+
+
 def _sanitize_telegram_name(raw: str) -> str:
     """Convert a command/skill/plugin name to a valid Telegram command name.
 
@@ -427,7 +447,6 @@ _clamp_telegram_names = _clamp_command_names
 # ---------------------------------------------------------------------------
 # Shared skill/plugin collection for gateway platforms
 # ---------------------------------------------------------------------------
-
 def _collect_gateway_skill_entries(
     platform: str,
     max_slots: int,
@@ -543,20 +562,21 @@ def _collect_gateway_skill_entries(
 # Platform-specific wrappers
 # ---------------------------------------------------------------------------
 def telegram_menu_commands(max_commands: int = 100) -> tuple[list[tuple[str, str]], int]:
-    """返回受 Bot API 限制的 Telegram 菜单命令。
+    """Return Telegram menu commands capped to the Bot API limit.
 
-    优先级顺序（优先级越高 = 溢出时永不被移除）：
-      1. 核心 CommandDef 命令（始终包含）
-      2. 插件斜杠命令（优先于技能）
-      3. 内置技能命令（填充剩余槽位，按字母顺序）
+    Priority order (higher priority = never bumped by overflow):
+      1. Core CommandDef commands (always included)
+      2. Plugin slash commands (take precedence over skills)
+      3. Built-in skill commands (fill remaining slots, alphabetical)
 
-    技能是唯一在达到上限时会被修剪的层级。
-    用户安装的 Hub 技能被排除在外——可通过 /skills 访问。
-    为 ``"telegram"`` 平台禁用的技能（通过 ``hermes skills
-    config``）会完全从菜单中排除。
+    Skills are the only tier that gets trimmed when the cap is hit.
+    User-installed hub skills are excluded — accessible via /skills.
+    Skills disabled for the ``"telegram"`` platform (via ``hermes skills
+    config``) are excluded from the menu entirely.
 
     Returns:
-        (menu_commands, hidden_count) 其中 hidden_count 是由于上限而被省略的技能命令数量。
+        (menu_commands, hidden_count) where hidden_count is the number of
+        skill commands omitted due to the cap.
     """
     core_commands = list(telegram_bot_commands())
     reserved_names = {n for n, _ in core_commands}
@@ -570,7 +590,7 @@ def telegram_menu_commands(max_commands: int = 100) -> tuple[list[tuple[str, str
         desc_limit=40,
         sanitize_name=_sanitize_telegram_name,
     )
-    # 丢弃 cmd_key —— Telegram 只需要 (name, desc) 对。
+    # Drop the cmd_key — Telegram only needs (name, desc) pairs.
     all_commands.extend((n, d) for n, d, _k in entries)
     return all_commands[:max_commands], hidden_count
 
@@ -579,28 +599,28 @@ def discord_skill_commands(
     max_slots: int,
     reserved_names: set[str],
 ) -> tuple[list[tuple[str, str, str]], int]:
-    """返回用于 Discord 斜杠命令注册的技能条目。
+    """Return skill entries for Discord slash command registration.
 
-    与 :func:`telegram_menu_commands` 相同的优先级和过滤逻辑
-    （插件 > 技能，排除 Hub，按平台禁用排除），但
-    适配了 Discord 的限制：
+    Same priority and filtering logic as :func:`telegram_menu_commands`
+    (plugins > skills, hub excluded, per-platform disabled excluded), but
+    adapted for Discord's constraints:
 
-    - 名称中允许连字符（无需 ``-`` → ``_`` 清理）
-    - 描述限制在 100 字符内（Discord 的每字段最大值）
+    - Hyphens are allowed in names (no ``-`` → ``_`` sanitization)
+    - Descriptions capped at 100 chars (Discord's per-field max)
 
     Args:
-        max_slots: 可用命令槽位（100 减去现有内置命令数量）。
-        reserved_names: 已注册的内置命令名称。
+        max_slots: Available command slots (100 minus existing built-in count).
+        reserved_names: Names of already-registered built-in commands.
 
     Returns:
-        ``(entries, hidden_count)`` 其中 *entries* 是
-        ``(discord_name, description, cmd_key)`` 三元组的列表。``cmd_key`` 是
-        斜杠处理程序回调所需的原始 ``/skill-name`` 键。
+        ``(entries, hidden_count)`` where *entries* is a list of
+        ``(discord_name, description, cmd_key)`` triples.  ``cmd_key`` is
+        the original ``/skill-name`` key needed for the slash handler callback.
     """
     return _collect_gateway_skill_entries(
         platform="discord",
         max_slots=max_slots,
-        reserved_names=set(reserved_names),  # 复制 —— 不修改调用者的集合
+        reserved_names=set(reserved_names),  # copy — don't mutate caller's set
         desc_limit=100,
     )
 
@@ -608,23 +628,24 @@ def discord_skill_commands(
 def discord_skill_commands_by_category(
     reserved_names: set[str],
 ) -> tuple[dict[str, list[tuple[str, str, str]]], list[tuple[str, str, str]], int]:
-    """返回按类别组织的技能条目，用于 Discord ``/skill`` 子命令组。
+    """Return skill entries organized by category for Discord ``/skill`` subcommand groups.
 
-    目录在 ``SKILLS_DIR`` 下至少嵌套 2 层的技能
-    （例如 ``creative/ascii-art/SKILL.md``）按其顶级
-    类别分组。根层级的技能（例如 ``dogfood/SKILL.md``）作为
-    *未分类* 返回 —— 调用者应将它们注册为 ``/skill`` 组的直接子命令。
+    Skills whose directory is nested at least 2 levels under ``SKILLS_DIR``
+    (e.g. ``creative/ascii-art/SKILL.md``) are grouped by their top-level
+    category.  Root-level skills (e.g. ``dogfood/SKILL.md``) are returned as
+    *uncategorized* — the caller should register them as direct subcommands
+    of the ``/skill`` group.
 
-    应用与 :func:`discord_skill_commands` 相同的过滤：排除 Hub
-    技能，排除按平台禁用的技能，名称被截断。
+    The same filtering as :func:`discord_skill_commands` is applied: hub
+    skills excluded, per-platform disabled excluded, names clamped.
 
     Returns:
         ``(categories, uncategorized, hidden_count)``
 
         - *categories*: ``{category_name: [(name, description, cmd_key), ...]}``
         - *uncategorized*: ``[(name, description, cmd_key), ...]``
-        - *hidden_count*: 由于 Discord 组限制而被丢弃的技能数量
-          （25 个子命令组，每组 25 个子命令）
+        - *hidden_count*: skills dropped due to Discord group limits
+          (25 subcommand groups, 25 subcommands per group)
     """
     from pathlib import Path as _P
 
@@ -635,7 +656,7 @@ def discord_skill_commands_by_category(
     except Exception:
         pass
 
-    # 收集原始技能数据 --------------------------------------------------
+    # Collect raw skill data --------------------------------------------------
     categories: dict[str, list[tuple[str, str, str]]] = {}
     uncategorized: list[tuple[str, str, str]] = []
     _names_used: set[str] = set(reserved_names)
@@ -654,7 +675,7 @@ def discord_skill_commands_by_category(
             if not skill_path:
                 continue
             sp = _P(skill_path).resolve()
-            # 跳过不在 SKILLS_DIR 内或来自 Hub 的技能
+            # Skip skills outside SKILLS_DIR or from the hub
             if not str(sp).startswith(str(_skills_dir)):
                 continue
             if str(sp).startswith(str(_hub_dir)):
@@ -665,7 +686,7 @@ def discord_skill_commands_by_category(
                 continue
 
             raw_name = cmd_key.lstrip("/")
-            # 截断至 32 字符（Discord 限制）
+            # Clamp to 32 chars (Discord limit)
             discord_name = raw_name[:32]
             if discord_name in _names_used:
                 continue
@@ -675,8 +696,8 @@ def discord_skill_commands_by_category(
             if len(desc) > 100:
                 desc = desc[:97] + "..."
 
-            # 根据 SKILLS_DIR 内的相对路径确定类别。
-            # 例如 creative/ascii-art/SKILL.md → parts = ("creative", "ascii-art")
+            # Determine category from the relative path within SKILLS_DIR.
+            # e.g. creative/ascii-art/SKILL.md → parts = ("creative", "ascii-art")
             try:
                 rel = sp.parent.relative_to(_skills_dir)
             except ValueError:
@@ -690,7 +711,7 @@ def discord_skill_commands_by_category(
     except Exception:
         pass
 
-    # 强制执行 Discord 限制：25 个子命令组，每组 25 个子命令 ------
+    # Enforce Discord limits: 25 subcommand groups, 25 subcommands each ------
     _MAX_GROUPS = 25
     _MAX_PER_GROUP = 25
 
@@ -705,7 +726,7 @@ def discord_skill_commands_by_category(
         trimmed_categories[cat] = entries
         group_count += 1
 
-    # 未分类的技能也计入 25 个顶级限制
+    # Uncategorized skills also count against the 25 top-level limit
     remaining_slots = _MAX_GROUPS - group_count
     if len(uncategorized) > remaining_slots:
         hidden += len(uncategorized) - remaining_slots
@@ -766,10 +787,11 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _completion_text(cmd_name: str, word: str) -> str:
-        """返回补全的替换文本。
+        """返回补全项的替换文本。
 
-        当用户已经准确输入了完整命令（``/help``）时，返回 ``help`` 将是无操作，并且 prompt_toolkit 会隐藏菜单。
-        附加一个尾随空格可以保持下拉菜单可见，并使退格键自然地重新触发它。
+        当用户已经完整输入了命令（例如 ``/help``），
+        返回 ``help`` 将是一个无操作，并且 prompt_toolkit 会隐藏菜单。
+        添加一个尾随空格可以保持下拉菜单可见，并使退格键能自然地重新触发它。
         """
         return f"{cmd_name} " if cmd_name == word else cmd_name
 
@@ -777,20 +799,21 @@ class SlashCommandCompleter(Completer):
     def _extract_path_word(text: str) -> str | None:
         """如果当前单词看起来像文件路径，则提取它。
 
-        返回光标下的类似路径的标记，如果当前单词看起来不像路径则返回 None。
-        当单词以 ``./``、``../``、``~/``、``/`` 开头，或包含 ``/`` 分隔符（例如 ``src/main.py``）时，它看起来就像路径。
+        返回光标下的路径状标记，如果当前单词看起来不像路径则返回 None。
+        一个单词在以下情况下被认为是路径状的：
+        以 ``./``、``../``、``~/``、``/`` 开头，或者包含 ``/`` 分隔符（例如 ``src/main.py``）。
         """
         if not text:
             return None
-        # 向后查找当前“单词”的开头。
-        # 单词由空格分隔，但路径可以包含几乎所有内容。
+        # 向后遍历以找到当前“单词”的起始位置。
+        # 单词由空格分隔，但路径可以包含几乎任何字符。
         i = len(text) - 1
         while i >= 0 and text[i] != " ":
             i -= 1
         word = text[i + 1:]
         if not word:
             return None
-        # 仅对类似路径的标记触发路径补全
+        # 仅对路径状标记触发路径补全
         if word.startswith(("./", "../", "~/", "/")) or "/" in word:
             return word
         return None
@@ -799,7 +822,7 @@ class SlashCommandCompleter(Completer):
     def _path_completions(word: str, limit: int = 30):
         """为匹配 *word* 的文件路径生成 Completion 对象。"""
         expanded = os.path.expanduser(word)
-        # 拆分为目录部分和前缀以在其中匹配
+        # 拆分为目录部分和前缀，以便在其中匹配
         if expanded.endswith("/"):
             search_dir = expanded
             prefix = ""
@@ -851,7 +874,7 @@ class SlashCommandCompleter(Completer):
         """提取一个裸的 ``@`` 标记用于上下文引用补全。"""
         if not text:
             return None
-        # 向后查找当前单词的开头
+        # 向后遍历以找到当前单词的起始位置
         i = len(text) - 1
         while i >= 0 and text[i] != " ":
             i -= 1
@@ -874,7 +897,7 @@ class SlashCommandCompleter(Completer):
             ("@staged", "Git 暂存区差异"),
             ("@file:", "附加文件"),
             ("@folder:", "附加文件夹"),
-            ("@git:", "带差异的 Git 日志（例如 @git:5）"),
+            ("@git:", "Git 日志及差异（例如 @git:5）"),
             ("@url:", "获取网页内容"),
         )
         for candidate, meta in _STATIC_REFS:
@@ -1104,7 +1127,7 @@ class SlashCommandCompleter(Completer):
             pass
 
     def _model_completions(self, sub_text: str, sub_lower: str):
-        """从配置别名 + 内置别名为 /model 生成补全。"""
+        """从配置别名 + 内置别名中为 /model 生成补全。"""
         seen = set()
         # 基于配置的直接别名（首选 — 包含提供商信息）
         try:

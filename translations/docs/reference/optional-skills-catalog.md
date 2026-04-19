@@ -19,7 +19,7 @@ hermes skills install official/blockchain/solana
 hermes skills install official/mlops/flash-attention
 ```
 
-安装后，该技能将出现在 Agent 的技能列表中，并在检测到相关任务时自动加载。
+安装后，该技能会出现在 Agent 的技能列表中，并在检测到相关任务时自动加载。
 
 卸载方法：
 
@@ -54,8 +54,9 @@ hermes skills uninstall <skill-name>
 | 技能 | 描述 |
 |-------|-------------|
 | **blender-mcp** | 通过 socket 连接到 blender-mcp 插件，直接从 Hermes 控制 Blender。创建 3D 对象、材质、动画，并运行任意 Blender Python (bpy) 代码。 |
-| **concept-diagrams** | 生成扁平、极简、支持明暗模式的 SVG 图表作为独立的 HTML 文件，使用统一的教育视觉语言（9 种语义色阶，自动深色模式）。最适合物理设置、化学机制、数学曲线、物理对象（飞机、涡轮机、智能手机）、平面图、横截面、生命周期/流程叙述以及中心辐射型系统图。附带 15 个示例图表。 |
-| **meme-generation** | 通过选择模板并使用 Pillow 叠加文本来生成真实的梗图。生成实际的 `.png` 梗图文件。 |
+| **concept-diagrams** | 生成扁平、极简、支持明暗模式的 SVG 图表作为独立的 HTML 文件，使用统一的教育视觉语言（9 种语义颜色渐变，自动深色模式）。最适合物理设置、化学机制、数学曲线、物理对象（飞机、涡轮机、智能手机）、平面图、横截面、生命周期/流程叙述以及中心辐射型系统图。附带 15 个示例图表。 |
+| **meme-generation** | 通过选择模板并使用 Pillow 叠加文本来生成真实的 meme 图片。生成实际的 `.png` meme 文件。 |
+| **touchdesigner-mcp** | 通过 twozero MCP 插件控制正在运行的 TouchDesigner 实例 — 创建操作器、设置参数、连接线路、执行 Python、构建实时音频反应式视觉效果和 GLSL 网络。包含 36 个原生工具。 |
 
 ## DevOps
 
@@ -68,13 +69,14 @@ hermes skills uninstall <skill-name>
 
 | 技能 | 描述 |
 |-------|-------------|
-| **agentmail** | 通过 AgentMail 为 Agent 提供其专用的电子邮件收件箱。使用 Agent 拥有的电子邮件地址自主发送、接收和管理电子邮件。 |
+| **agentmail** | 通过 AgentMail 为 Agent 提供其专属的电子邮件收件箱。使用 Agent 拥有的电子邮件地址自主发送、接收和管理电子邮件。 |
 
 ## 健康
 
 | 技能 | 描述 |
 |-------|-------------|
-| **neuroskill-bci** | 用于神经科学研究工作流程的脑机接口 (BCI) 集成。 |
+| **fitness-nutrition** | 健身房锻炼计划制定和营养追踪器。通过 wger 按肌肉、设备或类别搜索 690 多个练习。通过 USDA FoodData Central 查找 380,000 多种食物的宏量营养素和卡路里。计算 BMI、TDEE、单次最大重复次数、宏量营养素分配和体脂率 — 纯 Python，无需 pip 安装。 |
+| **neuroskill-bci** | 用于神经科学研究工作流的脑机接口 (BCI) 集成。 |
 
 ## MCP
 
@@ -96,22 +98,23 @@ hermes skills uninstall <skill-name>
 |-------|-------------|
 | **accelerate** | 最简单的分布式训练 API。只需 4 行代码即可为任何 PyTorch 脚本添加分布式支持。为 DeepSpeed/FSDP/Megatron/DDP 提供统一 API。 |
 | **chroma** | 开源嵌入数据库。存储嵌入和元数据，执行向量和全文搜索。为 RAG 和语义搜索提供简单的 4 函数 API。 |
-| **faiss** | Facebook 的高效相似性搜索和密集向量聚类库。支持数十亿向量、GPU 加速和各种索引类型（Flat、IVF、HNSW）。 |
+| **faiss** | Facebook 的库，用于高效相似性搜索和密集向量聚类。支持数十亿向量、GPU 加速和各种索引类型（Flat、IVF、HNSW）。 |
 | **flash-attention** | 使用 Flash Attention 优化 Transformer 注意力机制，实现 2-4 倍加速和 10-20 倍内存减少。支持 PyTorch SDPA、flash-attn 库、H100 FP8 和滑动窗口。 |
+| **guidance** | 使用正则表达式和语法控制 LLM 输出，保证有效的 JSON/XML/代码生成，强制执行结构化格式，并使用 Guidance（微软研究的约束生成框架）构建多步骤工作流。 |
 | **hermes-atropos-environments** | 为 Atropos 训练构建、测试和调试 Hermes Agent RL 环境。涵盖 HermesAgentBaseEnv 接口、奖励函数、Agent 循环集成和评估。 |
 | **huggingface-tokenizers** | 用于研究和生产的基于 Rust 的快速分词器。在 20 秒内完成 1GB 文本的分词。支持 BPE、WordPiece 和 Unigram 算法。 |
-| **instructor** | 从 LLM 响应中提取结构化数据，使用 Pydantic 进行验证，自动重试失败的提取，并流式传输部分结果。 |
+| **instructor** | 使用 Pydantic 验证从 LLM 响应中提取结构化数据，自动重试失败的提取，并流式传输部分结果。 |
 | **lambda-labs** | 用于 ML 训练和推理的预留和按需 GPU 云实例。提供 SSH 访问、持久文件系统和多节点集群。 |
 | **llava** | 大型语言和视觉助手 — 结合 CLIP 视觉和 LLaMA 语言模型进行视觉指令微调和基于图像的对话。 |
-| **nemo-curator** | 用于 LLM 训练的 GPU 加速数据整理。模糊去重（快 16 倍）、质量过滤（30 多种启发式方法）、语义去重、PII 编辑。使用 RAPIDS 进行扩展。 |
+| **nemo-curator** | 用于 LLM 训练的 GPU 加速数据整理。模糊去重（快 16 倍）、质量过滤（30 多种启发式方法）、语义去重、PII 编辑。可随 RAPIDS 扩展。 |
 | **pinecone** | 用于生产 AI 的托管向量数据库。自动扩展、混合搜索（稠密 + 稀疏）、元数据过滤和低延迟（p95 低于 100 毫秒）。 |
 | **pytorch-lightning** | 高级 PyTorch 框架，包含 Trainer 类、自动分布式训练（DDP/FSDP/DeepSpeed）、回调函数和最少的样板代码。 |
-| **qdrant** | 高性能向量相似性搜索引擎。基于 Rust 构建，具有快速最近邻搜索、带过滤的混合搜索和可扩展的向量存储。 |
+| **qdrant** | 高性能向量相似性搜索引擎。由 Rust 驱动，具有快速最近邻搜索、带过滤的混合搜索和可扩展的向量存储。 |
 | **saelens** | 使用 SAELens 训练和分析稀疏自编码器 (SAE)，将神经网络激活分解为可解释的特征。 |
 | **simpo** | 简单偏好优化 — DPO 的无参考替代方案，性能更优（在 AlpacaEval 2.0 上 +6.4 分）。无需参考模型。 |
-| **slime** | 使用 Megatron+SGLang 框架通过 RL 进行 LLM 后训练。自定义数据生成工作流以及与 Megatron-LM 的紧密集成，以实现 RL 扩展。 |
-| **tensorrt-llm** | 使用 NVIDIA TensorRT 优化 LLM 推理，实现最大吞吐量。在 A100/H100 上，通过量化（FP8/INT4）和动态批处理，比 PyTorch 快 10-100 倍。 |
-| **torchtitan** | 使用 4D 并行（FSDP2、TP、PP、CP）进行 PyTorch 原生分布式 LLM 预训练。使用 Float8 和 torch.compile 从 8 个扩展到 512+ 个 GPU。 |
+| **slime** | 使用 Megatron+SGLang 框架对 LLM 进行 RL 后训练。自定义数据生成工作流以及与 Megatron-LM 的紧密集成，用于 RL 扩展。 |
+| **tensorrt-llm** | 使用 NVIDIA TensorRT 优化 LLM 推理，实现最大吞吐量。在 A100/H100 上比 PyTorch 快 10-100 倍，支持量化（FP8/INT4）和动态批处理。 |
+| **torchtitan** | 具有 4D 并行性（FSDP2、TP、PP、CP）的 PyTorch 原生分布式 LLM 预训练。支持从 8 到 512+ 个 GPU 扩展，支持 Float8 和 torch.compile。 |
 
 ## 生产力
 
@@ -128,11 +131,11 @@ hermes skills uninstall <skill-name>
 |-------|-------------|
 | **bioinformatics** | 通往来自 bioSkills 和 ClawBio 的 400 多个生物信息学技能的网关。涵盖基因组学、转录组学、单细胞、变异检测、药物基因组学、宏基因组学和结构生物学。 |
 | **domain-intel** | 使用 Python 标准库进行被动域名侦察。子域名发现、SSL 证书检查、WHOIS 查询、DNS 记录和批量多域名分析。无需 API 密钥。 |
-| **duckduckgo-search** | 通过 DuckDuckGo 进行免费网络搜索 — 文本、新闻、图像、视频。无需 API 密钥。 |
+| **duckduckgo-search** | 通过 DuckDuckGo 进行免费网络搜索 — 文本、新闻、图片、视频。无需 API 密钥。 |
 | **gitnexus-explorer** | 使用 GitNexus 索引代码库，并通过 Web UI 和 Cloudflare 隧道提供交互式知识图谱。 |
-| **parallel-cli** | Parallel CLI 的供应商技能 — Agent 原生网络搜索、提取、深度研究、丰富和监控。 |
+| **parallel-cli** | Parallel CLI 的供应商技能 — Agent 原生的网络搜索、提取、深度研究、丰富和监控。 |
 | **qmd** | 使用 qmd 在本地搜索个人知识库、笔记、文档和会议记录 — 一个结合了 BM25、向量搜索和 LLM 重排的混合检索引擎。 |
-| **scrapling** | 使用 Scrapling 进行网络抓取 — HTTP 获取、隐身浏览器自动化、Cloudflare 绕过以及通过 CLI 和 Python 进行蜘蛛爬取。 |
+| **scrapling** | 使用 Scrapling 进行网络爬取 — HTTP 获取、隐身浏览器自动化、Cloudflare 绕过以及通过 CLI 和 Python 进行蜘蛛爬取。 |
 
 ## 安全
 
@@ -148,7 +151,7 @@ hermes skills uninstall <skill-name>
 
 要向仓库添加新的可选技能：
 
-1.  在 `optional-skills/<category>/<skill-name>/` 下创建目录
+1.  在 `optional-skills/<category>/<skill-name>/` 下创建一个目录
 2.  添加一个包含标准 frontmatter（名称、描述、版本、作者）的 `SKILL.md` 文件
 3.  在 `references/`、`templates/` 或 `scripts/` 子目录中包含任何支持文件
 4.  提交拉取请求 — 技能在合并后将出现在此目录中

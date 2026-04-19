@@ -7,7 +7,7 @@ description: "构建一个包含工具、钩子、数据文件和技能的完整
 
 # 构建 Hermes 插件
 
-本指南将从头开始构建一个完整的 Hermes 插件。最终你将得到一个包含多个工具、生命周期钩子、附带数据文件以及一个捆绑技能的工作插件——涵盖了插件系统支持的所有功能。
+本指南将从头开始构建一个完整的 Hermes 插件。最终你将得到一个包含多个工具、生命周期钩子、附带数据文件以及一个捆绑技能的可用插件——涵盖了插件系统支持的所有功能。
 
 ## 你将构建什么
 
@@ -41,12 +41,12 @@ provides_hooks:
 
 这告诉 Hermes：“我是一个名为 calculator 的插件，我提供工具和钩子。” `provides_tools` 和 `provides_hooks` 字段列出了插件注册的内容。
 
-你可以添加的可选字段：
+可以添加的可选字段：
 ```yaml
 author: Your Name
-requires_env:          # 根据环境变量控制加载；安装期间会提示
+requires_env:          # 根据环境变量控制加载；安装时提示
   - SOME_API_KEY       # 简单格式 — 如果缺失则插件被禁用
-  - name: OTHER_KEY    # 丰富格式 — 安装期间显示描述/URL
+  - name: OTHER_KEY    # 丰富格式 — 安装时显示描述/URL
     description: "Other 服务的密钥"
     url: "https://other.com/keys"
     secret: true
@@ -119,7 +119,7 @@ UNIT_CONVERT = {
 import json
 import math
 
-# 用于表达式计算的安全全局变量 — 无文件/网络访问权限
+# 用于表达式求值的安全全局变量 — 无文件/网络访问权限
 _SAFE_MATH = {
     "abs": abs, "round": round, "min": min, "max": max,
     "pow": pow, "sqrt": math.sqrt, "sin": math.sin, "cos": math.cos,
@@ -134,7 +134,7 @@ def calculate(args: dict, **kwargs) -> str:
     """安全地计算数学表达式。
 
     处理器的规则：
-    1. 接收 args（字典）— LLM 传递的参数
+    1. 接收 args (dict) — LLM 传递的参数
     2. 执行工作
     3. 返回一个 JSON 字符串 — 即使出错也总是如此
     4. 接受 **kwargs 以保持向前兼容性
@@ -176,7 +176,7 @@ def unit_convert(args: dict, **kwargs) -> str:
         return json.dumps({"error": "需要 value、from_unit 和 to_unit"})
 
     try:
-        # 温度转换
+        # 温度
         if from_unit.upper() in {"C","F","K"} and to_unit.upper() in {"C","F","K"}:
             result = _convert_temp(float(value), from_unit.upper(), to_unit.upper())
             return json.dumps({"input": f"{value} {from_unit}", "result": round(result, 4),
@@ -237,7 +237,7 @@ def register(ctx):
 ```
 
 **`register()` 的作用：**
-- 在启动时仅调用一次
+- 在启动时仅被调用一次
 - `ctx.register_tool()` 将你的工具放入注册表 — 模型会立即看到它
 - `ctx.register_hook()` 订阅生命周期事件
 - `ctx.register_cli_command()` 注册一个 CLI 子命令（例如 `hermes my-plugin <subcommand>`）
@@ -253,7 +253,7 @@ hermes
 
 你应该能在横幅的工具列表中看到 `calculator: calculate, unit_convert`。
 
-尝试以下提示：
+尝试以下提示词：
 ```
 2 的 16 次方是多少？
 将 100 华氏度转换为摄氏度
@@ -286,7 +286,7 @@ Plugins (1):
 - **清单** 声明插件是什么
 - **模式** 为 LLM 描述工具
 - **处理函数** 实现实际逻辑
-- **注册** 将所有内容连接起来
+- **注册** 连接所有部分
 
 ## 插件还能做什么？
 
@@ -305,7 +305,7 @@ with open(_DATA_FILE) as f:
     _DATA = yaml.safe_load(f)
 ```
 
-### 捆绑技能
+### 打包技能
 
 插件可以附带技能文件，Agent 通过 `skill_view("plugin:skill")` 加载它们。在你的 `__init__.py` 中注册它们：
 
@@ -335,14 +335,14 @@ def register(ctx):
 
 ```python
 skill_view("my-plugin:my-workflow")   # → 插件版本
-skill_view("my-workflow")              # → 内置版本（保持不变）
+skill_view("my-workflow")              # → 内置版本（不变）
 ```
 
 **关键特性：**
 - 插件技能是**只读的** — 它们不会进入 `~/.hermes/skills/` 目录，也不能通过 `skill_manage` 编辑。
 - 插件技能**不会**列在系统提示词的 `<available_skills>` 索引中 — 它们是显式加载的。
 - 不带命名空间的技能名称不受影响 — 命名空间防止了与内置技能的冲突。
-- 当 Agent 加载插件技能时，会预先添加一个捆绑上下文横幅，列出同一插件中的其他技能。
+- 当 Agent 加载一个插件技能时，会预先添加一个捆绑上下文横幅，列出同一插件中的其他技能。
 
 :::tip 旧模式
 旧的 `shutil.copy2` 模式（将技能复制到 `~/.hermes/skills/`）仍然有效，但存在与内置技能名称冲突的风险。对于新插件，建议使用 `ctx.register_skill()`。
@@ -360,7 +360,7 @@ requires_env:
 
 如果 `WEATHER_API_KEY` 未设置，插件将被禁用并显示明确的消息。不会崩溃，Agent 中也不会出错 — 只是显示 "Plugin weather disabled (missing: WEATHER_API_KEY)"。
 
-当用户运行 `hermes plugins install` 时，系统会**交互式地提示**他们输入任何缺失的 `requires_env` 变量。值会自动保存到 `.env` 文件中。
+当用户运行 `hermes plugins install` 时，系统会**交互式地提示**输入任何缺失的 `requires_env` 变量。值会自动保存到 `.env` 文件中。
 
 为了获得更好的安装体验，可以使用带有描述和注册 URL 的丰富格式：
 
@@ -377,7 +377,7 @@ requires_env:
 |-------|----------|-------------|
 | `name` | 是 | 环境变量名称 |
 | `description` | 否 | 在安装提示时显示给用户 |
-| `url` | 否 | 获取凭据的地址 |
+| `url` | 否 | 获取凭据的网址 |
 | `secret` | 否 | 如果为 `true`，输入会被隐藏（类似密码字段） |
 
 两种格式可以在同一个列表中混合使用。已设置的变量会被静默跳过。
@@ -407,7 +407,7 @@ def register(ctx):
 ```
 ### 钩子参考
 
-每个钩子的完整文档都在 **[事件钩子参考](/docs/user-guide/features/hooks#plugin-hooks)** 中——包含回调函数签名、参数表、每个钩子的确切触发时机以及示例。以下是摘要：
+每个钩子的完整文档都在 **[事件钩子参考](/docs/user-guide/features/hooks#plugin-hooks)** 中——包括回调函数签名、参数表、每个钩子触发的确切时机以及示例。以下是摘要：
 
 | 钩子 | 触发时机 | 回调函数签名 | 返回值 |
 |------|-----------|-------------------|---------|
@@ -417,12 +417,12 @@ def register(ctx):
 | [`post_llm_call`](/docs/user-guide/features/hooks#post_llm_call) | 每轮对话一次，在工具调用循环之后（仅限成功的轮次） | `session_id: str, user_message: str, assistant_response: str, conversation_history: list, model: str, platform: str` | 忽略 |
 | [`on_session_start`](/docs/user-guide/features/hooks#on_session_start) | 新会话创建时（仅限第一轮） | `session_id: str, model: str, platform: str` | 忽略 |
 | [`on_session_end`](/docs/user-guide/features/hooks#on_session_end) | 每次 `run_conversation` 调用结束时 + CLI 退出时 | `session_id: str, completed: bool, interrupted: bool, model: str, platform: str` | 忽略 |
-| [`pre_api_request`](/docs/user-guide/features/hooks#pre_api_request) | 向 LLM 提供商发起每次 HTTP 请求之前 | `method: str, url: str, headers: dict, body: dict` | 忽略 |
-| [`post_api_request`](/docs/user-guide/features/hooks#post_api_request) | 从 LLM 提供商收到每次 HTTP 响应之后 | `method: str, url: str, status_code: int, response: dict` | 忽略 |
+| [`on_session_finalize`](/docs/user-guide/features/hooks#on_session_finalize) | CLI/消息网关销毁活动会话时 | `session_id: str \| None, platform: str` | 忽略 |
+| [`on_session_reset`](/docs/user-guide/features/hooks#on_session_reset) | 消息网关交换新的会话密钥时（`/new`, `/reset`） | `session_id: str, platform: str` | 忽略 |
 
 大多数钩子都是“触发即忘”的观察者——它们的返回值会被忽略。例外是 `pre_llm_call`，它可以向对话中注入上下文。
 
-所有回调函数都应接受 `**kwargs` 以确保向前兼容性。如果钩子回调崩溃，它会被记录并跳过。其他钩子和 Agent 会继续正常运行。
+所有回调函数都应接受 `**kwargs` 以确保向前兼容。如果钩子回调崩溃，它会被记录并跳过。其他钩子和 Agent 会继续正常运行。
 
 ### `pre_llm_call` 上下文注入
 
@@ -432,10 +432,10 @@ def register(ctx):
 
 ```python
 # 包含 context 键的字典
-return {"context": "回忆起的记忆：\n- 用户偏好深色模式\n- 上一个项目：hermes-agent"}
+return {"context": "Recalled memories:\n- User prefers dark mode\n- Last project: hermes-agent"}
 
 # 纯字符串（等同于上面的字典形式）
-return "回忆起的记忆：\n- 用户偏好深色模式"
+return "Recalled memories:\n- User prefers dark mode"
 
 # 返回 None 或不返回 → 不注入（仅作为观察者）
 return None
@@ -447,21 +447,21 @@ return None
 
 注入的上下文是附加到**用户消息**，而不是系统提示词。这是一个深思熟虑的设计选择：
 
-- **提示词缓存保留** —— 系统提示词在各轮对话中保持相同。Anthropic 和 OpenRouter 会缓存系统提示词前缀，因此保持其稳定可以在多轮对话中节省 75%+ 的输入 Token。如果插件修改了系统提示词，每一轮都会导致缓存未命中。
-- **临时性** —— 注入仅在 API 调用时发生。对话历史中的原始用户消息永远不会被修改，并且不会持久化到会话数据库中。
-- **系统提示词是 Hermes 的领域** —— 它包含模型特定的指导、工具执行规则、人格指令以及缓存的技能内容。插件通过提供与用户输入并行的上下文来做出贡献，而不是通过改变 Agent 的核心指令。
+- **提示词缓存保留** —— 系统提示词在各轮对话中保持相同。Anthropic 和 OpenRouter 会缓存系统提示词前缀，因此保持其稳定可以在多轮对话中节省 75% 以上的输入 Token。如果插件修改了系统提示词，每一轮都会导致缓存未命中。
+- **临时性** —— 注入仅在 API 调用时发生。对话历史中的原始用户消息永远不会被修改，并且没有任何内容会持久化到会话数据库中。
+- **系统提示词是 Hermes 的领域** —— 它包含模型特定的指导、工具执行规则、人格指令以及缓存的技能内容。插件通过用户输入提供上下文，而不是通过改变 Agent 的核心指令。
 
 #### 示例：记忆召回插件
 
 ```python
-"""记忆插件 —— 从向量数据库中召回相关上下文。"""
+"""Memory plugin — recalls relevant context from a vector store."""
 
 import httpx
 
 MEMORY_API = "https://your-memory-api.example.com"
 
 def recall_context(session_id, user_message, is_first_turn, **kwargs):
-    """在每次 LLM 轮次前调用。返回回忆起的记忆。"""
+    """Called before each LLM turn. Returns recalled memories."""
     try:
         resp = httpx.post(f"{MEMORY_API}/recall", json={
             "session_id": session_id,
@@ -469,13 +469,13 @@ def recall_context(session_id, user_message, is_first_turn, **kwargs):
         }, timeout=3)
         memories = resp.json().get("results", [])
         if not memories:
-            return None  # 没有内容可注入
+            return None  # nothing to inject
 
-        text = "从先前会话中回忆起的上下文：\n"
+        text = "Recalled context from previous sessions:\n"
         text += "\n".join(f"- {m['text']}" for m in memories)
         return {"context": text}
     except Exception:
-        return None  # 静默失败，不中断 Agent
+        return None  # fail silently, don't break the agent
 
 def register(ctx):
     ctx.register_hook("pre_llm_call", recall_context)
@@ -484,15 +484,15 @@ def register(ctx):
 #### 示例：防护栏插件
 
 ```python
-"""防护栏插件 —— 强制执行内容策略。"""
+"""Guardrails plugin — enforces content policies."""
 
-POLICY = """本次会话中，您必须遵守以下内容策略：
-- 绝不生成访问工作目录之外文件系统的代码
-- 在执行破坏性操作前总是发出警告
-- 拒绝涉及个人数据提取的请求"""
+POLICY = """You MUST follow these content policies for this session:
+- Never generate code that accesses the filesystem outside the working directory
+- Always warn before executing destructive operations
+- Refuse requests involving personal data extraction"""
 
 def inject_guardrails(**kwargs):
-    """将策略文本注入到每一轮对话中。"""
+    """Injects policy text into every turn."""
     return {"context": POLICY}
 
 def register(ctx):
@@ -502,23 +502,23 @@ def register(ctx):
 #### 示例：仅观察钩子（无注入）
 
 ```python
-"""分析插件 —— 跟踪轮次元数据而不注入上下文。"""
+"""Analytics plugin — tracks turn metadata without injecting context."""
 
 import logging
 logger = logging.getLogger(__name__)
 
 def log_turn(session_id, user_message, model, is_first_turn, **kwargs):
-    """在每次 LLM 调用前触发。返回 None —— 不注入上下文。"""
-    logger.info("轮次：session=%s model=%s first=%s msg_len=%d",
+    """Fires before each LLM call. Returns None — no context injected."""
+    logger.info("Turn: session=%s model=%s first=%s msg_len=%d",
                 session_id, model, is_first_turn, len(user_message or ""))
-    # 无返回值 → 无注入
+    # No return → no injection
 
 def register(ctx):
     ctx.register_hook("pre_llm_call", log_turn)
 ```
 #### 多个插件返回上下文
 
-当多个插件从 `pre_llm_call` 返回上下文时，它们的输出会用双换行符连接起来，并一起附加到用户消息中。顺序遵循插件发现顺序（按插件目录名称字母顺序）。
+当多个插件从 `pre_llm_call` 返回上下文时，它们的输出会用双换行符连接，并一起附加到用户消息中。顺序遵循插件发现顺序（按插件目录名称字母顺序）。
 
 ### 注册 CLI 命令
 
@@ -560,7 +560,7 @@ def register(ctx):
 
 ### 注册斜杠命令
 
-插件可以注册会话内的斜杠命令——用户在对话过程中键入的命令（如 `/lcm status` 或 `/ping`）。这些命令在 CLI 和消息网关（Telegram、Discord 等）中均有效。
+插件可以注册会话内的斜杠命令——用户在对话过程中输入的命令（如 `/lcm status` 或 `/ping`）。这些命令在 CLI 和消息网关（Telegram、Discord 等）中均有效。
 
 ```python
 def _handle_status(raw_args: str) -> str:
@@ -577,7 +577,7 @@ def register(ctx):
     )
 ```
 
-注册后，用户可以在任何会话中键入 `/mystatus`。该命令将出现在自动补全、`/help` 输出和 Telegram 机器人菜单中。
+注册后，用户可以在任何会话中输入 `/mystatus`。该命令将出现在自动补全、`/help` 输出和 Telegram 机器人菜单中。
 
 **签名：** `ctx.register_command(name: str, handler: Callable, description: str = "")`
 
@@ -592,13 +592,13 @@ def register(ctx):
 | | `register_command()` | `register_cli_command()` |
 |---|---|---|
 | 调用方式 | 在会话中作为 `/name` | 在终端中作为 `hermes name` |
-| 工作环境 | CLI 会话、Telegram、Discord 等 | 仅终端 |
-| 处理器接收 | 原始参数字符串 | argparse `Namespace` 对象 |
+| 工作环境 | CLI 会话、Telegram、Discord 等 | 仅限终端 |
+| 处理器接收 | 原始参数字符串 | argparse `Namespace` |
 | 用例 | 诊断、状态、快速操作 | 复杂的子命令树、设置向导 |
 
 **冲突保护：** 如果插件尝试注册的名称与内置命令（`help`、`model`、`new` 等）冲突，注册将被静默拒绝并记录警告。内置命令始终优先。
 
-**异步处理器：** 消息网关调度会自动检测并等待异步处理器，因此你可以使用同步或异步函数：
+**异步处理器：** 消息网关调度器会自动检测并等待异步处理器，因此你可以使用同步或异步函数：
 
 ```python
 async def _handle_check(raw_args: str) -> str:
@@ -610,7 +610,7 @@ def register(ctx):
 ```
 
 :::tip
-本指南涵盖**通用插件**（工具、钩子、斜杠命令、CLI 命令）。关于专门的插件类型，请参阅：
+本指南涵盖**通用插件**（工具、钩子、斜杠命令、CLI 命令）。对于专用插件类型，请参阅：
 - [记忆提供商插件](/docs/developer-guide/memory-provider-plugin) —— 跨会话知识后端
 - [上下文引擎插件](/docs/developer-guide/context-engine-plugin) —— 替代的上下文管理策略
 :::
@@ -672,9 +672,9 @@ def handler(args, **kwargs):
 
 **模式描述过于模糊：**
 ```python
-# 不好 —— 模型不知道何时使用它
+# 糟糕 —— 模型不知道何时使用它
 "description": "Does stuff"
 
-# 好 —— 模型确切知道何时以及如何使用
+# 良好 —— 模型确切知道何时以及如何使用
 "description": "评估数学表达式。用于算术、三角函数、对数。支持：+, -, *, /, **, sqrt, sin, cos, log, pi, e。"
 ```

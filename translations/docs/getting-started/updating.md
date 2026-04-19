@@ -27,7 +27,7 @@ hermes update
 1.  **Git pull** — 从 `main` 分支拉取最新代码并更新子模块
 2.  **依赖项安装** — 运行 `uv pip install -e ".[all]"` 以获取新的或更改的依赖项
 3.  **配置迁移** — 检测自你当前版本以来添加的新配置选项，并提示你设置它们
-4.  **消息网关自动重启** — 如果消息网关服务正在运行（Linux 上是 systemd，macOS 上是 launchd），它会在更新完成后**自动重启**，以便新代码立即生效
+4.  **消息网关自动重启** — 如果消息网关服务正在运行（Linux 上是 systemd，macOS 上是 launchd），更新完成后它会**自动重启**，以便新代码立即生效
 
 预期输出如下所示：
 
@@ -35,29 +35,44 @@ hermes update
 $ hermes update
 正在更新 Hermes Agent...
 📥 正在拉取最新代码...
-已经是最新的。 (或: 正在更新 abc1234..def5678)
+Already up to date.  (或: Updating abc1234..def5678)
 📦 正在更新依赖项...
 ✅ 依赖项已更新
 🔍 正在检查新的配置选项...
-✅ 配置是最新的 (或: 发现 2 个新选项 — 正在运行迁移...)
+✅ 配置是最新的  (或: 发现 2 个新选项 — 正在运行迁移...)
 🔄 正在重启消息网关服务...
 ✅ 消息网关已重启
 ✅ Hermes Agent 更新成功！
 ```
 
-### 推荐的更新后验证
+### 建议的更新后验证
 
 `hermes update` 处理主要的更新路径，但快速验证可以确认一切是否顺利：
 
-1.  `git status --short` — 如果工作树意外地变脏，请在继续之前检查
+1.  `git status --short` — 如果工作树意外地处于脏状态，请在继续之前检查
 2.  `hermes doctor` — 检查配置、依赖项和服务健康状况
 3.  `hermes --version` — 确认版本号按预期更新
 4.  如果你使用消息网关：`hermes gateway status`
 5.  如果 `doctor` 报告 npm audit 问题：在标记的目录中运行 `npm audit fix`
 
-:::warning 更新后工作树变脏
-如果 `git status --short` 在 `hermes update` 后显示意外的更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
+:::warning 更新后工作树处于脏状态
+如果 `git status --short` 在 `hermes update` 后显示意外更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
 :::
+
+### 如果更新过程中终端断开连接
+
+`hermes update` 会保护自身免受意外终端丢失的影响：
+
+*   更新会忽略 `SIGHUP`，因此关闭 SSH 会话或终端窗口不再会在安装过程中终止它。`pip` 和 `git` 子进程继承了此保护，因此 Python 环境不会因连接断开而处于半安装状态。
+*   更新运行时，所有输出都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失，请重新连接并检查日志，查看更新是否完成以及消息网关重启是否成功：
+
+```bash
+tail -f ~/.hermes/logs/update.log
+```
+
+*   `Ctrl-C` (SIGINT) 和系统关机 (SIGTERM) 仍然会被响应 —— 这些是故意的取消操作，而不是意外。
+
+你不再需要将 `hermes update` 包装在 `screen` 或 `tmux` 中以在终端断开时存活。
 
 ### 检查当前版本
 
@@ -67,9 +82,9 @@ hermes version
 
 与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases) 上的最新版本进行比较。
 
-### 通过消息平台更新
+### 从消息平台更新
 
-你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令进行更新：
+你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令来更新：
 
 ```
 /update
@@ -141,7 +156,7 @@ nix flake update hermes-agent
 nix profile upgrade hermes-agent
 ```
 
-Nix 安装是不可变的 — 回滚由 Nix 的生成系统处理：
+Nix 安装是不可变的 —— 回滚由 Nix 的生成系统处理：
 
 ```bash
 nix profile rollback

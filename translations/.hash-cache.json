@@ -120,13 +120,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/getting-started/learning-path.md": {
-    "source_hash": "sha256:cc36e095f92a78ccea18f6088fc6605a6cf0f6492cf84e4d3e6527dc6033c1bc",
-    "translated_at": "2026-04-13T03:37:54.215923+00:00",
+    "source_hash": "sha256:b696e4e3654b2fe7f3189a601eb0c7f38c2c60356a035f07a33cce7c800f9d6f",
+    "translated_at": "2026-04-19T04:47:24.171938+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/getting-started/updating.md": {
-    "source_hash": "sha256:b0ba096cc776efa0ad41036b0ad41170b9bc4a85ebb843e1278546926f8c1ee1",
-    "translated_at": "2026-04-17T04:46:19.745236+00:00",
+    "source_hash": "sha256:2519676e8a1b38fe25d3399d508719adcc3d65e8adc5924cf34031211cda52c7",
+    "translated_at": "2026-04-19T04:46:56.160897+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/getting-started/termux.md": {
@@ -135,8 +135,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/getting-started/quickstart.md": {
-    "source_hash": "sha256:084998a004ca0be8fb6b0ad40a26d01758f363e5198a3dab474660c753f1907f",
-    "translated_at": "2026-04-18T04:27:48.848194+00:00",
+    "source_hash": "sha256:efd0d6fa834a5ff040ab8e45dd5aa3b426fecb225bf3e117cc87b4f891456e2b",
+    "translated_at": "2026-04-19T04:47:50.255541+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/automate-with-cron.md": {
@@ -165,8 +165,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/build-a-hermes-plugin.md": {
-    "source_hash": "sha256:7aa51d930b887cf83ec0bb7bd147396e22418bbe741b16b130c67d4632a38edb",
-    "translated_at": "2026-04-16T04:51:00.081094+00:00",
+    "source_hash": "sha256:c9b0ac941e38489905bdcf5c22712e4ecd13f4e5c2375f2bea6b2b1ca8c8c4db",
+    "translated_at": "2026-04-19T04:50:22.905842+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/python-library.md": {
@@ -230,8 +230,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/optional-skills-catalog.md": {
-    "source_hash": "sha256:e654204775aa8a756e0cc3ffeea2d44dab291f73555da0c4f7e280fc4cac3675",
-    "translated_at": "2026-04-18T04:29:38.449580+00:00",
+    "source_hash": "sha256:49b4e725ecb61bdac2c9ef5fd2f1cf1f658d93a7b84ce2655e8d922c0558550c",
+    "translated_at": "2026-04-19T04:52:06.449415+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/profile-commands.md": {
@@ -240,38 +240,38 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/faq.md": {
-    "source_hash": "sha256:0d26e2a59ee8c931607a581626e655ee76c45e648d5f61ccd2e84dc78f08dbbd",
-    "translated_at": "2026-04-16T04:53:12.506925+00:00",
+    "source_hash": "sha256:a8e7cc555f8374546b102b8d233aa61f6679c3625dca370d14ef35262792237c",
+    "translated_at": "2026-04-19T04:52:48.549326+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/cli-commands.md": {
-    "source_hash": "sha256:83e86e158a632265df172d0ecf47df29483ae52d6e45a7cbaf1efe914a62a3a6",
-    "translated_at": "2026-04-18T04:32:25.670057+00:00",
+    "source_hash": "sha256:41b942ba4cce651f835582f364eebe0d656cc3c1e4071194032e7c9bd84e8cd9",
+    "translated_at": "2026-04-19T04:53:27.969809+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/environment-variables.md": {
-    "source_hash": "sha256:1e0a455e2ba1912f09199d9b2043673184086bbd432c26edd140710ad19eda07",
-    "translated_at": "2026-04-18T04:34:26.166165+00:00",
+    "source_hash": "sha256:f51e0b8f5870a388edc2749582e991348cb2e8046640ab194e5be8d2c78dbcc7",
+    "translated_at": "2026-04-19T04:54:25.358273+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/slash-commands.md": {
-    "source_hash": "sha256:23d5891e51db30e072099c29c4ad15e3bcb27548cb7d86ebd7e79adc8b7a3ed9",
-    "translated_at": "2026-04-18T04:31:55.685311+00:00",
+    "source_hash": "sha256:0eb613af423b91fd0c20544134e9f1ffdff2518ca0019e5b72c73a665548d4be",
+    "translated_at": "2026-04-19T04:54:54.298862+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/toolsets-reference.md": {
-    "source_hash": "sha256:549339b0a39b23f70831faa08aea137687d5f55240166f8e33ccd96ec988f69b",
-    "translated_at": "2026-04-15T04:46:08.947749+00:00",
+    "source_hash": "sha256:ee859c37cc206c997ee28ac01d13bfe911c1e2befa1682543d3f3c58309bd6f2",
+    "translated_at": "2026-04-19T04:55:55.603376+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/integrations/providers.md": {
-    "source_hash": "sha256:525e6f29845d7ef187ded58ed84ef956a6242d7632adf2e999fb74e5c1adbad4",
-    "translated_at": "2026-04-18T04:35:56.759046+00:00",
+    "source_hash": "sha256:caaccadcb267d194e9a3b8aca27ba174aa62f722f38f625492e8f0e7829145af",
+    "translated_at": "2026-04-19T04:56:03.021420+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/tools-reference.md": {
-    "source_hash": "sha256:94dd843a2eb30a1043022b523ec56cd6942260bdffa0fbe0446b04a20cc6c7d0",
-    "translated_at": "2026-04-17T04:49:04.971272+00:00",
+    "source_hash": "sha256:21b2488e2387d3d257650979d7b68ab41dcb6986022c867c2e54d174a648c866",
+    "translated_at": "2026-04-19T04:56:01.513841+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/checkpoints-and-rollback.md": {
@@ -295,13 +295,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/skills-catalog.md": {
-    "source_hash": "sha256:070332aec32f5b016bc66857b32ea46d0771e0ec24685fe5f941dd68e1a38d38",
-    "translated_at": "2026-04-17T04:52:01.342052+00:00",
+    "source_hash": "sha256:9d98ed70463f0d0da7b9721a3f1b9ab45a79d2041866817fa007fd06f1d617ba",
+    "translated_at": "2026-04-19T04:56:57.003126+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/api-server.md": {
-    "source_hash": "sha256:5a8290f163ee29617abfc3c229359df88f2d97d4b166c373e14520519842cf3c",
-    "translated_at": "2026-04-15T04:48:00.816567+00:00",
+    "source_hash": "sha256:8df4f66a3465d9fcdd68701e5c0b7ad87414db73f9fa3a481bfb74bbf05d8e36",
+    "translated_at": "2026-04-19T04:58:09.265815+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/batch-processing.md": {
@@ -310,8 +310,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/code-execution.md": {
-    "source_hash": "sha256:b352354b894814c979952fc8f12c962853ed0b3571424920bfa998349505bf02",
-    "translated_at": "2026-04-13T03:56:51.763362+00:00",
+    "source_hash": "sha256:f3d1892a0db7da5a477e58a0c551b3259e2562ebad45c998ca0d7d2bfd261abc",
+    "translated_at": "2026-04-19T04:57:43.121835+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/context-references.md": {
@@ -320,8 +320,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/browser.md": {
-    "source_hash": "sha256:874d430eea404698ea48aeb8116b401cc37d29bc2758048e37a02af2d753bbcd",
-    "translated_at": "2026-04-18T04:34:17.288828+00:00",
+    "source_hash": "sha256:bd79122d19d248ecae678e4864ab52ea7e4a8cb7f5acd6f63b925dcb17189ff3",
+    "translated_at": "2026-04-19T04:58:38.055735+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/context-files.md": {
@@ -350,8 +350,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/fallback-providers.md": {
-    "source_hash": "sha256:4da44dacb1692aea056449cb9ea7a9068e587b5cdf065c562f148605ca4f89b4",
-    "translated_at": "2026-04-18T04:34:36.710708+00:00",
+    "source_hash": "sha256:0a098fb5a95d7fec3c8eeb668e51c275e04d4adf342646e49d390e7b0ec3d224",
+    "translated_at": "2026-04-19T04:59:18.374454+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/image-generation.md": {
@@ -375,13 +375,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/hooks.md": {
-    "source_hash": "sha256:1e225ef107b2dfabda48f2ea6ea27679aaeb3953162057f62e1feffbe63db3cf",
-    "translated_at": "2026-04-13T04:02:09.415298+00:00",
+    "source_hash": "sha256:1c6af360345feda4d7b70cf0bdfe22e40665190f952f83d0e12fa4d82caa8df6",
+    "translated_at": "2026-04-19T05:01:48.873621+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/configuration.md": {
-    "source_hash": "sha256:46e13b1cf61213442fcd9b091e5c7a767f80d56bc32453e149ac105fe4967450",
-    "translated_at": "2026-04-17T04:59:13.428643+00:00",
+    "source_hash": "sha256:a3e385912a421a6a3485bf69c85fea97c17c425febe3315035d5f9375840a902",
+    "translated_at": "2026-04-19T05:05:27.790913+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/personality.md": {
@@ -415,8 +415,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/tts.md": {
-    "source_hash": "sha256:8647abf08010fb8c85507a0ea37c7a4e35f4a356ea494efe96cf9b851f4e9cf5",
-    "translated_at": "2026-04-18T04:36:10.078919+00:00",
+    "source_hash": "sha256:d47a6e3fb3d8639f6d71a8022d5ef96d63fdd4d13d9a2f11c189336ddff1c768",
+    "translated_at": "2026-04-19T04:59:42.898532+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/skins.md": {
@@ -475,8 +475,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/discord.md": {
-    "source_hash": "sha256:913de125c5538573906fb72ba803014ac15b82ccd6bba1a607d64ac6bd5eedd4",
-    "translated_at": "2026-04-18T04:40:33.032683+00:00",
+    "source_hash": "sha256:bc02f20b1e4ee52213bcd065bb7724814363d6bbf17a2ce71085b3feda98f349",
+    "translated_at": "2026-04-19T05:04:22.516880+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/mattermost.md": {
@@ -485,13 +485,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/matrix.md": {
-    "source_hash": "sha256:50b73e66590e0eb49119fbd7fcd5b7b5f9add2f7afee4ce1407a813eda420e40",
-    "translated_at": "2026-04-17T04:59:01.449905+00:00",
+    "source_hash": "sha256:07ece3d733946d99491d799e54f187c74f6bac3a798be13ab3f7935f13bd6e33",
+    "translated_at": "2026-04-19T05:03:30.266287+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/open-webui.md": {
-    "source_hash": "sha256:51e9dccb6e5fe100a198f7afdf462d3186bdf6cfc50d5d80d6940cbaace36af2",
-    "translated_at": "2026-04-15T04:51:43.809206+00:00",
+    "source_hash": "sha256:f70251dfb46c0ada9cbf00c12b3e605f8aea107a2d64959c36077cd4dec46cbf",
+    "translated_at": "2026-04-19T05:01:21.110554+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/sms.md": {
@@ -510,8 +510,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/slack.md": {
-    "source_hash": "sha256:02e6f4d0743b0e6ce23e080f2f0790accfe839a9513618b2b455dcc6cff0b405",
-    "translated_at": "2026-04-16T04:59:00.327240+00:00",
+    "source_hash": "sha256:b342cd1e4a145d70e0ed5bfccc0fa599e975d1909643acb91c968134ce0ca5a5",
+    "translated_at": "2026-04-19T05:04:44.677443+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/wecom.md": {
@@ -525,8 +525,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/telegram.md": {
-    "source_hash": "sha256:e22c3057230dbf6769e544edcfbcbfda3d9eb754c1f8e5b9ca5027e15b4ca6a0",
-    "translated_at": "2026-04-17T05:00:12.920194+00:00",
+    "source_hash": "sha256:5fcaf31cb1edc3ddd5b416cd7681b71717004e0563190c735de903256ebb2304",
+    "translated_at": "2026-04-19T05:06:20.405402+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/whatsapp.md": {
@@ -605,8 +605,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/commands.py": {
-    "source_hash": "sha256:0ca8fb1a6eae5f6f21156e5e2c41e91900ce05112531a583b60fda4fcde124f5",
-    "translated_at": "2026-04-18T04:47:09.973355+00:00",
+    "source_hash": "sha256:11181dfa1112fb924e19610c6532eb5b5784e485c9695c47ea5df5b3a17d6b88",
+    "translated_at": "2026-04-19T05:12:26.487740+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/doctor.py": {
@@ -615,8 +615,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/setup.py": {
-    "source_hash": "sha256:f170f4e6819a34ee1eba2cb85914c449b32466b68023d9f6e4a49fbf2b93400d",
-    "translated_at": "2026-04-18T04:58:38.286153+00:00",
+    "source_hash": "sha256:903d048dbeee96b7c2526dde80c637a2618be8d8af19d9ab3625bdcc918e320e",
+    "translated_at": "2026-04-19T05:23:13.587650+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/automation-templates.md": {
@@ -625,8 +625,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/qqbot.md": {
-    "source_hash": "sha256:8ce03842769debeb4c32193edd2b5b95d225f0405636f774000a1874998a0749",
-    "translated_at": "2026-04-18T04:37:41.852898+00:00",
+    "source_hash": "sha256:5058a74fbb5499da7f30a2fc7fb1cb6d635847c224fd2f49ffb4e0c0c1741bc5",
+    "translated_at": "2026-04-19T05:02:13.178818+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/skills/google-workspace.md": {

@@ -1,6 +1,6 @@
 ---
 title: 备用提供商
-description: 在主模型不可用时，配置自动故障转移至备用 LLM 提供商。
+description: 在主模型不可用时配置自动故障转移至备用 LLM 提供商。
 sidebar_label: 备用提供商
 sidebar_position: 8
 ---
@@ -50,7 +50,10 @@ fallback_model:
 | NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` (可选: `NVIDIA_BASE_URL`) |
 | Ollama Cloud | `ollama-cloud` | `OLLAMA_API_KEY` |
 | Google Gemini (OAuth) | `google-gemini-cli` | `hermes model` (Google OAuth; 可选: `HERMES_GEMINI_PROJECT_ID`) |
+| Google AI Studio | `gemini` | `GOOGLE_API_KEY` (别名: `GEMINI_API_KEY`) |
 | xAI (Grok) | `xai` (别名 `grok`) | `XAI_API_KEY` (可选: `XAI_BASE_URL`) |
+| AWS Bedrock | `bedrock` | 标准 boto3 认证 (`AWS_REGION` + `AWS_PROFILE` 或 `AWS_ACCESS_KEY_ID`) |
+| Qwen Portal (OAuth) | `qwen-oauth` | `hermes model` (Qwen Portal OAuth; 可选: `HERMES_QWEN_BASE_URL`) |
 | OpenCode Zen | `opencode-zen` | `OPENCODE_ZEN_API_KEY` |
 | OpenCode Go | `opencode-go` | `OPENCODE_GO_API_KEY` |
 | Kilo Code | `kilocode` | `KILOCODE_API_KEY` |
@@ -80,7 +83,7 @@ fallback_model:
 - **服务器错误** (HTTP 500, 502, 503) — 在重试尝试用尽后
 - **认证失败** (HTTP 401, 403) — 立即（无需重试）
 - **未找到** (HTTP 404) — 立即
-- **无效响应** — 当 API 反复返回格式错误或空响应时
+- **无效响应** — 当 API 重复返回格式错误或空响应时
 
 触发时，Hermes 会：
 
@@ -91,8 +94,8 @@ fallback_model:
 
 切换是无缝的 — 您的对话历史、工具调用和上下文都会被保留。Agent 会从它中断的地方继续，只是使用了不同的模型。
 
-:::info 单次触发
-备用机制在每个会话中**最多激活一次**。如果备用提供商也失败，则由正常的错误处理接管（重试，然后显示错误消息）。这可以防止级联故障转移循环。
+:::info 一次性触发
+备用机制在每个会话中**最多激活一次**。如果备用提供商也失败，则正常的错误处理机制会接管（重试，然后显示错误消息）。这可以防止级联故障转移循环。
 :::
 
 ### 示例
@@ -153,38 +156,40 @@ fallback_model:
 
 ## 辅助任务备用
 
-Hermes 为辅助任务使用独立的轻量级模型。每个任务都有自己的提供商解析链，这相当于一个内置的备用系统。
-
+Hermes 为辅助任务使用独立的轻量级模型。每个任务都有自己的提供商解析链，这充当了内置的备用系统。
 ### 具有独立提供商解析的任务
 
-| 任务 | 功能 | 配置键 |
+| 任务 | 功能说明 | 配置键 |
 |------|-------------|-----------|
-| 视觉 | 图像分析、浏览器截图 | `auxiliary.vision` |
-| 网页提取 | 网页摘要 | `auxiliary.web_extract` |
-| 压缩 | 上下文压缩摘要 | `auxiliary.compression` |
-| 会话搜索 | 过往会话摘要 | `auxiliary.session_search` |
-| 技能中心 | 技能搜索与发现 | `auxiliary.skills_hub` |
+| Vision | 图像分析、浏览器截图 | `auxiliary.vision` |
+| Web Extract | 网页内容摘要 | `auxiliary.web_extract` |
+| Compression | 上下文压缩摘要 | `auxiliary.compression` |
+| Session Search | 历史会话摘要 | `auxiliary.session_search` |
+| Skills Hub | 技能搜索与发现 | `auxiliary.skills_hub` |
 | MCP | MCP 辅助操作 | `auxiliary.mcp` |
-| 记忆刷新 | 记忆整合 | `auxiliary.flush_memories` |
+| Memory Flush | 记忆合并 | `auxiliary.flush_memories` |
+| Approval | 智能命令审批分类 | `auxiliary.approval` |
+| Title Generation | 会话标题摘要 | `auxiliary.title_generation` |
+
 ### 自动检测链
 
-当任务的提供商设置为 `"auto"`（默认值）时，Hermes 会按顺序尝试各个提供商，直到有一个成功为止：
+当任务的提供商设置为 `"auto"`（默认值）时，Hermes 会按顺序尝试提供商，直到有一个可用：
 
 **对于文本任务（压缩、网页提取等）：**
 
 ```text
-OpenRouter → Nous Portal → 自定义端点 → Codex OAuth →
-API 密钥提供商（z.ai、Kimi、MiniMax、小米 MiMo、Hugging Face、Anthropic）→ 放弃
+OpenRouter → Nous Portal → Custom endpoint → Codex OAuth →
+API-key providers (z.ai, Kimi, MiniMax, Xiaomi MiMo, Hugging Face, Anthropic) → 放弃
 ```
 
 **对于视觉任务：**
 
 ```text
 主提供商（如果支持视觉）→ OpenRouter → Nous Portal →
-Codex OAuth → Anthropic → 自定义端点 → 放弃
+Codex OAuth → Anthropic → Custom endpoint → 放弃
 ```
 
-如果解析出的提供商在调用时失败，Hermes 还有一个内部重试机制：如果提供商不是 OpenRouter 且没有设置显式的 `base_url`，它会将 OpenRouter 作为最后的备用方案。
+如果解析出的提供商在调用时失败，Hermes 内部也会进行重试：如果提供商不是 OpenRouter 且没有设置显式的 `base_url`，它会将 OpenRouter 作为最后的备用方案。
 
 ### 配置辅助提供商
 
@@ -223,7 +228,7 @@ auxiliary:
     model: ""
 ```
 
-上述每个任务都遵循相同的 **provider / model / base_url** 模式。上下文压缩在 `auxiliary.compression` 下配置：
+以上每个任务都遵循相同的 **provider / model / base_url** 模式。上下文压缩在 `auxiliary.compression` 下配置：
 
 ```yaml
 auxiliary:
@@ -242,15 +247,15 @@ fallback_model:
   # base_url: http://localhost:8000/v1               # 可选的自定义端点
 ```
 
-所有三个配置项 —— auxiliary、compression、fallback —— 的工作方式相同：设置 `provider` 来选择处理请求的提供商，设置 `model` 来选择模型，设置 `base_url` 来指向自定义端点（覆盖 provider）。
+所有三者——辅助任务、压缩、备用模型——的工作方式相同：设置 `provider` 来选择处理请求的提供商，设置 `model` 来选择模型，设置 `base_url` 来指向自定义端点（覆盖 provider）。
 
 ### 辅助任务的提供商选项
 
-这些选项仅适用于 `auxiliary:`、`compression:` 和 `fallback_model:` 配置 —— `"main"` **不是**顶级 `model.provider` 的有效值。对于自定义端点，请在 `model:` 部分使用 `provider: custom`（参见 [AI 提供商](/docs/integrations/providers)）。
+这些选项仅适用于 `auxiliary:`、`compression:` 和 `fallback_model:` 配置——`"main"` **不是** 顶层 `model.provider` 的有效值。对于自定义端点，请在 `model:` 部分使用 `provider: custom`（参见 [AI 提供商](/docs/integrations/providers)）。
 
 | 提供商 | 描述 | 要求 |
 |----------|-------------|-------------|
-| `"auto"` | 按顺序尝试提供商直到一个成功（默认） | 至少配置了一个提供商 |
+| `"auto"` | 按顺序尝试提供商直到一个可用（默认） | 至少配置了一个提供商 |
 | `"openrouter"` | 强制使用 OpenRouter | `OPENROUTER_API_KEY` |
 | `"nous"` | 强制使用 Nous Portal | `hermes auth` |
 | `"codex"` | 强制使用 Codex OAuth | `hermes model` → Codex |
@@ -275,7 +280,7 @@ auxiliary:
 
 ## 上下文压缩备用方案
 
-上下文压缩使用 `auxiliary.compression` 配置块来控制哪个模型和提供商处理摘要生成：
+上下文压缩使用 `auxiliary.compression` 配置块来控制哪个模型和提供商处理摘要：
 
 ```yaml
 auxiliary:
@@ -288,13 +293,13 @@ auxiliary:
 带有 `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` 的旧配置会在首次加载时自动迁移到 `auxiliary.compression.*`（配置版本 17）。
 :::
 
-如果没有可用于压缩的提供商，Hermes 会丢弃中间的对话轮次而不生成摘要，而不是让会话失败。
+如果没有可用的提供商进行压缩，Hermes 会丢弃中间对话轮次而不生成摘要，而不是让会话失败。
 
 ---
 
-## 委派提供商覆盖
+## 委派任务提供商覆盖
 
-由 `delegate_task` 生成的子 Agent **不**使用主备用模型。但是，它们可以被路由到不同的提供商:模型对以优化成本：
+由 `delegate_task` 生成的子 Agent **不**使用主备用模型。但是，它们可以被路由到不同的提供商:模型组合以优化成本：
 
 ```yaml
 delegation:
@@ -304,13 +309,13 @@ delegation:
   # api_key: "local-key"
 ```
 
-有关完整配置详情，请参阅 [子 Agent 委派](/docs/user-guide/features/delegation)。
+完整配置细节请参见 [子 Agent 委派](/docs/user-guide/features/delegation)。
 
 ---
 
 ## 定时任务提供商
 
-定时任务使用执行时配置的任何提供商运行。它们不支持备用模型。要为定时任务使用不同的提供商，请在定时任务本身上配置 `provider` 和 `model` 覆盖：
+定时任务运行时使用执行时配置的任何提供商。它们不支持备用模型。要为定时任务使用不同的提供商，请在定时任务本身上配置 `provider` 和 `model` 覆盖：
 
 ```python
 cronjob(
@@ -321,22 +326,23 @@ cronjob(
     model="google/gemini-3-flash-preview"
 )
 ```
-
-有关完整配置详情，请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。
+请参阅[定时任务（Cron）](/docs/user-guide/features/cron)了解完整的配置详情。
 
 ---
 
-## 总结
+## 功能摘要
 
-| 功能 | 备用机制 | 配置位置 |
+| 功能 | 回退机制 | 配置位置 |
 |---------|-------------------|----------------|
-| 主 Agent 模型 | config.yaml 中的 `fallback_model` —— 出错时一次性故障转移 | `fallback_model:`（顶级） |
+| 主 Agent 模型 | `config.yaml` 中的 `fallback_model` — 出错时一次性故障转移 | `fallback_model:` (顶层) |
 | 视觉 | 自动检测链 + 内部 OpenRouter 重试 | `auxiliary.vision` |
 | 网页提取 | 自动检测链 + 内部 OpenRouter 重试 | `auxiliary.web_extract` |
-| 上下文压缩 | 自动检测链，如果不可用则降级为无摘要 | `auxiliary.compression` |
+| 上下文压缩 | 自动检测链，不可用时降级为无摘要 | `auxiliary.compression` |
 | 会话搜索 | 自动检测链 | `auxiliary.session_search` |
 | 技能中心 | 自动检测链 | `auxiliary.skills_hub` |
 | MCP 助手 | 自动检测链 | `auxiliary.mcp` |
 | 记忆刷新 | 自动检测链 | `auxiliary.flush_memories` |
-| 委派 | 仅提供商覆盖（无自动备用） | `delegation.provider` / `delegation.model` |
-| 定时任务 | 仅每个任务的提供商覆盖（无自动备用） | 每个任务的 `provider` / `model` |
+| 审批分类 | 自动检测链 | `auxiliary.approval` |
+| 标题生成 | 自动检测链 | `auxiliary.title_generation` |
+| 委派 | 仅提供商覆盖（无自动回退） | `delegation.provider` / `delegation.model` |
+| 定时任务 | 仅每项任务的提供商覆盖（无自动回退） | 每项任务的 `provider` / `model` |
