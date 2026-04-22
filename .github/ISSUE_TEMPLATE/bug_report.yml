@@ -1,0 +1,161 @@
+name: "🐛 错误报告"
+description: 报告一个错误 —— 某些功能损坏、崩溃或行为异常。
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢报告错误！请填写以下部分，以便我们快速复现并修复。
+
+        **提交前请**：
+        - [ ] 搜索[现有问题](https://github.com/NousResearch/hermes-agent/issues)以避免重复
+        - [ ] 更新到最新版本 (`hermes update`) 并确认错误仍然存在
+        - [ ] 运行 `hermes debug share` 并将链接粘贴在下方（参见调试报告部分）
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 错误描述
+      description: 对损坏内容的清晰描述。如果相关，请包含错误信息、回溯或截图。
+      placeholder: |
+        发生了什么？你期望发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 触发错误的最小步骤。越具体，我们修复得越快。
+      placeholder: |
+        1. 运行 `hermes chat`
+        2. 发送消息 "..."
+        3. Agent 调用工具 X
+        4. 出现错误：...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      description: 本应发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？如果可用，请包含完整的错误输出。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 受影响组件
+      description: Hermes 的哪个部分受到影响？
+      multiple: true
+      options:
+        - CLI (交互式聊天)
+        - 消息网关 (Telegram/Discord/Slack/WhatsApp)
+        - 设置 / 安装
+        - 工具 (终端、文件操作、网页、代码执行等)
+        - 技能 (技能加载、技能中心、技能守卫)
+        - Agent 核心 (会话循环、上下文压缩、记忆)
+        - 配置 (config.yaml, .env, hermes setup)
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 消息平台 (如果与消息网关相关)
+      description: 哪个平台适配器受到影响？
+      multiple: true
+      options:
+        - 不适用 (仅 CLI)
+        - Telegram
+        - Discord
+        - Slack
+        - WhatsApp
+
+  - type: textarea
+    id: debug-report
+    attributes:
+      label: 调试报告
+      description: |
+        从你的终端运行 `hermes debug share` 并将其打印的链接粘贴在此处。
+        这会自动将你的系统信息、配置和最近日志上传到粘贴服务。
+
+        如果你在交互式聊天会话中，也可以使用 `/debug` 斜杠命令 —— 效果相同。
+
+        如果上传失败，请运行 `hermes debug share --local` 并直接粘贴输出。
+      placeholder: |
+        Report   https://paste.rs/abc123
+        agent.log   https://paste.rs/def456
+        gateway.log   https://paste.rs/ghi789
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      description: 例如 Ubuntu 24.04, macOS 15.2, Windows 11
+      placeholder: Ubuntu 24.04
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python 版本
+      description: `python --version` 的输出
+      placeholder: "3.11.9"
+
+  - type: input
+    id: hermes-version
+    attributes:
+      label: Hermes 版本
+      description: `hermes version` 的输出
+      placeholder: "2.1.0"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 额外日志 / 回溯 (可选)
+      description: |
+        上面的调试报告已涵盖大部分日志。使用此字段填写任何 `hermes debug share` 未捕获的额外错误输出、回溯或截图。
+      render: shell
+
+  - type: textarea
+    id: root-cause
+    attributes:
+      label: 根本原因分析 (可选)
+      description: |
+        如果你已深入研究代码并确定了根本原因，请在此处分享。
+        如果可能，请包含文件路径、行号和代码片段。这将大大加快修复速度。
+      placeholder: |
+        错误位于 `gateway/run.py` 第 949 行。`len(history)` 统计了 session_meta 条目，
+        但 `agent_messages` 是从过滤后的历史记录构建的...
+
+  - type: textarea
+    id: proposed-fix
+    attributes:
+      label: 建议的修复方案 (可选)
+      description: 如果你有修复思路（或已准备好 PR），请在此处描述。
+      placeholder: |
+        将 `gateway/platforms/base.py` 第 289 行的 `.get()` 替换为 `.pop()`，
+        以便在检索后实际清除待处理的消息。
+
+  - type: checkboxes
+    id: pr-ready
+    attributes:
+      label: 你愿意为此提交 PR 吗？
+      options:
+        - label: 我想自己修复并提交 PR

@@ -1,0 +1,112 @@
+name: "🔧 安装/配置帮助"
+description: 在安装或配置 Hermes 时遇到问题？请在此提问。
+title: "[安装]: "
+labels: ["setup"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        很抱歉您遇到了问题！请填写以下详细信息以便我们提供帮助。
+
+        **首先快速检查一下：**
+        - 运行 `hermes debug share` 并将链接粘贴到下面的“调试报告”部分
+        - 如果您在聊天会话中，可以使用 `/debug` 命令 — 效果相同
+        - 尝试运行 `hermes update` 获取最新版本
+        - 查看 [README 故障排除部分](https://github.com/NousResearch/hermes-agent#troubleshooting)
+        - 对于一般性问题，可以考虑在 [Nous Research Discord](https://discord.gg/NousResearch) 寻求更快的帮助
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 出了什么问题？
+      description: 描述您尝试做什么以及在哪里失败了。
+      placeholder: |
+        我运行了 `hermes setup` 并选择了 Nous Portal，但当我尝试
+        启动消息网关时，我遇到了...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 已执行的步骤
+      description: 您做了什么？请包含您运行的确切命令。
+      placeholder: |
+        1. 运行了安装脚本：`curl -fsSL ... | bash`
+        2. 运行了 `hermes setup` 并选择了“快速设置”
+        3. 选择了 OpenRouter，输入了 API 密钥
+        4. 运行了 `hermes chat` 并出现错误...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: 安装方式
+      options:
+        - 安装脚本 (curl | bash)
+        - 手动克隆 + pip/uv 安装
+        - PowerShell 安装程序 (Windows)
+        - Docker
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      placeholder: Ubuntu 24.04 / macOS 15.2 / Windows 11
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python 版本
+      description: `python --version` (或 `python3 --version`) 的输出
+      placeholder: "3.11.9"
+
+  - type: input
+    id: hermes-version
+    attributes:
+      label: Hermes 版本
+      description: `hermes version` 的输出（如果安装已进行到这一步）
+      placeholder: "2.1.0"
+
+  - type: textarea
+    id: debug-report
+    attributes:
+      label: 调试报告
+      description: |
+        在终端中运行 `hermes debug share` 并将其打印的链接粘贴到这里。
+        这将自动将您的系统信息、配置和最近的日志上传到粘贴服务。
+
+        如果您在交互式聊天会话中，也可以使用 `/debug` 斜杠命令 — 效果相同。
+
+        如果上传失败或安装未进行到这一步，请运行 `hermes debug share --local` 并直接粘贴输出。
+        如果连这也不行，请运行 `hermes doctor` 并粘贴其输出。
+      placeholder: |
+        报告   https://paste.rs/abc123
+        agent.log   https://paste.rs/def456
+        gateway.log   https://paste.rs/ghi789
+      render: shell
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: 完整的错误输出
+      description: 粘贴完整的错误信息或回溯。这将自动格式化。
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 我已尝试的方法
+      description: 列出您已经尝试过的任何修复方法或变通方案。
+      placeholder: |
+        - 运行了 `hermes update`
+        - 尝试使用 `pip install -e ".[all]"` 重新安装
+        - 检查了 OPENROUTER_API_KEY 是否在 ~/.hermes/.env 中设置
