@@ -24,11 +24,11 @@ docker run -it --rm \
   nousresearch/hermes-agent setup
 ```
 
-这将使你进入设置向导，它会提示你输入 API 密钥并将其写入 `~/.hermes/.env`。你只需要执行一次此操作。强烈建议此时为消息网关设置一个聊天系统。
+这将使你进入设置向导，它会提示你输入 API 密钥并将其写入 `~/.hermes/.env`。你只需要执行一次此操作。强烈建议在此步骤中为消息网关设置一个聊天系统。
 
 ## 以网关模式运行
 
-配置完成后，以后台方式运行容器作为持久化的网关（Telegram、Discord、Slack、WhatsApp 等）：
+配置完成后，以后台方式运行容器作为持久化网关（Telegram、Discord、Slack、WhatsApp 等）：
 
 ```sh
 docker run -d \
@@ -47,7 +47,7 @@ docker run -d \
 
 内置的 Web 仪表板可以作为单独的容器与网关一起运行。
 
-要将仪表板作为自己的容器运行，请将其指向网关的健康检查端点，以便它可以跨容器检测网关状态：
+要将仪表板作为自己的容器运行，请将其指向网关的健康检查端点，以便它可以检测跨容器的网关状态：
 
 ```sh
 docker run -d \
@@ -78,6 +78,12 @@ docker run -it --rm \
   nousresearch/hermes-agent
 ```
 
+或者，如果你已经在运行的容器中打开了终端（例如通过 Docker Desktop），只需运行：
+
+```sh
+/opt/hermes/.venv/bin/hermes
+```
+
 ## 持久化卷
 
 `/opt/data` 卷是所有 Hermes 状态的单一事实来源。它映射到宿主机的 `~/.hermes/` 目录，包含：
@@ -96,7 +102,7 @@ docker run -it --rm \
 | `skins/` | 自定义 CLI 皮肤 |
 
 :::warning
-切勿同时针对同一数据目录运行两个 Hermes **网关**容器 — 会话文件和记忆存储并非为并发写入访问而设计。将仪表板容器与网关一起运行是安全的，因为仪表板只读取数据。
+切勿同时运行两个针对同一数据目录的 Hermes **网关**容器 — 会话文件和记忆存储并非为并发写入访问而设计。将仪表板容器与网关一起运行是安全的，因为仪表板只读取数据。
 :::
 
 ## 环境变量转发
@@ -115,7 +121,7 @@ docker run -it --rm \
 
 ## Docker Compose 示例
 
-对于需要同时部署网关和仪表板的持久化部署，使用 `docker-compose.yaml` 非常方便：
+对于同时部署网关和仪表板的持久化部署，使用 `docker-compose.yaml` 非常方便：
 
 ```yaml
 services:
@@ -130,7 +136,7 @@ services:
       - ~/.hermes:/opt/data
     networks:
       - hermes-net
-    # 取消注释以转发特定的环境变量，而不是使用 .env 文件：
+    # 取消注释以转发特定环境变量，而不是使用 .env 文件：
     # environment:
     #   - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     #   - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -176,10 +182,10 @@ Hermes 容器需要适度的资源。推荐的最低配置：
 | 资源 | 最低要求 | 推荐配置 |
 |----------|---------|-------------|
 | 内存 | 1 GB | 2–4 GB |
-| CPU | 1 核 | 2 核 |
+| CPU | 1 核心 | 2 核心 |
 | 磁盘（数据卷） | 500 MB | 2+ GB（随会话/技能增长） |
 
-浏览器自动化（Playwright/Chromium）是最耗内存的功能。如果不需要浏览器工具，1 GB 就足够了。如果启用了浏览器工具，请至少分配 2 GB。
+浏览器自动化（Playwright/Chromium）是最耗内存的功能。如果你不需要浏览器工具，1 GB 就足够了。如果启用了浏览器工具，请至少分配 2 GB。
 
 在 Docker 中设置限制：
 
@@ -194,9 +200,9 @@ docker run -d \
 
 ## Dockerfile 的作用
 
-官方镜像基于 `debian:13.4` 并包含：
+官方镜像基于 `debian:13.4`，包含：
 
-- 带有所有 Hermes 依赖项的 Python 3 (`pip install -e ".[all]"`)
+- Python 3 及所有 Hermes 依赖项 (`pip install -e ".[all]"`)
 - Node.js + npm（用于浏览器自动化和 WhatsApp 桥接）
 - 带有 Chromium 的 Playwright (`npx playwright install --with-deps chromium`)
 - ripgrep 和 ffmpeg 作为系统工具
@@ -205,8 +211,8 @@ docker run -d \
 入口点脚本 (`docker/entrypoint.sh`) 在首次运行时引导数据卷：
 - 创建目录结构 (`sessions/`, `memories/`, `skills/` 等)
 - 如果不存在 `.env`，则复制 `.env.example` → `.env`
-- 如果缺少 `config.yaml`，则复制默认配置
-- 如果缺少 `SOUL.md`，则复制默认文件
+- 如果缺少，则复制默认的 `config.yaml`
+- 如果缺少，则复制默认的 `SOUL.md`
 - 使用基于清单的方法同步捆绑的技能（保留用户编辑）
 - 然后使用你传递的任何参数运行 `hermes`
 
@@ -233,7 +239,7 @@ docker compose up -d
 
 ## 技能和凭证文件
 
-当使用 Docker 作为执行环境时（不是上述方法，而是指 Agent 在 Docker 沙盒内执行命令），Hermes 会自动将技能目录 (`~/.hermes/skills/`) 和技能声明的任何凭证文件作为只读卷绑定挂载到容器中。这意味着技能脚本、模板和引用在沙盒内可用，无需手动配置。
+当使用 Docker 作为执行环境时（不是上述方法，而是指 Agent 在 Docker 沙盒内执行命令时），Hermes 会自动将技能目录 (`~/.hermes/skills/`) 和技能声明的任何凭证文件作为只读卷绑定挂载到容器中。这意味着技能脚本、模板和引用在沙盒内可用，无需手动配置。
 
 SSH 和 Modal 后端也会发生相同的同步 — 技能和凭证文件会在每个命令执行前通过 rsync 或 Modal 挂载 API 上传。
 
@@ -273,7 +279,7 @@ docker run -d \
 docker restart hermes
 ```
 
-### 检查容器健康状态
+### 检查容器健康状况
 
 ```sh
 docker logs --tail 50 hermes          # 最近日志
