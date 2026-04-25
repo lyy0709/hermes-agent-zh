@@ -118,14 +118,14 @@ def get_available_skills() -> Dict[str, List[str]]:
 # 更新检查
 # =========================================================================
 
-# 缓存更新检查结果6小时，避免重复的git拉取
+# 缓存更新检查结果6小时，避免重复的 git fetch
 _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 
 
 def check_for_updates() -> Optional[int]:
     """检查本地仓库落后于 origin/main 多少个提交。
 
-    最多每6小时执行一次 ``git fetch``（缓存至
+    最多每6小时执行一次 ``git fetch``（缓存到
     ``~/.hermes/.update_check``）。返回落后的提交数量，
     如果检查失败或不适用则返回 ``None``。
     """
@@ -133,7 +133,7 @@ def check_for_updates() -> Optional[int]:
     repo_dir = hermes_home / "hermes-agent"
     cache_file = hermes_home / ".update_check"
 
-    # 必须是一个git仓库 — 对于开发安装，回退到项目根目录
+    # 必须是一个 git 仓库 — 对于开发安装，回退到项目根目录
     if not (repo_dir / ".git").exists():
         repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
@@ -149,7 +149,7 @@ def check_for_updates() -> Optional[int]:
     except Exception:
         pass
 
-    # 拉取最新引用（快速 — 仅下载引用元数据，不下载文件）
+    # 获取最新引用（快速 — 仅下载引用元数据，不下载文件）
     try:
         subprocess.run(
             ["git", "fetch", "origin", "--quiet"],
@@ -235,6 +235,52 @@ def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
     return {"upstream": upstream, "local": local, "ahead": max(ahead, 0)}
 
 
+_RELEASE_URL_BASE = "https://github.com/NousResearch/hermes-agent/releases/tag"
+_latest_release_cache: Optional[tuple] = None  # (tag, url) once resolved
+
+
+def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
+    """Return ``(tag, release_url)`` for the latest git tag, or None.
+
+    Local-only — runs ``git describe --tags --abbrev=0`` against the
+    Hermes checkout. Cached per-process. Release URL always points at the
+    canonical NousResearch/hermes-agent repo (forks don't get a link).
+    """
+    global _latest_release_cache
+    if _latest_release_cache is not None:
+        return _latest_release_cache or None
+
+    repo_dir = repo_dir or _resolve_repo_dir()
+    if repo_dir is None:
+        _latest_release_cache = ()  # falsy sentinel — skip future lookups
+        return None
+
+    try:
+        result = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            cwd=str(repo_dir),
+        )
+    except Exception:
+        _latest_release_cache = ()
+        return None
+
+    if result.returncode != 0:
+        _latest_release_cache = ()
+        return None
+
+    tag = (result.stdout or "").strip()
+    if not tag:
+        _latest_release_cache = ()
+        return None
+
+    url = f"{_RELEASE_URL_BASE}/{tag}"
+    _latest_release_cache = (tag, url)
+    return _latest_release_cache
+
+
 def format_banner_version_label() -> str:
     """Return the version label shown in the startup banner title."""
     base = f"Hermes Agent v{VERSION} ({RELEASE_DATE})"
@@ -249,8 +295,8 @@ def format_banner_version_label() -> str:
     if ahead <= 0 or upstream == local:
         return f"{base} · 上游 {upstream}"
 
-    carried_word = "个提交" if ahead == 1 else "个提交"
-    return f"{base} · 上游 {upstream} · 本地 {local} (+{ahead} 个携带的提交)"
+    carried_word = "提交" if ahead == 1 else "提交"
+    return f"{base} · 上游 {upstream} · 本地 {local} (+{ahead} 个待合并 {carried_word})"
 
 
 # =========================================================================
@@ -259,8 +305,6 @@ def format_banner_version_label() -> str:
 
 _update_result: Optional[int] = None
 _update_check_done = threading.Event()
-
-
 def prefetch_update_check():
     """Kick off update check in a background daemon thread."""
     def _run():
@@ -272,17 +316,17 @@ def prefetch_update_check():
 
 
 def get_update_result(timeout: float = 0.5) -> Optional[int]:
-    """Get result of prefetched check. Returns None if not ready."""
+    """获取预取检查的结果。如果未就绪则返回 None。"""
     _update_check_done.wait(timeout=timeout)
     return _update_result
 
 
 # =========================================================================
-# Welcome banner
+# 欢迎横幅
 # =========================================================================
 
 def _format_context_length(tokens: int) -> str:
-    """Format a token count for display (e.g. 128000 → '128K', 1048576 → '1M')."""
+    """格式化 Token 数量以便显示（例如 128000 → '128K', 1048576 → '1M'）。"""
     if tokens >= 1_000_000:
         val = tokens / 1_000_000
         rounded = round(val)
@@ -296,10 +340,12 @@ def _format_context_length(tokens: int) -> str:
             return f"{rounded}K"
         return f"{val:.1f}K"
     return str(tokens)
+
+
 def _display_toolset_name(toolset_name: str) -> str:
-    """Normalize internal/legacy toolset identifiers for banner display."""
+    """规范化内部/遗留的工具集标识符以便在横幅中显示。"""
     if not toolset_name:
-        return "未知"
+        return "unknown"
     return (
         toolset_name[:-6]
         if toolset_name.endswith("_tools")
@@ -313,17 +359,17 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
                          session_id: str = None,
                          get_toolset_for_tool=None,
                          context_length: int = None):
-    """Build and print a welcome banner with caduceus on left and info on right.
+    """构建并打印欢迎横幅，左侧为墨丘利节杖，右侧为信息。
 
     Args:
-        console: Rich Console instance.
-        model: Current model name.
-        cwd: Current working directory.
-        tools: List of tool definitions.
-        enabled_toolsets: List of enabled toolset names.
-        session_id: Session identifier.
-        get_toolset_for_tool: Callable to map tool name -> toolset name.
-        context_length: Model's context window size in tokens.
+        console: Rich Console 实例。
+        model: 当前模型名称。
+        cwd: 当前工作目录。
+        tools: 工具定义列表。
+        enabled_toolsets: 已启用的工具集名称列表。
+        session_id: 会话标识符。
+        get_toolset_for_tool: 将工具名称映射到工具集名称的可调用对象。
+        context_length: 模型的上下文窗口大小（以 Token 计）。
     """
     from model_tools import check_tool_availability, TOOLSET_REQUIREMENTS
     if get_toolset_for_tool is None:
@@ -334,9 +380,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
 
     _, unavailable_toolsets = check_tool_availability(quiet=True)
     disabled_tools = set()
-    # Tools whose toolset has a check_fn are lazy-initialized (e.g. honcho,
-    # homeassistant) — they show as unavailable at banner time because the
-    # check hasn't run yet, but they aren't misconfigured.
+    # 那些工具集具有 check_fn 的工具是延迟初始化的（例如 honcho, homeassistant）—— 它们在横幅显示时显示为不可用，因为检查尚未运行，但它们并未配置错误。
     lazy_tools = set()
     for item in unavailable_toolsets:
         toolset_name = item.get("name", "")
@@ -351,13 +395,13 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     layout_table.add_column("left", justify="center")
     layout_table.add_column("right", justify="left")
 
-    # Resolve skin colors once for the entire banner
+    # 为整个横幅解析一次皮肤颜色
     accent = _skin_color("banner_accent", "#FFBF00")
     dim = _skin_color("banner_dim", "#B8860B")
     text = _skin_color("banner_text", "#FFF8DC")
     session_color = _skin_color("session_border", "#8B8682")
 
-    # Use skin's custom caduceus art if provided
+    # 如果皮肤提供了自定义的墨丘利节杖艺术图，则使用它
     try:
         from hermes_cli.skin_engine import get_active_skin
         _bskin = get_active_skin()
@@ -435,9 +479,9 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
         right_lines.append(f"[dim {dim}]{toolset}:[/] {tools_str}")
 
     if remaining_toolsets > 0:
-        right_lines.append(f"[dim {dim}](以及 {remaining_toolsets} 个更多工具集...)[/]")
+        right_lines.append(f"[dim {dim}](还有 {remaining_toolsets} 个工具集...)[/]")
 
-    # MCP Servers section (only if configured)
+    # MCP 服务器部分（仅在配置时显示）
     try:
         from tools.mcp_tool import get_mcp_status
         mcp_status = get_mcp_status()
@@ -456,7 +500,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
             else:
                 right_lines.append(
                     f"[red]{srv['name']}[/] [dim]({srv['transport']})[/] "
-                    f"[red]— 失败[/]"
+                    f"[red]— 连接失败[/]"
                 )
 
     right_lines.append("")
@@ -484,29 +528,29 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     if mcp_connected:
         summary_parts.append(f"{mcp_connected} 个 MCP 服务器")
     summary_parts.append("/help 查看命令")
-    # Show active profile name when not 'default'
+    # 当活动配置文件不是 'default' 时显示其名称
     try:
         from hermes_cli.profiles import get_active_profile_name
         _profile_name = get_active_profile_name()
         if _profile_name and _profile_name != "default":
             right_lines.append(f"[bold {accent}]配置文件:[/] [{text}]{_profile_name}[/]")
     except Exception:
-        pass  # Never break the banner over a profiles.py bug
+        pass  # 绝不因 profiles.py 的错误而破坏横幅
 
     right_lines.append(f"[dim {dim}]{' · '.join(summary_parts)}[/]")
 
-    # Update check — use prefetched result if available
+    # 更新检查 —— 如果可用，则使用预取的结果
     try:
         behind = get_update_result(timeout=0.5)
         if behind and behind > 0:
             from hermes_cli.config import recommended_update_command
-            commits_word = "commit" if behind == 1 else "commits"
+            commits_word = "个提交" if behind == 1 else "个提交"
             right_lines.append(
-                f"[bold yellow]⚠ 落后 {behind} 个 {commits_word}[/]"
+                f"[bold yellow]⚠ 落后 {behind} {commits_word}[/]"
                 f"[dim yellow] — 运行 [bold]{recommended_update_command()}[/bold] 以更新[/]"
             )
     except Exception:
-        pass  # Never break the banner over an update check
+        pass  # 绝不因更新检查而破坏横幅
 
     right_content = "\n".join(right_lines)
     layout_table.add_row(left_content, right_content)
@@ -514,9 +558,16 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     agent_name = _skin_branding("agent_name", "Hermes Agent")
     title_color = _skin_color("banner_title", "#FFD700")
     border_color = _skin_color("banner_border", "#CD7F32")
+    version_label = format_banner_version_label()
+    release_info = get_latest_release_tag()
+    if release_info:
+        _tag, _url = release_info
+        title_markup = f"[bold {title_color}][link={_url}]{version_label}[/link][/]"
+    else:
+        title_markup = f"[bold {title_color}]{version_label}[/]"
     outer_panel = Panel(
         layout_table,
-        title=f"[bold {title_color}]{format_banner_version_label()}[/]",
+        title=title_markup,
         border_style=border_color,
         padding=(0, 2),
     )

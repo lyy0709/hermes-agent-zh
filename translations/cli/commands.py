@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from typing import Any
 
 # prompt_toolkit 是一个可选的 CLI 依赖项——仅用于
-# SlashCommandCompleter 和 SlashCommandAutoSuggest。缺少它的消息网关和测试
+# SlashCommandCompleter 和 SlashCommandAutoSuggest。缺少它的网关和测试
 # 环境仍然必须能够导入此模块
 # 以用于 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
 try:
@@ -39,14 +39,14 @@ except ImportError:  # pragma: no cover
 class CommandDef:
     """单个斜杠命令的定义。"""
 
-    name: str                          # 不带斜杠的规范名称："background"
+    name: str                          # 规范名称，不带斜杠："background"
     description: str                   # 人类可读的描述
-    category: str                      # "会话"、"配置" 等
+    category: str                      # "会话"、"配置"等
     aliases: tuple[str, ...] = ()      # 替代名称：("bg",)
     args_hint: str = ""                # 参数占位符："<prompt>"、"[name]"
-    subcommands: tuple[str, ...] = ()  # 可标签补全的子命令
+    subcommands: tuple[str, ...] = ()  # 可制表符补全的子命令
     cli_only: bool = False             # 仅在 CLI 中可用
-    gateway_only: bool = False         # 仅在消息网关/消息传递中可用
+    gateway_only: bool = False         # 仅在网关/消息传递中可用
     gateway_config_gate: str | None = None  # 配置点路径；当为真值时，覆盖网关的 cli_only
 
 
@@ -56,88 +56,91 @@ class CommandDef:
 
 COMMAND_REGISTRY: list[CommandDef] = [
     # 会话
-    CommandDef("new", "启动新会话（新的会话 ID + 历史记录）", "会话",
+    CommandDef("new", "开始一个新会话（新的会话 ID + 历史记录）", "会话",
                aliases=("reset",)),
-    CommandDef("clear", "清屏并启动新会话", "会话",
+    CommandDef("clear", "清屏并开始一个新会话", "会话",
                cli_only=True),
     CommandDef("history", "显示对话历史记录", "会话",
                cli_only=True),
     CommandDef("save", "保存当前对话", "会话",
                cli_only=True),
     CommandDef("retry", "重试最后一条消息（重新发送给 Agent）", "会话"),
-    CommandDef("undo", "移除最后一条用户/助手交换", "会话"),
+    CommandDef("undo", "移除最后一个用户/助手交换", "会话"),
     CommandDef("title", "为当前会话设置标题", "会话",
-               args_hint="[名称]"),
+               args_hint="[name]"),
     CommandDef("branch", "分支当前会话（探索不同路径）", "会话",
-               aliases=("fork",), args_hint="[名称]"),
+               aliases=("fork",), args_hint="[name]"),
     CommandDef("compress", "手动压缩对话上下文", "会话",
-               args_hint="[焦点主题]"),
+               args_hint="[focus topic]"),
     CommandDef("rollback", "列出或恢复文件系统检查点", "会话",
-               args_hint="[编号]"),
+               args_hint="[number]"),
     CommandDef("snapshot", "创建或恢复 Hermes 配置/状态的状态快照", "会话",
-               aliases=("snap",), args_hint="[create|restore <id>|prune]"),
+               cli_only=True, aliases=("snap",), args_hint="[create|restore <id>|prune]"),
     CommandDef("stop", "终止所有正在运行的后台进程", "会话"),
-    CommandDef("approve", "批准一个待处理的危险命令", "会话",
+    CommandDef("approve", "批准一个待定的危险命令", "会话",
                gateway_only=True, args_hint="[session|always]"),
-    CommandDef("deny", "拒绝一个待处理的危险命令", "会话",
+    CommandDef("deny", "拒绝一个待定的危险命令", "会话",
                gateway_only=True),
-    CommandDef("background", "在后台运行一个提示", "会话",
-               aliases=("bg",), args_hint="<提示>"),
-    CommandDef("btw", "使用会话上下文的临时旁侧问题（无工具，不持久化）", "会话",
-               args_hint="<问题>"),
+    CommandDef("background", "在后台运行一个提示词", "会话",
+               aliases=("bg",), args_hint="<prompt>"),
+    CommandDef("btw", "使用会话上下文的临时旁侧问题（不使用工具，不持久化）", "会话",
+               args_hint="<question>"),
     CommandDef("agents", "显示活跃的 Agent 和正在运行的任务", "会话",
                aliases=("tasks",)),
-    CommandDef("queue", "为下一轮排队一个提示（不中断）", "会话",
-               aliases=("q",), args_hint="<提示>"),
+    CommandDef("queue", "为下一轮排队一个提示词（不中断）", "会话",
+               aliases=("q",), args_hint="<prompt>"),
     CommandDef("steer", "在下一次工具调用后注入一条消息而不中断", "会话",
-               args_hint="<提示>"),
+               args_hint="<prompt>"),
     CommandDef("status", "显示会话信息", "会话"),
     CommandDef("profile", "显示活跃的配置文件名称和主目录", "信息"),
     CommandDef("sethome", "将此聊天设置为主频道", "会话",
                gateway_only=True, aliases=("set-home",)),
     CommandDef("resume", "恢复一个先前命名的会话", "会话",
-               args_hint="[名称]"),
+               args_hint="[name]"),
 
     # 配置
     CommandDef("config", "显示当前配置", "配置",
                cli_only=True),
-    CommandDef("model", "为此会话切换模型", "配置", args_hint="[模型] [--provider 名称] [--global]"),
-    CommandDef("provider", "显示可用的提供商和当前提供商",
-               "配置"),
-    CommandDef("gquota", "显示 Google Gemini Code Assist 配额使用情况", "信息"),
+    CommandDef("model", "为此会话切换模型", "配置", args_hint="[model] [--provider name] [--global]"),
+    CommandDef("gquota", "显示 Google Gemini Code Assist 配额使用情况", "信息",
+               cli_only=True),
 
     CommandDef("personality", "设置预定义的人格", "配置",
-               args_hint="[名称]"),
+               args_hint="[name]"),
     CommandDef("statusbar", "切换上下文/模型状态栏", "配置",
                cli_only=True, aliases=("sb",)),
-    CommandDef("verbose", "循环工具进度显示：关闭 -> 新 -> 全部 -> 详细",
+    CommandDef("verbose", "循环工具进度显示：关闭 -> 新任务 -> 全部 -> 详细",
                "配置", cli_only=True,
                gateway_config_gate="display.tool_progress_command"),
     CommandDef("yolo", "切换 YOLO 模式（跳过所有危险命令批准）",
                "配置"),
     CommandDef("reasoning", "管理推理努力和显示", "配置",
-               args_hint="[级别|show|hide]",
+               args_hint="[level|show|hide]",
                subcommands=("none", "minimal", "low", "medium", "high", "xhigh", "show", "hide", "on", "off")),
     CommandDef("fast", "切换快速模式——OpenAI 优先处理 / Anthropic 快速模式（普通/快速）", "配置",
                args_hint="[normal|fast|status]",
                subcommands=("normal", "fast", "status", "on", "off")),
     CommandDef("skin", "显示或更改显示皮肤/主题", "配置",
-               args_hint="[名称]"),
+               cli_only=True, args_hint="[name]"),
     CommandDef("voice", "切换语音模式", "配置",
                args_hint="[on|off|tts|status]", subcommands=("on", "off", "tts", "status")),
+    CommandDef("busy", "控制当 Hermes 工作时 Enter 键的作用", "配置",
+               cli_only=True, args_hint="[queue|interrupt|status]",
+               subcommands=("queue", "interrupt", "status")),
 
     # 工具 & 技能
-    CommandDef("tools", "管理工具：/tools [list|disable|enable] [名称...]", "工具 & 技能",
-               args_hint="[list|disable|enable] [名称...]", cli_only=True),
+    CommandDef("tools", "管理工具：/tools [list|disable|enable] [name...]", "工具 & 技能",
+               args_hint="[list|disable|enable] [name...]", cli_only=True),
     CommandDef("toolsets", "列出可用的工具集", "工具 & 技能",
                cli_only=True),
     CommandDef("skills", "搜索、安装、检查或管理技能",
                "工具 & 技能", cli_only=True,
                subcommands=("search", "browse", "inspect", "install")),
     CommandDef("cron", "管理定时任务", "工具 & 技能",
-               cli_only=True, args_hint="[子命令]",
+               cli_only=True, args_hint="[subcommand]",
                subcommands=("list", "add", "create", "edit", "pause", "resume", "run", "remove")),
-    CommandDef("reload", "将 .env 变量重新加载到正在运行的会话中", "工具 & 技能"),
+    CommandDef("reload", "将 .env 变量重新加载到正在运行的会话中", "工具 & 技能",
+               cli_only=True),
     CommandDef("reload-mcp", "从配置重新加载 MCP 服务器", "工具 & 技能",
                aliases=("reload_mcp",)),
     CommandDef("browser", "通过 CDP 将浏览器工具连接到您正在运行的 Chrome", "工具 & 技能",
@@ -148,21 +151,21 @@ COMMAND_REGISTRY: list[CommandDef] = [
 
     # 信息
     CommandDef("commands", "浏览所有命令和技能（分页）", "信息",
-               gateway_only=True, args_hint="[页码]"),
+               gateway_only=True, args_hint="[page]"),
     CommandDef("help", "显示可用命令", "信息"),
-    CommandDef("restart", "在排空活跃运行后优雅地重启消息网关", "会话",
+    CommandDef("restart", "在排空活跃运行后优雅地重启网关", "会话",
                gateway_only=True),
     CommandDef("usage", "显示当前会话的 Token 使用情况和速率限制", "信息"),
-    CommandDef("insights", "显示使用洞察和分析", "信息",
-               args_hint="[天数]"),
-    CommandDef("platforms", "显示消息网关/消息传递平台状态", "信息",
+    CommandDef("insights", "显示使用情况洞察和分析", "信息",
+               args_hint="[days]"),
+    CommandDef("platforms", "显示网关/消息传递平台状态", "信息",
                cli_only=True, aliases=("gateway",)),
-    CommandDef("copy", "将最后一条助手响应复制到剪贴板", "信息",
-               cli_only=True, args_hint="[编号]"),
+    CommandDef("copy", "将最后一个助手响应复制到剪贴板", "信息",
+               cli_only=True, args_hint="[number]"),
     CommandDef("paste", "从剪贴板附加图像", "信息",
                cli_only=True),
-    CommandDef("image", "为您的下一个提示附加本地图像文件", "信息",
-               cli_only=True, args_hint="<路径>"),
+    CommandDef("image", "为您的下一个提示词附加一个本地图像文件", "信息",
+               cli_only=True, args_hint="<path>"),
     CommandDef("update", "将 Hermes Agent 更新到最新版本", "信息",
                gateway_only=True),
     CommandDef("debug", "上传调试报告（系统信息 + 日志）并获取可分享链接", "信息"),
@@ -210,8 +213,7 @@ for _cmd in COMMAND_REGISTRY:
     if not _cmd.gateway_only:
         COMMANDS[f"/{_cmd.name}"] = _build_description(_cmd)
         for _alias in _cmd.aliases:
-            COMMANDS[f"/{_alias}"] = f"{_cmd.description} (/ {_cmd.name} 的别名)"
-
+            COMMANDS[f"/{_alias}"] = f"{_cmd.description} (/别名 {_cmd.name})"
 
 # Backwards-compatible categorized dict
 COMMANDS_BY_CATEGORY: dict[str, dict[str, str]] = {}
@@ -313,7 +315,7 @@ def should_bypass_active_session(command_name: str | None) -> bool:
     safety net in gateway.run discards any command text that reaches
     the pending queue — which meant a mid-run /model (or /reasoning,
     /voice, /insights, /title, /resume, /retry, /undo, /compress,
-    /usage, /provider, /reload-mcp, /sethome, /reset) would silently
+    /usage, /reload-mcp, /sethome, /reset) would silently
     interrupt the agent AND get discarded, producing a zero-char
     response. See issue #5057 / PRs #6252, #10370, #4665.
 
@@ -411,7 +413,7 @@ def _iter_plugin_command_entries() -> list[tuple[str, str, str]]:
     for name, meta in commands.items():
         if not isinstance(name, str) or not isinstance(meta, dict):
             continue
-        description = str(meta.get("description") or f"运行 /{name}")
+        description = str(meta.get("description") or f"执行 /{name}")
         args_hint = str(meta.get("args_hint") or "").strip()
         entries.append((name, description, args_hint))
     return entries
@@ -864,20 +866,20 @@ class SlashCommandCompleter(Completer):
     def _extract_path_word(text: str) -> str | None:
         """如果当前单词看起来像文件路径，则提取它。
 
-        返回光标下的类路径标记，如果当前单词看起来不像路径则返回 None。
-        当一个单词以 ``./``、``../``、``~/``、``/`` 开头，或包含 ``/`` 分隔符（例如 ``src/main.py``）时，它被认为是类路径的。
+        返回光标下的路径状标记，如果当前单词看起来不像路径则返回 None。
+        当一个单词以 ``./``、``../``、``~/``、``/`` 开头，或者包含 ``/`` 分隔符（例如 ``src/main.py``）时，它被认为是路径状的。
         """
         if not text:
             return None
         # 向后遍历以找到当前“单词”的起始位置。
-        # 单词由空格分隔，但路径可以包含几乎任何内容。
+        # 单词由空格分隔，但路径可以包含几乎任何字符。
         i = len(text) - 1
         while i >= 0 and text[i] != " ":
             i -= 1
         word = text[i + 1:]
         if not word:
             return None
-        # 仅对类路径标记触发路径补全
+        # 仅对路径状标记触发路径补全
         if word.startswith(("./", "../", "~/", "/")) or "/" in word:
             return word
         return None
@@ -935,7 +937,7 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _extract_context_word(text: str) -> str | None:
-        """提取一个裸的 ``@`` 标记用于上下文引用补全。"""
+        """提取用于上下文引用补全的裸 ``@`` 标记。"""
         if not text:
             return None
         # 向后遍历以找到当前单词的起始位置
@@ -950,7 +952,7 @@ class SlashCommandCompleter(Completer):
     def _context_completions(self, word: str, limit: int = 30):
         """生成 Claude Code 风格的 @ 上下文补全。
 
-        裸的 ``@`` 或 ``@partial`` 显示静态引用和匹配的文件/文件夹。
+        裸 ``@`` 或 ``@partial`` 显示静态引用和匹配的文件/文件夹。
         ``@file:path`` 和 ``@folder:path`` 由现有的路径补全路径处理。
         """
         lowered = word.lower()
@@ -973,7 +975,7 @@ class SlashCommandCompleter(Completer):
                     display_meta=meta,
                 )
 
-        # 如果用户输入了 @file: / @folder:（或者只是 @file / @folder 还没有冒号），委托给路径补全。
+        # 如果用户输入了 @file: / @folder:（或者只是 @file / @folder 但还没有冒号），委托给路径补全。
         # 接受裸形式可以让选择器在用户输入 `@folder` 后立即显示目录，而无需他们先接受静态的 `@folder:` 提示并重新触发补全。
         for prefix in ("@file:", "@folder:"):
             bare = prefix[:-1]
@@ -1004,7 +1006,7 @@ class SlashCommandCompleter(Completer):
                     full_path = os.path.join(search_dir, entry)
                     is_dir = os.path.isdir(full_path)
                     # `@folder:` 必须只显示目录；`@file:` 只显示常规文件。
-                    # 没有这个过滤器，`@folder:` 会列出当前工作目录中的每个 .env / .gitignore，违背了明确的前缀，并让期望目录选择器的用户感到困惑。
+                    # 没有这个过滤器，`@folder:` 会列出当前目录下的每个 .env / .gitignore，违背了明确的前缀意图，并让期望目录选择器的用户感到困惑。
                     if want_dir != is_dir:
                         continue
                     if count >= limit:
@@ -1022,7 +1024,7 @@ class SlashCommandCompleter(Completer):
                     count += 1
                 return
 
-        # 裸 @ 或 @partial — 模糊项目范围文件搜索
+        # 裸 @ 或 @partial —— 模糊项目范围文件搜索
         query = word[1:]  # 去掉 @
         yield from self._fuzzy_file_completions(word, query, limit)
 
@@ -1117,7 +1119,7 @@ class SlashCommandCompleter(Completer):
         files = self._get_project_files()
 
         if not query:
-            # 无查询 — 显示最近修改的文件（已按修改时间排序）
+            # 无查询 —— 显示最近修改的文件（已按修改时间排序）
             for fp in files[:limit]:
                 is_dir = fp.endswith("/")
                 filename = os.path.basename(fp)
@@ -1157,7 +1159,7 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _skin_completions(sub_text: str, sub_lower: str):
-        """从可用皮肤中为 /skin 生成补全。"""
+        """为 /skin 从可用皮肤生成补全。"""
         try:
             from hermes_cli.skin_engine import list_skins
             for s in list_skins():
@@ -1174,7 +1176,7 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _personality_completions(sub_text: str, sub_lower: str):
-        """从配置的人格中为 /personality 生成补全。"""
+        """为 /personality 从配置的人格生成补全。"""
         try:
             from hermes_cli.config import load_config
             personalities = load_config().get("agent", {}).get("personalities", {})
@@ -1201,9 +1203,9 @@ class SlashCommandCompleter(Completer):
             pass
 
     def _model_completions(self, sub_text: str, sub_lower: str):
-        """从配置别名 + 内置别名为 /model 生成补全。"""
+        """为 /model 从配置别名 + 内置别名生成补全。"""
         seen = set()
-        # 基于配置的直接别名（首选 — 包含提供商信息）
+        # 基于配置的直接别名（首选 —— 包含提供商信息）
         try:
             from hermes_cli.model_switch import (
                 _ensure_direct_aliases, DIRECT_ALIASES, MODEL_ALIASES,
@@ -1254,7 +1256,7 @@ class SlashCommandCompleter(Completer):
             sub_text = parts[1] if len(parts) > 1 else ""
             sub_lower = sub_text.lower()
 
-            # 为具有运行时列表的命令提供动态补全
+            # 对具有运行时列表的命令进行动态补全
             if " " not in sub_text:
                 if base_cmd == "/model":
                     yield from self._model_completions(sub_text, sub_lower)

@@ -6,7 +6,7 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 
 # 架构
 
-本页是 Hermes Agent 内部结构的顶层地图。您可以通过它来了解代码库的整体布局，然后深入阅读特定子系统的文档以获取实现细节。
+本页是 Hermes Agent 内部结构的顶层地图。用它来熟悉代码库，然后深入特定子系统的文档以了解实现细节。
 
 ## 系统概览
 
@@ -14,7 +14,7 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        入口点                                       │
 │                                                                      │
-│  CLI (cli.py)    消息网关 (gateway/run.py)    ACP (acp_adapter/)    │
+│  CLI (cli.py)    消息网关 (gateway/run.py)    ACP (acp_adapter/)     │
 │  批量运行器       API 服务器                  Python 库              │
 └──────────┬──────────────┬───────────────────────┬───────────────────┘
            │              │                       │
@@ -35,16 +35,16 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 │  │              │  │ codex_resp.   │  │ 47 个工具    │               │
 │  │              │  │ anthropic     │  │ 19 个工具集  │               │
 │  └──────────────┘  └──────────────┘  └──────────────┘               │
-└─────────────────────────────────────────────────────────────────────┘
+└─────────┴─────────────────┴─────────────────┴───────────────────────┘
            │                                    │
            ▼                                    ▼
 ┌───────────────────┐              ┌──────────────────────┐
 │ 会话存储          │              │ 工具后端              │
 │ (SQLite + FTS5)   │              │ 终端 (6 个后端)       │
 │ hermes_state.py   │              │ 浏览器 (5 个后端)     │
-│ gateway/session.py│              │ 网页 (4 个后端)       │
-└───────────────────┘              │ MCP (动态)           │
-                                   │ 文件、视觉等          │
+│ gateway/session.py│              │ 网络 (4 个后端)       │
+└───────────────────┘              │ MCP (动态)            │
+                                   │ 文件、视觉等           │
                                    └──────────────────────┘
 ```
 
@@ -56,7 +56,7 @@ hermes-agent/
 ├── cli.py                    # HermesCLI — 交互式终端 TUI (~10,000 行)
 ├── model_tools.py            # 工具发现、模式收集、分发
 ├── toolsets.py               # 工具分组和平台预设
-├── hermes_state.py           # 带有 FTS5 的 SQLite 会话/状态数据库
+├── hermes_state.py           # 带 FTS5 的 SQLite 会话/状态数据库
 ├── hermes_constants.py       # HERMES_HOME，配置文件感知路径
 ├── batch_runner.py           # 批量轨迹生成
 │
@@ -80,7 +80,7 @@ hermes-agent/
 │   ├── config.py             # DEFAULT_CONFIG, OPTIONAL_ENV_VARS, 迁移
 │   ├── commands.py           # COMMAND_REGISTRY — 中央斜杠命令定义
 │   ├── auth.py               # PROVIDER_REGISTRY，凭证解析
-│   ├── runtime_provider.py   # 提供商 → api_mode + 凭证
+│   ├── runtime_provider.py   # Provider → api_mode + credentials
 │   ├── models.py             # 模型目录，提供商模型列表
 │   ├── model_switch.py       # /model 命令逻辑 (CLI + 消息网关共享)
 │   ├── setup.py              # 交互式设置向导 (~3,100 行)
@@ -103,15 +103,15 @@ hermes-agent/
 │   ├── code_execution_tool.py # execute_code 沙盒
 │   ├── delegate_tool.py      # 子 Agent 委派
 │   ├── mcp_tool.py           # MCP 客户端 (~2,200 行)
-│   ├── credential_files.py   # 基于文件的凭证透传
-│   ├── env_passthrough.py    # 沙盒环境变量透传
+│   ├── credential_files.py   # 基于文件的凭证传递
+│   ├── env_passthrough.py    # 沙盒的环境变量传递
 │   ├── ansi_strip.py         # ANSI 转义序列剥离
 │   └── environments/         # 终端后端 (local, docker, ssh, modal, daytona, singularity)
 │
 ├── gateway/                  # 消息平台网关
 │   ├── run.py                # GatewayRunner — 消息分发 (~9,000 行)
 │   ├── session.py            # SessionStore — 会话持久化
-│   ├── delivery.py           # 出站消息投递
+│   ├── delivery.py           # 出站消息传递
 │   ├── pairing.py            # DM 配对授权
 │   ├── hooks.py              # 钩子发现和生命周期事件
 │   ├── mirror.py             # 跨会话消息镜像
@@ -173,9 +173,9 @@ hermes-agent/
 
 如果你是代码库的新手：
 
-1. **本页面** — 了解概况
-2. **[Agent 循环内部机制](./agent-loop.md)** — AIAgent 的工作原理
-3. **[提示词组装](./prompt-assembly.md)** — 系统提示词的构建
+1. **本页面** — 了解整体情况
+2. **[Agent 循环内部机制](./agent-loop.md)** — AIAgent 如何工作
+3. **[提示词组装](./prompt-assembly.md)** — 系统提示词构建
 4. **[提供商运行时解析](./provider-runtime.md)** — 提供商如何被选择
 5. **[添加提供商](./adding-providers.md)** — 添加新提供商的实用指南
 6. **[工具运行时](./tools-runtime.md)** — 工具注册表、分发、执行环境
@@ -189,7 +189,7 @@ hermes-agent/
 
 ### Agent 循环
 
-同步编排引擎（`run_agent.py` 中的 `AIAgent`）。处理提供商选择、提示词构建、工具执行、重试、回退、回调、压缩和持久化。支持三种 API 模式以适配不同的提供商后端。
+同步编排引擎（`run_agent.py` 中的 `AIAgent`）。处理提供商选择、提示词构建、工具执行、重试、回退、回调、压缩和持久化。支持三种 API 模式以适应不同的提供商后端。
 
 → [Agent 循环内部机制](./agent-loop.md)
 
@@ -198,7 +198,7 @@ hermes-agent/
 在整个会话生命周期中构建和维护提示词：
 
 - **`prompt_builder.py`** — 从以下部分组装系统提示词：人格（SOUL.md）、记忆（MEMORY.md, USER.md）、技能、上下文文件（AGENTS.md, .hermes.md）、工具使用指南以及模型特定指令
-- **`prompt_caching.py`** — 应用 Anthropic 缓存断点以实现前缀缓存
+- **`prompt_caching.py`** — 应用 Anthropic 缓存断点进行前缀缓存
 - **`context_compressor.py`** — 当上下文超过阈值时，总结中间对话轮次
 
 → [提示词组装](./prompt-assembly.md), [上下文压缩与提示词缓存](./context-compression-and-caching.md)
@@ -211,7 +211,7 @@ hermes-agent/
 
 ### 工具系统
 
-中心化工具注册表（`tools/registry.py`），包含 19 个工具集中的 47 个已注册工具。每个工具文件在导入时自行注册。注册表处理模式收集、分发、可用性检查和错误包装。终端工具支持 6 种后端（本地、Docker、SSH、Daytona、Modal、Singularity）。
+中心化工具注册表（`tools/registry.py`），包含 19 个工具集中的 47 个注册工具。每个工具文件在导入时自行注册。注册表处理模式收集、分发、可用性检查和错误包装。终端工具支持 6 种后端（本地、Docker、SSH、Daytona、Modal、Singularity）。
 
 → [工具运行时](./tools-runtime.md)
 
@@ -256,11 +256,11 @@ hermes-agent/
 | 原则 | 实践中的含义 |
 |-----------|--------------------------|
 | **提示词稳定性** | 系统提示词在会话中途不会改变。除了明确的用户操作（`/model`）外，没有破坏缓存的变更。 |
-| **可观察的执行** | 每次工具调用都通过回调对用户可见。CLI（旋转器）和网关（聊天消息）中都有进度更新。 |
-| **可中断性** | API 调用和工具执行可以被用户输入或信号中途取消。 |
-| **平台无关的核心** | 一个 AIAgent 类服务于 CLI、网关、ACP、批处理和 API 服务器。平台差异存在于入口点，而非 Agent 本身。 |
-| **松耦合** | 可选子系统（MCP、插件、记忆提供商、RL 执行环境）使用注册表模式和 check_fn 门控，而非硬依赖。 |
-| **配置隔离** | 每个配置（`hermes -p <name>`）都有自己的 HERMES_HOME、配置、记忆、会话和网关 PID。多个配置可以并发运行。 |
+| **可观察的执行** | 每次工具调用都通过回调对用户可见。CLI（旋转器）和网关（聊天消息）中提供进度更新。 |
+| **可中断** | API 调用和工具执行可以被用户输入或信号中途取消。 |
+| **平台无关的核心** | 一个 AIAgent 类服务于 CLI、网关、ACP、批处理和 API 服务器。平台差异存在于入口点，而不是 Agent 中。 |
+| **松耦合** | 可选的子系统（MCP、插件、记忆提供商、RL 执行环境）使用注册模式和 check_fn 门控，而不是硬依赖。 |
+| **配置文件隔离** | 每个配置文件（`hermes -p <name>`）都有自己的 HERMES_HOME、配置、记忆、会话和网关 PID。多个配置文件可以并发运行。 |
 ## 文件依赖链
 
 ```text

@@ -1,67 +1,67 @@
 # 上下文压缩与缓存
 
-Hermes Agent 采用双压缩系统和 Anthropic 提示词缓存，以在长对话中高效管理上下文窗口使用。
+Hermes Agent 使用双重压缩系统和 Anthropic 提示词缓存来高效管理长对话中的上下文窗口使用。
 
-源文件：`agent/context_engine.py`（抽象基类），`agent/context_compressor.py`（默认引擎），`agent/prompt_caching.py`，`gateway/run.py`（会话清理），`run_agent.py`（搜索 `_compress_context`）
+源文件：`agent/context_engine.py` (ABC), `agent/context_compressor.py` (默认引擎), `agent/prompt_caching.py`, `gateway/run.py` (会话清理), `run_agent.py` (搜索 `_compress_context`)
 
 ## 可插拔的上下文引擎
 
-上下文管理基于 `ContextEngine` 抽象基类（`agent/context_engine.py`）。内置的 `ContextCompressor` 是默认实现，但插件可以用其他引擎替换它（例如，无损上下文管理）。
+上下文管理基于 `ContextEngine` 抽象基类 (`agent/context_engine.py`)。内置的 `ContextCompressor` 是默认实现，但插件可以用其他引擎替换它（例如，无损上下文管理）。
 
 ```yaml
 context:
-  engine: "compressor"    # 默认值 — 内置有损摘要
+  engine: "compressor"    # 默认 — 内置有损摘要
   engine: "lcm"           # 示例 — 提供无损上下文的插件
 ```
 
 引擎负责：
-- 决定何时触发压缩（`should_compress()`）
-- 执行压缩（`compress()`）
+- 决定何时触发压缩 (`should_compress()`)
+- 执行压缩 (`compress()`)
 - 可选地暴露 Agent 可以调用的工具（例如，`lcm_grep`）
 - 跟踪来自 API 响应的 Token 使用情况
 
-选择是通过 `config.yaml` 中的 `context.engine` 配置驱动的。解析顺序：
+选择通过 `config.yaml` 中的 `context.engine` 进行配置驱动。解析顺序：
 1. 检查 `plugins/context_engine/<name>/` 目录
-2. 检查通用插件系统（`register_context_engine()`）
+2. 检查通用插件系统 (`register_context_engine()`)
 3. 回退到内置的 `ContextCompressor`
 
-插件引擎**永远不会自动激活** — 用户必须将 `context.engine` 显式设置为插件的名称。默认的 `"compressor"` 始终使用内置引擎。
+插件引擎**永远不会自动激活** — 用户必须显式地将 `context.engine` 设置为插件的名称。默认的 `"compressor"` 始终使用内置引擎。
 
 通过 `hermes plugins` → Provider Plugins → Context Engine 配置，或直接编辑 `config.yaml`。
 
 关于构建上下文引擎插件，请参阅[上下文引擎插件](/docs/developer-guide/context-engine-plugin)。
 
-## 双压缩系统
+## 双重压缩系统
 
 Hermes 有两个独立的压缩层，它们独立运行：
 
 ```
                      ┌──────────────────────────┐
-  传入消息           │   消息网关会话清理        │  在上下文 85% 时触发
-  ─────────────────► │   （Agent 前，粗略估计）  │  大型会话的安全网
+  传入消息           │   消息网关会话清理        │  在上下文达到 85% 时触发
+  ─────────────────► │   (Agent 前，粗略估计)    │  大型会话的安全网
                      └─────────────┬────────────┘
                                    │
                                    ▼
                      ┌──────────────────────────┐
-                     │   Agent ContextCompressor │  在上下文 50% 时触发（默认）
-                     │   （循环内，真实 Token）   │  常规上下文管理
+                     │   Agent ContextCompressor │  在上下文达到 50% 时触发（默认）
+                     │   (循环内，真实 Token)     │  常规上下文管理
                      └──────────────────────────┘
 ```
 
-### 1. 消息网关会话清理（85% 阈值）
+### 1. 消息网关会话清理 (85% 阈值)
 
-位于 `gateway/run.py`（搜索 `Session hygiene: auto-compress`）。这是一个**安全网**，在 Agent 处理消息之前运行。它防止会话在轮次之间变得过大（例如，Telegram/Discord 中过夜累积）时导致 API 失败。
+位于 `gateway/run.py` 中（搜索 `Session hygiene: auto-compress`）。这是一个**安全网**，在 Agent 处理消息之前运行。它防止会话在回合之间（例如，在 Telegram/Discord 中过夜累积）变得过大而导致 API 失败。
 
 - **阈值**：固定为模型上下文长度的 85%
-- **Token 来源**：优先使用上一轮 API 报告的实际 Token；回退到基于字符的粗略估计（`estimate_messages_tokens_rough`）
+- **Token 来源**：优先使用上一回合 API 报告的实际 Token；回退到基于字符的粗略估计 (`estimate_messages_tokens_rough`)
 - **触发条件**：仅当 `len(history) >= 4` 且压缩启用时
-- **目的**：捕获那些逃脱了 Agent 自身压缩器的会话
+- **目的**：捕获逃脱 Agent 自身压缩器的会话
 
-消息网关清理阈值有意设置得比 Agent 的压缩器高。将其设置为 50%（与 Agent 相同）会导致在长消息网关会话中每一轮都过早压缩。
+消息网关清理阈值有意设置得比 Agent 的压缩器更高。将其设置为 50%（与 Agent 相同）会导致在长消息网关会话中每个回合都过早压缩。
 
-### 2. Agent ContextCompressor（50% 阈值，可配置）
+### 2. Agent ContextCompressor (50% 阈值，可配置)
 
-位于 `agent/context_compressor.py`。这是**主要的压缩系统**，在 Agent 的工具循环内运行，可以访问准确的、API 报告的 Token 计数。
+位于 `agent/context_compressor.py` 中。这是**主要的压缩系统**，在 Agent 的工具循环内运行，可以访问准确的、API 报告的 Token 计数。
 
 ## 配置
 
@@ -69,16 +69,16 @@ Hermes 有两个独立的压缩层，它们独立运行：
 
 ```yaml
 compression:
-  enabled: true              # 启用/禁用压缩（默认：true）
-  threshold: 0.50            # 上下文窗口的比例（默认：0.50 = 50%）
-  target_ratio: 0.20         # 将多少阈值保留为尾部（默认：0.20）
-  protect_last_n: 20         # 最小受保护的尾部消息数（默认：20）
+  enabled: true              # 启用/禁用压缩 (默认: true)
+  threshold: 0.50            # 上下文窗口的比例 (默认: 0.50 = 50%)
+  target_ratio: 0.20         # 将多少阈值保留为尾部 (默认: 0.20)
+  protect_last_n: 20         # 最小受保护的尾部消息数 (默认: 20)
 
 # 摘要模型/提供商在 auxiliary 下配置：
 auxiliary:
   compression:
-    model: null              # 覆盖摘要模型（默认：自动检测）
-    provider: auto           # 提供商："auto"、"openrouter"、"nous"、"main" 等
+    model: null              # 覆盖摘要模型 (默认: 自动检测)
+    provider: auto           # 提供商: "auto", "openrouter", "nous", "main" 等
     base_url: null           # 自定义 OpenAI 兼容端点
 ```
 
@@ -87,9 +87,9 @@ auxiliary:
 | 参数 | 默认值 | 范围 | 描述 |
 |-----------|---------|-------|-------------|
 | `threshold` | `0.50` | 0.0-1.0 | 当提示词 Token ≥ `threshold × context_length` 时触发压缩 |
-| `target_ratio` | `0.20` | 0.10-0.80 | 控制尾部保护 Token 预算：`threshold_tokens × target_ratio` |
+| `target_ratio` | `0.20` | 0.10-0.80 | 控制尾部保护的 Token 预算：`threshold_tokens × target_ratio` |
 | `protect_last_n` | `20` | ≥1 | 始终保留的最少最近消息数 |
-| `protect_first_n` | `3` | （硬编码） | 系统提示词 + 首次交换始终保留 |
+| `protect_first_n` | `3` | (硬编码) | 系统提示词 + 首次交换始终保留 |
 
 ### 计算值（对于默认设置下的 200K 上下文模型）
 
@@ -119,21 +119,21 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 ┌─────────────────────────────────────────────────────────────┐
 │  消息列表                                                   │
 │                                                             │
-│  [0..2]  ← protect_first_n（系统提示词 + 首次交换）         │
-│  [3..N]  ← 中间轮次 → 被摘要                                │
-│  [N..end] ← 尾部（基于 Token 预算 或 protect_last_n）       │
+│  [0..2]  ← protect_first_n (系统 + 首次交换)                │
+│  [3..N]  ← 中间回合 → 被摘要                                │
+│  [N..end] ← 尾部 (基于 Token 预算 或 protect_last_n)        │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 尾部保护是**基于 Token 预算的**：从末尾向前遍历，累积 Token 直到预算耗尽。如果预算保护的消息更少，则回退到固定的 `protect_last_n` 计数。
-边界对齐以避免拆分工具调用/工具结果组。
-`_align_boundary_backward()` 方法会跳过连续的工具结果，找到父级助理消息，从而保持组的完整性。
+边界对齐以避免分割工具调用/工具结果组。
+`_align_boundary_backward()` 方法会遍历连续的工具结果以找到父级助手消息，从而保持组的完整性。
 
 ### 阶段 3：生成结构化摘要
 
 :::warning 摘要模型的上下文长度
-摘要模型的上下文窗口**必须至少与**主 Agent 模型的一样大。整个中间部分会在一次 `call_llm(task="compression")` 调用中发送给摘要模型。如果摘要模型的上下文较小，API 会返回上下文长度错误 —— `_generate_summary()` 会捕获该错误，记录警告并返回 `None`。然后压缩器会**在没有摘要的情况下**丢弃中间轮次，悄无声息地丢失会话上下文。这是压缩质量下降的最常见原因。
+摘要模型的上下文窗口**必须至少与**主 Agent 模型的一样大。整个中间部分会在一次 `call_llm(task="compression")` 调用中发送给摘要模型。如果摘要模型的上下文较小，API 会返回一个上下文长度错误——`_generate_summary()` 会捕获该错误，记录警告并返回 `None`。然后压缩器会**在没有摘要的情况下**丢弃中间轮次，悄无声息地丢失对话上下文。这是导致压缩质量下降的最常见原因。
 :::
 
 中间轮次使用辅助 LLM 和结构化模板进行摘要：
@@ -147,7 +147,7 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 
 ## 进展
 ### 已完成
-[已完成的工作 —— 具体的文件路径、运行的命令、结果]
+[已完成的工作——具体的文件路径、运行的命令、结果]
 ### 进行中
 [当前正在进行的工作]
 ### 受阻
@@ -157,36 +157,36 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 [重要的技术决策及其原因]
 
 ## 相关文件
-[读取、修改或创建的文件 —— 每个文件附简要说明]
+[读取、修改或创建的文件——每个文件附简要说明]
 
 ## 后续步骤
 [接下来需要做什么]
 
 ## 关键上下文
-[具体的值、错误消息、配置详情]
+[具体的值、错误信息、配置详情]
 ```
 
-摘要的 Token 预算随压缩内容量动态调整：
+摘要的预算根据要压缩的内容量进行缩放：
 - 公式：`content_tokens × 0.20`（`_SUMMARY_RATIO` 常量）
-- 最小值：2,000 Token
-- 最大值：`min(context_length × 0.05, 12,000)` Token
+- 最小值：2,000 个 Token
+- 最大值：`min(context_length × 0.05, 12,000)` 个 Token
 
 ### 阶段 4：组装压缩后的消息
 
-压缩后的消息列表为：
+压缩后的消息列表是：
 1. 头部消息（首次压缩时会在系统提示词后附加说明）
 2. 摘要消息（选择角色以避免连续相同角色违规）
 3. 尾部消息（未修改）
 
 孤立的工具调用/工具结果对由 `_sanitize_tool_pairs()` 清理：
-- 引用已移除调用的工具结果 → 移除
-- 结果被移除的工具调用 → 注入存根结果
+- 引用已移除调用的工具结果 → 被移除
+- 其结果被移除的工具调用 → 注入存根结果
 
 ### 迭代式重新压缩
 
-在后续压缩中，之前的摘要会连同**更新**指令（而非从头开始摘要）一起传递给 LLM。这可以在多次压缩中保留信息 —— 项目从“进行中”移动到“已完成”，添加新的进展，并移除过时的信息。
+在后续压缩中，之前的摘要会连同**更新**它的指令一起传递给 LLM，而不是从头开始摘要。这可以在多次压缩中保留信息——项目从“进行中”移动到“已完成”，添加新的进展，并移除过时的信息。
 
-压缩器实例上的 `_previous_summary` 字段用于存储上一次的摘要文本。
+压缩器实例上的 `_previous_summary` 字段为此目的存储上一次的摘要文本。
 
 ## 压缩前后示例
 
@@ -249,14 +249,14 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 
 来源：`agent/prompt_caching.py`
 
-通过缓存会话前缀，在多轮对话中减少约 75% 的输入 Token 成本。使用 Anthropic 的 `cache_control` 断点。
+通过缓存对话前缀，在多轮对话中减少约 75% 的输入 Token 成本。使用 Anthropic 的 `cache_control` 断点。
 
 ### 策略：system_and_3
 
 Anthropic 允许每个请求最多 4 个 `cache_control` 断点。Hermes 使用 "system_and_3" 策略：
 
 ```
-断点 1: 系统提示词           (所有轮次中稳定不变)
+断点 1: 系统提示词           (在所有轮次中稳定)
 断点 2: 倒数第 3 条非系统消息  ─┐
 断点 3: 倒数第 2 条非系统消息   ├─ 滚动窗口
 断点 4: 最后一条非系统消息      ─┘
@@ -269,7 +269,7 @@ Anthropic 允许每个请求最多 4 个 `cache_control` 断点。Hermes 使用 
 ```python
 # 缓存标记格式
 marker = {"type": "ephemeral"}
-# 或者设置 1 小时 TTL：
+# 或者对于 1 小时 TTL：
 marker = {"type": "ephemeral", "ttl": "1h"}
 ```
 
@@ -279,7 +279,7 @@ marker = {"type": "ephemeral", "ttl": "1h"}
 |-------------|-------------------|
 | 字符串内容 | 转换为 `[{"type": "text", "text": ..., "cache_control": ...}]` |
 | 列表内容 | 添加到最后一个元素的字典中 |
-| 无/空内容 | 添加为 `msg["cache_control"]` |
+| 无/空 | 添加为 `msg["cache_control"]` |
 | 工具消息 | 添加为 `msg["cache_control"]`（仅限原生 Anthropic） |
 ### 缓存感知设计模式
 
@@ -289,7 +289,7 @@ marker = {"type": "ephemeral", "ttl": "1h"}
 
 3. **压缩缓存交互**：压缩后，压缩区域的缓存失效，但系统提示词缓存保留。滚动的 3 条消息窗口会在 1-2 轮内重新建立缓存。
 
-4. **TTL 选择**：默认是 `5m`（5 分钟）。对于用户在各轮次之间休息的长时间运行的会话，使用 `1h`。
+4. **TTL 选择**：默认是 `5m`（5 分钟）。对于用户在各轮次之间休息的长时间运行会话，使用 `1h`。
 
 ### 启用提示词缓存
 
@@ -298,22 +298,23 @@ marker = {"type": "ephemeral", "ttl": "1h"}
 - 提供商支持 `cache_control`（原生 Anthropic API 或 OpenRouter）
 
 ```yaml
-# config.yaml — TTL 可配置
-model:
-  cache_ttl: "5m"   # "5m" 或 "1h"
+# config.yaml — TTL 是可配置的（必须是 "5m" 或 "1h"）
+prompt_caching:
+  cache_ttl: "5m"
 ```
 
 CLI 在启动时显示缓存状态：
 ```
-💾 提示词缓存：已启用（通过 OpenRouter 的 Claude，5m TTL）
+💾 Prompt caching: ENABLED (Claude via OpenRouter, 5m TTL)
 ```
+
 
 ## 上下文压力警告
 
-Agent 在压缩阈值的 85% 时发出上下文压力警告（不是上下文的 85% —— 是阈值本身的 85%，而阈值是上下文的 50%）：
+当达到压缩阈值的 85% 时（不是上下文的 85% — 是阈值本身的 85%，而阈值是上下文的 50%），Agent 会发出上下文压力警告：
 
 ```
-⚠️  上下文已达到压缩阈值的 85%（42,500/50,000 个 Token）
+⚠️  上下文已达到压缩阈值的 85% (42,500/50,000 tokens)
 ```
 
-压缩后，如果使用率降至阈值 85% 以下，警告状态将被清除。如果压缩未能将使用率降低到警告水平以下（对话内容过于密集），警告会持续存在，但压缩不会再次触发，直到再次超过阈值。
+压缩后，如果使用量降至阈值 85% 以下，警告状态将被清除。如果压缩未能将使用量降低到警告水平以下（对话内容过于密集），警告将持续存在，但压缩不会再次触发，直到再次超过阈值。
