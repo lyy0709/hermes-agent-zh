@@ -110,8 +110,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/developer-guide/session-storage.md": {
-    "source_hash": "sha256:e6523522f23ff7a25064e39e3d3ec386555af5132075a5367579c6b39141d35d",
-    "translated_at": "2026-04-13T03:37:10.331070+00:00",
+    "source_hash": "sha256:59099542888d25a9b67b069213c030837d36fa990d27b223a923b36b18577196",
+    "translated_at": "2026-04-26T04:56:08.079210+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/getting-started/installation.md": {
@@ -245,13 +245,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/cli-commands.md": {
-    "source_hash": "sha256:4ab35ea312561e6de3dd2c2d7573eb82861f0deb74baa09d6a96c86d556ada3e",
-    "translated_at": "2026-04-23T04:52:30.329919+00:00",
+    "source_hash": "sha256:a1947fe6d116adc47f02e368744e834b88cda8fa3160130ecaf0d68280d4ee09",
+    "translated_at": "2026-04-26T05:00:55.229951+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/environment-variables.md": {
-    "source_hash": "sha256:4f33b6e63abf0ca92ac60665f8081cbf20a8ae17b40cde76c6d2725d34498c48",
-    "translated_at": "2026-04-24T04:59:19.330680+00:00",
+    "source_hash": "sha256:8689d68ceae3993b9ae437bf3ffa5c730565b6993fe706852981a3e413575034",
+    "translated_at": "2026-04-26T05:03:08.622104+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/slash-commands.md": {
@@ -350,8 +350,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/fallback-providers.md": {
-    "source_hash": "sha256:f43250756358664fe3e5bc19041c30d2f1d2a1ac9461e2cad8ec66d7704567f3",
-    "translated_at": "2026-04-23T04:50:26.474672+00:00",
+    "source_hash": "sha256:78d0960995ce1a8b2e23bd3625d0dc459a1f36550cbd6e2fc617933d2547af5d",
+    "translated_at": "2026-04-26T04:58:38.390953+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/image-generation.md": {
@@ -380,8 +380,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/configuration.md": {
-    "source_hash": "sha256:2afc31f13832c7c2b12ca25db25c336db4ba6aa130bbb11927c19d88f6edf86a",
-    "translated_at": "2026-04-25T04:53:04.415938+00:00",
+    "source_hash": "sha256:27f3661c092849cb02e4e79373b27944ad77188ca42396ea36b798337367d2ac",
+    "translated_at": "2026-04-26T05:06:51.427469+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/personality.md": {
@@ -520,8 +520,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/webhooks.md": {
-    "source_hash": "sha256:14a5915e04270703b569ba0544b967d86c4367717a08733b3d544ac96a1f06aa",
-    "translated_at": "2026-04-20T05:06:23.050560+00:00",
+    "source_hash": "sha256:3b212605d03e03166cd2988d496353030aa934ccea72b56c1e8ce7c5d85ced89",
+    "translated_at": "2026-04-26T05:04:26.679249+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/telegram.md": {
@@ -585,8 +585,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/web-dashboard.md": {
-    "source_hash": "sha256:649e4afba398d088a98662a77805e46e177fe7703a60d23df0ac1858e22b1991",
-    "translated_at": "2026-04-25T04:53:23.454450+00:00",
+    "source_hash": "sha256:431a2a247bfa9123a0f6d22491ee7acd8bd0d274ef9c07f57f9984232dbe0758",
+    "translated_at": "2026-04-26T05:02:13.872922+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/banner.py": {
@@ -605,8 +605,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/commands.py": {
-    "source_hash": "sha256:b2ab4b951ebd2f069ae3edb7bb58345dfffeeb140f7ce12030571a310ce6c039",
-    "translated_at": "2026-04-25T06:01:51.718537+00:00",
+    "source_hash": "sha256:e8451988d4bd2133b1cd770b872e8560c91bb5902ddab44d6ab67c59218973bd",
+    "translated_at": "2026-04-26T05:12:18.001661+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/doctor.py": {
@@ -1337,6 +1337,16 @@
   "website/docs/user-guide/skills/optional/security/security-oss-forensics.md": {
     "source_hash": "sha256:15cf293003708b2a4ef3f7fcf8fa8dbbc73b0ae58cc0ba2033a1a752d3571c3d",
     "translated_at": "2026-04-25T05:53:03.700451+00:00",
+    "model": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "website/docs/guides/azure-foundry.md": {
+    "source_hash": "sha256:7372e51a1a4cab21cba1737507b784bca6c62890ebff965fce990b194a5da99c",
+    "translated_at": "2026-04-26T04:55:36.684415+00:00",
+    "model": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "website/docs/user-guide/features/extending-the-dashboard.md": {
+    "source_hash": "sha256:7091490db9488f3e54273fc748965d6331b17636ec9e7cd08855372c7a65d948",
+    "translated_at": "2026-04-26T05:03:01.302686+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   }
 }

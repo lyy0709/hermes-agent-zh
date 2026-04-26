@@ -29,7 +29,7 @@ fallback_model:
   model: anthropic/claude-sonnet-4
 ```
 
-`provider` 和 `model` 都是**必需的**。如果缺少任何一个，备用功能将被禁用。
+`provider` 和 `model` 都是**必需的**。如果缺少其中任何一个，备用功能将被禁用。
 
 ### 支持的提供商
 
@@ -83,7 +83,7 @@ fallback_model:
 - **服务器错误** (HTTP 500, 502, 503) — 在重试尝试用尽后
 - **认证失败** (HTTP 401, 403) — 立即（无需重试）
 - **未找到** (HTTP 404) — 立即
-- **无效响应** — 当 API 反复返回格式错误或空响应时
+- **无效响应** — 当 API 重复返回格式错误或空响应时
 
 触发时，Hermes 会：
 
@@ -95,7 +95,7 @@ fallback_model:
 切换是无缝的 — 您的对话历史、工具调用和上下文都得以保留。Agent 会从它中断的地方继续，只是使用了不同的模型。
 
 :::info 按轮次，而非按会话
-备用机制是**轮次作用域**的：每个新的用户消息开始时都会恢复使用主模型。如果主模型在轮次中途失败，备用机制仅在该轮次激活。在下一条消息时，Hermes 会再次尝试主模型。在单个轮次内，备用机制最多激活一次 — 如果备用模型也失败，则由正常的错误处理接管（重试，然后显示错误消息）。这可以防止在单个轮次内发生级联故障转移循环，同时给主模型每个轮次都有新的机会。
+备用机制是**轮次作用域**的：每条新的用户消息开始时都会恢复使用主模型。如果主模型在某个轮次中途失败，备用机制仅在该轮次激活。在下一条消息时，Hermes 会再次尝试主模型。在单个轮次内，备用机制最多激活一次 — 如果备用模型也失败，则交由正常的错误处理接管（重试，然后显示错误消息）。这可以防止在单个轮次内发生级联故障转移循环，同时让主模型在每一轮都有新的机会。
 :::
 
 ### 示例
@@ -138,9 +138,9 @@ fallback_model:
   model: gpt-5.3-codex
 ```
 
-### 备用机制适用场景
+### 备用机制适用的场景
 
-| 场景 | 是否支持备用 |
+| 场景 | 支持备用 |
 |---------|-------------------|
 | CLI 会话 | ✔ |
 | 消息网关 (Telegram, Discord 等) | ✔ |
@@ -155,25 +155,24 @@ fallback_model:
 
 ## 辅助任务回退机制
 
-Hermes 为辅助任务使用独立的轻量级模型。每个任务都有其自己的提供商解析链，作为内置的回退系统。
+Hermes 使用独立的轻量级模型处理辅助任务。每个任务都有独立的提供商解析链，作为内置的回退系统。
 
 ### 具有独立提供商解析的任务
 
 | 任务 | 功能描述 | 配置键 |
 |------|-------------|-----------|
 | Vision | 图像分析、浏览器截图 | `auxiliary.vision` |
-| Web Extract | 网页摘要 | `auxiliary.web_extract` |
+| Web Extract | 网页内容摘要 | `auxiliary.web_extract` |
 | Compression | 上下文压缩摘要 | `auxiliary.compression` |
 | Session Search | 历史会话摘要 | `auxiliary.session_search` |
 | Skills Hub | 技能搜索与发现 | `auxiliary.skills_hub` |
 | MCP | MCP 辅助操作 | `auxiliary.mcp` |
-| Memory Flush | 记忆整合 | `auxiliary.flush_memories` |
 | Approval | 智能命令审批分类 | `auxiliary.approval` |
 | Title Generation | 会话标题摘要 | `auxiliary.title_generation` |
 
 ### 自动检测链
 
-当任务的提供商设置为 `"auto"`（默认值）时，Hermes 会按顺序尝试提供商，直到一个可用为止：
+当任务的提供商设置为 `"auto"`（默认值）时，Hermes 会按顺序尝试各个提供商，直到有一个可用：
 
 **对于文本任务（压缩、网页提取等）：**
 
@@ -189,7 +188,7 @@ Main provider (if vision-capable) → OpenRouter → Nous Portal →
 Codex OAuth → Anthropic → Custom endpoint → give up
 ```
 
-如果解析出的提供商在调用时失败，Hermes 还有一个内部重试机制：如果提供商不是 OpenRouter 且没有设置显式的 `base_url`，它会将 OpenRouter 作为最后手段的回退方案。
+如果解析出的提供商在调用时失败，Hermes 还有一个内部重试机制：如果提供商不是 OpenRouter 且没有显式设置 `base_url`，它会将 OpenRouter 作为最后的手段进行回退。
 
 ### 配置辅助任务提供商
 
@@ -225,10 +224,6 @@ auxiliary:
   mcp:
     provider: "auto"
     model: ""
-
-  flush_memories:
-    provider: "auto"
-    model: ""
 ```
 
 以上每个任务都遵循相同的 **provider / model / base_url** 模式。上下文压缩在 `auxiliary.compression` 下配置：
@@ -241,7 +236,7 @@ auxiliary:
     base_url: null                                    # 自定义 OpenAI 兼容端点
 ```
 
-而回退模型使用：
+回退模型使用：
 
 ```yaml
 fallback_model:
@@ -253,7 +248,7 @@ fallback_model:
 对于 `auxiliary.session_search`，Hermes 还支持：
 
 - `max_concurrency` 限制同时运行的会话摘要数量
-- `extra_body` 在摘要调用中传递特定于提供商的 OpenAI 兼容请求字段
+- `extra_body` 在摘要调用时传递特定于提供商的 OpenAI 兼容请求字段
 
 示例：
 
@@ -269,11 +264,11 @@ auxiliary:
 
 如果你的提供商不支持原生的 OpenAI 兼容推理控制字段，`extra_body` 对此部分将没有帮助；在这种情况下，`max_concurrency` 对于减少请求突发导致的 429 错误仍然有用。
 
-所有三个配置——辅助任务、压缩、回退——都以相同的方式工作：设置 `provider` 来选择处理请求的提供商，设置 `model` 来选择模型，设置 `base_url` 来指向自定义端点（覆盖 provider）。
+所有三个配置项 —— auxiliary、compression、fallback —— 的工作方式相同：设置 `provider` 来选择处理请求的提供商，设置 `model` 来选择模型，设置 `base_url` 来指向自定义端点（覆盖 provider）。
 
 ### 辅助任务的提供商选项
 
-这些选项仅适用于 `auxiliary:`、`compression:` 和 `fallback_model:` 配置——`"main"` **不是** 顶层 `model.provider` 的有效值。对于自定义端点，请在 `model:` 部分使用 `provider: custom`（参见 [AI 提供商](/docs/integrations/providers)）。
+这些选项仅适用于 `auxiliary:`、`compression:` 和 `fallback_model:` 配置 —— `"main"` **不是**顶层 `model.provider` 的有效值。对于自定义端点，请在 `model:` 部分使用 `provider: custom`（参见 [AI 提供商](/docs/integrations/providers)）。
 
 | 提供商 | 描述 | 要求 |
 |----------|-------------|-------------|
@@ -281,12 +276,12 @@ auxiliary:
 | `"openrouter"` | 强制使用 OpenRouter | `OPENROUTER_API_KEY` |
 | `"nous"` | 强制使用 Nous Portal | `hermes auth` |
 | `"codex"` | 强制使用 Codex OAuth | `hermes model` → Codex |
-| `"main"` | 使用主 Agent 使用的任何提供商（仅限辅助任务） | 已配置活动的主提供商 |
+| `"main"` | 使用主 Agent 使用的任何提供商（仅限辅助任务） | 已配置活跃的主提供商 |
 | `"anthropic"` | 强制使用原生 Anthropic | `ANTHROPIC_API_KEY` 或 Claude Code 凭据 |
 
 ### 直接端点覆盖
 
-对于任何辅助任务，设置 `base_url` 会完全绕过提供商解析，并将请求直接发送到该端点：
+对于任何辅助任务，设置 `base_url` 会完全绕过提供商解析，直接将请求发送到该端点：
 
 ```yaml
 auxiliary:
@@ -311,8 +306,8 @@ auxiliary:
     model: "google/gemini-3-flash-preview"
 ```
 
-:::info 旧配置迁移
-带有 `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` 的旧配置在首次加载时（配置版本 17）会自动迁移到 `auxiliary.compression.*`。
+:::info 旧版迁移
+具有 `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` 的旧配置在首次加载时（配置版本 17）会自动迁移到 `auxiliary.compression.*`。
 :::
 
 如果没有可用于压缩的提供商，Hermes 会丢弃中间对话轮次而不生成摘要，而不是让会话失败。
@@ -321,7 +316,7 @@ auxiliary:
 
 ## 委派任务提供商覆盖
 
-由 `delegate_task` 生成的子 Agent **不**使用主回退模型。但是，为了成本优化，可以将它们路由到不同的提供商:模型对：
+由 `delegate_task` 生成的子 Agent **不**使用主回退模型。但是，它们可以被路由到不同的提供商:模型对以进行成本优化：
 ```yaml
 delegation:
   provider: "openrouter"                      # 为所有子 Agent 覆盖提供商
@@ -336,7 +331,7 @@ delegation:
 
 ## 定时任务提供商
 
-定时任务运行时使用执行时配置的任何提供商。它们不支持后备模型。要为定时任务使用不同的提供商，请在定时任务本身上配置 `provider` 和 `model` 覆盖：
+定时任务在运行时使用任何已配置的提供商执行。它们不支持后备模型。要为定时任务使用不同的提供商，请在定时任务本身上配置 `provider` 和 `model` 覆盖：
 
 ```python
 cronjob(
@@ -356,15 +351,14 @@ cronjob(
 
 | 功能 | 后备机制 | 配置位置 |
 |---------|-------------------|----------------|
-| 主 Agent 模型 | `config.yaml` 中的 `fallback_model` — 每次对话轮次错误时故障转移（每次轮次恢复主模型） | `fallback_model:` (顶层) |
+| 主 Agent 模型 | `config.yaml` 中的 `fallback_model` — 发生错误时每轮故障转移（每轮恢复主模型） | `fallback_model:` (顶层) |
 | 视觉 | 自动检测链 + 内部 OpenRouter 重试 | `auxiliary.vision` |
 | 网页提取 | 自动检测链 + 内部 OpenRouter 重试 | `auxiliary.web_extract` |
 | 上下文压缩 | 自动检测链，如果不可用则降级为无摘要 | `auxiliary.compression` |
 | 会话搜索 | 自动检测链 | `auxiliary.session_search` |
 | 技能中心 | 自动检测链 | `auxiliary.skills_hub` |
 | MCP 助手 | 自动检测链 | `auxiliary.mcp` |
-| 记忆刷新 | 自动检测链 | `auxiliary.flush_memories` |
 | 审批分类 | 自动检测链 | `auxiliary.approval` |
 | 标题生成 | 自动检测链 | `auxiliary.title_generation` |
 | 委派 | 仅提供商覆盖（无自动后备） | `delegation.provider` / `delegation.model` |
-| 定时任务 | 仅每个任务的提供商覆盖（无自动后备） | 每个任务的 `provider` / `model` |
+| 定时任务 | 仅每任务提供商覆盖（无自动后备） | 每任务的 `provider` / `model` |
