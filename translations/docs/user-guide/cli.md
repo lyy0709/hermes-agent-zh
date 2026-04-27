@@ -42,15 +42,15 @@ hermes --resume <session_id>  # 按 ID 恢复特定会话 (-r)
 # 详细模式（调试输出）
 hermes chat --verbose
 
-# 隔离的 git 工作树（用于并行运行多个 Agent）
-hermes -w                         # 工作树中的交互模式
-hermes -w -q "Fix issue #123"     # 工作树中的单次查询
+# 隔离的 git worktree（用于并行运行多个 Agent）
+hermes -w                         # worktree 中的交互模式
+hermes -w -q "Fix issue #123"     # worktree 中的单次查询
 ```
 
 ## 界面布局
 
-<img className="docs-terminal-figure" src="/img/docs/cli-layout.svg" alt="Hermes CLI 布局的样式化预览，展示了横幅、对话区域和固定的输入提示。" />
-<p className="docs-figure-caption">Hermes CLI 横幅、对话流和固定输入提示，渲染为稳定的文档图形而非脆弱的文本艺术。</p>
+<img className="docs-terminal-figure" src="/img/docs/cli-layout.svg" alt="Hermes CLI 布局的样式化预览，展示了横幅、对话区域和固定的输入提示符。" />
+<p className="docs-figure-caption">Hermes CLI 横幅、对话流和固定输入提示符被渲染为稳定的文档图形，而非脆弱的文本艺术。</p>
 
 欢迎横幅一目了然地显示您的模型、终端后端、工作目录、可用工具和已安装的技能。
 
@@ -67,7 +67,7 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 | 模型名称 | 当前模型（如果超过 26 个字符则截断） |
 | Token 计数 | 已使用的上下文 Token / 最大上下文窗口 |
 | 上下文条 | 带有颜色编码阈值的视觉填充指示器 |
-| 成本 | 预估的会话成本（对于未知/零价格模型显示 `n/a`） |
+| 成本 | 预估的会话成本（对于未知/零价格模型显示为 `n/a`） |
 | 持续时间 | 已用会话时间 |
 
 状态栏会根据终端宽度自适应——在 ≥ 76 列时显示完整布局，在 52–75 列时显示紧凑布局，在低于 52 列时显示最小布局（仅模型 + 持续时间）。
@@ -85,7 +85,7 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 
 ### 会话恢复显示
 
-当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 - 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
+当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示符之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 - 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
 
 ## 快捷键
 
@@ -122,7 +122,7 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 
 完整的 CLI 和消息内置命令列表，请参阅 [斜杠命令参考](../reference/slash-commands.md)。
 
-关于设置、提供商、静音调优以及消息/Discord 语音使用，请参阅 [语音模式](features/voice-mode.md)。
+关于设置、提供商、静音调整以及消息/Discord 语音使用，请参阅 [语音模式](features/voice-mode.md)。
 
 :::tip
 命令不区分大小写——`/HELP` 与 `/help` 效果相同。已安装的技能也会自动成为斜杠命令。
@@ -153,7 +153,7 @@ quick_commands:
 hermes -s hermes-agent-dev,github-auth
 hermes chat -s github-pr-workflow -s github-auth
 ```
-Hermes 会在首次交互前将每个已命名的技能加载到会话提示词中。该标志在交互模式和单次查询模式下均有效。
+Hermes 会在首次交互前将每个命名的技能加载到会话提示词中。该标志在交互模式和单次查询模式下均有效。
 
 ## 技能斜杠命令
 
@@ -195,7 +195,7 @@ personalities:
 有两种方式输入多行消息：
 
 1. **`Alt+Enter` 或 `Ctrl+J`** — 插入新行
-2. **反斜杠续行** — 在行尾使用 `\` 以继续：
+2. **反斜杠续行** — 在行尾输入 `\` 以继续：
 
 ```
 ❯ Write a function that:\
@@ -213,47 +213,55 @@ personalities:
 
 - 当 Agent 正在工作时**输入新消息并按 Enter** — 它会中断并处理你的新指令
 - **`Ctrl+C`** — 中断当前操作（2 秒内按两次以强制退出）
-- 正在运行的终端命令会立即被终止（SIGTERM，1 秒后 SIGKILL）
-- 中断期间输入的多个消息会合并为一个提示词
+- 正在运行的终端命令会立即被终止（先发送 SIGTERM，1 秒后发送 SIGKILL）
+- 中断期间输入的多个消息会被合并为一个提示词
 
 ### 忙碌输入模式
 
-`display.busy_input_mode` 配置键控制当你在 Agent 工作时按下 Enter 时发生的情况：
+`display.busy_input_mode` 配置项控制当你在 Agent 工作时按下 Enter 时发生的情况：
 
 | 模式 | 行为 |
 |------|----------|
 | `"interrupt"` (默认) | 你的消息会中断当前操作并立即被处理 |
-| `"queue"` | 你的消息会被静默排队，并在 Agent 完成后作为下一轮交互发送 |
+| `"queue"` | 你的消息会被静默排队，并在 Agent 完成后作为下一个回合发送 |
+| `"steer"` | 你的消息通过 `/steer` 注入到当前运行中，在下一个工具调用后到达 Agent — 不中断，不创建新回合 |
 
 ```yaml
 # ~/.hermes/config.yaml
 display:
-  busy_input_mode: "queue"   # 或 "interrupt" (默认)
+  busy_input_mode: "steer"   # 或 "queue" 或 "interrupt" (默认)
 ```
 
-队列模式在你想要准备后续消息而不想意外取消正在执行的工作时很有用。未知值会回退到 `"interrupt"`。
+`"queue"` 模式在你想要准备后续消息而不意外取消正在进行的工作时很有用。`"steer"` 模式在你想要在不中断的情况下重定向 Agent 任务中途时很有用 — 例如，当它仍在编辑代码时说“实际上，也检查一下测试”。未知值会回退到 `"interrupt"`。
+
+`"steer"` 有两个自动回退：如果 Agent 尚未开始，或者如果附加了图像，消息会回退到 `"queue"` 行为，这样就不会丢失任何内容。
 
 你也可以在 CLI 内部更改它：
 
 ```text
 /busy queue
+/busy steer
 /busy interrupt
 /busy status
 ```
 
+:::tip 首次提示
+当你第一次在 Hermes 工作时按下 Enter 时，Hermes 会打印一行提示来解释 `/busy` 旋钮（`"(tip) Your message interrupted the current run…"`）。每个安装只触发一次 — `config.yaml` 中 `onboarding.seen.busy_input_prompt` 下的一个标志会锁定它。删除该键可以再次看到提示。
+:::
+
 ### 挂起到后台
 
-在 Unix 系统上，按 **`Ctrl+Z`** 将 Hermes 挂起到后台 — 就像任何终端进程一样。shell 会打印确认信息：
+在 Unix 系统上，按 **`Ctrl+Z`** 将 Hermes 挂起到后台 — 就像任何终端进程一样。Shell 会打印确认信息：
 
 ```
 Hermes Agent has been suspended. Run `fg` to bring Hermes Agent back.
 ```
 
-在你的 shell 中输入 `fg` 以恢复会话，回到你离开时的状态。Windows 不支持此功能。
+在你的 shell 中输入 `fg` 以恢复到你离开时的会话。Windows 不支持此功能。
 
 ## 工具进度显示
 
-CLI 会在 Agent 工作时显示动画反馈：
+CLI 在 Agent 工作时显示动画反馈：
 
 **思考动画**（在 API 调用期间）：
 ```
@@ -273,7 +281,7 @@ CLI 会在 Agent 工作时显示动画反馈：
 
 ### 工具预览长度
 
-`display.tool_preview_length` 配置键控制在工具调用预览行（例如文件路径、终端命令）中显示的最大字符数。默认值为 `0`，表示无限制 — 显示完整路径和命令。
+`display.tool_preview_length` 配置项控制在工具调用预览行（例如文件路径、终端命令）中显示的最大字符数。默认值为 `0`，表示无限制 — 显示完整路径和命令。
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -309,47 +317,47 @@ hermes --resume "refactoring auth"         # 按标题恢复
 hermes -r 20260225_143052_a1b2c3           # 简写形式
 ```
 
-恢复操作会从 SQLite 中还原完整的对话历史。Agent 会看到所有先前的消息、工具调用和响应 — 就像你从未离开过一样。
+恢复会从 SQLite 中还原完整的对话历史。Agent 会看到所有先前的消息、工具调用和响应 — 就像你从未离开过一样。
 
 在聊天中使用 `/title My Session Name` 来命名当前会话，或从命令行使用 `hermes sessions rename <id> <title>`。使用 `hermes sessions list` 浏览过去的会话。
-
 ### 会话存储
 
-CLI 会话存储在 Hermes 的 SQLite 状态数据库 `~/.hermes/state.db` 中。该数据库保存：
+CLI 会话存储在 Hermes 的 SQLite 状态数据库中，位于 `~/.hermes/state.db`。该数据库保存：
 
 - 会话元数据（ID、标题、时间戳、Token 计数器）
 - 消息历史记录
-- 跨压缩/恢复会话的谱系
-- 由 `session_search` 使用的全文搜索索引
+- 压缩/恢复会话之间的谱系关系
+- `session_search` 使用的全文搜索索引
 
-一些消息适配器也会在数据库旁边保留每个平台的转录文件，但 CLI 本身是从 SQLite 会话存储中恢复的。
+一些消息适配器也会在数据库旁边保存每个平台的转录文件，但 CLI 本身是从 SQLite 会话存储中恢复会话的。
 
 ### 上下文压缩
 
-长对话在接近上下文限制时会自动被总结：
+当对话接近上下文限制时，长对话会自动被总结：
 
 ```yaml
 # 在 ~/.hermes/config.yaml 中
 compression:
   enabled: true
-  threshold: 0.50    # 默认在达到上下文限制的 50% 时压缩
+  threshold: 0.50    # 默认在达到上下文限制的 50% 时进行压缩
 
-# 总结模型在 auxiliary 下配置：
+# 在 auxiliary 下配置总结模型：
 auxiliary:
   compression:
     model: "google/gemini-3-flash-preview"  # 用于总结的模型
 ```
-当压缩触发时，中间轮次的对话会被总结，而前 3 轮和后 4 轮对话总是会被保留。
+
+当压缩触发时，中间的对话轮次会被总结，而前 3 轮和后 4 轮对话总是会被保留。
 
 ## 后台会话
 
-在单独的后台会话中运行一个提示词，同时继续使用 CLI 进行其他工作：
+在单独的**后台会话**中运行一个提示词，同时继续使用 CLI 进行其他工作：
 
 ```
 /background Analyze the logs in /var/log and summarize any errors from today
 ```
 
-Hermes 会立即确认任务并返回提示词：
+Hermes 会立即确认任务并让你回到提示符：
 
 ```
 🔄 Background task #1 started: "Analyze the logs in /var/log and summarize..."
@@ -378,7 +386,7 @@ Hermes 会立即确认任务并返回提示词：
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
-如果任务失败，你将看到错误通知。如果你的配置中启用了 `display.bell_on_complete`，任务完成时终端铃会响。
+如果任务失败，你将看到一个错误通知。如果你的配置中启用了 `display.bell_on_complete`，任务完成时终端会响铃。
 
 ### 使用场景
 
@@ -395,7 +403,7 @@ Hermes 会立即确认任务并返回提示词：
 默认情况下，CLI 在静默模式下运行，该模式：
 - 抑制来自工具的详细日志记录
 - 启用可爱风格的动画反馈
-- 保持输出简洁且用户友好
+- 保持输出简洁和用户友好
 
 如需调试输出：
 ```bash

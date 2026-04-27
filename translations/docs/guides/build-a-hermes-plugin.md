@@ -7,7 +7,7 @@ description: "构建一个包含工具、钩子、数据文件和技能的完整
 
 # 构建 Hermes 插件
 
-本指南将从头开始构建一个完整的 Hermes 插件。最终你将得到一个包含多个工具、生命周期钩子、附带数据文件以及一个捆绑技能的可用插件——涵盖了插件系统支持的所有功能。
+本指南将引导你从头开始构建一个完整的 Hermes 插件。最终你将得到一个包含多个工具、生命周期钩子、附带数据文件以及一个捆绑技能的工作插件——涵盖了插件系统支持的所有功能。
 
 ## 你将构建什么
 
@@ -15,7 +15,7 @@ description: "构建一个包含工具、钩子、数据文件和技能的完整
 - `calculate` — 计算数学表达式（`2**16`、`sqrt(144)`、`pi * 5**2`）
 - `unit_convert` — 单位转换（`100 F → 37.78 C`、`5 km → 3.11 mi`）
 
-此外，还有一个记录每次工具调用的钩子，以及一个捆绑的技能文件。
+此外，还包括一个记录每次工具调用的钩子，以及一个捆绑的技能文件。
 
 ## 步骤 1：创建插件目录
 
@@ -41,7 +41,7 @@ provides_hooks:
 
 这告诉 Hermes：“我是一个名为 calculator 的插件，我提供工具和钩子。” `provides_tools` 和 `provides_hooks` 字段列出了插件注册的内容。
 
-可以添加的可选字段：
+你可以添加的可选字段：
 ```yaml
 author: Your Name
 requires_env:          # 根据环境变量控制加载；安装时提示
@@ -63,7 +63,7 @@ CALCULATE = {
     "name": "calculate",
     "description": (
         "计算数学表达式并返回结果。"
-        "支持算术（+, -, *, /, **）、函数（sqrt, sin, cos, "
+        "支持算术运算（+, -, *, /, **）、函数（sqrt, sin, cos, "
         "log, abs, round, floor, ceil）和常量（pi, e）。"
         "当用户询问任何数学问题时使用此工具。"
     ),
@@ -134,7 +134,7 @@ def calculate(args: dict, **kwargs) -> str:
     """安全地计算数学表达式。
 
     处理器的规则：
-    1. 接收 args (dict) — LLM 传递的参数
+    1. 接收 args（字典）— LLM 传递的参数
     2. 执行工作
     3. 返回一个 JSON 字符串 — 即使出错也总是如此
     4. 接受 **kwargs 以保持向前兼容性
@@ -147,9 +147,9 @@ def calculate(args: dict, **kwargs) -> str:
         result = eval(expression, {"__builtins__": {}}, _SAFE_MATH)
         return json.dumps({"expression": expression, "result": result})
     except ZeroDivisionError:
-        return json.dumps({"expression": expression, "error": "除以零"})
+        return json.dumps({"expression": expression, "error": "除以零错误"})
     except Exception as e:
-        return json.dumps({"expression": expression, "error": f"无效：{e}"})
+        return json.dumps({"expression": expression, "error": f"无效表达式: {e}"})
 
 
 # 转换表 — 值以基本单位表示
@@ -176,7 +176,7 @@ def unit_convert(args: dict, **kwargs) -> str:
         return json.dumps({"error": "需要 value、from_unit 和 to_unit"})
 
     try:
-        # 温度
+        # 温度转换
         if from_unit.upper() in {"C","F","K"} and to_unit.upper() in {"C","F","K"}:
             result = _convert_temp(float(value), from_unit.upper(), to_unit.upper())
             return json.dumps({"input": f"{value} {from_unit}", "result": round(result, 4),
@@ -193,17 +193,17 @@ def unit_convert(args: dict, **kwargs) -> str:
 
         return json.dumps({"error": f"无法转换 {from_unit} → {to_unit}"})
     except Exception as e:
-        return json.dumps({"error": f"转换失败：{e}"})
+        return json.dumps({"error": f"转换失败: {e}"})
 ```
 **处理函数的关键规则：**
 1. **签名：** `def my_handler(args: dict, **kwargs) -> str`
 2. **返回值：** 始终是一个 JSON 字符串。成功和错误情况都是如此。
-3. **永不抛出异常：** 捕获所有异常，返回错误 JSON 代替。
+3. **永不抛出异常：** 捕获所有异常，改为返回错误 JSON。
 4. **接受 `**kwargs`：** Hermes 未来可能会传递额外的上下文。
 
 ## 步骤 5：编写注册代码
 
-创建 `__init__.py` — 这个文件将模式与处理函数连接起来：
+创建 `__init__.py` —— 此文件将模式与处理函数关联起来：
 
 ```python
 """Calculator plugin — registration."""
@@ -226,19 +226,19 @@ def _on_post_tool_call(tool_name, args, result, task_id, **kwargs):
 
 
 def register(ctx):
-    """将模式与处理函数连接起来并注册钩子。"""
+    """将模式与处理函数关联并注册钩子。"""
     ctx.register_tool(name="calculate",    toolset="calculator",
                       schema=schemas.CALCULATE,    handler=tools.calculate)
     ctx.register_tool(name="unit_convert", toolset="calculator",
                       schema=schemas.UNIT_CONVERT, handler=tools.unit_convert)
 
-    # 这个钩子会为所有工具调用触发，不仅限于我们的工具
+    # 此钩子对所有工具调用都触发，不仅限于我们的工具
     ctx.register_hook("post_tool_call", _on_post_tool_call)
 ```
 
 **`register()` 的作用：**
 - 在启动时仅被调用一次
-- `ctx.register_tool()` 将你的工具放入注册表 — 模型会立即看到它
+- `ctx.register_tool()` 将你的工具放入注册表 —— 模型会立即看到它
 - `ctx.register_hook()` 订阅生命周期事件
 - `ctx.register_cli_command()` 注册一个 CLI 子命令（例如 `hermes my-plugin <subcommand>`）
 - 如果此函数崩溃，插件将被禁用，但 Hermes 会继续正常运行
@@ -253,7 +253,7 @@ hermes
 
 你应该能在横幅的工具列表中看到 `calculator: calculate, unit_convert`。
 
-尝试以下提示词：
+尝试以下提示：
 ```
 2 的 16 次方是多少？
 将 100 华氏度转换为摄氏度
@@ -277,7 +277,7 @@ Plugins (1):
 ```
 ~/.hermes/plugins/calculator/
 ├── plugin.yaml      # "我是 calculator，我提供工具和钩子"
-├── __init__.py      # 连接：模式 → 处理函数，注册钩子
+├── __init__.py      # 关联：模式 → 处理函数，注册钩子
 ├── schemas.py       # LLM 读取的内容（描述 + 参数规范）
 └── tools.py         # 实际运行的代码（calculate, unit_convert 函数）
 ```
@@ -286,7 +286,7 @@ Plugins (1):
 - **清单** 声明插件是什么
 - **模式** 为 LLM 描述工具
 - **处理函数** 实现实际逻辑
-- **注册** 连接所有部分
+- **注册** 将所有内容连接起来
 
 ## 插件还能做什么？
 
@@ -305,7 +305,7 @@ with open(_DATA_FILE) as f:
     _DATA = yaml.safe_load(f)
 ```
 
-### 打包技能
+### 捆绑技能
 
 插件可以附带技能文件，Agent 通过 `skill_view("plugin:skill")` 加载它们。在你的 `__init__.py` 中注册它们：
 
@@ -335,14 +335,14 @@ def register(ctx):
 
 ```python
 skill_view("my-plugin:my-workflow")   # → 插件版本
-skill_view("my-workflow")              # → 内置版本（不变）
+skill_view("my-workflow")              # → 内置版本（保持不变）
 ```
 
 **关键特性：**
-- 插件技能是**只读的** — 它们不会进入 `~/.hermes/skills/` 目录，也不能通过 `skill_manage` 编辑。
-- 插件技能**不会**列在系统提示词的 `<available_skills>` 索引中 — 它们是显式加载的。
-- 不带命名空间的技能名称不受影响 — 命名空间防止了与内置技能的冲突。
-- 当 Agent 加载一个插件技能时，会预先添加一个捆绑上下文横幅，列出同一插件中的其他技能。
+- 插件技能是**只读的** —— 它们不会进入 `~/.hermes/skills/` 目录，也不能通过 `skill_manage` 编辑。
+- 插件技能**不会**列在系统提示词的 `<available_skills>` 索引中 —— 它们是显式加载的。
+- 不带命名空间的技能名称不受影响 —— 命名空间防止了与内置技能的冲突。
+- 当 Agent 加载插件技能时，会预先添加一个捆绑上下文横幅，列出同一插件中的其他技能。
 
 :::tip 旧模式
 旧的 `shutil.copy2` 模式（将技能复制到 `~/.hermes/skills/`）仍然有效，但存在与内置技能名称冲突的风险。对于新插件，建议使用 `ctx.register_skill()`。
@@ -353,19 +353,19 @@ skill_view("my-workflow")              # → 内置版本（不变）
 如果你的插件需要一个 API 密钥：
 
 ```yaml
-# plugin.yaml — 简单格式（向后兼容）
+# plugin.yaml —— 简单格式（向后兼容）
 requires_env:
   - WEATHER_API_KEY
 ```
 
-如果 `WEATHER_API_KEY` 未设置，插件将被禁用并显示明确的消息。不会崩溃，Agent 中也不会出错 — 只是显示 "Plugin weather disabled (missing: WEATHER_API_KEY)"。
+如果 `WEATHER_API_KEY` 未设置，插件将被禁用并显示明确的消息。不会崩溃，Agent 中也不会出错 —— 只是显示 "Plugin weather disabled (missing: WEATHER_API_KEY)"。
 
 当用户运行 `hermes plugins install` 时，系统会**交互式地提示**输入任何缺失的 `requires_env` 变量。值会自动保存到 `.env` 文件中。
 
 为了获得更好的安装体验，可以使用带有描述和注册 URL 的丰富格式：
 
 ```yaml
-# plugin.yaml — 丰富格式
+# plugin.yaml —— 丰富格式
 requires_env:
   - name: WEATHER_API_KEY
     description: "OpenWeather 的 API 密钥"
@@ -377,8 +377,8 @@ requires_env:
 |-------|----------|-------------|
 | `name` | 是 | 环境变量名称 |
 | `description` | 否 | 在安装提示时显示给用户 |
-| `url` | 否 | 获取凭据的网址 |
-| `secret` | 否 | 如果为 `true`，输入会被隐藏（类似密码字段） |
+| `url` | 否 | 获取凭据的地址 |
+| `secret` | 否 | 如果为 `true`，输入将被隐藏（类似密码字段） |
 
 两种格式可以在同一个列表中混合使用。已设置的变量会被静默跳过。
 
@@ -407,26 +407,26 @@ def register(ctx):
 ```
 ### 钩子参考
 
-每个钩子的完整文档都在 **[事件钩子参考](/docs/user-guide/features/hooks#plugin-hooks)** 中——包括回调函数签名、参数表、每个钩子触发的确切时机以及示例。以下是摘要：
+每个钩子的完整文档都在 **[事件钩子参考](/docs/user-guide/features/hooks#plugin-hooks)** 中——包含回调函数签名、参数表、每个钩子触发的确切时机以及示例。以下是摘要：
 
 | 钩子 | 触发时机 | 回调函数签名 | 返回值 |
 |------|-----------|-------------------|---------|
 | [`pre_tool_call`](/docs/user-guide/features/hooks#pre_tool_call) | 在任何工具执行之前 | `tool_name: str, args: dict, task_id: str` | 忽略 |
-| [`post_tool_call`](/docs/user-guide/features/hooks#post_tool_call) | 在任何工具返回之后 | `tool_name: str, args: dict, result: str, task_id: str` | 忽略 |
-| [`pre_llm_call`](/docs/user-guide/features/hooks#pre_llm_call) | 每轮对话一次，在工具调用循环之前 | `session_id: str, user_message: str, conversation_history: list, is_first_turn: bool, model: str, platform: str` | [上下文注入](#pre_llm_call-context-injection) |
-| [`post_llm_call`](/docs/user-guide/features/hooks#post_llm_call) | 每轮对话一次，在工具调用循环之后（仅限成功的轮次） | `session_id: str, user_message: str, assistant_response: str, conversation_history: list, model: str, platform: str` | 忽略 |
+| [`post_tool_call`](/docs/user-guide/features/hooks#post_tool_call) | 在任何工具返回之后 | `tool_name: str, args: dict, result: str, task_id: str, duration_ms: int` | 忽略 |
+| [`pre_llm_call`](/docs/user-guide/features/hooks#pre_llm_call) | 每轮一次，在工具调用循环之前 | `session_id: str, user_message: str, conversation_history: list, is_first_turn: bool, model: str, platform: str` | [上下文注入](#pre_llm_call-context-injection) |
+| [`post_llm_call`](/docs/user-guide/features/hooks#post_llm_call) | 每轮一次，在工具调用循环之后（仅限成功的轮次） | `session_id: str, user_message: str, assistant_response: str, conversation_history: list, model: str, platform: str` | 忽略 |
 | [`on_session_start`](/docs/user-guide/features/hooks#on_session_start) | 新会话创建时（仅限第一轮） | `session_id: str, model: str, platform: str` | 忽略 |
 | [`on_session_end`](/docs/user-guide/features/hooks#on_session_end) | 每次 `run_conversation` 调用结束时 + CLI 退出时 | `session_id: str, completed: bool, interrupted: bool, model: str, platform: str` | 忽略 |
 | [`on_session_finalize`](/docs/user-guide/features/hooks#on_session_finalize) | CLI/消息网关销毁活动会话时 | `session_id: str \| None, platform: str` | 忽略 |
-| [`on_session_reset`](/docs/user-guide/features/hooks#on_session_reset) | 消息网关交换新的会话密钥时（`/new`, `/reset`） | `session_id: str, platform: str` | 忽略 |
+| [`on_session_reset`](/docs/user-guide/features/hooks#on_session_reset) | 消息网关交换新的会话密钥时 (`/new`, `/reset`) | `session_id: str, platform: str` | 忽略 |
 
-大多数钩子都是“触发即忘”的观察者——它们的返回值会被忽略。例外是 `pre_llm_call`，它可以向对话中注入上下文。
+大多数钩子都是触发即忘的观察者——它们的返回值会被忽略。例外是 `pre_llm_call`，它可以向对话中注入上下文。
 
-所有回调函数都应接受 `**kwargs` 以确保向前兼容。如果钩子回调崩溃，它会被记录并跳过。其他钩子和 Agent 会继续正常运行。
+所有回调函数都应接受 `**kwargs` 以确保向前兼容性。如果钩子回调函数崩溃，它会被记录并跳过。其他钩子和 Agent 会继续正常运行。
 
 ### `pre_llm_call` 上下文注入
 
-这是唯一一个返回值有意义的钩子。当 `pre_llm_call` 回调返回一个包含 `"context"` 键的字典（或一个纯字符串）时，Hermes 会将该文本注入到**当前轮次的用户消息**中。这是记忆插件、RAG 集成、防护栏以及任何需要为模型提供额外上下文的插件所使用的机制。
+这是唯一一个返回值有意义的钩子。当 `pre_llm_call` 回调函数返回一个包含 `"context"` 键的字典（或一个纯字符串）时，Hermes 会将该文本注入到**当前轮次的用户消息**中。这是记忆插件、RAG 集成、护栏以及任何需要为模型提供额外上下文的插件所使用的机制。
 
 #### 返回格式
 
@@ -443,11 +443,11 @@ return None
 
 任何非 None、非空且包含 `"context"` 键的返回值（或纯非空字符串）都会被收集并附加到当前轮次的用户消息中。
 
-#### 注入机制
+#### 注入工作原理
 
 注入的上下文是附加到**用户消息**，而不是系统提示词。这是一个深思熟虑的设计选择：
 
-- **提示词缓存保留** —— 系统提示词在各轮对话中保持相同。Anthropic 和 OpenRouter 会缓存系统提示词前缀，因此保持其稳定可以在多轮对话中节省 75% 以上的输入 Token。如果插件修改了系统提示词，每一轮都会导致缓存未命中。
+- **提示词缓存保留** —— 系统提示词在各轮次间保持相同。Anthropic 和 OpenRouter 会缓存系统提示词前缀，因此保持其稳定可以在多轮对话中节省 75%+ 的输入 Token。如果插件修改了系统提示词，每一轮都会导致缓存未命中。
 - **临时性** —— 注入仅在 API 调用时发生。对话历史中的原始用户消息永远不会被修改，并且没有任何内容会持久化到会话数据库中。
 - **系统提示词是 Hermes 的领域** —— 它包含模型特定的指导、工具执行规则、人格指令以及缓存的技能内容。插件通过用户输入提供上下文，而不是通过改变 Agent 的核心指令。
 
@@ -481,7 +481,7 @@ def register(ctx):
     ctx.register_hook("pre_llm_call", recall_context)
 ```
 
-#### 示例：防护栏插件
+#### 示例：护栏插件
 
 ```python
 """Guardrails plugin — enforces content policies."""
@@ -499,7 +499,7 @@ def register(ctx):
     ctx.register_hook("pre_llm_call", inject_guardrails)
 ```
 
-#### 示例：仅观察钩子（无注入）
+#### 示例：仅观察者钩子（无注入）
 
 ```python
 """Analytics plugin — tracks turn metadata without injecting context."""
@@ -556,11 +556,11 @@ def register(ctx):
 
 **记忆提供商插件**使用基于约定的方法：在你的插件的 `cli.py` 文件中添加一个 `register_cli(subparser)` 函数。记忆插件发现系统会自动找到它——无需调用 `ctx.register_cli_command()`。详情请参阅[记忆提供商插件指南](/docs/developer-guide/memory-provider-plugin#adding-cli-commands)。
 
-**活跃提供商门控：** 记忆插件 CLI 命令仅在其提供商是配置中活跃的 `memory.provider` 时才会出现。如果用户尚未设置你的提供商，你的 CLI 命令将不会使帮助输出变得杂乱。
+**活跃提供商门控：** 记忆插件 CLI 命令仅在其提供商是配置中活跃的 `memory.provider` 时才会出现。如果用户没有设置你的提供商，你的 CLI 命令将不会使帮助输出变得杂乱。
 
 ### 注册斜杠命令
 
-插件可以注册会话内的斜杠命令——用户在对话过程中输入的命令（如 `/lcm status` 或 `/ping`）。这些命令在 CLI 和消息网关（Telegram、Discord 等）中均有效。
+插件可以注册会话内的斜杠命令——用户在对话过程中输入的命令（如 `/lcm status` 或 `/ping`）。这些命令在 CLI 和消息网关（Telegram、Discord 等）中都有效。
 
 ```python
 def _handle_status(raw_args: str) -> str:
@@ -577,7 +577,7 @@ def register(ctx):
     )
 ```
 
-注册后，用户可以在任何会话中输入 `/mystatus`。该命令将出现在自动补全、`/help` 输出和 Telegram 机器人菜单中。
+注册后，用户可以在任何会话中输入 `/mystatus`。该命令会出现在自动补全、`/help` 输出和 Telegram 机器人菜单中。
 
 **签名：** `ctx.register_command(name: str, handler: Callable, description: str = "")`
 
@@ -593,12 +593,12 @@ def register(ctx):
 |---|---|---|
 | 调用方式 | 在会话中作为 `/name` | 在终端中作为 `hermes name` |
 | 工作环境 | CLI 会话、Telegram、Discord 等 | 仅限终端 |
-| 处理器接收 | 原始参数字符串 | argparse `Namespace` |
-| 用例 | 诊断、状态、快速操作 | 复杂的子命令树、设置向导 |
+| 处理器接收 | 原始参数字符串 | argparse `Namespace` 对象 |
+| 使用场景 | 诊断、状态、快速操作 | 复杂的子命令树、设置向导 |
 
 **冲突保护：** 如果插件尝试注册的名称与内置命令（`help`、`model`、`new` 等）冲突，注册将被静默拒绝并记录警告。内置命令始终优先。
 
-**异步处理器：** 消息网关调度器会自动检测并等待异步处理器，因此你可以使用同步或异步函数：
+**异步处理器：** 消息网关调度会自动检测并等待异步处理器，因此你可以使用同步或异步函数：
 
 ```python
 async def _handle_check(raw_args: str) -> str:
@@ -610,14 +610,14 @@ def register(ctx):
 ```
 
 :::tip
-本指南涵盖**通用插件**（工具、钩子、斜杠命令、CLI 命令）。对于专用插件类型，请参阅：
+本指南涵盖**通用插件**（工具、钩子、斜杠命令、CLI 命令）。关于专门的插件类型，请参阅：
 - [记忆提供商插件](/docs/developer-guide/memory-provider-plugin) —— 跨会话知识后端
 - [上下文引擎插件](/docs/developer-guide/context-engine-plugin) —— 替代的上下文管理策略
 :::
 
 ### 通过 pip 分发
 
-要公开分享插件，请向你的 Python 包添加一个入口点：
+要公开分享插件，请在你的 Python 包中添加一个入口点：
 
 ```toml
 # pyproject.toml
@@ -672,9 +672,9 @@ def handler(args, **kwargs):
 
 **模式描述过于模糊：**
 ```python
-# 糟糕 —— 模型不知道何时使用它
+# 不好 —— 模型不知道何时使用它
 "description": "Does stuff"
 
-# 良好 —— 模型确切知道何时以及如何使用
+# 好 —— 模型确切知道何时以及如何使用
 "description": "评估数学表达式。用于算术、三角函数、对数。支持：+, -, *, /, **, sqrt, sin, cos, log, pi, e。"
 ```

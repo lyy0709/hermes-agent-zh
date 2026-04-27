@@ -1,7 +1,7 @@
 ---
 sidebar_position: 12
 title: "使用技能"
-description: "查找、安装、使用和创建技能——这些按需知识文档能教会 Hermes 处理新的工作流"
+description: "查找、安装、使用和创建技能——这些按需知识文档能教会 Hermes 新的工作流程"
 ---
 
 # 使用技能
@@ -44,13 +44,13 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 
 ### 技能中心
 
-官方的可选技能（默认未激活的较重量级或小众技能）可通过中心获取：
+官方可选技能（默认不激活的较重量级或小众技能）可通过中心获取：
 
 ```bash
-# 浏览官方的可选技能
+# 浏览官方可选技能
 /skills browse
 
-# 在中心搜索
+# 搜索中心
 /skills search blockchain
 ```
 
@@ -70,7 +70,7 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 /excalidraw
 ```
 
-您也可以通过自然对话触发技能——要求 Hermes 使用特定技能，它将通过 `skill_view` 工具加载它。
+您也可以通过自然对话触发技能——要求 Hermes 使用特定技能，它会通过 `skill_view` 工具加载它。
 
 ### 渐进式披露
 
@@ -86,23 +86,27 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 
 ## 从中心安装
 
-官方的可选技能随 Hermes 一起提供，但默认不激活。需要显式安装它们：
+官方可选技能随 Hermes 一起提供，但默认不激活。需要显式安装它们：
 
 ```bash
-# 安装一个官方的可选技能
+# 安装官方可选技能
 hermes skills install official/research/arxiv
 
 # 在聊天会话中从中心安装
 /skills install official/creative/songwriting-and-ai-music
+
+# 从任何 HTTP(S) URL 直接安装单个文件的 SKILL.md
+hermes skills install https://sharethis.chat/SKILL.md
+/skills install https://example.com/SKILL.md --name my-skill
 ```
 
 会发生什么：
 1.  技能目录被复制到 `~/.hermes/skills/`
 2.  它出现在您的 `skills_list` 输出中
-3.  它变为可用的斜杠命令
+3.  它作为一个斜杠命令变得可用
 
 :::tip
-已安装的技能在新会话中生效。如果您希望它在当前会话中可用，请使用 `/reset` 重新开始，或添加 `--now` 以立即使提示词缓存失效（在下一轮会消耗更多 Token）。
+已安装的技能在新会话中生效。如果您希望它在当前会话中可用，请使用 `/reset` 重新开始，或者添加 `--now` 以立即使提示词缓存失效（下一轮会消耗更多 Token）。
 :::
 
 ### 验证安装
@@ -149,12 +153,12 @@ metadata:
         url: "https://developers.google.com/tenor/guides/quickstart"
 ```
 
-当首次加载带有配置的技能时，Hermes 会提示您输入值。它们存储在 `config.yaml` 中的 `skills.config.*` 下。
+当首次加载带有配置的技能时，Hermes 会提示您输入值。它们存储在 `config.yaml` 的 `skills.config.*` 下。
 
 从 CLI 管理技能配置：
 
 ```bash
-# 为特定技能进行交互式配置
+# 交互式配置特定技能
 hermes skills config gif-search
 
 # 查看所有技能配置
@@ -196,9 +200,9 @@ metadata:
 2.  运行 `command --with-flags`
 3.  解析输出并呈现结果
 
-## 常见问题
--   常见故障：[描述]。修复方法：[解决方案]
--   注意[边缘情况]
+## 注意事项
+- 常见故障：[描述]。修复方法：[解决方案]
+- 注意[边缘情况]
 
 ## 验证
 运行 `check-command` 以确认结果正确。
@@ -228,7 +232,7 @@ my-skill/
 
 ### 4. 测试它
 
-开始一个新会话并尝试您的技能：
+启动一个新会话并尝试您的技能：
 
 ```bash
 hermes chat -q "/my-skill help me with the thing"
@@ -261,25 +265,25 @@ hermes skills
 | | 技能 | 记忆 |
 |---|---|---|
 | **是什么** | 程序性知识——如何做事情 | 事实性知识——事情是什么 |
-| **何时** | 按需加载，仅在相关时 | 自动注入到每个会话中 |
+| **何时使用** | 按需加载，仅在相关时 | 自动注入到每个会话中 |
 | **大小** | 可以很大（数百行） | 应该紧凑（仅关键事实） |
 | **成本** | 加载前零 Token | 小但持续的 Token 成本 |
 | **示例** | "如何部署到 Kubernetes" | "用户偏好深色模式，住在太平洋标准时间" |
-| **创建者** | 您、Agent 或从中心安装 | Agent，基于对话 |
+| **谁创建** | 您、Agent 或从中心安装 | Agent，基于对话 |
 
 **经验法则：** 如果您会把它放在参考文档中，它就是技能。如果您会把它写在便利贴上，它就是记忆。
 
 ---
 
-## 提示
+## 技巧
 
 **保持技能专注。** 一个试图涵盖"所有 DevOps"的技能会太长且太模糊。一个涵盖"将 Python 应用部署到 Fly.io"的技能则足够具体，真正有用。
 
-**让 Agent 创建技能。** 完成复杂的多步骤任务后，Hermes 通常会提议将方法保存为技能。请同意——这些由 Agent 编写的技能捕获了确切的工作流程，包括沿途发现的常见问题。
+**让 Agent 创建技能。** 在完成复杂的多步骤任务后，Hermes 通常会提议将方法保存为技能。请同意——这些由 Agent 编写的技能捕获了确切的工作流程，包括沿途发现的注意事项。
 
 **使用分类。** 将技能组织到子目录中（`~/.hermes/skills/devops/`、`~/.hermes/skills/research/` 等）。这使列表易于管理，并帮助 Agent 更快地找到相关技能。
 
-**当技能过时时进行更新。** 如果您使用某个技能时遇到了它未涵盖的问题，请告诉 Hermes 用您学到的东西更新该技能。未维护的技能会成为负担。
+**当技能过时时更新它们。** 如果您使用某个技能时遇到了它未涵盖的问题，请告诉 Hermes 用您学到的东西更新该技能。未维护的技能会成为负担。
 
 ---
 
