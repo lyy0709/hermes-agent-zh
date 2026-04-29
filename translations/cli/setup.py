@@ -1,7 +1,7 @@
 """
 Hermes Agent 的交互式设置向导。
 
-模块化向导，包含可独立运行的各个部分：
+模块化向导，包含可独立运行的章节：
   1. 模型与提供商 — 选择您的 AI 提供商和模型
   2. 终端后端 — 您的 Agent 运行命令的位置
   3. Agent 设置 — 迭代次数、压缩、会话重置
@@ -67,7 +67,7 @@ def _supports_same_provider_pool_setup(provider: str) -> bool:
     return pconfig.auth_type in {"api_key", "oauth_device_code"}
 
 
-# 每个提供商的默认模型列表 — 当无法访问实时的 /models 端点时用作回退。
+# 每个提供商的默认模型列表 — 当无法访问实时的 /models 端点时用作后备。
 _DEFAULT_PROVIDER_MODELS = {
     "copilot-acp": [
         "copilot-acp",
@@ -183,7 +183,7 @@ def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     print_info("  hermes config set model.default your-model-name")
     print()
     print_info("或者在您的环境中设置 OPENROUTER_API_KEY / OPENAI_API_KEY。")
-    print_info("请在交互式终端中运行 'hermes setup' 以使用完整向导。")
+    print_info("请在交互式终端中运行 'hermes setup' 以使用完整的向导。")
     print()
 
 
@@ -235,7 +235,7 @@ def prompt_choice(question: str, choices: list, default: int = 0, description: s
         else:
             print(f"  {marker} {choice}")
 
-    print_info(f"  按 Enter 使用默认值 ({default + 1})  按 Ctrl+C 退出")
+    print_info(f"  按回车使用默认值 ({default + 1})  按 Ctrl+C 退出")
 
     while True:
         try:
@@ -319,9 +319,9 @@ def _prompt_api_key(var: dict):
     print(color(f"  ─── {var.get('description', var['name'])} ───", Colors.CYAN))
     print()
     if tools_str:
-        print_info(f"  启用：{tools_str}")
+        print_info(f"  启用功能: {tools_str}")
     if var.get("url"):
-        print_info(f"  获取密钥地址：{var['url']}")
+        print_info(f"  获取密钥地址: {var['url']}")
     print()
 
     if var.get("password"):
@@ -368,7 +368,7 @@ def _print_setup_summary(config: dict, hermes_home):
     elif subscription_features.web.available:
         label = "网络搜索与提取"
         if subscription_features.web.current_provider:
-            label = f"网络搜索与提取 ({subscription_features.web.current_provider})"
+            label = f"网络搜索与提取（{subscription_features.web.current_provider}）"
         tool_status.append((label, True, None))
     else:
         tool_status.append(("网络搜索与提取", False, "EXA_API_KEY, PARALLEL_API_KEY, FIRECRAWL_API_KEY/FIRECRAWL_API_URL, 或 TAVILY_API_KEY"))
@@ -380,7 +380,7 @@ def _print_setup_summary(config: dict, hermes_home):
     elif subscription_features.browser.available:
         label = "浏览器自动化"
         if browser_provider:
-            label = f"浏览器自动化 ({browser_provider})"
+            label = f"浏览器自动化（{browser_provider}）"
         tool_status.append((label, True, None))
     else:
         missing_browser_hint = "npm install -g agent-browser, 设置 CAMOFOX_URL, 或配置 Browser Use 或 Browserbase"
@@ -428,7 +428,7 @@ def _print_setup_summary(config: dict, hermes_home):
         except Exception:
             pass
         if _img_backend:
-            tool_status.append((f"图像生成 ({_img_backend})", True, None))
+            tool_status.append((f"图像生成（{_img_backend}）", True, None))
         else:
             tool_status.append(("图像生成", False, "FAL_KEY 或 OPENAI_API_KEY"))
 
@@ -539,7 +539,7 @@ def _print_setup_summary(config: dict, hermes_home):
             "部分工具已禁用。运行 'hermes setup tools' 进行配置，"
         )
         from hermes_constants import display_hermes_home as _dhh
-        print_warning(f"或直接编辑 {_dhh()}/.env 以添加缺失的API密钥。")
+        print_warning(f"或直接编辑 {_dhh()}/.env 添加缺失的API密钥。")
         print()
 
     # Done banner
@@ -615,7 +615,7 @@ def _prompt_container_resources(config: dict):
     print_info("  持久化文件系统在会话之间保留文件。")
     print_info("  设置为 'no' 以使用每次重置的临时沙盒。")
     persist_str = prompt(
-        "  跨会话持久化文件系统？ (yes/no)", persist_label
+        "  在会话间持久化文件系统？ (yes/no)", persist_label
     )
     terminal["container_persistent"] = persist_str.lower() in ("yes", "true", "y", "1")
 
@@ -629,7 +629,7 @@ def _prompt_container_resources(config: dict):
 
     # Memory
     current_mem = terminal.get("container_memory", 5120)
-    mem_str = prompt("  内存大小 (MB) (5120 = 5GB)", str(current_mem))
+    mem_str = prompt("  内存大小，单位 MB (5120 = 5GB)", str(current_mem))
     try:
         terminal["container_memory"] = int(mem_str)
     except ValueError:
@@ -637,7 +637,7 @@ def _prompt_container_resources(config: dict):
 
     # Disk
     current_disk = terminal.get("container_disk", 51200)
-    disk_str = prompt("  磁盘大小 (MB) (51200 = 50GB)", str(current_disk))
+    disk_str = prompt("  磁盘大小，单位 MB (51200 = 50GB)", str(current_disk))
     try:
         terminal["container_disk"] = int(disk_str)
     except ValueError:
@@ -668,7 +668,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     from hermes_cli.config import load_config, save_config
 
     print_header("推理提供商")
-    print_info("选择如何连接到您的主聊天模型。")
+    print_info("选择如何连接到您的主要聊天模型。")
     print_info(f"   指南: {_DOCS_BASE}/integrations/providers")
     print()
 
@@ -702,8 +702,6 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     if isinstance(_m, dict):
         selected_provider = _m.get("provider")
 
-    nous_subscription_selected = selected_provider == "nous"
-
     # ── Same-provider fallback & rotation setup (full setup only) ──
     if not quick and _supports_same_provider_pool_setup(selected_provider):
         try:
@@ -717,23 +715,23 @@ def setup_model_provider(config: dict, *, quick: bool = False):
             manual_count = sum(1 for entry in entries if str(getattr(entry, "source", "")).startswith("manual"))
             auto_count = entry_count - manual_count
             print()
-            print_header("同提供商回退与轮换")
+            print_header("同提供商故障转移与轮换")
             print_info(
-                "Hermes 可以为同一个提供商保存多个凭证，并在凭证耗尽或受到速率限制时在它们之间轮换。"
+                "Hermes 可以为同一提供商保存多个凭据，并在某个凭据耗尽或达到速率限制时在它们之间轮换。"
             )
             print_info(
-                "这可以保留您的主提供商，同时减少因配额问题导致的中断。"
+                "这可以保留您的主要提供商，同时减少因配额问题导致的中断。"
             )
             print()
             if auto_count > 0:
                 print_info(
-                    f"当前为 {selected_provider} 池化的凭证: {entry_count} "
+                    f"当前为 {selected_provider} 池化的凭据: {entry_count} "
                     f"({manual_count} 手动添加, {auto_count} 从环境/共享认证自动检测)"
                 )
             else:
-                print_info(f"当前为 {selected_provider} 池化的凭证: {entry_count}")
+                print_info(f"当前为 {selected_provider} 池化的凭据: {entry_count}")
 
-            while prompt_yes_no("为同提供商回退添加另一个凭证？", False):
+            while prompt_yes_no("为同提供商故障转移添加另一个凭据？", False):
                 auth_add_command(
                     SimpleNamespace(
                         provider=selected_provider,
@@ -753,13 +751,13 @@ def setup_model_provider(config: dict, *, quick: bool = False):
                 )
                 pool = load_pool(selected_provider)
                 entry_count = len(pool.entries())
-                print_info(f"提供商池现在有 {entry_count} 个凭证。")
+                print_info(f"提供商池现在有 {entry_count} 个凭据。")
 
             if entry_count > 1:
                 strategy_labels = [
-                    "填满优先 / 粘性 — 持续使用第一个健康的凭证直到它耗尽",
-                    "轮询 — 每次选择后轮换到下一个健康的凭证",
-                    "随机 — 每次随机选择一个健康的凭证",
+                    "填满优先 / 粘性 — 持续使用第一个健康的凭据直到它耗尽",
+                    "轮询 — 每次选择后轮换到下一个健康的凭据",
+                    "随机 — 每次随机选择一个健康的凭据",
                 ]
                 current_strategy = _get_credential_pool_strategies(config).get(selected_provider, "fill_first")
                 default_strategy_idx = {
@@ -814,11 +812,11 @@ def setup_model_provider(config: dict, *, quick: bool = False):
         print_header("视觉与图像分析 (可选)")
         print_info(f"视觉使用独立的多模态后端。 {_prov_display}")
         print_info("目前没有提供 Hermes 可以自动用于视觉的后端，")
-        print_info("所以现在选择一个后端，或者跳过并稍后配置。")
+        print_info("所以请现在选择一个后端，或者跳过并稍后配置。")
         print()
 
         _vision_choices = [
-            "OpenRouter — 使用 Gemini (免费层在 openrouter.ai/keys)",
+            "OpenRouter — 使用 Gemini (免费层级在 openrouter.ai/keys)",
             "OpenAI 兼容端点 — 基础 URL、API 密钥和视觉模型",
             "暂时跳过",
         ]
@@ -832,7 +830,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
             else:
                 print_info("已跳过 — 视觉将不可用")
         elif _vision_idx == 1:  # OpenAI-compatible endpoint
-            _base_url = prompt("  基础 URL (留空为 OpenAI)").strip() or "https://api.openai.com/v1"
+            _base_url = prompt("  基础 URL (留空则使用 OpenAI)").strip() or "https://api.openai.com/v1"
             _api_key_label = "  API 密钥"
             _is_native_openai = base_url_hostname(_base_url) == "api.openai.com"
             if _is_native_openai:
@@ -845,7 +843,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
                 _vaux["base_url"] = _base_url
                 if _is_native_openai:
                     _oai_vision_models = ["gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano"]
-                    _vm_choices = _oai_vision_models + ["使用默认 (gpt-4o-mini)"]
+                    _vm_choices = _oai_vision_models + ["使用默认值 (gpt-4o-mini)"]
                     _vm_idx = prompt_choice("选择视觉模型:", _vm_choices, 0)
                     _selected_vision_model = (
                         _oai_vision_models[_vm_idx]
@@ -853,7 +851,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
                         else "gpt-4o-mini"
                     )
                 else:
-                    _selected_vision_model = prompt("  视觉模型 (留空 = 使用主/自定义默认值)").strip()
+                    _selected_vision_model = prompt("  视觉模型 (留空 = 使用主模型/自定义默认值)").strip()
                 save_env_value("AUXILIARY_VISION_MODEL", _selected_vision_model)
                 print_success(
                     f"视觉已配置，使用 {_base_url}"
@@ -862,7 +860,7 @@ def setup_model_provider(config: dict, *, quick: bool = False):
             else:
                 print_info("已跳过 — 视觉将不可用")
         else:
-            print_info("已跳过 — 稍后使用 'hermes setup' 添加或配置 AUXILIARY_VISION_* 设置")
+            print_info("已跳过 — 稍后可通过 'hermes setup' 添加或配置 AUXILIARY_VISION_* 设置")
 
 
     # Tool Gateway prompt is already shown by _model_flow_nous() above.
@@ -926,7 +924,7 @@ def _install_neutts_deps() -> bool:
         return True
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         print_error(f"安装 neutts 失败: {e}")
-        print_info("尝试手动安装: python -m pip install -U neutts[all]")
+        print_info("请尝试手动安装: python -m pip install -U neutts[all]")
         return False
 
 
@@ -940,7 +938,7 @@ def _install_kittentts_deps() -> bool:
         "0.8.1/kittentts-0.8.1-py3-none-any.whl"
     )
     print()
-    print_info("正在安装 kittentts Python 包 (首次使用时会下载约 25-80MB 的模型)...")
+    print_info("正在安装 kittentts Python 包 (首次使用会下载约 25-80MB 的模型)...")
     print()
     try:
         subprocess.run(
@@ -951,7 +949,7 @@ def _install_kittentts_deps() -> bool:
         return True
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         print_error(f"安装 kittentts 失败: {e}")
-        print_info(f"尝试手动安装: python -m pip install -U '{wheel_url}' soundfile")
+        print_info(f"请尝试手动安装: python -m pip install -U '{wheel_url}' soundfile")
         return False
 def _setup_tts_provider(config: dict):
     """Interactive TTS provider selection with install flow for NeuTTS."""
@@ -985,10 +983,10 @@ def _setup_tts_provider(config: dict):
     choices.extend(
         [
             "Edge TTS（免费，基于云端，无需设置）",
-            "ElevenLabs（优质音质，需要 API 密钥）",
-            "OpenAI TTS（良好音质，需要 API 密钥）",
+            "ElevenLabs（高品质，需要 API 密钥）",
+            "OpenAI TTS（良好品质，需要 API 密钥）",
             "xAI TTS（Grok 语音，需要 API 密钥）",
-            "MiniMax TTS（高质量，支持语音克隆，需要 API 密钥）",
+            "MiniMax TTS（高品质，支持语音克隆，需要 API 密钥）",
             "Mistral Voxtral TTS（多语言，原生 Opus 格式，需要 API 密钥）",
             "Google Gemini TTS（30 种预置语音，可通过提示词控制，需要 API 密钥）",
             "NeuTTS（本地设备运行，免费，约 300MB 模型下载）",
@@ -1010,7 +1008,7 @@ def _setup_tts_provider(config: dict):
         print_info("OpenAI TTS 将使用托管的 Nous 消息网关并计入您的订阅账单。")
         if get_env_value("VOICE_TOOLS_OPENAI_KEY") or get_env_value("OPENAI_API_KEY"):
             print_warning(
-                "直接配置的 OpenAI 凭据仍然存在，在从 ~/.hermes/.env 中移除之前可能优先使用。"
+                "直接配置的 OpenAI 凭据仍然存在，在从 ~/.hermes/.env 中移除之前，它们可能会优先使用。"
             )
 
     if selected == "neutts":
@@ -1025,10 +1023,10 @@ def _setup_tts_provider(config: dict):
         else:
             print()
             print_info("NeuTTS 需要：")
-            print_info("  • Python 包：neutts（约 50MB 安装包 + 首次使用约 300MB 模型）")
-            print_info("  • 系统包：espeak-ng (phonemizer)")
+            print_info("  • Python 包：neutts（约 50MB 安装包 + 首次使用时约 300MB 模型）")
+            print_info("  • 系统包：espeak-ng（phonemizer）")
             print()
-            if prompt_yes_no("现在安装 NeuTTS 依赖项吗？", True):
+            if prompt_yes_no("现在安装 NeuTTS 依赖吗？", True):
                 if not _install_neutts_deps():
                     print_warning("NeuTTS 安装不完整。回退到 Edge TTS。")
                     selected = "edge"
@@ -1156,9 +1154,9 @@ def setup_tts(config: dict):
 def setup_terminal_backend(config: dict):
     """Configure the terminal execution backend."""
     import platform as _platform
-    print_header("终端执行后端")
+    print_header("终端后端")
     print_info("选择 Hermes 运行 shell 命令和代码的位置。")
-    print_info("这会影响工具执行、文件访问和隔离性。")
+    print_info("这会影响工具执行、文件访问和隔离。")
     print_info(f"   指南: {_DOCS_BASE}/developer-guide/environments")
     print()
 
@@ -1171,7 +1169,7 @@ def setup_terminal_backend(config: dict):
         "Docker - 具有可配置资源的隔离容器",
         "Modal - 无服务器云沙盒",
         "SSH - 在远程机器上运行",
-        "Daytona - 持久化云开发环境",
+        "Daytona - 持久的云开发环境",
     ]
     idx_to_backend = {0: "local", 1: "docker", 2: "modal", 3: "ssh", 4: "daytona"}
     backend_to_idx = {"local": 0, "docker": 1, "modal": 2, "ssh": 3, "daytona": 4}
@@ -1189,7 +1187,7 @@ def setup_terminal_backend(config: dict):
     idx_to_backend[keep_current_idx] = current_backend
 
     terminal_idx = prompt_choice(
-        "选择终端执行后端:", terminal_choices, keep_current_idx
+        "选择终端后端:", terminal_choices, keep_current_idx
     )
 
     selected_backend = idx_to_backend.get(terminal_idx)
@@ -1201,7 +1199,7 @@ def setup_terminal_backend(config: dict):
     config.setdefault("terminal", {})["backend"] = selected_backend
 
     if selected_backend == "local":
-        print_success("终端执行后端: 本地")
+        print_success("终端后端: 本地")
         print_info("命令直接在此机器上运行。")
 
         # CWD for messaging
@@ -1229,7 +1227,7 @@ def setup_terminal_backend(config: dict):
                     print_success("Sudo 密码已保存")
 
     elif selected_backend == "docker":
-        print_success("终端执行后端: Docker")
+        print_success("终端后端: Docker")
 
         # Check if Docker is available
         docker_bin = shutil.which("docker")
@@ -1250,7 +1248,7 @@ def setup_terminal_backend(config: dict):
         _prompt_container_resources(config)
 
     elif selected_backend == "singularity":
-        print_success("终端执行后端: Singularity/Apptainer")
+        print_success("终端后端: Singularity/Apptainer")
 
         # Check if singularity/apptainer is available
         sing_bin = shutil.which("apptainer") or shutil.which("singularity")
@@ -1272,7 +1270,7 @@ def setup_terminal_backend(config: dict):
         _prompt_container_resources(config)
 
     elif selected_backend == "modal":
-        print_success("终端执行后端: Modal")
+        print_success("终端后端: Modal")
         print_info("无服务器云沙盒。每个会话都有自己的容器。")
         from tools.managed_tool_gateway import is_managed_tool_gateway_ready
         from tools.tool_backend_helpers import normalize_modal_mode
@@ -1371,8 +1369,8 @@ def setup_terminal_backend(config: dict):
         _prompt_container_resources(config)
 
     elif selected_backend == "daytona":
-        print_success("终端执行后端: Daytona")
-        print_info("持久化云开发环境。")
+        print_success("终端后端: Daytona")
+        print_info("持久的云开发环境。")
         print_info("每个会话获得一个具有文件系统持久性的专用沙盒。")
         print_info("注册: https://daytona.io")
 
@@ -1430,7 +1428,7 @@ def setup_terminal_backend(config: dict):
         _prompt_container_resources(config)
 
     elif selected_backend == "ssh":
-        print_success("终端执行后端: SSH")
+        print_success("终端后端: SSH")
         print_info("通过 SSH 在远程机器上运行命令。")
 
         # SSH host
@@ -1484,7 +1482,7 @@ def setup_terminal_backend(config: dict):
         save_env_value("TERMINAL_MODAL_MODE", config["terminal"].get("modal_mode", "auto"))
     save_config(config)
     print()
-    print_success(f"终端执行后端已设置为: {selected_backend}")
+    print_success(f"终端后端已设置为: {selected_backend}")
 
 
 # =============================================================================
@@ -1509,10 +1507,10 @@ def _apply_default_agent_settings(config: dict):
     save_config(config)
     print_success("已应用推荐默认设置：")
     print_info("  最大迭代次数: 90")
-    print_info("  工具进度: 全部")
+    print_info("  工具进度显示: all")
     print_info("  压缩阈值: 0.50")
-    print_info("  会话重置: 闲置 (1440 分钟) + 每日 (4:00)")
-    print_info("  稍后运行 `hermes setup agent` 以自定义。")
+    print_info("  会话重置: 不活动 (1440 分钟) + 每日 (4:00)")
+    print_info("  稍后运行 `hermes setup agent` 以进行自定义。")
 
 
 def setup_agent_settings(config: dict):
@@ -1529,7 +1527,7 @@ def setup_agent_settings(config: dict):
     print_info("每次对话的最大工具调用迭代次数。")
     print_info("数值越高 = 处理更复杂的任务，但消耗更多 Token。")
     print_info(
-        f"按 Enter 键保持 {current_max}。大多数任务使用 90，开放式探索使用 150+。"
+        f"按 Enter 键保持 {current_max}。对于大多数任务使用 90，或对于开放式探索使用 150+。"
     )
 
     max_iter_str = prompt("最大迭代次数", current_max)
@@ -1548,8 +1546,8 @@ def setup_agent_settings(config: dict):
     print_info("工具进度显示")
     print_info("控制显示多少工具活动（CLI 和消息传递）。")
     print_info("  off     — 静默，仅显示最终响应")
-    print_info("  new     — 仅当工具名称变更时显示（减少噪音）")
-    print_info("  all     — 显示每次工具调用及简短预览")
+    print_info("  new     — 仅当工具名称更改时显示（减少噪音）")
+    print_info("  all     — 显示每个工具调用及其简短预览")
     print_info("  verbose — 完整参数、结果和调试日志")
 
     current_mode = config.get("display", {}).get("tool_progress", "all")
@@ -1591,27 +1589,27 @@ def setup_agent_settings(config: dict):
         "消息传递会话（Telegram、Discord 等）会随时间累积上下文。"
     )
     print_info(
-        "每条消息都会添加到对话历史中，这意味着 API 成本会增长。"
+        "每条消息都会添加到对话历史记录中，这意味着 API 成本会增长。"
     )
     print_info("")
     print_info(
-        "为了管理这一点，会话可以在闲置一段时间后自动重置"
+        "为了管理这一点，会话可以在不活动一段时间后自动重置"
     )
     print_info(
         "或在每天固定时间重置。重置发生时，Agent 会先将重要内容"
     )
     print_info(
-        "保存到其持久记忆——但对话上下文会被清除。"
+        "保存到其持久记忆 — 但对话上下文会被清除。"
     )
     print_info("")
-    print_info("您也可以在聊天中随时输入 /reset 手动重置。")
+    print_info("您也可以随时在聊天中输入 /reset 手动重置。")
     print_info("")
 
     reset_choices = [
-        "闲置 + 每日重置（推荐 - 以先到者为准）",
-        "仅闲置（在 N 分钟无消息后重置）",
-        "仅每日（每天固定小时重置）",
-        "永不自动重置（上下文持续存在，直到 /reset 或上下文压缩）",
+        "不活动 + 每日重置（推荐 - 以先到者为准）",
+        "仅不活动（在 N 分钟无消息后重置）",
+        "仅每日（每天在固定小时重置）",
+        "永不自动重置（上下文持续存在直到 /reset 或上下文压缩）",
         "保持当前设置",
     ]
 
@@ -1628,7 +1626,7 @@ def setup_agent_settings(config: dict):
 
     if reset_idx == 0:  # Both
         config["session_reset"]["mode"] = "both"
-        idle_str = prompt("  闲置超时（分钟）", str(current_idle))
+        idle_str = prompt("  不活动超时（分钟）", str(current_idle))
         try:
             idle_val = int(idle_str)
             if idle_val > 0:
@@ -1643,11 +1641,11 @@ def setup_agent_settings(config: dict):
         except ValueError:
             pass
         print_success(
-            f"会话将在闲置 {config['session_reset'].get('idle_minutes', 1440)} 分钟后或每日 {config['session_reset'].get('at_hour', 4)}:00 重置"
+            f"会话在 {config['session_reset'].get('idle_minutes', 1440)} 分钟不活动后或每日 {config['session_reset'].get('at_hour', 4)}:00 重置"
         )
     elif reset_idx == 1:  # Idle only
         config["session_reset"]["mode"] = "idle"
-        idle_str = prompt("  闲置超时（分钟）", str(current_idle))
+        idle_str = prompt("  不活动超时（分钟）", str(current_idle))
         try:
             idle_val = int(idle_str)
             if idle_val > 0:
@@ -1655,7 +1653,7 @@ def setup_agent_settings(config: dict):
         except ValueError:
             pass
         print_success(
-            f"会话将在闲置 {config['session_reset'].get('idle_minutes', 1440)} 分钟后重置"
+            f"会话在 {config['session_reset'].get('idle_minutes', 1440)} 分钟不活动后重置"
         )
     elif reset_idx == 2:  # Daily only
         config["session_reset"]["mode"] = "daily"
@@ -1667,15 +1665,15 @@ def setup_agent_settings(config: dict):
         except ValueError:
             pass
         print_success(
-            f"会话将在每日 {config['session_reset'].get('at_hour', 4)}:00 重置"
+            f"会话每日在 {config['session_reset'].get('at_hour', 4)}:00 重置"
         )
     elif reset_idx == 3:  # None
         config["session_reset"]["mode"] = "none"
         print_info(
-            "会话将永不自动重置。上下文仅通过压缩管理。"
+            "会话将永不自动重置。上下文仅由压缩管理。"
         )
         print_warning(
-            "长对话将增加成本。需要时请手动使用 /reset。"
+            "长对话的成本将会增长。需要时请手动使用 /reset。"
         )
     # else: keep current (idx == 4)
 
@@ -1733,7 +1731,7 @@ def _setup_telegram():
         save_env_value("TELEGRAM_ALLOWED_USERS", allowed_users.replace(" ", ""))
         print_success("Telegram 白名单已配置 - 只有列出的用户可以使用机器人")
     else:
-        print_info("⚠️  未设置白名单 - 任何找到你机器的人都可以使用它!")
+        print_info("⚠️  未设置白名单 - 任何发现你机器的人都可以使用它!")
 
     print()
     print_info("📬 主频道: Hermes 在此发送定时任务结果、")
@@ -1764,7 +1762,7 @@ def _setup_discord():
             if not get_env_value("DISCORD_ALLOWED_USERS"):
                 print_info("⚠️  Discord 未设置用户白名单 - 任何人都可以使用你的机器人!")
                 if prompt_yes_no("现在添加允许的用户?", True):
-                    print_info("   如何查找 Discord ID: 启用开发者模式，右键点击用户名 → 复制 ID")
+                    print_info("   查找 Discord ID: 启用开发者模式，右键点击用户名 → 复制 ID")
                     allowed_users = prompt("允许的用户 ID (逗号分隔)")
                     if allowed_users:
                         cleaned_ids = _clean_discord_user_ids(allowed_users)
@@ -1781,7 +1779,7 @@ def _setup_discord():
 
     print()
     print_info("🔒 安全: 限制谁可以使用你的机器人")
-    print_info("   如何查找你的 Discord 用户 ID:")
+    print_info("   查找你的 Discord 用户 ID:")
     print_info("   1. 在 Discord 设置中启用开发者模式")
     print_info("   2. 右键点击你的用户名 → 复制 ID")
     print()
@@ -1795,15 +1793,15 @@ def _setup_discord():
         save_env_value("DISCORD_ALLOWED_USERS", ",".join(cleaned_ids))
         print_success("Discord 白名单已配置")
     else:
-        print_info("⚠️  未设置白名单 - 机器人所在服务器中的任何人都可以使用它!")
+        print_info("⚠️  未设置白名单 - 你机器人所在服务器中的任何人都可以使用它!")
 
     print()
     print_info("📬 主频道: Hermes 在此发送定时任务结果、")
     print_info("   跨平台消息和通知。")
-    print_info("   如何获取频道 ID: 右键点击一个频道 → 复制频道 ID")
+    print_info("   获取频道 ID: 右键点击一个频道 → 复制频道 ID")
     print_info("   (需要在 Discord 设置中启用开发者模式)")
     print_info("   你也可以稍后在 Discord 频道中输入 /set-home 来设置。")
-    home_channel = prompt("主频道 ID (留空稍后通过 /set-home 设置)")
+    home_channel = prompt("主频道 ID (留空以稍后使用 /set-home 设置)")
     if home_channel:
         save_env_value("DISCORD_HOME_CHANNEL", home_channel)
 
@@ -1827,9 +1825,10 @@ def _setup_slack():
     if existing:
         print_info("Slack: 已配置")
         if not prompt_yes_no("重新配置 Slack？", False):
-            # 即使不重新配置，也提供刷新清单的选项，以便新命令（例如 /btw, /stop, ...）能在 Slack 中注册。
+            # Even without reconfiguring, offer to refresh the manifest so
+            # new commands (e.g. /btw, /stop, ...) get registered in Slack.
             if prompt_yes_no(
-                "使用最新的命令列表重新生成 Slack 应用清单吗？（建议在 `hermes update` 后执行）",
+                "使用最新的命令列表重新生成 Slack 应用清单？（建议在 `hermes update` 后执行）",
                 True,
             ):
                 _write_slack_manifest_and_instruct()
@@ -1846,7 +1845,9 @@ def _setup_slack():
     print_info("   完整指南：https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack/")
     print()
 
-    # 预先生成并写入清单，以便用户可以将其粘贴到“从清单创建”流程中，而不是逐个点击权限/事件/斜杠命令。
+    # Generate and write manifest up-front so the user can paste it into
+    # the "Create from manifest" flow instead of clicking through scopes /
+    # events / slash commands one at a time.
     _write_slack_manifest_and_instruct()
 
     print()
@@ -1868,10 +1869,10 @@ def _setup_slack():
     )
     if allowed_users:
         save_env_value("SLACK_ALLOWED_USERS", allowed_users.replace(" ", ""))
-        print_success("Slack 允许名单已配置")
+        print_success("Slack 允许列表已配置")
     else:
-        print_warning("⚠️  未设置 Slack 允许名单 - 默认情况下，未配对的用户将被拒绝。")
-        print_info("   仅当你确实希望开放工作区访问时，才设置 SLACK_ALLOW_ALL_USERS=true 或 GATEWAY_ALLOW_ALL_USERS=true。")
+        print_warning("⚠️  未设置 Slack 允许列表 - 默认情况下未配对的用户将被拒绝。")
+        print_info("   仅当你确实希望开放工作区访问权限时，才设置 SLACK_ALLOW_ALL_USERS=true 或 GATEWAY_ALLOW_ALL_USERS=true。")
 
 
 def _write_slack_manifest_and_instruct():
@@ -1923,7 +1924,7 @@ def _setup_matrix():
             return
 
     print_info("适用于任何 Matrix 主服务器 (Synapse, Conduit, Dendrite, 或 matrix.org)。")
-    print_info("   1. 在你的主服务器上创建一个机器人用户，或使用你自己的账户")
+    print_info("   1. 在您的主服务器上创建一个机器人用户，或使用您自己的账户")
     print_info("   2. 从 Element 获取访问令牌，或提供用户 ID + 密码")
     print()
     homeserver = prompt("主服务器 URL (例如 https://matrix.example.org)")
@@ -1931,7 +1932,7 @@ def _setup_matrix():
         save_env_value("MATRIX_HOMESERVER", homeserver.rstrip("/"))
 
     print()
-    print_info("认证: 提供访问令牌 (推荐), 或用户 ID + 密码。")
+    print_info("认证: 提供访问令牌 (推荐)，或用户 ID + 密码。")
     token = prompt("访问令牌 (留空则使用密码登录)", password=True)
     if token:
         save_env_value("MATRIX_ACCESS_TOKEN", token)
@@ -1980,7 +1981,7 @@ def _setup_matrix():
                     print_info(f"  错误: {result.stderr.strip().splitlines()[-1]}")
 
         print()
-        print_info("🔒 安全: 限制谁可以使用你的机器人")
+        print_info("🔒 安全: 限制谁可以使用您的机器人")
         print_info("   Matrix 用户 ID 格式为 @username:server")
         print()
         allowed_users = prompt("允许的用户 ID (逗号分隔，留空则开放访问)")
@@ -1993,7 +1994,7 @@ def _setup_matrix():
         print()
         print_info("📬 主房间: Hermes 发送定时任务结果和通知的地方。")
         print_info("   房间 ID 格式为 !abc123:server (在 Element 房间设置中显示)")
-        print_info("   你也可以稍后在 Matrix 房间中输入 /set-home 来设置。")
+        print_info("   您也可以稍后在 Matrix 房间中输入 /set-home 来设置。")
         home_room = prompt("主房间 ID (留空则稍后使用 /set-home 设置)")
         if home_room:
             save_env_value("MATRIX_HOME_ROOM", home_room)
@@ -2007,7 +2008,7 @@ def _setup_mattermost():
             return
 
     print_info("适用于任何自托管的 Mattermost 实例。")
-    print_info("   1. 在 Mattermost 中：集成 → Bot 账户 → 添加 Bot 账户")
+    print_info("   1. 在 Mattermost 中: 集成 → Bot 账户 → 添加 Bot 账户")
     print_info("   2. 复制 bot token")
     print()
     mm_url = prompt("Mattermost 服务器 URL (例如 https://mm.example.com)")
@@ -2020,20 +2021,20 @@ def _setup_mattermost():
     print_success("Mattermost token 已保存")
 
     print()
-    print_info("🔒 安全：限制谁可以使用你的 bot")
-    print_info("   要查找你的用户 ID：点击你的头像 → 个人资料")
-    print_info("   或使用 API：GET /api/v4/users/me")
+    print_info("🔒 安全: 限制谁可以使用你的 bot")
+    print_info("   要查找你的用户 ID: 点击你的头像 → 个人资料")
+    print_info("   或使用 API: GET /api/v4/users/me")
     print()
     allowed_users = prompt("允许的用户 ID (逗号分隔，留空表示开放访问)")
     if allowed_users:
         save_env_value("MATTERMOST_ALLOWED_USERS", allowed_users.replace(" ", ""))
-        print_success("Mattermost 允许名单已配置")
+        print_success("Mattermost 允许列表已配置")
     else:
-        print_info("⚠️  未设置允许名单 - 任何可以给 bot 发消息的人都可以使用它！")
+        print_info("⚠️  未设置允许列表 - 任何可以给 bot 发消息的人都可以使用它!")
 
     print()
-    print_info("📬 主频道：Hermes 在此发送定时任务结果和通知。")
-    print_info("   要获取频道 ID：点击频道名称 → 查看信息 → 复制 ID")
+    print_info("📬 主频道: Hermes 在此发送定时任务结果和通知。")
+    print_info("   要获取频道 ID: 点击频道名称 → 查看信息 → 复制 ID")
     print_info("   你也可以稍后在 Mattermost 频道中输入 /set-home 来设置。")
     home_channel = prompt("主频道 ID (留空稍后通过 /set-home 设置)")
     if home_channel:
@@ -2054,8 +2055,8 @@ def _setup_whatsapp():
     if prompt_yes_no("现在启用 WhatsApp?", True):
         save_env_value("WHATSAPP_ENABLED", "true")
         print_success("WhatsApp 已启用")
-        print_info("运行 'hermes whatsapp' 来选择你的模式（独立的 bot 号码")
-        print_info("或个人的自我聊天）并通过二维码配对。")
+        print_info("运行 'hermes whatsapp' 来选择你的模式 (独立的 bot 号码")
+        print_info("或个人的自我聊天) 并通过二维码配对。")
 
 
 def _setup_weixin():
@@ -2118,7 +2119,7 @@ def _setup_bluebubbles():
     existing = get_env_value("BLUEBUBBLES_SERVER_URL")
     if existing:
         print_info("BlueBubbles: 已配置")
-        if not prompt_yes_no("重新配置 BlueBubbles?", False):
+        if not prompt_yes_no("重新配置 BlueBubbles？", False):
             return
 
     print_info("通过 BlueBubbles 将 Hermes 连接到 iMessage —— 一个免费、开源的")
@@ -2143,7 +2144,7 @@ def _setup_bluebubbles():
     print_success("BlueBubbles 凭据已保存")
 
     print()
-    print_info("🔒 安全: 限制谁可以向您的机器人发送消息")
+    print_info("🔒 安全性: 限制谁可以向您的机器人发送消息")
     print_info("   使用 iMessage 地址: 邮箱 (user@icloud.com) 或电话 (+15551234567)")
     print()
     allowed_users = prompt("允许的 iMessage 地址 (逗号分隔，留空表示开放访问)")
@@ -2155,14 +2156,14 @@ def _setup_bluebubbles():
 
     print()
     print_info("📬 主频道: 用于定时任务交付和通知的电话或邮箱。")
-    print_info("   您也可以在 iMessage 聊天中使用 /set-home 稍后设置此项。")
+    print_info("   您也可以在 iMessage 聊天中使用 /set-home 稍后设置此选项。")
     home_channel = prompt("主频道地址 (留空稍后设置)")
     if home_channel:
         save_env_value("BLUEBUBBLES_HOME_CHANNEL", home_channel)
 
     print()
     print_info("高级设置 (默认值适用于大多数配置):")
-    if prompt_yes_no("配置 Webhook 监听器设置?", False):
+    if prompt_yes_no("配置 Webhook 监听器设置？", False):
         webhook_port = prompt("Webhook 监听器端口 (默认: 8645)")
         if webhook_port:
             try:
@@ -2193,7 +2194,7 @@ def _setup_webhooks():
     print()
     print_warning("⚠  Webhook 和 SMS 平台需要将消息网关端口暴露到互联网。")
     print_warning("   出于安全考虑，请在沙盒环境（Docker、虚拟机等）中运行消息网关，")
-    print_warning("   以限制提示词注入攻击的爆炸半径。")
+    print_warning("   以限制提示词注入可能造成的破坏范围。")
     print()
     print_info("   完整指南：https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks/")
     print()
@@ -2204,9 +2205,9 @@ def _setup_webhooks():
             save_env_value("WEBHOOK_PORT", str(int(port)))
             print_success(f"Webhook 端口已设置为 {port}")
         except ValueError:
-            print_warning("无效的端口号，使用默认值 8644")
+            print_warning("无效的端口号，将使用默认值 8644")
 
-    secret = prompt("全局 HMAC 密钥（所有路由共享）", password=True)
+    secret = prompt("全局 HMAC 密钥（在所有路由间共享）", password=True)
     if secret:
         save_env_value("WEBHOOK_SECRET", secret)
         print_success("Webhook 密钥已保存")
@@ -2217,9 +2218,9 @@ def _setup_webhooks():
     print()
     print_success("Webhooks 已启用！后续步骤：")
     from hermes_constants import display_hermes_home as _dhh
-    print_info(f"   1. 在 {_dhh()}/config.yaml 中定义 webhook 路由")
+    print_info(f"   1. 在 {_dhh()}/config.yaml 中定义 Webhook 路由")
     print_info("   2. 将您的服务（GitHub、GitLab 等）指向：")
-    print_info("      http://your-server:8644/webhooks/<route-name>")
+    print_info("      http://您的服务器:8644/webhooks/<路由名称>")
     print()
     print_info("   路由配置指南：")
     print_info("   https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks/#configuring-routes")
@@ -2271,7 +2272,7 @@ def setup_gateway(config: dict):
     selected = prompt_checklist("选择要配置的平台:", items, pre_selected)
 
     if not selected:
-        print_info("未选择任何平台。稍后可通过 'hermes setup gateway' 进行配置。")
+        print_info("未选择任何平台。稍后可以运行 'hermes setup gateway' 来配置。")
         return
 
     for idx in selected:
@@ -2326,7 +2327,7 @@ def setup_gateway(config: dict):
             print()
             print_warning(f"未设置主频道: {', '.join(missing_home)}")
             print_info("   没有主频道，定时任务和跨平台消息将无法发送到这些平台。")
-            print_info("   稍后可以在聊天中使用 /set-home 设置，或运行:")
+            print_info("   稍后可以在聊天中使用 /set-home 命令设置，或者：")
             for plat in missing_home:
                 print_info(
                     f"     hermes config set {plat.upper()}_HOME_CHANNEL <channel_id>"
@@ -2370,27 +2371,27 @@ def setup_gateway(config: dict):
             print()
 
         if service_running:
-            if prompt_yes_no("  重启消息网关以应用更改?", True):
+            if prompt_yes_no("  重启消息网关以应用更改？", True):
                 try:
                     if supports_systemd:
                         systemd_restart()
                     elif _is_macos:
                         launchd_restart()
                 except UserSystemdUnavailableError as e:
-                    print_error("  重启失败 — 用户 systemd 不可访问:")
+                    print_error("  重启失败 — 用户 systemd 不可访问：")
                     for line in str(e).splitlines():
                         print(f"  {line}")
                 except Exception as e:
                     print_error(f"  重启失败: {e}")
         elif service_installed:
-            if prompt_yes_no("  启动消息网关服务?", True):
+            if prompt_yes_no("  启动消息网关服务？", True):
                 try:
                     if supports_systemd:
                         systemd_start()
                     elif _is_macos:
                         launchd_start()
                 except UserSystemdUnavailableError as e:
-                    print_error("  启动失败 — 用户 systemd 不可访问:")
+                    print_error("  启动失败 — 用户 systemd 不可访问：")
                     for line in str(e).splitlines():
                         print(f"  {line}")
                 except Exception as e:
@@ -2398,7 +2399,7 @@ def setup_gateway(config: dict):
         elif supports_service_manager:
             svc_name = "systemd" if supports_systemd else "launchd"
             if prompt_yes_no(
-                f"  将消息网关安装为 {svc_name} 服务? (后台运行，开机自启)",
+                f"  将消息网关安装为 {svc_name} 服务？(在后台运行，开机自启)",
                 True,
             ):
                 try:
@@ -2410,37 +2411,37 @@ def setup_gateway(config: dict):
                         launchd_install(force=False)
                         did_install = True
                     print()
-                    if did_install and prompt_yes_no("  现在启动服务?", True):
+                    if did_install and prompt_yes_no("  现在启动服务？", True):
                         try:
                             if supports_systemd:
                                 systemd_start(system=installed_scope == "system")
                             elif _is_macos:
                                 launchd_start()
                         except UserSystemdUnavailableError as e:
-                            print_error("  启动失败 — 用户 systemd 不可访问:")
+                            print_error("  启动失败 — 用户 systemd 不可访问：")
                             for line in str(e).splitlines():
                                 print(f"  {line}")
                         except Exception as e:
                             print_error(f"  启动失败: {e}")
                 except Exception as e:
                     print_error(f"  安装失败: {e}")
-                    print_info("  您可以尝试手动安装: hermes gateway install")
+                    print_info("  你可以尝试手动安装: hermes gateway install")
             else:
-                print_info("  您可以稍后安装: hermes gateway install")
+                print_info("  你可以稍后安装: hermes gateway install")
                 if supports_systemd:
-                    print_info("  或作为开机服务安装: sudo hermes gateway install --system")
+                    print_info("  或作为开机自启服务: sudo hermes gateway install --system")
                 print_info("  或在前台运行:  hermes gateway")
         else:
             from hermes_constants import is_container
             if is_container():
-                print_info("启动消息网关以使您的机器人上线:")
+                print_info("启动消息网关以使你的机器人上线：")
                 print_info("   hermes gateway run          # 作为容器主进程运行")
                 print_info("")
-                print_info("如需自动重启，请使用 Docker 重启策略:")
+                print_info("如需自动重启，请使用 Docker 重启策略：")
                 print_info("   docker run --restart unless-stopped ...")
                 print_info("   docker restart <container>  # 手动重启")
             else:
-                print_info("启动消息网关以使您的机器人上线:")
+                print_info("启动消息网关以使你的机器人上线：")
                 print_info("   hermes gateway              # 在前台运行")
 
         print_info("━" * 50)
@@ -2646,11 +2647,11 @@ def _load_openclaw_migration_module():
 # Config values may have different semantics between OpenClaw and Hermes.
 # Instruction/context files (.md) can contain incompatible setup procedures.
 _HIGH_IMPACT_KIND_KEYWORDS = {
-    "gateway": "⚠ 消息网关/消息平台 — 这将配置 Hermes 使用你的 OpenClaw 消息通道",
-    "telegram": "⚠ Telegram — 这将使 Hermes 指向你的 OpenClaw Telegram 机器人",
-    "slack": "⚠ Slack — 这将使 Hermes 指向你的 OpenClaw Slack 工作区",
-    "discord": "⚠ Discord — 这将使 Hermes 指向你的 OpenClaw Discord 机器人",
-    "whatsapp": "⚠ WhatsApp — 这将使 Hermes 指向你的 OpenClaw WhatsApp 连接",
+    "gateway": "⚠ 消息网关/消息平台 — 这将配置 Hermes 使用您的 OpenClaw 消息通道",
+    "telegram": "⚠ Telegram — 这将使 Hermes 指向您的 OpenClaw Telegram 机器人",
+    "slack": "⚠ Slack — 这将使 Hermes 指向您的 OpenClaw Slack 工作区",
+    "discord": "⚠ Discord — 这将使 Hermes 指向您的 OpenClaw Discord 机器人",
+    "whatsapp": "⚠ WhatsApp — 这将使 Hermes 指向您的 OpenClaw WhatsApp 连接",
     "config": "⚠ 配置值 — OpenClaw 设置可能无法 1:1 映射到 Hermes 的等效项",
     "soul": "⚠ 指令文件 — 可能包含 OpenClaw 特定的设置/重启流程",
     "memory": "⚠ 记忆/上下文文件 — 可能引用 OpenClaw 特定的基础设施",
@@ -2714,7 +2715,7 @@ def _print_migration_preview(report: dict):
         for warning in sorted(warnings_shown):
             print(color(f"    {warning}", Colors.YELLOW))
         print()
-        print(color("  注意：OpenClaw 的配置值在 Hermes 中可能具有不同的语义。", Colors.YELLOW))
+        print(color("  注意：OpenClaw 的配置值在 Hermes 中可能有不同的语义。", Colors.YELLOW))
         print(color("  例如，OpenClaw 的 tool_call_execution: \"auto\" 不等于 Hermes 的 yolo 模式。", Colors.YELLOW))
         print(color("  OpenClaw 的指令文件 (.md) 可能包含不兼容的流程。", Colors.YELLOW))
         print()
@@ -2743,7 +2744,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
 
     if not prompt_yes_no("是否查看可导入的内容？", default=True):
         print_info(
-            "跳过迁移。您稍后可以使用以下命令运行：hermes claw migrate --dry-run"
+            "跳过迁移。您稍后可以通过以下命令运行：hermes claw migrate --dry-run"
         )
         return False
 
@@ -2789,11 +2790,11 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
 
     if preview_count == 0:
         print()
-        print_info("没有可从 OpenClaw 导入的内容。")
+        print_info("没有从 OpenClaw 导入的内容。")
         return False
 
     print()
-    print_header(f"迁移预览 — {preview_count} 个项目将被导入")
+    print_header(f"迁移预览 — 将导入 {preview_count} 个项目")
     print_info("尚未进行任何更改。请查看以下列表：")
     print()
     _print_migration_preview(preview_report)
@@ -2801,7 +2802,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
     # ── Phase 2: Confirm and execute ──
     if not prompt_yes_no("继续执行迁移？", default=False):
         print_info(
-            "迁移已取消。您稍后可以使用以下命令运行：hermes claw migrate"
+            "迁移已取消。您稍后可以通过以下命令运行：hermes claw migrate"
         )
         print_info(
             "使用 --dry-run 再次预览，或使用 --preset minimal 进行更轻量的导入。"
@@ -2858,7 +2859,7 @@ def _offer_openclaw_migration(hermes_home: Path) -> bool:
 # =============================================================================
 
 SETUP_SECTIONS = [
-    ("model", "模型 & 提供商", setup_model_provider),
+    ("model", "模型与提供商", setup_model_provider),
     ("tts", "文本转语音", setup_tts),
     ("terminal", "终端后端", setup_terminal_backend),
     ("gateway", "消息平台（消息网关）", setup_gateway),
@@ -2994,7 +2995,7 @@ def run_setup_wizard(args):
         print()
         print_header("重新配置")
         print_success("您已经配置了 Hermes。")
-        print_info("正在运行完整向导 — 每个提示都显示您当前的值。")
+        print_info("运行完整向导 — 每个提示都会显示您当前的值。")
         print_info("按 Enter 键保留它，或输入新值进行更改。")
         print_info("")
         print_info("提示：使用 'hermes setup model|terminal|")
@@ -3009,7 +3010,7 @@ def run_setup_wizard(args):
         # --reconfigure / --quick on a fresh install are meaningless — fall
         # through to the normal first-time flow.
         if reconfigure_requested or quick_requested:
-            print_info("未找到现有配置 — 正在运行首次设置。")
+            print_info("未找到现有配置 — 运行首次设置。")
             print()
 
         # Offer OpenClaw migration before configuration begins

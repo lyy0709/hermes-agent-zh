@@ -1,12 +1,12 @@
 ---
 sidebar_position: 10
 title: "皮肤与主题"
-description: "使用内置和用户定义的皮肤自定义 Hermes CLI 外观"
+description: "使用内置和用户定义的皮肤自定义 Hermes CLI 的外观"
 ---
 
 # 皮肤与主题
 
-皮肤控制 Hermes CLI 的**视觉呈现**：横幅颜色、旋转器表情和动词、响应框标签、品牌文本以及工具活动前缀。
+皮肤控制着 Hermes CLI 的**视觉呈现**：横幅颜色、旋转器表情和动词、响应框标签、品牌文本以及工具活动前缀。
 
 对话风格和视觉风格是两个独立的概念：
 
@@ -32,15 +32,15 @@ display:
 
 | 皮肤 | 描述 | Agent 品牌 | 视觉特征 |
 |------|-------------|----------------|------------------|
-| `default` | 经典 Hermes — 金色与可爱风格 | `Hermes Agent` | 温暖的金色边框，米色文本，旋转器中的可爱表情。熟悉的蛇杖横幅。干净且吸引人。 |
+| `default` | 经典 Hermes — 金色与可爱风格 | `Hermes Agent` | 温暖的金色边框、米色文本、旋转器中的可爱表情。熟悉的双蛇杖横幅。简洁而亲切。 |
 | `ares` | 战神主题 — 深红与青铜色 | `Ares Agent` | 深红色边框配青铜色点缀。激进的旋转器动词（"锻造"、"行军"、"淬炼钢铁"）。自定义剑与盾 ASCII 艺术横幅。 |
-| `mono` | 单色 — 干净的灰度 | `Hermes Agent` | 全灰度 — 无颜色。边框为 `#555555`，文本为 `#c9d1d9`。适合极简终端设置或屏幕录制。 |
-| `slate` | 冷蓝色 — 面向开发者 | `Hermes Agent` | 宝蓝色边框 (`#4169e1`)，柔和的蓝色文本。冷静且专业。无自定义旋转器 — 使用默认表情。 |
-| `daylight` | 适用于明亮终端的浅色主题，深色文本和冷蓝色点缀 | `Hermes Agent` | 专为白色或明亮终端设计。深石板色文本配蓝色边框，浅色状态表面，以及一个在浅色终端配置文件中仍保持可读性的浅色补全菜单。 |
-| `warm-lightmode` | 适用于浅色终端背景的暖棕色/金色文本 | `Hermes Agent` | 为浅色终端设计的温暖羊皮纸色调。深棕色文本配鞍棕色点缀，奶油色状态表面。是较冷的 daylight 主题的温暖替代方案。 |
+| `mono` | 单色 — 简洁的灰度 | `Hermes Agent` | 全灰色 — 无彩色。边框为 `#555555`，文本为 `#c9d1d9`。适合极简终端设置或屏幕录制。 |
+| `slate` | 冷蓝色 — 面向开发者 | `Hermes Agent` | 宝蓝色边框 (`#4169e1`)、柔和的蓝色文本。冷静而专业。无自定义旋转器 — 使用默认表情。 |
+| `daylight` | 适用于明亮终端的浅色主题，深色文本配冷蓝色点缀 | `Hermes Agent` | 专为白色或明亮终端设计。深石板色文本配蓝色边框、浅色状态表面，以及一个在浅色终端配置文件中仍保持可读性的浅色补全菜单。 |
+| `warm-lightmode` | 适用于浅色终端背景的暖棕色/金色文本 | `Hermes Agent` | 为浅色终端提供温暖的羊皮纸色调。深棕色文本配鞍棕色点缀、奶油色状态表面。是较冷的 daylight 主题的另一种大地色系选择。 |
 | `poseidon` | 海神主题 — 深蓝与海沫色 | `Poseidon Agent` | 深蓝到海沫色的渐变。海洋主题的旋转器（"绘制洋流"、"探测深度"）。三叉戟 ASCII 艺术横幅。 |
-| `sisyphus` | 西西弗斯主题 — 朴素的灰度与持久性 | `Sisyphus Agent` | 浅灰色配鲜明对比。巨石主题的旋转器（"推石上山"、"重置巨石"、"忍受循环"）。巨石与山丘 ASCII 艺术横幅。 |
-| `charizard` | 火山主题 — 焦橙色与余烬色 | `Charizard Agent` | 温暖的焦橙色到余烬色的渐变。火焰主题的旋转器（"进入气流"、"测量燃烧"）。龙形剪影 ASCII 艺术横幅。 |
+| `sisyphus` | 西西弗斯主题 — 朴素灰度与持久性 | `Sisyphus Agent` | 浅灰色配鲜明对比。巨石主题的旋转器（"推石上山"、"重置巨石"、"忍受循环"）。巨石与山丘 ASCII 艺术横幅。 |
+| `charizard` | 火山主题 — 焦橙色与余烬色 | `Charizard Agent` | 温暖的焦橙色到余烬色的渐变。火焰主题的旋转器（"顺风滑翔"、"测量燃烧"）。龙形剪影 ASCII 艺术横幅。 |
 
 ## 可配置键的完整列表
 
@@ -83,7 +83,7 @@ display:
 | `thinking_verbs` | 字符串列表 | 旋转器消息中显示的动词 | `["forging", "plotting", "hammering plans"]` |
 | `wings` | [左, 右] 对列表 | 旋转器周围的装饰性括号 | `[["⟪⚔", "⚔⟫"], ["⟪▲", "▲⟫"]]` |
 
-当旋转器值为空时（如 `default` 和 `mono`），将使用 `display.py` 中的硬编码默认值。
+当旋转器值为空时（如 `default` 和 `mono` 皮肤），将使用 `display.py` 中的硬编码默认值。
 
 ### 品牌 (`branding:`)
 
@@ -91,21 +91,21 @@ display:
 
 | 键 | 描述 | 默认值 |
 |-----|-------------|---------|
-| `agent_name` | 在横幅标题和状态显示中显示的名称 | `Hermes Agent` |
+| `agent_name` | 横幅标题和状态显示中显示的名称 | `Hermes Agent` |
 | `welcome` | CLI 启动时显示的欢迎信息 | `Welcome to Hermes Agent! Type your message or /help for commands.` |
 | `goodbye` | 退出时显示的信息 | `Goodbye! ⚕` |
 | `response_label` | 响应框标题上的标签 | ` ⚕ Hermes ` |
-| `prompt_symbol` | 用户输入提示前的符号 | `❯ ` |
-| `help_header` | `/help` 命令输出时的标题文本 | `(^_^)? Available Commands` |
+| `prompt_symbol` | 用户输入提示前的符号（裸符号，渲染器会添加尾随空格） | `❯` |
+| `help_header` | `/help` 命令输出中的标题文本 | `(^_^)? Available Commands` |
 
 ### 其他顶级键
 
 | 键 | 类型 | 描述 | 默认值 |
 |-----|------|-------------|---------|
 | `tool_prefix` | 字符串 | CLI 中工具输出行前的前缀字符 | `┊` |
-| `tool_emojis` | 字典 | 针对旋转器和进度的每个工具的表情符号覆盖 (`{工具名: 表情符号}`) | `{}` |
-| `banner_logo` | 字符串 | 富标记 ASCII 艺术徽标（替换默认的 HERMES_AGENT 横幅） | `""` |
-| `banner_hero` | 字符串 | 富标记英雄艺术（替换默认的蛇杖艺术） | `""` |
+| `tool_emojis` | 字典 | 用于旋转器和进度的按工具表情符号覆盖 (`{工具名: 表情符号}`) | `{}` |
+| `banner_logo` | 字符串 | Rich 标记的 ASCII 艺术徽标（替换默认的 HERMES_AGENT 横幅） | `""` |
+| `banner_hero` | 字符串 | Rich 标记的英雄艺术图（替换默认的双蛇杖艺术图） | `""` |
 
 ## 自定义皮肤
 
@@ -119,7 +119,7 @@ display:
 # 缺失的值会自动从 'default' 皮肤继承。
 
 name: mytheme
-description: 我的自定义主题
+description: My custom theme
 
 colors:
   banner_border: "#CD7F32"
@@ -167,12 +167,12 @@ branding:
   welcome: "Welcome to My Agent! Type your message or /help for commands."
   goodbye: "See you later! ⚡"
   response_label: " ⚡ My Agent "
-  prompt_symbol: "⚡ ❯ "
+  prompt_symbol: "⚡"
   help_header: "(⚡) Available Commands"
 
 tool_prefix: "┊"
 
-# 每个工具的表情符号覆盖（可选）
+# 按工具表情符号覆盖（可选）
 tool_emojis:
   terminal: "⚔"
   web_search: "🔮"
@@ -185,13 +185,13 @@ tool_emojis:
 #   [#FFD700]  Custom art here  [/]
 ```
 
-### 最小化自定义皮肤示例
+### 最小自定义皮肤示例
 
-由于所有内容都从 `default` 继承，一个最小化的皮肤只需更改不同的部分：
+由于所有内容都从 `default` 继承，一个最小的皮肤只需更改不同的部分：
 
 ```yaml
 name: cyberpunk
-description: 霓虹终端主题
+description: Neon terminal theme
 
 colors:
   banner_border: "#FF00FF"
@@ -212,7 +212,7 @@ tool_prefix: "▏"
 
 ## Hermes Mod — 可视化皮肤编辑器
 
-[Hermes Mod](https://github.com/cocktailpeanut/hermes-mod) 是一个社区构建的 Web UI，用于可视化创建和管理皮肤。无需手动编写 YAML，您将获得一个带有实时预览的点按式编辑器。
+[Hermes Mod](https://github.com/cocktailpeanut/hermes-mod) 是一个社区构建的 Web UI，用于可视化创建和管理皮肤。您无需手动编写 YAML，而是获得一个带有实时预览的点按式编辑器。
 
 ![Hermes Mod 皮肤编辑器](https://raw.githubusercontent.com/cocktailpeanut/hermes-mod/master/nous.png)
 
@@ -228,17 +228,17 @@ tool_prefix: "▏"
 
 ### 安装
 
-**选项 1 — Pinokio (一键安装):**
+**选项 1 — Pinokio（一键安装）：**
 
 在 [pinokio.computer](https://pinokio.computer) 上找到它并一键安装。
 
-**选项 2 — npx (终端中最快):**
+**选项 2 — npx（从终端最快）：**
 
 ```bash
 npx -y hermes-mod
 ```
 
-**选项 3 — 手动安装:**
+**选项 3 — 手动安装：**
 
 ```bash
 git clone https://github.com/cocktailpeanut/hermes-mod.git
@@ -252,7 +252,7 @@ npm start
 1.  启动应用（通过 Pinokio 或终端）。
 2.  打开 **Skin Studio**。
 3.  选择一个内置或自定义皮肤进行编辑。
-4.  从文本生成徽标和/或上传图像作为英雄艺术。选择渲染风格和宽度。
+4.  从文本生成徽标和/或上传图像作为英雄艺术图。选择渲染风格和宽度。
 5.  编辑颜色、旋转器、品牌和其他字段。
 6.  点击 **Save** 将皮肤 YAML 写入 `~/.hermes/skins/`。
 7.  点击 **Activate** 将其设置为当前皮肤（更新 `config.yaml` 中的 `display.skin`）。
