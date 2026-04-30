@@ -1,14 +1,14 @@
 ---
-title: "YouTube 内容"
-sidebar_label: "YouTube 内容"
-description: "获取 YouTube 视频字幕，并将其转换为结构化内容（章节、摘要、推文串、博客文章）"
+title: "Youtube Content — YouTube 转录文本转摘要、推文串、博客文章"
+sidebar_label: "Youtube Content"
+description: "YouTube 转录文本转摘要、推文串、博客文章"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# YouTube 内容
+# Youtube Content
 
-获取 YouTube 视频字幕，并将其转换为结构化内容（章节、摘要、推文串、博客文章）。当用户分享 YouTube URL 或视频链接、要求总结视频、请求字幕，或希望从任何 YouTube 视频中提取并重新格式化内容时使用。
+将 YouTube 转录文本转换为摘要、推文串、博客文章。
 
 ## 技能元数据
 
@@ -25,7 +25,11 @@ description: "获取 YouTube 视频字幕，并将其转换为结构化内容（
 
 # YouTube 内容工具
 
-从 YouTube 视频中提取字幕并将其转换为有用的格式。
+## 使用时机
+
+当用户分享 YouTube URL 或视频链接、要求总结视频、请求转录文本，或希望从任何 YouTube 视频中提取并重新格式化内容时使用。将转录文本转换为结构化内容（章节、摘要、推文串、博客文章）。
+
+从 YouTube 视频中提取转录文本并将其转换为有用的格式。
 
 ## 设置
 
@@ -47,13 +51,13 @@ python3 SKILL_DIR/scripts/fetch_transcript.py "URL" --text-only
 # 带时间戳
 python3 SKILL_DIR/scripts/fetch_transcript.py "URL" --timestamps
 
-# 指定语言及备用语言链
+# 特定语言，带后备链
 python3 SKILL_DIR/scripts/fetch_transcript.py "URL" --language tr,en
 ```
 
 ## 输出格式
 
-获取字幕后，根据用户要求进行格式化：
+获取转录文本后，根据用户要求进行格式化：
 
 - **章节**：按主题转换分组，输出带时间戳的章节列表
 - **摘要**：整个视频的简洁 5-10 句概述
@@ -72,17 +76,17 @@ python3 SKILL_DIR/scripts/fetch_transcript.py "URL" --language tr,en
 31:55 问答 — 关于可扩展性和后续步骤的观众提问
 ```
 
-## 工作流
+## 工作流程
 
-1.  **获取**：使用辅助脚本配合 `--text-only --timestamps` 参数获取字幕。
-2.  **验证**：确认输出非空且为预期语言。如果为空，则重试不带 `--language` 参数以获取任何可用的字幕。如果仍然为空，则告知用户该视频可能禁用了字幕。
-3.  **分块（如需要）**：如果字幕超过约 50K 字符，则分割成重叠的块（约 40K 字符，重叠 2K 字符），并在合并前总结每个块。
+1.  **获取**：使用辅助脚本配合 `--text-only --timestamps` 参数获取转录文本。
+2.  **验证**：确认输出非空且为预期语言。如果为空，则重试时不带 `--language` 参数以获取任何可用的转录文本。如果仍然为空，则告知用户该视频可能已禁用转录。
+3.  **分块（如需要）**：如果转录文本超过约 50K 字符，则将其分割成重叠的块（约 40K 字符，重叠 2K 字符），并在合并前总结每个块。
 4.  **转换**：转换为请求的输出格式。如果用户未指定格式，则默认为摘要。
-5.  **验证**：重新阅读转换后的输出，检查连贯性、正确的时间戳和完整性，然后再呈现。
+5.  **验证**：在呈现前重新阅读转换后的输出，检查连贯性、时间戳正确性和完整性。
 
 ## 错误处理
 
-- **字幕被禁用**：告知用户；建议他们检查视频页面上是否有可用的字幕。
-- **私密/不可用视频**：转达错误并请用户验证 URL。
-- **无匹配语言**：重试不带 `--language` 参数以获取任何可用的字幕，然后向用户说明实际语言。
-- **依赖缺失**：运行 `pip install youtube-transcript-api` 并重试。
+- **转录功能已禁用**：告知用户；建议他们检查视频页面上是否有可用的字幕。
+- **视频私密/不可用**：转达错误信息并请用户验证 URL。
+- **无匹配语言**：重试时不带 `--language` 参数以获取任何可用的转录文本，然后向用户说明实际语言。
+- **依赖项缺失**：运行 `pip install youtube-transcript-api` 并重试。

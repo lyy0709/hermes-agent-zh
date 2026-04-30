@@ -1,14 +1,14 @@
 ---
-title: "Apple Notes — 通过 macOS 上的 memo CLI 管理 Apple Notes（创建、查看、搜索、编辑）"
+title: "Apple Notes — 通过 memo CLI 管理 Apple Notes：创建、搜索、编辑"
 sidebar_label: "Apple Notes"
-description: "通过 macOS 上的 memo CLI 管理 Apple Notes（创建、查看、搜索、编辑）"
+description: "通过 memo CLI 管理 Apple Notes：创建、搜索、编辑"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Apple Notes
 
-通过 macOS 上的 memo CLI 管理 Apple Notes（创建、查看、搜索、编辑）。
+通过 memo CLI 管理 Apple Notes：创建、搜索、编辑。
 
 ## 技能元数据
 

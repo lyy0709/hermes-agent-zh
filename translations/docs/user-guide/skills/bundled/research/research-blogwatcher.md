@@ -1,14 +1,14 @@
 ---
-title: "Blogwatcher — 使用 blogwatcher-cli 工具监控博客和 RSS/Atom 源更新"
+title: "Blogwatcher — 通过 blogwatcher-cli 工具监控博客和 RSS/Atom 订阅源"
 sidebar_label: "Blogwatcher"
-description: "使用 blogwatcher-cli 工具监控博客和 RSS/Atom 源更新"
+description: "通过 blogwatcher-cli 工具监控博客和 RSS/Atom 订阅源"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Blogwatcher
 
-使用 blogwatcher-cli 工具监控博客和 RSS/Atom 源更新。添加博客、扫描新文章、跟踪阅读状态并按类别筛选。
+通过 `blogwatcher-cli` 工具监控博客和 RSS/Atom 订阅源。
 
 ## 技能元数据
 
@@ -29,7 +29,7 @@ description: "使用 blogwatcher-cli 工具监控博客和 RSS/Atom 源更新"
 
 # Blogwatcher
 
-使用 `blogwatcher-cli` 工具跟踪博客和 RSS/Atom 源更新。支持自动源发现、HTML 抓取回退、OPML 导入以及已读/未读文章管理。
+使用 `blogwatcher-cli` 工具跟踪博客和 RSS/Atom 订阅源的更新。支持自动发现订阅源、HTML 抓取回退、OPML 导入以及已读/未读文章管理。
 
 ## 安装
 
@@ -46,7 +46,7 @@ description: "使用 blogwatcher-cli 工具监控博客和 RSS/Atom 源更新"
 
 ### 使用持久化存储的 Docker
 
-默认情况下，数据库位于 `~/.blogwatcher-cli/blogwatcher-cli.db`。在 Docker 中，容器重启后此数据会丢失。使用 `BLOGWATCHER_DB` 或卷挂载来持久化它：
+默认情况下，数据库位于 `~/.blogwatcher-cli/blogwatcher-cli.db`。在 Docker 中，容器重启后此数据会丢失。使用 `BLOGWATCHER_DB` 或卷挂载来持久化数据：
 
 ```bash
 # 命名卷（最简单）
@@ -71,8 +71,8 @@ mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
 ### 管理博客
 
 - 添加博客：`blogwatcher-cli add "My Blog" https://example.com`
-- 添加时指定源：`blogwatcher-cli add "My Blog" https://example.com --feed-url https://example.com/feed.xml`
-- 添加时使用 HTML 抓取：`blogwatcher-cli add "My Blog" https://example.com --scrape-selector "article h2 a"`
+- 添加并指定订阅源：`blogwatcher-cli add "My Blog" https://example.com --feed-url https://example.com/feed.xml`
+- 添加并使用 HTML 抓取：`blogwatcher-cli add "My Blog" https://example.com --scrape-selector "article h2 a"`
 - 列出跟踪的博客：`blogwatcher-cli blogs`
 - 移除博客：`blogwatcher-cli remove "My Blog" --yes`
 - 从 OPML 导入：`blogwatcher-cli import subscriptions.opml`
@@ -87,8 +87,8 @@ mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
 - 按类别筛选：`blogwatcher-cli articles --category "Engineering"`
 - 标记文章为已读：`blogwatcher-cli read 1`
 - 标记文章为未读：`blogwatcher-cli unread 1`
-- 标记全部为已读：`blogwatcher-cli read-all`
-- 标记某个博客的全部文章为已读：`blogwatcher-cli read-all --blog "My Blog" --yes`
+- 标记所有文章为已读：`blogwatcher-cli read-all`
+- 标记某个博客的所有文章为已读：`blogwatcher-cli read-all --blog "My Blog" --yes`
 
 ## 环境变量
 
@@ -106,46 +106,46 @@ mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
 
 ```
 $ blogwatcher-cli blogs
-Tracked blogs (1):
+跟踪的博客 (1):
 
   xkcd
     URL: https://xkcd.com
     Feed: https://xkcd.com/atom.xml
-    Last scanned: 2026-04-03 10:30
+    最后扫描时间: 2026-04-03 10:30
 ```
 
 ```
 $ blogwatcher-cli scan
-Scanning 1 blog(s)...
+正在扫描 1 个博客...
 
   xkcd
-    Source: RSS | Found: 4 | New: 4
+    来源: RSS | 找到: 4 | 新文章: 4
 
-Found 4 new article(s) total!
+总共找到 4 篇新文章！
 ```
 
 ```
 $ blogwatcher-cli articles
-Unread articles (2):
+未读文章 (2):
 
   [1] [new] Barrel - Part 13
-       Blog: xkcd
+       博客: xkcd
        URL: https://xkcd.com/3095/
-       Published: 2026-04-02
-       Categories: Comics, Science
+       发布日期: 2026-04-02
+       类别: Comics, Science
 
   [2] [new] Volcano Fact
-       Blog: xkcd
+       博客: xkcd
        URL: https://xkcd.com/3094/
-       Published: 2026-04-01
-       Categories: Comics
+       发布日期: 2026-04-01
+       类别: Comics
 ```
 
-## 注意事项
+## 说明
 
-- 当未提供 `--feed-url` 时，会自动从博客主页发现 RSS/Atom 源。
+- 当未提供 `--feed-url` 时，会自动从博客主页发现 RSS/Atom 订阅源。
 - 如果 RSS 失败且配置了 `--scrape-selector`，则回退到 HTML 抓取。
-- 来自 RSS/Atom 源的类别会被存储，并可用于筛选文章。
+- 来自 RSS/Atom 订阅源的类别会被存储，并可用于筛选文章。
 - 从 Feedly、Inoreader、NewsBlur 等导出的 OPML 文件批量导入博客。
 - 数据库默认存储在 `~/.blogwatcher-cli/blogwatcher-cli.db`（可通过 `--db` 或 `BLOGWATCHER_DB` 覆盖）。
 - 使用 `blogwatcher-cli <command> --help` 来发现所有标志和选项。

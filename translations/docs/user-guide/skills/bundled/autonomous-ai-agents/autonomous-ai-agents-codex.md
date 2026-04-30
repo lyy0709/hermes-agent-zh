@@ -1,14 +1,14 @@
 ---
-title: "Codex — 将编码任务委派给 OpenAI Codex CLI Agent"
+title: "Codex — 将编码任务委派给 OpenAI Codex CLI（功能、PR）"
 sidebar_label: "Codex"
-description: "将编码任务委派给 OpenAI Codex CLI Agent"
+description: "将编码任务委派给 OpenAI Codex CLI（功能、PR）"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Codex
 
-将编码任务委派给 OpenAI Codex CLI Agent。用于构建功能、重构、PR 审查和批量问题修复。需要安装 codex CLI 并位于 git 仓库中。
+将编码任务委派给 OpenAI Codex CLI（功能、PR）。
 
 ## 技能元数据
 
@@ -32,12 +32,21 @@ description: "将编码任务委派给 OpenAI Codex CLI Agent"
 
 通过 Hermes 终端将编码任务委派给 [Codex](https://github.com/openai/codex)。Codex 是 OpenAI 的自主编码 Agent CLI。
 
+## 使用场景
+
+- 构建功能
+- 重构代码
+- PR 审查
+- 批量问题修复
+
+需要安装 codex CLI 并位于 git 仓库中。
+
 ## 先决条件
 
--   已安装 Codex：`npm install -g @openai/codex`
--   已配置 OpenAI API 密钥
--   **必须在 git 仓库内运行** — Codex 拒绝在仓库外运行
--   在终端调用中使用 `pty=true` — Codex 是一个交互式终端应用程序
+- 已安装 Codex：`npm install -g @openai/codex`
+- 已配置 OpenAI API 密钥
+- **必须在 git 仓库内运行** — Codex 拒绝在仓库外运行
+- 在终端调用中使用 `pty=true` — Codex 是一个交互式终端应用程序
 
 ## 一次性任务
 
@@ -50,10 +59,10 @@ terminal(command="codex exec 'Add dark mode toggle to settings'", workdir="~/pro
 terminal(command="cd $(mktemp -d) && git init && codex exec 'Build a snake game in Python'", pty=true)
 ```
 
-## 后台模式（长任务）
+## 后台模式（长时任务）
 
 ```
-# 使用 PTY 在后台启动
+# 在后台启动并启用 PTY
 terminal(command="codex exec --full-auto 'Refactor the auth module'", workdir="~/project", background=true, pty=true)
 # 返回 session_id
 
@@ -122,10 +131,10 @@ terminal(command="gh pr comment 86 --body '<review>'", workdir="~/project")
 
 ## 规则
 
-1.  **始终使用 `pty=true`** — Codex 是一个交互式终端应用程序，没有 PTY 会挂起
-2.  **需要 Git 仓库** — Codex 不会在 git 目录外运行。对于临时工作，使用 `mktemp -d && git init`
-3.  **一次性任务使用 `exec`** — `codex exec "prompt"` 运行并干净退出
-4.  **构建时使用 `--full-auto`** — 自动批准沙盒内的更改
-5.  **长任务使用后台模式** — 使用 `background=true` 并通过 `process` 工具监控
-6.  **不要干扰** — 使用 `poll`/`log` 监控，对长时间运行的任务保持耐心
-7.  **可以并行** — 对于批量工作，可以同时运行多个 Codex 进程
+1. **始终使用 `pty=true`** — Codex 是一个交互式终端应用程序，没有 PTY 会挂起
+2. **需要 Git 仓库** — Codex 不会在 git 目录外运行。对于临时工作，使用 `mktemp -d && git init`
+3. **一次性任务使用 `exec`** — `codex exec "prompt"` 运行并干净退出
+4. **构建时使用 `--full-auto`** — 自动批准沙盒内的更改
+5. **长时任务使用后台模式** — 使用 `background=true` 并通过 `process` 工具监控
+6. **不要干扰** — 使用 `poll`/`log` 监控，对长时任务保持耐心
+7. **可以并行运行** — 对于批量工作，可以同时运行多个 Codex 进程

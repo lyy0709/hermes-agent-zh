@@ -1,14 +1,14 @@
 ---
-title: "Gif Search — 使用 curl 从 Tenor 搜索和下载 GIF"
+title: "Gif Search — 通过 curl + jq 从 Tenor 搜索/下载 GIF"
 sidebar_label: "Gif Search"
-description: "使用 curl 从 Tenor 搜索和下载 GIF"
+description: "通过 curl + jq 从 Tenor 搜索/下载 GIF"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Gif Search
 
-使用 curl 从 Tenor 搜索和下载 GIF。除了 curl 和 jq 外无需其他依赖。适用于查找反应 GIF、创建视觉内容以及在聊天中发送 GIF。
+通过 curl + jq 从 Tenor 搜索/下载 GIF。
 
 ## 技能元数据
 
@@ -29,11 +29,15 @@ description: "使用 curl 从 Tenor 搜索和下载 GIF"
 
 # GIF 搜索 (Tenor API)
 
-使用 curl 直接通过 Tenor API 搜索和下载 GIF。无需额外工具。
+使用 curl 通过 Tenor API 直接搜索和下载 GIF。无需额外工具。
+
+## 使用场景
+
+适用于查找表情包 GIF、创建视觉内容以及在聊天中发送 GIF。
 
 ## 设置
 
-在您的环境中设置 Tenor API 密钥（添加到 `~/.hermes/.env`）：
+在您的环境变量中设置 Tenor API 密钥（添加到 `~/.hermes/.env`）：
 
 ```bash
 TENOR_API_KEY=your_key_here
@@ -43,7 +47,7 @@ TENOR_API_KEY=your_key_here
 
 ## 先决条件
 
-- `curl` 和 `jq`（两者在 macOS/Linux 上都是标准的）
+- `curl` 和 `jq`（两者在 macOS/Linux 上都是标准工具）
 - `TENOR_API_KEY` 环境变量
 
 ## 搜索 GIF
@@ -74,10 +78,10 @@ curl -s "https://tenor.googleapis.com/v2/search?q=cat&limit=3&key=${TENOR_API_KE
 
 | 参数 | 描述 |
 |-----------|-------------|
-| `q` | 搜索查询（将空格 URL 编码为 `+`） |
+| `q` | 搜索查询（空格用 `+` URL 编码） |
 | `limit` | 最大结果数（1-50，默认 20） |
 | `key` | API 密钥（来自 `$TENOR_API_KEY` 环境变量） |
-| `media_filter` | 过滤格式：`gif`, `tinygif`, `mp4`, `tinymp4`, `webm` |
+| `media_filter` | 格式过滤器：`gif`, `tinygif`, `mp4`, `tinymp4`, `webm` |
 | `contentfilter` | 安全级别：`off`, `low`, `medium`, `high` |
 | `locale` | 语言：`en_US`, `es`, `fr` 等。 |
 
@@ -85,7 +89,7 @@ curl -s "https://tenor.googleapis.com/v2/search?q=cat&limit=3&key=${TENOR_API_KE
 
 每个结果在 `.media_formats` 下都有多种格式：
 
-| 格式 | 用例 |
+| 格式 | 使用场景 |
 |--------|----------|
 | `gif` | 全质量 GIF |
 | `tinygif` | 小型预览 GIF |
@@ -96,6 +100,6 @@ curl -s "https://tenor.googleapis.com/v2/search?q=cat&limit=3&key=${TENOR_API_KE
 
 ## 注意事项
 
-- 对查询进行 URL 编码：空格为 `+`，特殊字符为 `%XX`
+- 对查询进行 URL 编码：空格用 `+`，特殊字符用 `%XX`
 - 对于在聊天中发送，`tinygif` URL 更轻量
 - GIF URL 可以直接在 markdown 中使用：`![alt](https://github.com/NousResearch/hermes-agent/blob/main/skills/media/gif-search/url)`

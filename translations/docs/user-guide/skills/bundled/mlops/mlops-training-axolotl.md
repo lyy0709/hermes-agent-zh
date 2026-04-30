@@ -1,14 +1,14 @@
 ---
-title: "Axolotl"
+title: "Axolotl — Axolotl: YAML LLM 微调 (LoRA, DPO, GRPO)"
 sidebar_label: "Axolotl"
-description: "使用 Axolotl 微调 LLM 的专家指南 - YAML 配置、100+ 模型、LoRA/QLoRA、DPO/KTO/ORPO/GRPO、多模态支持"
+description: "Axolotl: YAML LLM 微调 (LoRA, DPO, GRPO)"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Axolotl
 
-使用 Axolotl 微调 LLM 的专家指南 - YAML 配置、100+ 模型、LoRA/QLoRA、DPO/KTO/ORPO/GRPO、多模态支持
+Axolotl: YAML LLM 微调 (LoRA, DPO, GRPO)。
 
 ## 技能元数据
 
@@ -30,7 +30,11 @@ description: "使用 Axolotl 微调 LLM 的专家指南 - YAML 配置、100+ 模
 
 # Axolotl 技能
 
-关于 axolotl 开发的全面协助，根据官方文档生成。
+## 内容概述
+
+使用 Axolotl 进行 LLM 微调的专家指导 —— YAML 配置、100+ 模型、LoRA/QLoRA、DPO/KTO/ORPO/GRPO、多模态支持。
+
+关于 axolotl 开发的全面协助，基于官方文档生成。
 
 ## 何时使用此技能
 
@@ -45,13 +49,13 @@ description: "使用 Axolotl 微调 LLM 的专家指南 - YAML 配置、100+ 模
 
 ### 常见模式
 
-**模式 1：** 要验证您的训练任务是否存在可接受的数据传输速度，运行 NCCL 测试可以帮助定位瓶颈，例如：
+**模式 1：** 要验证训练任务是否存在可接受的数据传输速度，运行 NCCL 测试可以帮助定位瓶颈，例如：
 
 ```
 ./build/all_reduce_perf -b 8 -e 128M -f 2 -g 3
 ```
 
-**模式 2：** 在 Axolotl YAML 中配置您的模型以使用 FSDP。例如：
+**模式 2：** 在 Axolotl YAML 中配置模型以使用 FSDP。例如：
 
 ```
 fsdp_version: 2
@@ -63,37 +67,45 @@ fsdp_config:
   reshard_after_forward: true
 ```
 
-**模式 3：** `context_parallel_size` 应该是 GPU 总数的除数。例如：
+**模式 3：** `context_parallel_size` 应是 GPU 总数的除数。例如：
 
 ```
 context_parallel_size
 ```
 
-**模式 4：** 例如：- 使用 8 个 GPU 且无序列并行：每步处理 8 个不同的批次 - 使用 8 个 GPU 且 `context_parallel_size=4`：每步仅处理 2 个不同的批次（每个批次在 4 个 GPU 上拆分） - 如果您的每 GPU `micro_batch_size` 为 2，则全局批次大小从 16 减少到 4
+**模式 4：** 例如：
+- 使用 8 个 GPU 且无序列并行：每步处理 8 个不同的批次
+- 使用 8 个 GPU 且 `context_parallel_size=4`：每步仅处理 2 个不同的批次（每个批次在 4 个 GPU 上拆分）
+- 如果每个 GPU 的 `micro_batch_size` 为 2，则全局批次大小从 16 减少到 4
 
 ```
 context_parallel_size=4
 ```
 
-**模式 5：** 在配置中设置 `save_compressed: true` 可以启用以压缩格式保存模型，这可以：- 将磁盘空间使用量减少约 40% - 保持与 vLLM 的兼容性以进行加速推理 - 保持与 llmcompressor 的兼容性以进行进一步优化（例如：量化）
+**模式 5：** 在配置中设置 `save_compressed: true` 可启用以压缩格式保存模型，这可以：
+- 将磁盘空间使用量减少约 40%
+- 保持与 vLLM 的兼容性以进行加速推理
+- 保持与 llmcompressor 的兼容性以进行进一步优化（例如：量化）
 
 ```
 save_compressed: true
 ```
 
-**模式 6：** 注意：不必将您的集成放在 `integrations` 文件夹中。它可以位于任何位置，只要它安装在您的 Python 环境的一个包中。请参阅此仓库作为示例：https://github.com/axolotl-ai-cloud/diff-transformer
+**模式 6：** 注意：不必将你的集成放在 `integrations` 文件夹中。它可以位于任何位置，只要它安装在你的 Python 环境的一个包中。请参阅此仓库作为示例：https://github.com/axolotl-ai-cloud/diff-transformer
 
 ```
 integrations
 ```
 
-**模式 7：** 处理单样本和批处理数据。- 单样本：`sample['input_ids']` 是一个 `list[int]` - 批处理数据：`sample['input_ids']` 是一个 `list[list[int]]`
+**模式 7：** 处理单样本和批处理数据。
+- 单样本：`sample['input_ids']` 是 `list[int]`
+- 批处理数据：`sample['input_ids']` 是 `list[list[int]]`
 
 ```
 utils.trainer.drop_long_seq(sample, sequence_len=2048, min_sequence_len=2)
 ```
 
-### 示例代码模式
+### 代码模式示例
 
 **示例 1** (python):
 ```python
@@ -153,7 +165,7 @@ prompt_strategies.input_output.RawInputOutputPrompter()
 从官方来源提取的组织化文档。这些文件包含：
 - 详细解释
 - 带有语言标注的代码示例
-- 指向原始文档的链接
+- 原始文档链接
 - 用于快速导航的目录
 
 ### scripts/
@@ -162,11 +174,11 @@ prompt_strategies.input_output.RawInputOutputPrompter()
 ### assets/
 在此处添加模板、样板文件或示例项目。
 
-## 注意
+## 注意事项
 
 - 此技能是根据官方文档自动生成的
 - 参考文件保留了源文档的结构和示例
-- 代码示例包含语言检测以实现更好的语法高亮
+- 代码示例包含语言检测，以实现更好的语法高亮
 - 快速参考模式是从文档中的常见用法示例中提取的
 
 ## 更新

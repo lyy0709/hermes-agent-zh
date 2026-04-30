@@ -14,7 +14,7 @@ description: "为 Atropos 训练构建、测试和调试 Hermes Agent RL 环境"
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/mlops/hermes-atropos-environments` 安装 |
+| 来源 | 可选 — 通过 `hermes skills install official/mlops/hermes-atropos-environments` 安装 |
 | 路径 | `optional-skills/mlops/hermes-atropos-environments` |
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent |
@@ -25,15 +25,16 @@ description: "为 Atropos 训练构建、测试和调试 Hermes Agent RL 环境"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # Hermes Agent Atropos 执行环境
 
 在 hermes-agent 仓库中构建与 Atropos 训练框架集成的 RL 环境的指南。
 
-## 架构概览
+## 架构概述
 
+<!-- ascii-guard-ignore -->
 ```
 Atropos BaseEnv (atroposlib/envs/base.py)
     └── HermesAgentBaseEnv (environments/hermes_base_env.py)
@@ -44,14 +45,15 @@ Atropos BaseEnv (atroposlib/envs/base.py)
                     仅需实现：setup, get_next_item, format_prompt,
                                     compute_reward, evaluate, wandb_log
 ```
+<!-- ascii-guard-ignore-end -->
 
-Hermes 环境很特殊，因为它们运行的是**支持工具调用的多轮 Agent 循环**——而不仅仅是单轮补全。基础环境处理循环；你实现任务和评分。
+Hermes 环境之所以特殊，是因为它们运行的是**支持工具调用的多轮次 Agent 循环**——而不仅仅是单轮次补全。基础环境处理循环；你实现任务和评分。
 
 ## 文件位置
 
 | 文件 | 用途 |
 |------|---------|
-| `environments/hermes_base_env.py` | 包含 Agent 循环和工具解析的基础类 |
+| `environments/hermes_base_env.py` | 包含 Agent 循环和工具解析的基类 |
 | `environments/agent_loop.py` | `HermesAgentLoop` + `AgentResult` 数据类 |
 | `environments/tool_context.py` | 用于奖励验证的 `ToolContext` |
 | `environments/tool_call_parsers.py` | 阶段 2 工具调用解析器（hermes, mistral 等） |
@@ -59,7 +61,7 @@ Hermes 环境很特殊，因为它们运行的是**支持工具调用的多轮 A
 
 ## 推理设置 — 首先询问用户
 
-**重要提示：** 在运行任何测试、评估或数据生成命令之前，务必先询问用户希望如何处理推理。**不要**假设使用 OpenRouter 或任何特定端点。提供以下选项：
+**重要：** 在运行任何测试、评估或数据生成命令之前，务必先询问用户他们希望如何处理推理。**不要**假设使用 OpenRouter 或任何特定端点。提供以下选项：
 
 1.  **OpenRouter** — 询问他们想使用哪个模型（例如 `anthropic/claude-sonnet-4.5`、`google/gemini-2.5-pro`、`meta-llama/llama-3.3-70b-instruct` 等）。需要在环境中设置 `OPENROUTER_API_KEY`。
 2.  **自托管的 VLLM 端点** — 询问他们的基础 URL（例如 `http://localhost:8000/v1`）和模型名称。设置 `--openai.server_type vllm`。
@@ -68,7 +70,7 @@ Hermes 环境很特殊，因为它们运行的是**支持工具调用的多轮 A
 
 一旦用户告知你他们的设置，在该会话的所有 CLI 命令中使用这些值。示例提示：
 
-> "在运行此命令之前，您希望如何处理推理？
+> "在运行此操作之前，您希望如何处理推理？
 > 1.  OpenRouter（我需要您首选的模型，例如 claude-sonnet-4.5）
 > 2.  自托管的 VLLM 端点（请提供 URL 和模型名称）
 > 3.  其他 OpenAI 兼容的 API（请提供 URL、模型以及任何身份验证信息）
@@ -125,7 +127,7 @@ def format_prompt(self, item: dict) -> str:
 
 ### 4. `compute_reward(item, result, ctx)` — 为 rollout 评分
 
-**关键提示**：`result` 是一个 `AgentResult`，**不是**字典。它具有以下属性：
+**关键：** `result` 是一个 `AgentResult`，**不是**字典。它具有以下属性：
 - `result.messages` — 消息字典列表（OpenAI 格式）
 - `result.turns_used` — 进行的 LLM 调用次数
 - `result.finished_naturally` — 如果模型自愿停止则为 True
@@ -163,7 +165,7 @@ return 1.0 if result["exit_code"] == 0 else 0.0
 ### 5. `evaluate()` — 使用完整 Agent 循环的定期评估
 
 **必须使用包含工具的完整 Agent 循环**，而不是单轮 chat_completion。
-hermes-agent 执行环境的重点在于代理式评估：
+hermes-agent 执行环境的核心就是代理式评估：
 
 ```python
 async def evaluate(self, *args, **kwargs) -> None:
@@ -188,7 +190,7 @@ async def evaluate(self, *args, **kwargs) -> None:
             valid_tool_names=valid_names,
             max_turns=self.config.max_agent_turns,
             task_id=task_id,
-            temperature=0.0,  # 评估时保持确定性
+            temperature=0.0,  # 评估时使用确定性设置
             max_tokens=self.config.max_token_length,
             extra_body=self.config.extra_body,
         )
@@ -222,7 +224,7 @@ async def wandb_log(self, wandb_metrics=None):
     await super().wandb_log(wandb_metrics)  # 必须调用 super
 ```
 
-**陷阱**：`compute_reward` 会将数据追加到指标缓冲区。在评估期间，这会污染训练指标。需要回滚在评估期间添加到缓冲区的条目。
+**陷阱**：`compute_reward` 会向指标缓冲区追加数据。在评估期间，这会污染训练指标。需要回滚在评估期间添加的缓冲区条目。
 
 ## Config 类
 
@@ -259,11 +261,11 @@ python environments/my_env.py evaluate --env.eval_size 20 \
 
 1.  **AgentResult 有 .messages，没有 .final_response** — 通过反向迭代 reversed(result.messages) 查找最后一个有内容的助手消息来提取最终回复。
 
-2.  **evaluate() 必须使用 HermesAgentLoop，而不是 chat_completion** — 单轮 chat_completion 没有工具。hermes-agent 基准测试的重点在于使用工具的代理式评估。
+2.  **evaluate() 必须使用 HermesAgentLoop，而不是 chat_completion** — 单轮 chat_completion 没有工具。hermes-agent 基准测试的核心就是使用工具的代理式评估。
 
-3.  **不要调用 _llm_judge 两次** — 如果 compute_reward 已经调用了它，请从缓冲区提取分数，而不是在 evaluate() 中单独调用评判器。
+3.  **不要调用 _llm_judge 两次** — 如果 compute_reward 已经调用了它，就从缓冲区提取分数，而不是在 evaluate() 中单独调用评判器。
 
-4.  **评估会污染训练缓冲区** — compute_reward 会将数据追加到指标缓冲区。在评估期间，回滚缓冲区条目以保持训练指标清洁。
+4.  **评估会污染训练缓冲区** — compute_reward 会向指标缓冲区追加数据。在评估期间，回滚缓冲区条目以保持训练指标干净。
 
 5.  **对于 OpenRouter，始终设置 health_check=false** — OpenRouter 没有 /health 端点。
 
@@ -271,7 +273,7 @@ python environments/my_env.py evaluate --env.eval_size 20 \
 
 7.  **default_toolsets 类变量与 enabled_toolsets 配置** — 类变量是一个提示；配置字段才是实际控制工具解析的。
 
-8.  **消息中的工具调用解析** — 工具调用是包含 `{"function": {"name": ..., "arguments": ...}}` 的字典。始终检查 `isinstance(tc, dict)`。
+8.  **消息中的工具调用解析** — 工具调用是带有 `{"function": {"name": ..., "arguments": ...}}` 的字典。始终检查 `isinstance(tc, dict)`。
 9. **ToolContext.cleanup()** — 始终在 finally 块中调用以释放沙盒资源。
 
 10. **server_type 对于外部 API 必须为 "openai"** — 如果没有此设置，Atropos 会假定为本地 VLLM 服务器。
@@ -281,9 +283,9 @@ python environments/my_env.py evaluate --env.eval_size 20 \
 ## 奖励函数模式
 
 ### LLM 评判（用于开放式任务）
-使用 `self.server.chat_completion()` 配合评分提示词。解析 JSON 响应以获取浮点数分数。当评判调用失败时，始终包含一个启发式后备方案（关键词重叠）。
+使用 `self.server.chat_completion()` 配合评分提示词。解析 JSON 响应以获取分数浮点数。当评判调用失败时，始终包含一个启发式后备方案（关键词重叠）。
 
-### 二进制验证（用于代码/终端任务）
+### 二元验证（用于代码/终端任务）
 使用 `ctx.terminal("pytest test.py -q")` 在 Agent 的沙盒中运行测试。通过返回 1.0，失败返回 0.0。
 
 ### 多信号（组合多个指标）
@@ -309,7 +311,7 @@ class MyEnv(HermesAgentBaseEnv):
     async def setup(self): ...         # 加载数据集 + 训练/评估分割
     async def get_next_item(self): ... # 循环遍历训练项目
     def format_prompt(self, item): ... # 项目 → 用户消息字符串
-    async def compute_reward(self, item, result, ctx): ...  # 为 rollout 评分
+    async def compute_reward(self, item, result, ctx): ...  # 评分 rollout
     async def evaluate(self, *args, **kwargs): ...  # 完整的 Agent 循环评估
     async def wandb_log(self, metrics=None): ...    # 自定义指标 + super()
 

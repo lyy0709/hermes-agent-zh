@@ -1,14 +1,14 @@
 ---
-title: "GitHub 仓库管理 — 克隆、创建、分支、配置和管理 GitHub 仓库"
+title: "GitHub 仓库管理 — 克隆/创建/分叉仓库；管理远程仓库、发布"
 sidebar_label: "GitHub 仓库管理"
-description: "克隆、创建、分支、配置和管理 GitHub 仓库"
+description: "克隆/创建/分叉仓库；管理远程仓库、发布"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # GitHub 仓库管理
 
-克隆、创建、分支、配置和管理 GitHub 仓库。管理远程仓库、密钥、发布和工作流。使用 gh CLI 或回退到通过 curl 使用 git + GitHub REST API。
+克隆/创建/分叉仓库；管理远程仓库、发布。
 
 ## 技能元数据
 
@@ -25,12 +25,12 @@ description: "克隆、创建、分支、配置和管理 GitHub 仓库"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # GitHub 仓库管理
 
-创建、克隆、分支、配置和管理 GitHub 仓库。每个部分先展示 `gh` 命令，然后是 `git` + `curl` 回退方案。
+创建、克隆、分叉、配置和管理 GitHub 仓库。每个部分先展示 `gh` 命令，然后是 `git` + `curl` 的备用方案。
 
 ## 先决条件
 
@@ -60,7 +60,7 @@ else
 fi
 ```
 
-如果你已经在一个仓库内：
+如果你已经在某个仓库内：
 
 ```bash
 REMOTE_URL=$(git remote get-url origin)
@@ -104,7 +104,7 @@ gh repo clone owner/repo-name -- --depth 1
 **使用 gh：**
 
 ```bash
-# 创建一个公共仓库并克隆它
+# 创建公共仓库并克隆它
 gh repo create my-new-project --public --clone
 
 # 私有仓库，带描述和许可证
@@ -172,7 +172,7 @@ curl -s -X POST \
   -d '{"owner": "'"$GH_USER"'", "name": "my-new-app", "private": false}'
 ```
 
-## 3. 分支仓库
+## 3. 分叉仓库
 
 **使用 gh：**
 
@@ -183,7 +183,7 @@ gh repo fork owner/repo-name --clone
 **使用 git + curl：**
 
 ```bash
-# 通过 API 创建分支
+# 通过 API 创建分叉
 curl -s -X POST \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/owner/repo-name/forks
@@ -197,7 +197,7 @@ cd repo-name
 git remote add upstream https://github.com/owner/repo-name.git
 ```
 
-### 保持分支同步
+### 保持分叉同步
 
 ```bash
 # 纯 git — 适用于所有情况
@@ -259,7 +259,7 @@ for r in json.load(sys.stdin)['items']:
 ```
 ## 5. 仓库设置
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh repo edit --description "Updated description" --visibility public
@@ -269,7 +269,7 @@ gh repo edit --add-topic "machine-learning,python"
 gh repo edit --enable-auto-merge
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 curl -s -X PATCH \
@@ -317,7 +317,7 @@ curl -s -X PUT \
 
 ## 7. 密钥管理 (GitHub Actions)
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh secret set API_KEY --body "your-secret-value"
@@ -326,7 +326,7 @@ gh secret list
 gh secret delete API_KEY
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 通过 API 设置密钥需要使用仓库的公钥进行加密，过程更复杂：
 
@@ -371,11 +371,11 @@ for s in json.load(sys.stdin)['secrets']:
     print(f\"  {s['name']:30}  updated: {s['updated_at']}\")"
 ```
 
-注意：对于密钥管理，`gh secret set` 要简单得多。如果需要设置密钥而 `gh` 不可用，建议仅为该操作安装它。
+注意：对于密钥管理，`gh secret set` 要简单得多。如果需要设置密钥且 `gh` 不可用，建议仅为该操作安装它。
 
 ## 8. 发布
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh release create v1.0.0 --title "v1.0.0" --generate-notes
@@ -385,7 +385,7 @@ gh release list
 gh release download v1.0.0 --dir ./downloads
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 # 创建发布
@@ -422,7 +422,7 @@ curl -s -X POST \
 
 ## 9. GitHub Actions 工作流
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh workflow list
@@ -435,7 +435,7 @@ gh workflow run ci.yml --ref main
 gh workflow run deploy.yml -f environment=staging
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 # 列出工作流
@@ -447,7 +447,7 @@ import sys, json
 for w in json.load(sys.stdin)['workflows']:
     print(f\"  {w['id']:10}  {w['name']:30}  {w['state']}\")"
 
-# 列出最近的运行记录
+# 列出最近的运行
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/repos/$OWNER/$REPO/actions/runs?per_page=10" \
@@ -481,7 +481,7 @@ curl -s -X POST \
   https://api.github.com/repos/$OWNER/$REPO/actions/workflows/$WORKFLOW_ID/dispatches \
   -d '{"ref": "main", "inputs": {"environment": "staging"}}'
 ```
-## 10. Gist
+## 10. Gist 代码片段
 
 **使用 gh：**
 

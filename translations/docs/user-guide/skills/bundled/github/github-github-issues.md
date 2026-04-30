@@ -1,14 +1,14 @@
 ---
-title: "GitHub Issues — 创建、管理、分类和关闭 GitHub Issues"
+title: "GitHub Issues — 通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues"
 sidebar_label: "GitHub Issues"
-description: "创建、管理、分类和关闭 GitHub Issues"
+description: "通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # GitHub Issues
 
-创建、管理、分类和关闭 GitHub Issues。搜索现有 Issues、添加标签、分配人员并链接到 PR。可与 gh CLI 配合使用，或通过 curl 回退到 git + GitHub REST API。
+通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues。
 
 ## 技能元数据
 
@@ -30,12 +30,12 @@ description: "创建、管理、分类和关闭 GitHub Issues"
 
 # GitHub Issues 管理
 
-创建、搜索、分类和管理 GitHub Issues。每个部分先展示 `gh` 命令，然后是 `curl` 回退方案。
+创建、搜索、分类和管理 GitHub Issues。每个部分先展示 `gh` 命令，然后是 `curl` 备用方案。
 
 ## 先决条件
 
 - 已通过 GitHub 认证（参见 `github-auth` 技能）
-- 在具有 GitHub 远程仓库的 git 仓库内，或明确指定仓库
+- 位于具有 GitHub 远程仓库的 git 仓库内，或明确指定仓库
 
 ### 设置
 
@@ -63,7 +63,7 @@ REPO=$(echo "$OWNER_REPO" | cut -d/ -f2)
 
 ## 1. 查看 Issues
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue list
@@ -73,10 +73,10 @@ gh issue list --search "authentication error" --state all
 gh issue view 42
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
-# 列出打开的 Issues
+# 列出打开的 issues
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/repos/$OWNER/$REPO/issues?state=open&per_page=20" \
@@ -97,7 +97,7 @@ for i in json.load(sys.stdin):
     if 'pull_request' not in i:
         print(f\"#{i['number']}  {i['title']}\")"
 
-# 查看特定 Issue
+# 查看特定 issue
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$OWNER/$REPO/issues/42 \
@@ -111,7 +111,7 @@ print(f\"State: {i['state']}  Labels: {labels}  Assignees: {assignees}\")
 print(f\"Author: {i['user']['login']}  Created: {i['created_at']}\")
 print(f\"\n{i['body']}\")"
 
-# 搜索 Issues
+# 搜索 issues
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/search/issues?q=authentication+error+repo:$OWNER/$REPO" \
@@ -123,7 +123,7 @@ for i in json.load(sys.stdin)['items']:
 
 ## 2. 创建 Issues
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue create \
@@ -143,7 +143,7 @@ Respect the ?next= query parameter." \
   --assignee "username"
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 curl -s -X POST \
@@ -198,14 +198,14 @@ curl -s -X POST \
 
 ### 添加/移除标签
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue edit 42 --add-label "priority:high,bug"
 gh issue edit 42 --remove-label "needs-triage"
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 # 添加标签
@@ -231,14 +231,14 @@ for l in json.load(sys.stdin):
 
 ### 分配
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue edit 42 --add-assignee username
 gh issue edit 42 --add-assignee @me
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 curl -s -X POST \
@@ -249,13 +249,13 @@ curl -s -X POST \
 
 ### 评论
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue comment 42 --body "Investigated — root cause is in auth middleware. Working on a fix."
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 curl -s -X POST \
@@ -266,7 +266,7 @@ curl -s -X POST \
 
 ### 关闭和重新打开
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue close 42
@@ -274,7 +274,7 @@ gh issue close 42 --reason "not planned"
 gh issue reopen 42
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 # 关闭
@@ -300,15 +300,15 @@ Fixes #42
 Resolves #42
 ```
 
-从 Issue 创建分支：
+要从 issue 创建分支：
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh issue develop 42 --checkout
 ```
 
-**使用 git（手动等效）：**
+**使用 git（手动等效）:**
 
 ```bash
 git checkout main && git pull origin main
@@ -317,9 +317,9 @@ git checkout -b fix/issue-42-login-redirect
 
 ## 4. Issue 分类工作流
 
-当被要求对 Issues 进行分类时：
+当被要求分类 issues 时：
 
-1. **列出未分类的 Issues：**
+1. **列出未分类的 issues:**
 
 ```bash
 # 使用 gh
@@ -336,30 +336,30 @@ for i in json.load(sys.stdin):
         print(f\"#{i['number']}  {i['title']}\")"
 ```
 
-2. **阅读并分类**每个 Issue（查看详情，理解 bug/功能）
+2. **阅读并分类** 每个 issue（查看详情，理解 bug/功能）
 
 3. **应用标签和优先级**（参见上面的“管理 Issues”）
 
-4. **分配**（如果负责人明确）
+4. **分配** 如果负责人明确
 
-5. **如有需要，添加分类备注评论**
+5. **如有需要，评论分类说明**
 
 ## 5. 批量操作
 
 对于批量操作，将 API 调用与 shell 脚本结合：
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
-# 关闭所有具有特定标签的 Issues
+# 关闭所有具有特定标签的 issues
 gh issue list --label "wontfix" --json number --jq '.[].number' | \
   xargs -I {} gh issue close {} --reason "not planned"
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
-# 列出具有某个标签的 Issue 编号，然后关闭每个
+# 列出具有某个标签的 issue 编号，然后逐个关闭
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/repos/$OWNER/$REPO/issues?labels=wontfix&state=open" \
@@ -377,9 +377,9 @@ curl -s \
 
 | 操作 | gh | curl 端点 |
 |--------|-----|--------------|
-| 列出 Issues | `gh issue list` | `GET /repos/{o}/{r}/issues` |
-| 查看 Issue | `gh issue view N` | `GET /repos/{o}/{r}/issues/N` |
-| 创建 Issue | `gh issue create ...` | `POST /repos/{o}/{r}/issues` |
+| 列出 issues | `gh issue list` | `GET /repos/{o}/{r}/issues` |
+| 查看 issue | `gh issue view N` | `GET /repos/{o}/{r}/issues/N` |
+| 创建 issue | `gh issue create ...` | `POST /repos/{o}/{r}/issues` |
 | 添加标签 | `gh issue edit N --add-label ...` | `POST /repos/{o}/{r}/issues/N/labels` |
 | 分配 | `gh issue edit N --add-assignee ...` | `POST /repos/{o}/{r}/issues/N/assignees` |
 | 评论 | `gh issue comment N --body ...` | `POST /repos/{o}/{r}/issues/N/comments` |

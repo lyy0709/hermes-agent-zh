@@ -1,14 +1,14 @@
 ---
-title: "Segment Anything Model — 用于零样本迁移的图像分割基础模型"
+title: "Segment Anything Model — SAM：通过点、框、掩码实现零样本图像分割"
 sidebar_label: "Segment Anything Model"
-description: "用于零样本迁移的图像分割基础模型"
+description: "SAM：通过点、框、掩码实现零样本图像分割"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Segment Anything Model
 
-用于零样本迁移的图像分割基础模型。当你需要使用点、框或掩码作为提示词来分割图像中的任何对象，或自动生成图像中所有对象的掩码时使用。
+SAM：通过点、框、掩码实现零样本图像分割。
 
 ## 技能元数据
 
@@ -25,7 +25,7 @@ description: "用于零样本迁移的图像分割基础模型"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # Segment Anything Model (SAM)
@@ -36,7 +36,7 @@ description: "用于零样本迁移的图像分割基础模型"
 
 **在以下情况使用 SAM：**
 - 无需特定任务训练即可分割图像中的任何对象
-- 使用点/框提示构建交互式标注工具
+- 构建具有点/框提示的交互式标注工具
 - 为其他视觉模型生成训练数据
 - 需要零样本迁移到新的图像领域
 - 构建对象检测/分割流水线
@@ -44,13 +44,13 @@ description: "用于零样本迁移的图像分割基础模型"
 
 **主要特性：**
 - **零样本分割**：无需微调即可在任何图像领域工作
-- **灵活的提示词**：点、边界框或先前的掩码
+- **灵活的提示**：点、边界框或先前的掩码
 - **自动分割**：自动生成所有对象掩码
 - **高质量**：在来自 1100 万张图像的 11 亿个掩码上训练
 - **多种模型尺寸**：ViT-B（最快）、ViT-L、ViT-H（最准确）
 - **ONNX 导出**：可在浏览器和边缘设备中部署
 
-**改用替代方案的情况：**
+**改用替代方案：**
 - **YOLO/Detectron2**：用于带类别的实时对象检测
 - **Mask2Former**：用于带类别的语义/全景分割
 - **GroundingDINO + SAM**：用于文本提示的分割
@@ -152,16 +152,18 @@ masks = processor.image_processor.post_process_masks(
 ### 模型架构
 
 <!-- ascii-guard-ignore -->
+<!-- ascii-guard-ignore -->
 ```
 SAM 架构：
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  图像编码器     │────▶│  提示词编码器   │────▶│  掩码解码器     │
+│  图像编码器     │────▶│  提示编码器     │────▶│  掩码解码器     │
 │    (ViT)        │     │ (点/框)         │     │ (Transformer)   │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
         │                       │                       │
-   图像嵌入             提示词嵌入                掩码 + IoU
-   (计算一次)           (每个提示词)              预测
+   图像嵌入             提示嵌入                 掩码 + IoU
+   （计算一次）          （每个提示）             预测
 ```
+<!-- ascii-guard-ignore-end -->
 <!-- ascii-guard-ignore-end -->
 
 ### 模型变体
@@ -172,9 +174,9 @@ SAM 架构：
 | ViT-L | `vit_l` | 1.2 GB | 中等 | 良好 |
 | ViT-B | `vit_b` | 375 MB | 最快 | 良好 |
 
-### 提示词类型
+### 提示类型
 
-| 提示词 | 描述 | 使用场景 |
+| 提示 | 描述 | 使用场景 |
 |--------|-------------|----------|
 | 点（前景） | 点击对象 | 单个对象选择 |
 | 点（背景） | 点击对象外部 | 排除区域 |
@@ -183,7 +185,7 @@ SAM 架构：
 
 ## 交互式分割
 
-### 点提示词
+### 点提示
 
 ```python
 # 单个前景点
@@ -196,14 +198,14 @@ masks, scores, logits = predictor.predict(
     multimask_output=True
 )
 
-# 多点（前景 + 背景）
+# 多个点（前景 + 背景）
 input_points = np.array([[500, 375], [600, 400], [450, 300]])
 input_labels = np.array([1, 1, 0])  # 2 个前景，1 个背景
 
 masks, scores, logits = predictor.predict(
     point_coords=input_points,
     point_labels=input_labels,
-    multimask_output=False  # 当提示词明确时输出单个掩码
+    multimask_output=False  # 当提示清晰时输出单个掩码
 )
 ```
 ### 框提示
@@ -240,7 +242,7 @@ masks, scores, logits = predictor.predict(
     multimask_output=True
 )
 
-# 使用额外的点和之前的掩码进行优化
+# 使用之前的掩码和额外的点进行优化
 masks, scores, logits = predictor.predict(
     point_coords=np.array([[500, 375], [550, 400]]),
     point_labels=np.array([1, 0]),  # 添加背景点
@@ -263,9 +265,9 @@ mask_generator = SamAutomaticMaskGenerator(sam)
 masks = mask_generator.generate(image)
 
 # 每个掩码包含：
-# - segmentation: 二值掩码
+# - segmentation: 二进制掩码
 # - bbox: [x, y, w, h]
-# - area: 像素数量
+# - area: 像素计数
 # - predicted_iou: 质量分数
 # - stability_score: 鲁棒性分数
 # - point_coords: 生成点
@@ -445,9 +447,9 @@ masks, scores, _ = predictor.predict(
 ```python
 # SamAutomaticMaskGenerator 输出
 {
-    "segmentation": np.ndarray,  # H×W 二值掩码
+    "segmentation": np.ndarray,  # H×W 二进制掩码
     "bbox": [x, y, w, h],        # 边界框
-    "area": int,                 # 像素数量
+    "area": int,                 # 像素计数
     "predicted_iou": float,      # 0-1 质量分数
     "stability_score": float,    # 0-1 鲁棒性分数
     "crop_box": [x, y, w, h],    # 生成裁剪区域
@@ -473,7 +475,7 @@ decoded_mask = mask_utils.decode(rle)
 
 ```python
 # 在 VRAM 有限的情况下使用较小的模型
-sam = sam_model_registry["vit_b"](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/models/segment-anything/checkpoint="sam_vit_b_01ec64.pth")
+sam = sam_model_registry["vit_b"](https://github.com/NusResearch/hermes-agent/blob/main/skills/mlops/models/segment-anything/checkpoint="sam_vit_b_01ec64.pth")
 
 # 分批处理图像
 # 在大批次之间清空 CUDA 缓存
@@ -493,7 +495,7 @@ mask_generator = SamAutomaticMaskGenerator(
 )
 
 # 部署时使用 ONNX
-# 使用 --return-single-mask 导出以加速推理
+# 使用 --return-single-mask 导出以获得更快的推理速度
 ```
 
 ## 常见问题
@@ -502,9 +504,9 @@ mask_generator = SamAutomaticMaskGenerator(
 |-------|----------|
 | 内存不足 | 使用 ViT-B 模型，减小图像尺寸 |
 | 推理速度慢 | 使用 ViT-B 模型，减少 `points_per_side` |
-| 掩码质量差 | 尝试不同的提示词，结合框和点使用 |
+| 掩码质量差 | 尝试不同的提示词，使用框 + 点 |
 | 边缘伪影 | 使用 `stability_score` 过滤 |
-| 漏掉小物体 | 增加 `points_per_side` |
+| 小物体被遗漏 | 增加 `points_per_side` |
 
 ## 参考文档
 

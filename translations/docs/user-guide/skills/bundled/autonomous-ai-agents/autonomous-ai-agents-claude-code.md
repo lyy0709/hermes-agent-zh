@@ -1,14 +1,14 @@
 ---
-title: "Claude Code — 将编码任务委派给 Claude Code（Anthropic 的 CLI Agent）"
+title: "Claude Code — 将编码任务委派给 Claude Code CLI（功能、PR）"
 sidebar_label: "Claude Code"
-description: "将编码任务委派给 Claude Code（Anthropic 的 CLI Agent）"
+description: "将编码任务委派给 Claude Code CLI（功能、PR）"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Claude Code
 
-将编码任务委派给 Claude Code（Anthropic 的 CLI Agent）。用于构建功能、重构、PR 审查和迭代式编码。需要安装 claude CLI。
+将编码任务委派给 Claude Code CLI（功能、PR）。
 
 ## 技能元数据
 
@@ -35,7 +35,7 @@ description: "将编码任务委派给 Claude Code（Anthropic 的 CLI Agent）"
 ## 先决条件
 
 - **安装：** `npm install -g @anthropic-ai/claude-code`
-- **认证：** 运行一次 `claude` 以登录（Pro/Max 用户使用浏览器 OAuth，或设置 `ANTHROPIC_API_KEY`）
+- **认证：** 运行一次 `claude` 以登录（Pro/Max 使用浏览器 OAuth，或设置 `ANTHROPIC_API_KEY`）
 - **控制台认证：** `claude auth login --console` 用于 API 密钥计费
 - **SSO 认证：** `claude auth login --sso` 用于企业版
 - **检查状态：** `claude auth status`（JSON）或 `claude auth status --text`（人类可读）
@@ -56,10 +56,10 @@ terminal(command="claude -p '为 src/ 中的所有 API 调用添加错误处理'
 ```
 
 **何时使用打印模式：**
-- 一次性编码任务（修复 bug、添加功能、重构）
+- 一次性编码任务（修复错误、添加功能、重构）
 - CI/CD 自动化和脚本编写
 - 使用 `--json-schema` 进行结构化数据提取
-- 管道输入处理（`cat file | claude -p "分析此文件"`）
+- 管道输入处理（`cat file | claude -p "分析此内容"`）
 - 任何不需要多轮对话的任务
 
 **打印模式跳过所有交互式对话框** — 没有工作区信任提示，没有权限确认。这使其非常适合自动化。
@@ -76,14 +76,14 @@ terminal(command="tmux new-session -d -s claude-work -x 140 -y 40")
 terminal(command="tmux send-keys -t claude-work 'cd /path/to/project && claude' Enter")
 
 # 等待启动，然后发送您的任务
-# （欢迎屏幕后大约等待 3-5 秒）
+# （等待约 3-5 秒以显示欢迎屏幕）
 terminal(command="sleep 5 && tmux send-keys -t claude-work '重构认证模块以使用 JWT Token' Enter")
 
 # 通过捕获窗格来监控进度
 terminal(command="sleep 15 && tmux capture-pane -t claude-work -p -S -50")
 
 # 发送后续任务
-terminal(command="tmux send-keys -t claude-work '现在为新 JWT 代码添加单元测试' Enter")
+terminal(command="tmux send-keys -t claude-work '现在为新的 JWT 代码添加单元测试' Enter")
 
 # 完成后退出
 terminal(command="tmux send-keys -t claude-work '/exit' Enter")
@@ -99,7 +99,7 @@ terminal(command="tmux send-keys -t claude-work '/exit' Enter")
 
 Claude Code 在首次启动时最多会显示两个确认对话框。您必须通过 tmux send-keys 处理这些对话框：
 
-### 对话框 1：工作区信任（首次访问目录时）
+### 对话框 1：工作区信任（首次访问某个目录）
 ```
 ❯ 1. 是的，我信任此文件夹    ← 默认（只需按 Enter）
   2. 不，退出
@@ -119,7 +119,7 @@ tmux send-keys -t <session> Down && sleep 0.3 && tmux send-keys -t <session> Ent
 ### 健壮的对话框处理模式
 ```
 # 启动并绕过权限
-terminal(command="tmux send-keys -t claude-work 'claude --dangerously-skip-permissions \"你的任务\"' Enter")
+terminal(command="tmux send-keys -t claude-work 'claude --dangerously-skip-permissions \"your task\"' Enter")
 
 # 处理信任对话框（按 Enter 选择默认的“是”）
 terminal(command="sleep 4 && tmux send-keys -t claude-work Enter")
@@ -138,9 +138,9 @@ terminal(command="sleep 15 && tmux capture-pane -t claude-work -p -S -60")
 | 子命令 | 用途 |
 |------------|---------|
 | `claude` | 启动交互式 REPL |
-| `claude "查询"` | 使用初始提示启动 REPL |
-| `claude -p "查询"` | 打印模式（非交互式，完成后退出） |
-| `cat file \| claude -p "查询"` | 将内容作为 stdin 上下文管道传输 |
+| `claude "query"` | 使用初始提示启动 REPL |
+| `claude -p "query"` | 打印模式（非交互式，完成后退出） |
+| `cat file \| claude -p "query"` | 将内容作为 stdin 上下文管道传输 |
 | `claude -c` | 继续此目录中最近的对话 |
 | `claude -r "id"` | 按 ID 或名称恢复特定会话 |
 | `claude auth login` | 登录（添加 `--console` 用于 API 计费，`--sso` 用于企业版） |
@@ -188,13 +188,13 @@ terminal(command="claude -p 'Analyze auth.py for security issues' --output-forma
 terminal(command="claude -p 'Write a summary' --output-format stream-json --verbose --include-partial-messages", timeout=60)
 ```
 
-返回换行分隔的 JSON 事件。可以使用 jq 过滤以获取实时文本：
+返回换行分隔的 JSON 事件。使用 jq 进行筛选以获取实时文本：
 ```
 claude -p "Explain X" --output-format stream-json --verbose --include-partial-messages | \
   jq -rj 'select(.type == "stream_event" and .event.delta.type? == "text_delta") | .event.delta.text'
 ```
 
-流事件包含 `system/api_retry` 类型，其中包含 `attempt`、`max_retries` 和 `error` 字段（例如 `rate_limit`、`billing_error`）。
+流事件包含 `system/api_retry` 类型，其中带有 `attempt`、`max_retries` 和 `error` 字段（例如 `rate_limit`、`billing_error`）。
 
 ### 双向流式传输
 要实现实时的输入和输出流式传输：
@@ -224,7 +224,7 @@ terminal(command="claude -p 'List all functions in src/' --output-format json --
 
 ### 会话恢复
 ```
-# 开始一个任务
+# 启动一个任务
 terminal(command="claude -p 'Start refactoring the database layer' --output-format json --max-turns 10 > /tmp/session.json", workdir="/project", timeout=180)
 
 # 使用会话 ID 恢复
@@ -233,7 +233,7 @@ terminal(command="claude -p 'Continue and add connection pooling' --resume $(cat
 # 或者恢复同一目录中最近的会话
 terminal(command="claude -p 'What did you do last time?' --continue --max-turns 1", workdir="/project", timeout=30)
 
-# 派生一个会话（新 ID，保留历史记录）
+# 派生一个会话（新的 ID，保留历史记录）
 terminal(command="claude -p 'Try a different approach' --resume <id> --fork-session --max-turns 10", workdir="/project", timeout=120)
 ```
 
@@ -242,9 +242,9 @@ terminal(command="claude -p 'Try a different approach' --resume <id> --fork-sess
 terminal(command="claude --bare -p 'Run all tests and report failures' --allowedTools 'Read,Bash' --max-turns 10", workdir="/project", timeout=180)
 ```
 
-`--bare` 模式会跳过钩子、插件、MCP 发现和 CLAUDE.md 加载。启动速度最快。需要设置 `ANTHROPIC_API_KEY`（跳过 OAuth）。
+`--bare` 模式会跳过钩子、插件、MCP 发现和 CLAUDE.md 加载。启动速度最快。需要 `ANTHROPIC_API_KEY`（跳过 OAuth）。
 
-要在裸模式中有选择地加载上下文：
+要在裸模式中选择性地加载上下文：
 | 要加载的内容 | 标志 |
 |---------|------|
 | 系统提示词附加内容 | `--append-system-prompt "text"` 或 `--append-system-prompt-file path` |
@@ -261,16 +261,16 @@ terminal(command="claude -p 'task' --fallback-model haiku --max-turns 5", timeou
 ## 完整的 CLI 标志参考
 
 ### 会话与执行环境
-| 标志 | 作用 |
+| 标志 | 效果 |
 |------|--------|
-| `-p, --print` | 非交互式单次模式（完成后退出） |
+| `-p, --print` | 非交互式单次运行模式（完成后退出） |
 | `-c, --continue` | 恢复当前目录中最近的对话 |
 | `-r, --resume <id>` | 通过 ID 或名称恢复特定会话（如果未提供 ID，则显示交互式选择器） |
-| `--fork-session` | 恢复时，创建新的会话 ID 而不是重用原始 ID |
+| `--fork-session` | 恢复时，创建新的会话 ID 而不是重用原始的 |
 | `--session-id <uuid>` | 为对话使用特定的 UUID |
 | `--no-session-persistence` | 不将会话保存到磁盘（仅限打印模式） |
 | `--add-dir <paths...>` | 授予 Claude 访问额外工作目录的权限 |
-| `-w, --worktree [name]` | 在 `.claude/worktrees/<name>` 处的独立 git 工作树中运行 |
+| `-w, --worktree [name]` | 在 `.claude/worktrees/<name>` 处的隔离 git 工作树中运行 |
 | `--tmux` | 为工作树创建一个 tmux 会话（需要 `--worktree`） |
 | `--ide` | 启动时自动连接到有效的 IDE |
 | `--chrome` / `--no-chrome` | 启用/禁用 Chrome 浏览器集成以进行 Web 测试 |
@@ -278,20 +278,20 @@ terminal(command="claude -p 'task' --fallback-model haiku --max-turns 5", timeou
 | `--file <specs...>` | 启动时要下载的文件资源（格式：`file_id:relative_path`） |
 
 ### 模型与性能
-| 标志 | 作用 |
+| 标志 | 效果 |
 |------|--------|
 | `--model <alias>` | 模型选择：`sonnet`、`opus`、`haiku`，或完整名称如 `claude-sonnet-4-6` |
 | `--effort <level>` | 推理深度：`low`、`medium`、`high`、`max`、`auto` | 两者 |
 | `--max-turns <n>` | 限制代理式循环次数（仅限打印模式；防止失控） |
 | `--max-budget-usd <n>` | 以美元为单位限制 API 花费（仅限打印模式） |
 | `--fallback-model <model>` | 当默认模型过载时自动回退（仅限打印模式） |
-| `--betas <betas...>` | 要包含在 API 请求中的 Beta 头信息（仅限 API 密钥用户） |
+| `--betas <betas...>` | 在 API 请求中包含的 Beta 头信息（仅限 API 密钥用户） |
 
 ### 权限与安全
-| 标志 | 作用 |
+| 标志 | 效果 |
 |------|--------|
 | `--dangerously-skip-permissions` | 自动批准所有工具使用（文件写入、bash、网络等） |
-| `--allow-dangerously-skip-permissions` | 启用绕过权限作为*选项*，但不默认启用 |
+| `--allow-dangerously-skip-permissions` | 启用绕过权限作为*选项*，而不是默认启用 |
 | `--permission-mode <mode>` | `default`、`acceptEdits`、`plan`、`auto`、`dontAsk`、`bypassPermissions` |
 | `--allowedTools <tools...>` | 白名单特定工具（逗号或空格分隔） |
 | `--disallowedTools <tools...>` | 黑名单特定工具 |
@@ -302,15 +302,15 @@ terminal(command="claude -p 'task' --fallback-model haiku --max-turns 5", timeou
 | `--output-format <fmt>` | `text`（默认）、`json`（单个结果对象）、`stream-json`（换行分隔） |
 | `--input-format <fmt>` | `text`（默认）或 `stream-json`（实时流式输入） |
 | `--json-schema <schema>` | 强制输出符合指定模式的 JSON |
-| `--verbose` | 输出完整的逐轮对话 |
+| `--verbose` | 输出完整的逐轮对话内容 |
 | `--include-partial-messages` | 包含到达的部分消息块（stream-json + print） |
-| `--replay-user-messages` | 在 stdout 上重新发送用户消息（stream-json 双向） |
+| `--replay-user-messages` | 在标准输出上重新发送用户消息（stream-json 双向） |
 
 ### 系统提示词与上下文
 | 标志 | 效果 |
 |------|--------|
-| `--append-system-prompt <text>` | **追加**到默认系统提示词（保留内置功能） |
-| `--append-system-prompt-file <path>` | **追加**文件内容到默认系统提示词 |
+| `--append-system-prompt <text>` | **添加**到默认系统提示词（保留内置功能） |
+| `--append-system-prompt-file <path>` | **添加**文件内容到默认系统提示词 |
 | `--system-prompt <text>` | **替换**整个系统提示词（通常使用 --append） |
 | `--system-prompt-file <path>` | **替换**系统提示词为文件内容 |
 | `--bare` | 跳过钩子、插件、MCP 发现、CLAUDE.md、OAuth（最快启动） |
@@ -325,7 +325,7 @@ terminal(command="claude -p 'task' --fallback-model haiku --max-turns 5", timeou
 ### 调试
 | 标志 | 效果 |
 |------|--------|
-| `-d, --debug [filter]` | 启用调试日志，可选类别过滤器（例如 `"api,hooks"`、`"!1p,!file"`） |
+| `-d, --debug [filter]` | 启用调试日志，可选的类别过滤器（例如 `"api,hooks"`、`"!1p,!file"`） |
 | `--debug-file <path>` | 将调试日志写入文件（隐式启用调试模式） |
 
 ### Agent 团队
@@ -345,13 +345,13 @@ Bash(git commit *)      # 仅 git commit 命令
 Bash(npm run lint:*)    # 通配符模式匹配
 WebSearch               # 网络搜索能力
 WebFetch                # 网页抓取
-mcp__<server>__<tool>   # 特定 MCP 工具
+mcp__<server>__<tool>   # 特定的 MCP 工具
 ```
 
 ## 设置与配置
 
-### 设置层级（优先级从高到低）
-1. **CLI 标志** — 覆盖所有设置
+### 设置层级（从高到低优先级）
+1. **CLI 标志** — 覆盖一切
 2. **本地项目：** `.claude/settings.local.json`（个人，gitignored）
 3. **项目：** `.claude/settings.json`（共享，git-tracked）
 4. **用户：** `~/.claude/settings.json`（全局）
@@ -367,7 +367,7 @@ mcp__<server>__<tool>   # 特定 MCP 工具
 }
 ```
 
-### 记忆文件（CLAUDE.md）层级
+### 记忆文件 (CLAUDE.md) 层级
 1. **全局：** `~/.claude/CLAUDE.md` — 适用于所有项目
 2. **项目：** `./CLAUDE.md` — 项目特定上下文（git-tracked）
 3. **本地：** `.claude/CLAUDE.local.md` — 个人项目覆盖（gitignored）
@@ -385,7 +385,7 @@ mcp__<server>__<tool>   # 特定 MCP 工具
 | `/context` | 以彩色网格可视化上下文使用情况，并提供优化建议 |
 | `/cost` | 查看 Token 使用情况，按模型和缓存命中率细分 |
 | `/resume` | 切换到或恢复另一个会话 |
-| `/rewind` | 回退到对话或代码中的先前检查点 |
+| `/rewind` | 回滚到对话或代码中的先前检查点 |
 | `/btw <question>` | 提出一个附带问题，不计入上下文成本 |
 | `/status` | 显示版本、连接性和会话信息 |
 | `/todos` | 列出对话中跟踪的待办事项 |
@@ -411,7 +411,7 @@ mcp__<server>__<tool>   # 特定 MCP 工具
 | `/permissions` | 查看/更新工具权限 |
 | `/agents` | 管理专门的子 Agent |
 | `/mcp` | 管理 MCP 服务器的交互式 UI |
-| `/add-dir` | 添加额外的工作目录（适用于 monorepo） |
+| `/add-dir` | 添加额外的工作目录（对 monorepo 有用） |
 | `/usage` | 显示计划限制和速率限制状态 |
 | `/voice` | 启用按住说话语音模式（20 种语言；按住空格键录音，松开发送） |
 | `/release-notes` | 版本发布说明的交互式选择器 |
@@ -436,7 +436,7 @@ mcp__<server>__<tool>   # 特定 MCP 工具
 # .claude/skills/database-migration.md
 当被要求创建或修改数据库迁移时：
 1. 使用 Alembic 生成迁移
-2. 始终创建回滚函数
+2. 始终创建一个回滚函数
 3. 针对本地数据库副本测试迁移
 ```
 
@@ -452,7 +452,7 @@ mcp__<server>__<tool>   # 特定 MCP 工具
 | `Ctrl+V` | 将图片粘贴到对话中 |
 | `Ctrl+O` | 转录模式 — 查看 Claude 的思考过程 |
 | `Ctrl+G` 或 `Ctrl+X Ctrl+E` | 在外部编辑器中打开提示词 |
-| `Esc Esc` | 回滚对话或代码状态 / 总结 |
+| `Esc Esc` | 回退对话或代码状态 / 总结 |
 
 ### 模式切换
 | 按键 | 操作 |
@@ -473,12 +473,12 @@ mcp__<server>__<tool>   # 特定 MCP 工具
 | 前缀 | 操作 |
 |--------|--------|
 | `!` | 直接执行 bash，绕过 AI（例如 `!npm test`）。单独使用 `!` 可切换 shell 模式。 |
-| `@` | 引用文件/目录并自动补全（例如 `@./src/api/`） |
+| `@` | 引用文件/目录，带自动补全（例如 `@./src/api/`） |
 | `#` | 快速添加到 CLAUDE.md 记忆（例如 `# 使用 2 空格缩进`） |
 | `/` | 斜杠命令 |
 
-### 专业提示："ultrathink"
-在提示词中使用关键词 "ultrathink"，以在特定轮次中启用最大推理努力。无论当前的 `/effort` 设置如何，这都会触发最深的思考模式。
+### 专业技巧："ultrathink"
+在提示词中使用关键词 "ultrathink"，可在特定轮次触发最大程度的推理努力。无论当前的 `/effort` 设置如何，这都会触发最深的思考模式。
 
 ## PR 审查模式
 
@@ -505,7 +505,7 @@ terminal(command="claude -p 'Review this PR thoroughly' --from-pr 42 --max-turns
 ```
 terminal(command="claude -w feature-x --tmux", workdir="/path/to/repo")
 ```
-在 `.claude/worktrees/feature-x` 创建一个隔离的 git 工作树，并为其创建一个 tmux 会话。如果可用，则使用 iTerm2 原生窗格；添加 `--tmux=classic` 以使用传统的 tmux。
+在 `.claude/worktrees/feature-x` 创建一个隔离的 git 工作树，并为其创建一个 tmux 会话。如果可用，会使用 iTerm2 原生窗格；添加 `--tmux=classic` 使用传统的 tmux。
 
 ## 并行 Claude 实例
 
@@ -565,7 +565,7 @@ Claude 会自动将学到的项目上下文存储在 `~/.claude/projects/<projec
 
 ## 自定义子 Agent
 
-在 `.claude/agents/`（项目）、`~/.claude/agents/`（个人）或通过 `--agents` CLI 标志（会话）中定义专门的 Agent：
+在 `.claude/agents/`（项目）、`~/.claude/agents/`（个人）或通过 `--agents` CLI 标志（会话）定义专门的 Agent：
 
 ### Agent 位置优先级
 1. `.claude/agents/` — 项目级别，团队共享
@@ -581,7 +581,7 @@ description: Security-focused code review
 model: opus
 tools: [Read, Bash]
 ---
-你是一名资深安全工程师。审查代码中的以下问题：
+你是一名高级安全工程师。审查代码中的以下问题：
 - 注入漏洞（SQL、XSS、命令注入）
 - 认证/授权缺陷
 - 代码中的密钥
@@ -628,7 +628,7 @@ Claude 可以编排多个 Agent："使用 @db-expert 来优化查询，然后使
 | `Stop` | 当 Claude 完成一个响应时 | 完成日志记录、状态更新 |
 | `SubagentStop` | 当子 Agent 完成时 | Agent 编排 |
 | `PreCompact` | 在上下文记忆被清除之前 | 备份会话记录 |
-| `SessionStart` | 当会话开始时 | 加载开发上下文（例如，`git status`） |
+| `SessionStart` | 当会话开始时 | 加载开发上下文（例如 `git status`） |
 
 ### 钩子环境变量
 | 变量 | 内容 |
@@ -666,8 +666,8 @@ terminal(command="claude mcp add puppeteer -- npx @anthropic-ai/server-puppeteer
 | 标志 | 作用域 | 存储位置 |
 |------|-------|---------|
 | `-s user` | 全局（所有项目） | `~/.claude.json` |
-| `-s local` | 此项目（个人） | `.claude/settings.local.json`（被 git 忽略） |
-| `-s project` | 此项目（团队共享） | `.claude/settings.json`（被 git 跟踪） |
+| `-s local` | 当前项目（个人） | `.claude/settings.local.json`（被 git 忽略） |
+| `-s project` | 当前项目（团队共享） | `.claude/settings.json`（被 git 跟踪） |
 
 ### 打印/CI 模式下的 MCP
 ```
@@ -692,10 +692,10 @@ terminal(command="tmux capture-pane -t dev -p -S -10")
 ```
 
 寻找以下指示器：
-- 底部的 `❯` = 等待你的输入（Claude 已完成或正在提问）
-- `●` 行 = Claude 正在主动使用工具（读取、写入、运行命令）
+- 底部有 `❯` = 等待你的输入（Claude 已完成或正在提问）
+- 有 `●` 的行 = Claude 正在积极使用工具（读取、写入、运行命令）
 - `⏵⏵ bypass permissions on` = 状态栏显示权限模式
-- `◐ medium · /effort` = 状态栏中当前的努力级别
+- `◐ medium · /effort` = 状态栏中当前的 effort 级别
 - `ctrl+o to expand` = 工具输出被截断（可以交互式展开）
 
 ### 上下文窗口健康度
@@ -709,29 +709,29 @@ terminal(command="tmux capture-pane -t dev -p -S -10")
 | 变量 | 效果 |
 |----------|--------|
 | `ANTHROPIC_API_KEY` | 用于身份验证的 API 密钥（OAuth 的替代方案） |
-| `CLAUDE_CODE_EFFORT_LEVEL` | 默认努力级别：`low`、`medium`、`high`、`max` 或 `auto` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | 默认 effort 级别：`low`、`medium`、`high`、`max` 或 `auto` |
 | `MAX_THINKING_TOKENS` | 限制思考 Token（设置为 `0` 以完全禁用思考） |
 | `MAX_MCP_OUTPUT_TOKENS` | 限制 MCP 服务器的输出（默认值可变；例如设置为 `50000`） |
 | `CLAUDE_CODE_NO_FLICKER=1` | 启用备用屏幕渲染以消除终端闪烁 |
-| `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | 从子进程中剥离凭据以确保安全 |
+| `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | 从子进程中剥离凭证以提高安全性 |
 
 ## 成本与性能提示
 
 1.  **使用 `--max-turns`** 在打印模式中防止无限循环。对于大多数任务，从 5-10 开始。
-2.  **使用 `--max-budget-usd`** 进行成本上限控制。注意：系统提示词缓存创建的最低成本约为 0.05 美元。
-3.  **使用 `--effort low`** 处理简单任务（更快、更便宜）。对于复杂推理，使用 `high` 或 `max`。
+2.  **使用 `--max-budget-usd`** 进行成本上限控制。注意：创建系统提示词缓存的最低成本约为 $0.05。
+3.  **使用 `--effort low`** 处理简单任务（更快、更便宜）。使用 `high` 或 `max` 处理复杂的推理任务。
 4.  **使用 `--bare`** 用于 CI/脚本，以跳过插件/钩子发现的开销。
-5.  **使用 `--allowedTools`** 限制为仅需要的工具（例如，对于代码审查，仅允许 `Read`）。
-6.  **在交互式会话中，当上下文变大时使用 `/compact`**。
+5.  **使用 `--allowedTools`** 限制为仅需要的工具（例如，对于代码审查只允许 `Read`）。
+6.  **在交互式会话中，当上下文变得很大时，使用 `/compact`**。
 7.  **当只需要分析已知内容时，使用管道输入**，而不是让 Claude 读取文件。
 8.  **使用 `--model haiku`** 处理简单任务（更便宜），使用 `--model opus` 处理复杂的多步骤工作。
 9.  **在打印模式中使用 `--fallback-model haiku`**，以优雅地处理模型过载。
 10. **为不同的任务启动新会话** — 会话持续 5 小时；新的上下文更高效。
-11. **在 CI 中使用 `--no-session-persistence`**，以避免在磁盘上累积已保存的会话。
-## 注意事项与常见问题
+11. **在 CI 中使用 `--no-session-persistence`**，以避免在磁盘上累积保存的会话。
+## 常见陷阱与注意事项
 
-1. **交互模式必须使用 tmux** — Claude Code 是一个完整的 TUI 应用。虽然在 Hermes 终端中单独使用 `pty=true` 可以工作，但 tmux 提供了用于监控的 `capture-pane` 和用于输入的 `send-keys`，这对于编排至关重要。
-2. **`--dangerously-skip-permissions` 对话框默认选择 "No, exit"** — 你必须按向下键然后按回车键才能接受。打印模式 (`-p`) 会完全跳过此对话框。
+1. **交互模式必须使用 tmux** — Claude Code 是一个完整的 TUI 应用。在 Hermes 终端中单独使用 `pty=true` 可以工作，但 tmux 提供了用于监控的 `capture-pane` 和用于输入的 `send-keys`，这对于编排至关重要。
+2. **`--dangerously-skip-permissions` 对话框默认选择 "No, exit"** — 你必须按向下键然后按回车键来接受。打印模式 (`-p`) 会完全跳过此对话框。
 3. **`--max-budget-usd` 最低约为 $0.05** — 仅创建系统提示词缓存就需要这么多成本。设置更低的值会立即报错。
 4. **`--max-turns` 仅适用于打印模式** — 在交互式会话中会被忽略。
 5. **Claude 可能使用 `python` 而不是 `python3`** — 在没有 `python` 符号链接的系统上，Claude 的 bash 命令第一次尝试会失败，但会自我纠正。
@@ -740,8 +740,8 @@ terminal(command="tmux capture-pane -t dev -p -S -10")
 8. **信任对话框每个目录只出现一次** — 仅首次出现，之后会被缓存。
 9. **后台 tmux 会话会持续存在** — 完成后务必使用 `tmux kill-session -t <name>` 进行清理。
 10. **斜杠命令（如 `/commit`）仅在交互模式下有效** — 在 `-p` 模式下，请用自然语言描述任务。
-11. **`--bare` 跳过 OAuth** — 需要设置 `ANTHROPIC_API_KEY` 环境变量或在设置中配置 `apiKeyHelper`。
-12. **上下文退化是真实存在的** — 当上下文窗口使用率超过 70% 时，AI 输出质量会明显下降。使用 `/context` 进行监控，并主动使用 `/compact`。
+11. **`--bare` 跳过 OAuth** — 需要 `ANTHROPIC_API_KEY` 环境变量或设置中的 `apiKeyHelper`。
+12. **上下文退化是真实存在的** — 当上下文窗口使用率超过 70% 时，AI 输出质量会显著下降。使用 `/context` 监控并主动使用 `/compact`。
 
 ## Hermes Agent 规则
 
@@ -751,7 +751,7 @@ terminal(command="tmux capture-pane -t dev -p -S -10")
 4. **在打印模式下设置 `--max-turns`** — 防止无限循环和成本失控
 5. **监控 tmux 会话** — 使用 `tmux capture-pane -t <session> -p -S -50` 检查进度
 6. **寻找 `❯` 提示符** — 表示 Claude 正在等待输入（已完成或正在提问）
-7. **清理 tmux 会话** — 完成后将其终止，避免资源泄漏
-8. **向用户报告结果** — 完成后，总结 Claude 做了什么以及发生了哪些变化
+7. **清理 tmux 会话** — 完成后终止会话，避免资源泄漏
+8. **向用户报告结果** — 完成后，总结 Claude 做了什么以及发生了什么变化
 9. **不要终止缓慢的会话** — Claude 可能正在进行多步骤工作；请检查进度
 10. **使用 `--allowedTools`** — 将能力限制在任务实际需要的范围内

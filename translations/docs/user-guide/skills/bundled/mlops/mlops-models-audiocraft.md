@@ -1,14 +1,14 @@
 ---
-title: "Audiocraft 音频生成"
+title: "Audiocraft 音频生成 — AudioCraft：MusicGen 文本到音乐，AudioGen 文本到声音"
 sidebar_label: "Audiocraft 音频生成"
-description: "用于音频生成的 PyTorch 库，包括文本到音乐 (MusicGen) 和文本到声音 (AudioGen)"
+description: "AudioCraft：MusicGen 文本到音乐，AudioGen 文本到声音"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Audiocraft 音频生成
 
-用于音频生成的 PyTorch 库，包括文本到音乐 (MusicGen) 和文本到声音 (AudioGen)。当你需要根据文本描述生成音乐、创建音效或执行旋律条件音乐生成时使用。
+AudioCraft：MusicGen 文本到音乐，AudioGen 文本到声音。
 
 ## 技能元数据
 
@@ -30,11 +30,11 @@ description: "用于音频生成的 PyTorch 库，包括文本到音乐 (MusicGe
 
 # AudioCraft：音频生成
 
-使用 Meta 的 AudioCraft 进行文本到音乐和文本到音频生成的综合指南，涵盖 MusicGen、AudioGen 和 EnCodec。
+使用 Meta 的 AudioCraft 通过 MusicGen、AudioGen 和 EnCodec 进行文本到音乐和文本到音频生成的综合指南。
 
 ## 何时使用 AudioCraft
 
-**在以下情况使用 AudioCraft：**
+**在以下情况下使用 AudioCraft：**
 - 需要根据文本描述生成音乐
 - 创建音效和环境音频
 - 构建音乐生成应用程序
@@ -43,14 +43,14 @@ description: "用于音频生成的 PyTorch 库，包括文本到音乐 (MusicGe
 - 需要具有风格迁移的可控音乐生成
 
 **主要特性：**
-- **MusicGen**：具有旋律条件的文本到音乐生成
+- **MusicGen**：支持旋律条件的文本到音乐生成
 - **AudioGen**：文本到音效生成
 - **EnCodec**：高保真神经音频编解码器
 - **多种模型尺寸**：小型 (300M) 到大型 (3.3B)
 - **立体声支持**：完整的立体声音频生成
 - **风格条件**：MusicGen-Style 用于基于参考的生成
 
-**改用以下替代方案：**
+**在以下情况下使用替代方案：**
 - **Stable Audio**：用于生成长篇商业音乐
 - **Bark**：用于带有音乐/音效的文本到语音
 - **Riffusion**：用于基于频谱图的音乐生成
@@ -146,12 +146,13 @@ torchaudio.save("sound.wav", wav[0].cpu(), sample_rate=16000)
 
 ### 架构概述
 
+<!-- ascii-guard-ignore -->
 ```
 AudioCraft 架构：
 ┌──────────────────────────────────────────────────────────────┐
 │                    文本编码器 (T5)                            │
 │                         │                                     │
-│                    文本嵌入                                    │
+│                    文本嵌入                                   │
 └────────────────────────┬─────────────────────────────────────┘
                          │
 ┌────────────────────────▼─────────────────────────────────────┐
@@ -165,6 +166,7 @@ AudioCraft 架构：
 │        将 Token 转换回音频波形                                │
 └──────────────────────────────────────────────────────────────┘
 ```
+<!-- ascii-guard-ignore-end -->
 
 ### 模型变体
 
@@ -183,9 +185,9 @@ AudioCraft 架构：
 
 | 参数 | 默认值 | 描述 |
 |-----------|---------|-------------|
-| `duration` | 8.0 | 时长（秒）(1-120) |
+| `duration` | 8.0 | 时长（秒）（1-120） |
 | `top_k` | 250 | Top-k 采样 |
-| `top_p` | 0.0 | 核心采样 (0 = 禁用) |
+| `top_p` | 0.0 | 核心采样（0 = 禁用） |
 | `temperature` | 1.0 | 采样温度 |
 | `cfg_coef` | 3.0 | 无分类器引导 |
 ## MusicGen 使用指南
@@ -203,8 +205,8 @@ model.set_generation_params(
     duration=30,          # 最长 30 秒
     top_k=250,            # 采样多样性
     top_p=0.0,            # 0 = 仅使用 top_k
-    temperature=1.0,      # 创造性（越高越多样）
-    cfg_coef=3.0          # 文本遵循度（越高越严格）
+    temperature=1.0,      # 创造性（值越高变化越多）
+    cfg_coef=3.0          # 文本遵循度（值越高越严格）
 )
 
 # 生成多个样本
@@ -254,7 +256,7 @@ model.set_generation_params(duration=15)
 descriptions = ["具有宽广立体声场感的氛围电子音乐"]
 wav = model.generate(descriptions)
 
-# wav 形状：[batch, 2, samples] 表示立体声
+# wav 形状: [batch, 2, samples] 表示立体声
 print(f"Stereo shape: {wav.shape}")  # [1, 2, 480000]
 torchaudio.save("stereo.wav", wav[0].cpu(), sample_rate=32000)
 ```
@@ -301,13 +303,13 @@ model.set_generation_params(
     cfg_coef_beta=5.0  # 风格影响力
 )
 
-# 配置风格调节器参数
+# 配置风格条件器
 model.set_style_conditioner_params(
     eval_q=3,          # RVQ 量化器 (1-6)
     excerpt_length=3.0  # 风格片段长度
 )
 
-# 加载风格参考音频
+# 加载风格参考
 style_audio, sr = torchaudio.load("reference_style.wav")
 
 # 使用文本 + 风格生成
@@ -318,11 +320,11 @@ wav = model.generate_with_style(descriptions, style_audio, sr)
 ### 纯风格生成（无文本）
 
 ```python
-# 生成匹配风格，无需文本提示
+# 在没有文本提示的情况下生成匹配风格
 model.set_generation_params(
     duration=30,
     cfg_coef=3.0,
-    cfg_coef_beta=None  # 为纯风格生成禁用双重 CFG
+    cfg_coef_beta=None  # 为纯风格生成禁用双 CFG
 )
 
 wav = model.generate_with_style([None], style_audio, sr)
@@ -341,9 +343,9 @@ model.set_generation_params(duration=10)
 
 # 生成各种声音
 descriptions = [
-    "带有暴雨和闪电的雷暴",
+    "带有大雨和闪电的雷暴",
     "繁忙的城市交通，伴有汽车喇叭声",
-    "岩石上的海浪拍击声",
+    "海浪拍打岩石",
     "森林中噼啪作响的篝火"
 ]
 
@@ -510,7 +512,7 @@ demo = gr.Interface(
     inputs=[
         gr.Textbox(label="音乐描述", placeholder="upbeat electronic dance music"),
         gr.Slider(1, 30, value=8, label="时长（秒）"),
-        gr.Slider(0.5, 2.0, value=1.0, label="Temperature"),
+        gr.Slider(0.5, 2.0, value=1.0, label="温度"),
         gr.Slider(1.0, 10.0, value=3.0, label="CFG 系数")
     ],
     outputs=gr.Audio(label="生成的音乐"),
@@ -565,13 +567,13 @@ for desc in descriptions:
 | CUDA OOM | 使用更小的模型，减少时长 |
 | 质量差 | 增加 cfg_coef，使用更好的提示词 |
 | 生成太短 | 检查最大时长设置 |
-| 音频伪影 | 尝试不同的 temperature |
+| 音频伪影 | 尝试不同的温度值 |
 | 立体声不工作 | 使用立体声模型变体 |
 
 ## 参考
 
 - **[高级用法](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/models/audiocraft/references/advanced-usage.md)** - 训练、微调、部署
-- **[故障排除](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/models/audiocraft/references/troubleshooting.md)** - 常见问题与解决方案
+- **[故障排除](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/models/audiocraft/references/troubleshooting.md)** - 常见问题及解决方案
 
 ## 资源
 

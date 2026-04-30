@@ -1,14 +1,14 @@
 ---
-title: "Evaluating Llms Harness — 在 60+ 个学术基准上评估 LLM（MMLU、HumanEval、GSM8K、TruthfulQA、HellaSwag）"
-sidebar_label: "Evaluating Llms Harness"
-description: "在 60+ 个学术基准上评估 LLM（MMLU、HumanEval、GSM8K、TruthfulQA、HellaSwag）"
+title: "评估 Llms Harness — lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）"
+sidebar_label: "评估 Llms Harness"
+description: "lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# Evaluating Llms Harness
+# 评估 Llms Harness
 
-在 60+ 个学术基准上评估 LLM（MMLU、HumanEval、GSM8K、TruthfulQA、HellaSwag）。适用于模型质量基准测试、模型比较、报告学术结果或跟踪训练进度。EleutherAI、HuggingFace 和主要实验室使用的行业标准。支持 HuggingFace、vLLM、API。
+lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）。
 
 ## 技能元数据
 
@@ -30,9 +30,13 @@ description: "在 60+ 个学术基准上评估 LLM（MMLU、HumanEval、GSM8K、
 
 # lm-evaluation-harness - LLM 基准测试
 
+## 内容概述
+
+在 60 多个学术基准测试（MMLU、HumanEval、GSM8K、TruthfulQA、HellaSwag）上评估 LLMs。用于基准测试模型质量、比较模型、报告学术结果或跟踪训练进度。EleutherAI、HuggingFace 和主要实验室使用的行业标准。支持 HuggingFace、vLLM、API。
+
 ## 快速开始
 
-lm-evaluation-harness 使用标准化的提示词和指标，在 60+ 个学术基准上评估 LLM。
+lm-evaluation-harness 使用标准化的提示词和指标在 60 多个学术基准测试上评估 LLMs。
 
 **安装**：
 ```bash
@@ -72,7 +76,7 @@ lm_eval --tasks list
 **步骤 1：选择基准测试套件**
 
 **核心推理基准测试**：
-- **MMLU**（大规模多任务语言理解）- 57 个学科，多项选择
+- **MMLU**（大规模多任务语言理解）- 57 个科目，多项选择
 - **GSM8K** - 小学数学文字题
 - **HellaSwag** - 常识推理
 - **TruthfulQA** - 真实性和事实性
@@ -80,7 +84,7 @@ lm_eval --tasks list
 
 **代码基准测试**：
 - **HumanEval** - Python 代码生成（164 个问题）
-- **MBPP**（基本 Python 问题）- Python 编程
+- **MBPP**（大多数基础 Python 问题）- Python 编码
 
 **标准套件**（推荐用于模型发布）：
 ```bash
@@ -95,10 +99,10 @@ lm_eval --model hf \
   --model_args pretrained=meta-llama/Llama-2-7b-hf,dtype=bfloat16 \
   --tasks mmlu \
   --device cuda:0 \
-  --batch_size auto  # 自动检测最佳批量大小
+  --batch_size auto  # 自动检测最佳批次大小
 ```
 
-**量化模型（4位/8位）**：
+**量化模型（4-bit/8-bit）**：
 ```bash
 lm_eval --model hf \
   --model_args pretrained=meta-llama/Llama-2-7b-hf,load_in_4bit=True \
@@ -117,7 +121,7 @@ lm_eval --model hf \
 **步骤 3：运行评估**
 
 ```bash
-# 完整的 MMLU 评估（57 个学科）
+# 完整的 MMLU 评估（57 个科目）
 lm_eval --model hf \
   --model_args pretrained=meta-llama/Llama-2-7b-hf \
   --tasks mmlu \
@@ -202,7 +206,7 @@ lm_eval --model hf \
 - **PIQA**：约 2 分钟
 
 避免用于频繁评估（太慢）：
-- **MMLU**：约 2 小时（57 个学科）
+- **MMLU**：约 2 小时（57 个科目）
 - **HumanEval**：需要代码执行
 
 **步骤 3：自动化评估**
@@ -349,7 +353,7 @@ print(df.to_markdown(index=False))
 
 ### 工作流 4：使用 vLLM 进行评估（更快的推理）
 
-使用 vLLM 后端实现 5-10 倍的评估加速。
+使用 vLLM 后端，评估速度提升 5-10 倍。
 
 ```
 vLLM 评估：
@@ -401,10 +405,10 @@ lm_eval --model vllm \
 - 需要可复现的评估
 
 **改用替代方案：**
-- **HELM**（斯坦福）：更广泛的评估（公平性、效率、校准）
+- **HELM**（斯坦福大学）：更广泛的评估（公平性、效率、校准）
 - **AlpacaEval**：使用 LLM 评判器进行指令遵循评估
 - **MT-Bench**：对话式多轮评估
-- **自定义脚本**：特定领域的评估
+- **自定义脚本**：领域特定的评估
 
 ## 常见问题
 
@@ -479,7 +483,7 @@ lm_eval --model hf \
 
 **基准测试描述**：查看 [references/benchmark-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/benchmark-guide.md) 获取所有 60 多个任务的详细描述、它们衡量什么以及如何解释。
 
-**自定义任务**：查看 [references/custom-tasks.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/custom-tasks.md) 了解如何创建特定领域的评估任务。
+**自定义任务**：查看 [references/custom-tasks.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/custom-tasks.md) 了解如何创建领域特定的评估任务。
 
 **API 评估**：查看 [references/api-evaluation.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/api-evaluation.md) 了解如何评估 OpenAI、Anthropic 和其他 API 模型。
 **多 GPU 策略**：关于数据并行和张量并行评估，请参阅 [references/distributed-eval.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/distributed-eval.md)。
@@ -501,5 +505,5 @@ lm_eval --model hf \
 
 - GitHub：https://github.com/EleutherAI/lm-evaluation-harness
 - 文档：https://github.com/EleutherAI/lm-evaluation-harness/tree/main/docs
-- 任务库：60 多个任务，包括 MMLU、GSM8K、HumanEval、TruthfulQA、HellaSwag、ARC、WinoGrande 等。
+- 任务库：60+ 个任务，包括 MMLU、GSM8K、HumanEval、TruthfulQA、HellaSwag、ARC、WinoGrande 等。
 - 排行榜：https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard（使用此评估工具）

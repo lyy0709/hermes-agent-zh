@@ -14,7 +14,7 @@ description: "如何将 Hermes Agent 更新到最新版本或卸载它"
 hermes update
 ```
 
-此命令会拉取最新代码，更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
+此命令会拉取最新代码、更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
 
 :::tip
 `hermes update` 会自动检测新的配置选项并提示你添加它们。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
@@ -24,10 +24,33 @@ hermes update
 
 当你运行 `hermes update` 时，会发生以下步骤：
 
-1.  **Git pull** — 从 `main` 分支拉取最新代码并更新子模块
-2.  **依赖项安装** — 运行 `uv pip install -e ".[all]"` 以获取新的或更改的依赖项
-3.  **配置迁移** — 检测自你当前版本以来添加的新配置选项，并提示你设置它们
-4.  **消息网关自动重启** — 如果消息网关服务正在运行（Linux 上是 systemd，macOS 上是 launchd），更新完成后它会**自动重启**，以便新代码立即生效
+1.  **配对数据快照** — 保存一个轻量级的更新前状态快照（涵盖 `~/.hermes/pairing/`、飞书评论规则和其他在运行时被修改的状态文件）。可通过 `hermes backup restore --state pre-update` 回滚。
+2.  **Git 拉取** — 从 `main` 分支拉取最新代码并更新子模块
+3.  **依赖项安装** — 运行 `uv pip install -e ".[all]"` 以获取新的或更改的依赖项
+4.  **配置迁移** — 检测自你当前版本以来添加的新配置选项，并提示你设置它们
+5.  **消息网关自动重启** — 如果消息网关服务正在运行（Linux 上为 systemd，macOS 上为 launchd），它会在更新完成后**自动重启**，以便新代码立即生效
+
+### 仅预览：`hermes update --check`
+
+想在真正拉取之前知道你是否落后于 `origin/main` 吗？运行 `hermes update --check` — 它会获取远程信息，并排打印你的本地提交和最新的远程提交，如果同步则退出码为 `0`，如果落后则退出码为 `1`。不会修改任何文件，也不会重启消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
+
+### 完整的更新前备份：`--backup`
+
+对于高价值的配置文件（生产环境消息网关、共享团队安装），你可以选择对 `HERMES_HOME`（配置、认证、会话、技能、配对）进行完整的拉取前备份：
+
+```bash
+hermes update --backup
+```
+
+或者将其设置为每次运行的默认行为：
+
+```yaml
+# ~/.hermes/config.yaml
+update:
+  backup: true
+```
+
+`--backup` 在早期版本中是始终开启的行为，但在大型主目录上每次更新都会增加几分钟时间，所以现在是可选的。上面提到的轻量级配对数据快照仍然会无条件运行。
 
 预期输出如下所示：
 
@@ -45,34 +68,34 @@ Already up to date.  (或: Updating abc1234..def5678)
 ✅ Hermes Agent 更新成功！
 ```
 
-### 建议的更新后验证
+### 推荐的更新后验证
 
-`hermes update` 处理主要的更新路径，但快速验证可以确认一切是否顺利：
+`hermes update` 处理主要的更新路径，但快速验证可以确认一切顺利落地：
 
-1.  `git status --short` — 如果工作树意外地处于脏状态，请在继续之前检查
+1.  `git status --short` — 如果工作树意外地变脏了，请在继续之前检查
 2.  `hermes doctor` — 检查配置、依赖项和服务健康状况
 3.  `hermes --version` — 确认版本号按预期更新
 4.  如果你使用消息网关：`hermes gateway status`
 5.  如果 `doctor` 报告 npm audit 问题：在标记的目录中运行 `npm audit fix`
 
-:::warning 更新后工作树处于脏状态
-如果 `git status --short` 在 `hermes update` 后显示意外更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
+:::warning 更新后工作树变脏
+如果 `git status --short` 在 `hermes update` 后显示意外的更改，请停止并在继续之前检查它们。这通常意味着本地修改被重新应用到了更新后的代码之上，或者依赖项步骤刷新了锁文件。
 :::
 
-### 如果更新过程中终端断开连接
+### 如果你的终端在更新过程中断开连接
 
-`hermes update` 会保护自身免受意外终端丢失的影响：
+`hermes update` 会保护自己免受意外终端丢失的影响：
 
-*   更新会忽略 `SIGHUP`，因此关闭 SSH 会话或终端窗口不再会在安装过程中终止它。`pip` 和 `git` 子进程继承了此保护，因此 Python 环境不会因连接断开而处于半安装状态。
-*   更新运行时，所有输出都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失，请重新连接并检查日志，查看更新是否完成以及消息网关重启是否成功：
+*   更新会忽略 `SIGHUP`，因此关闭 SSH 会话或终端窗口不再会在安装过程中终止它。`pip` 和 `git` 子进程继承了这种保护，因此 Python 环境不会因为连接断开而处于半安装状态。
+*   所有输出在更新运行时都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失了，重新连接并检查日志，看看更新是否完成以及消息网关重启是否成功：
 
 ```bash
 tail -f ~/.hermes/logs/update.log
 ```
 
-*   `Ctrl-C` (SIGINT) 和系统关机 (SIGTERM) 仍然会被响应 —— 这些是故意的取消操作，而不是意外。
+*   `Ctrl-C` (SIGINT) 和系统关机 (SIGTERM) 仍然会被响应 — 这些是故意的取消操作，而不是意外。
 
-你不再需要将 `hermes update` 包装在 `screen` 或 `tmux` 中以在终端断开时存活。
+你不再需要将 `hermes update` 包装在 `screen` 或 `tmux` 中以在终端断开连接时存活。
 
 ### 检查当前版本
 
@@ -84,13 +107,13 @@ hermes version
 
 ### 从消息平台更新
 
-你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令来更新：
+你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令进行更新：
 
 ```
 /update
 ```
 
-这会拉取最新代码，更新依赖项，并重启消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
+这会拉取最新代码、更新依赖项并重启消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
 
 ### 手动更新
 
@@ -144,7 +167,7 @@ uv pip install -e ".[all]"
 如果添加了新选项，回滚可能会导致配置不兼容。回滚后运行 `hermes config check`，如果遇到错误，请从 `config.yaml` 中删除任何无法识别的选项。
 :::
 
-### 给 Nix 用户的说明
+### 给 Nix 用户的注意事项
 
 如果你通过 Nix flake 安装，更新是通过 Nix 包管理器管理的：
 
@@ -156,7 +179,7 @@ nix flake update hermes-agent
 nix profile upgrade hermes-agent
 ```
 
-Nix 安装是不可变的 —— 回滚由 Nix 的生成系统处理：
+Nix 安装是不可变的 — 回滚由 Nix 的生成系统处理：
 
 ```bash
 nix profile rollback
@@ -172,7 +195,7 @@ nix profile rollback
 hermes uninstall
 ```
 
-卸载程序会给你选择保留配置文件 (`~/.hermes/`) 以便将来重新安装。
+卸载程序会给你选择保留配置文件（`~/.hermes/`）以便将来重新安装。
 
 ### 手动卸载
 

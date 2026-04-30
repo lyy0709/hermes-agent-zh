@@ -6,13 +6,13 @@ description: "如何构建一个上下文引擎插件来替换内置的 ContextC
 
 # 构建上下文引擎插件
 
-上下文引擎插件用于替换内置的 `ContextCompressor`，采用替代策略来管理对话上下文。例如，一个无损上下文管理（LCM）引擎，它构建知识有向无环图（DAG）而非进行有损摘要。
+上下文引擎插件用于替换内置的 `ContextCompressor`，提供替代的对话上下文管理策略。例如，一个无损上下文管理（LCM）引擎，它构建知识有向无环图（DAG）而非进行有损摘要。
 
 ## 工作原理
 
 Agent 的上下文管理建立在 `ContextEngine` 抽象基类（`agent/context_engine.py`）之上。内置的 `ContextCompressor` 是默认实现。插件引擎必须实现相同的接口。
 
-一次只能有一个上下文引擎处于**活动**状态。选择由配置驱动：
+同一时间只能有**一个**上下文引擎处于活动状态。选择由配置驱动：
 
 ```yaml
 # config.yaml
@@ -21,7 +21,7 @@ context:
   engine: "lcm"           # 激活名为 "lcm" 的插件引擎
 ```
 
-插件引擎**永远不会自动激活**——用户必须在 `context.engine` 中明确设置为插件的名称。
+插件引擎**永远不会自动激活**——用户必须显式地将 `context.engine` 设置为插件的名称。
 
 ## 目录结构
 
@@ -45,7 +45,7 @@ class LCMEngine(ContextEngine):
 
     @property
     def name(self) -> str:
-        """简短标识符，例如 'lcm'。必须与 config.yaml 中的值匹配。"""
+        """短标识符，例如 'lcm'。必须与 config.yaml 中的值匹配。"""
         return "lcm"
 
     def update_from_response(self, usage: dict) -> None:
@@ -58,16 +58,20 @@ class LCMEngine(ContextEngine):
     def should_compress(self, prompt_tokens: int = None) -> bool:
         """如果本轮应触发压缩，则返回 True。"""
 
-    def compress(self, messages: list, current_tokens: int = None) -> list:
+    def compress(self, messages: list, current_tokens: int = None,
+                 focus_topic: str = None) -> list:
         """压缩消息列表并返回一个新的（可能更短的）列表。
 
         返回的列表必须是有效的 OpenAI 格式消息序列。
+
+        ``focus_topic`` 是来自手动 ``/compress <focus>`` 的可选主题字符串；
+        支持引导式压缩的引擎应优先保留与其相关的信息，其他引擎可以忽略它。
         """
 ```
 
 ### 引擎必须维护的类属性
 
-Agent 直接读取这些属性用于显示和日志记录：
+Agent 会直接读取这些属性用于显示和日志记录：
 
 ```python
 last_prompt_tokens: int = 0
@@ -84,18 +88,18 @@ compression_count: int = 0       # compress() 已运行的次数
 
 | 方法 | 默认行为 | 何时需要重写 |
 |--------|---------|--------------|
-| `on_session_start(session_id, **kwargs)` | 无操作 | 需要加载持久化状态（DAG、数据库）时 |
-| `on_session_end(session_id, messages)` | 无操作 | 需要刷新状态、关闭连接时 |
-| `on_session_reset()` | 重置 Token 计数器 | 有需要清除的会话状态时 |
-| `update_model(model, context_length, ...)` | 更新 context_length 和 threshold | 切换模型时需要重新计算预算时 |
-| `get_tool_schemas()` | 返回 `[]` | 你的引擎提供 Agent 可调用的工具（例如 `lcm_grep`）时 |
-| `handle_tool_call(name, args, **kwargs)` | 返回错误 JSON | 你实现了工具处理程序时 |
-| `should_compress_preflight(messages)` | 返回 `False` | 可以进行廉价的 API 调用前估算时 |
-| `get_status()` | 标准的 token/threshold 字典 | 有自定义指标需要暴露时 |
+| `on_session_start(session_id, **kwargs)` | 无操作 | 你需要加载持久化状态（DAG、数据库） |
+| `on_session_end(session_id, messages)` | 无操作 | 你需要刷新状态、关闭连接 |
+| `on_session_reset()` | 重置 Token 计数器 | 你有需要清除的会话状态 |
+| `update_model(model, context_length, ...)` | 更新 context_length + threshold | 在模型切换时需要重新计算预算 |
+| `get_tool_schemas()` | 返回 `[]` | 你的引擎提供 Agent 可调用的工具（例如，`lcm_grep`） |
+| `handle_tool_call(name, args, **kwargs)` | 返回错误 JSON | 你实现了工具处理程序 |
+| `should_compress_preflight(messages)` | 返回 `False` | 你可以进行廉价的 API 调用前估算 |
+| `get_status()` | 标准的 token/threshold 字典 | 你有自定义指标需要暴露 |
 
 ## 引擎工具
 
-上下文引擎可以暴露 Agent 直接调用的工具。通过 `get_tool_schemas()` 返回模式，并在 `handle_tool_call()` 中处理调用：
+上下文引擎可以暴露供 Agent 直接调用的工具。从 `get_tool_schemas()` 返回模式，并在 `handle_tool_call()` 中处理调用：
 
 ```python
 def get_tool_schemas(self):
@@ -142,25 +146,25 @@ def register(ctx):
 
 ```
 1. 引擎实例化（插件加载或目录发现）
-2. on_session_start() — 对话开始
+2. on_session_start() — 会话开始
 3. update_from_response() — 每次 API 调用后
 4. should_compress() — 每轮检查
 5. compress() — 当 should_compress() 返回 True 时调用
 6. on_session_end() — 会话边界（CLI 退出、/reset、消息网关过期）
 ```
 
-`on_session_reset()` 在 `/new` 或 `/reset` 时被调用，用于清除会话状态而无需完全关闭。
+`on_session_reset()` 在 `/new` 或 `/reset` 时调用，用于清除会话状态而不完全关闭。
 
 ## 配置
 
-用户通过 `hermes plugins` → Provider Plugins → Context Engine，或通过编辑 `config.yaml` 来选择你的引擎：
+用户通过 `hermes plugins` → Provider Plugins → Context Engine 选择你的引擎，或者通过编辑 `config.yaml`：
 
 ```yaml
 context:
   engine: "lcm"   # 必须与你的引擎的 name 属性匹配
 ```
 
-`compression` 配置块（`compression.threshold`、`compression.protect_last_n` 等）是内置 `ContextCompressor` 特有的。你的引擎如果需要，应定义自己的配置格式，并在初始化时从 `config.yaml` 读取。
+`compression` 配置块（`compression.threshold`、`compression.protect_last_n` 等）是内置 `ContextCompressor` 特有的。你的引擎如果需要，应定义自己的配置格式，在初始化时从 `config.yaml` 读取。
 
 ## 测试
 
@@ -180,10 +184,10 @@ def test_compress_returns_valid_messages():
     assert all("role" in m for m in result)
 ```
 
-完整的抽象基类合约测试套件请参见 `tests/agent/test_context_engine.py`。
+完整的 ABC 契约测试套件请参见 `tests/agent/test_context_engine.py`。
 
 ## 另请参阅
 
 - [上下文压缩与缓存](/docs/developer-guide/context-compression-and-caching) — 内置压缩器的工作原理
-- [记忆提供商插件](/docs/developer-guide/memory-provider-plugin) — 类似的用于记忆的单选插件系统
+- [记忆提供者插件](/docs/developer-guide/memory-provider-plugin) — 类似的单选择插件系统，用于记忆
 - [插件](/docs/user-guide/features/plugins) — 通用插件系统概述

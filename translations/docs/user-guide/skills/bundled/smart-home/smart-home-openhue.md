@@ -1,14 +1,14 @@
 ---
-title: "Openhue — 通过 OpenHue CLI 控制 Philips Hue 灯具、房间和场景"
+title: "Openhue — 通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间"
 sidebar_label: "Openhue"
-description: "通过 OpenHue CLI 控制 Philips Hue 灯具、房间和场景"
+description: "通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Openhue
 
-通过 OpenHue CLI 控制 Philips Hue 灯具、房间和场景。开关灯、调整亮度、颜色、色温以及激活场景。
+通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间。
 
 ## 技能元数据
 
@@ -29,7 +29,7 @@ description: "通过 OpenHue CLI 控制 Philips Hue 灯具、房间和场景"
 
 # OpenHue CLI
 
-通过终端从 Hue Bridge 控制 Philips Hue 灯具和场景。
+通过终端控制 Hue Bridge 上的 Philips Hue 灯和场景。
 
 ## 先决条件
 
@@ -41,7 +41,7 @@ curl -sL https://github.com/openhue/openhue-cli/releases/latest/download/openhue
 brew install openhue/cli/openhue-cli
 ```
 
-首次运行需要按下 Hue Bridge 上的按钮进行配对。Bridge 必须与运行 Hermes 的机器在同一本地网络。
+首次运行需要按下 Hue Bridge 上的按钮进行配对。Bridge 必须与运行 Hermes 的机器在同一本地网络中。
 
 ## 使用场景
 
@@ -56,15 +56,15 @@ brew install openhue/cli/openhue-cli
 ### 列出资源
 
 ```bash
-openhue get light       # 列出所有灯具
+openhue get light       # 列出所有灯
 openhue get room        # 列出所有房间
 openhue get scene       # 列出所有场景
 ```
 
-### 控制灯具
+### 控制灯
 
 ```bash
-# 开/关
+# 打开/关闭
 openhue set light "Bedroom Lamp" --on
 openhue set light "Bedroom Lamp" --off
 
@@ -74,7 +74,7 @@ openhue set light "Bedroom Lamp" --on --brightness 50
 # 色温 (暖到冷: 153-500 mirek)
 openhue set light "Bedroom Lamp" --on --temperature 300
 
-# 颜色 (通过名称或十六进制)
+# 颜色 (按名称或十六进制)
 openhue set light "Bedroom Lamp" --on --color red
 openhue set light "Bedroom Lamp" --on --rgb "#FF5500"
 ```
@@ -99,10 +99,10 @@ openhue set scene "Concentrate" --room "Office"
 ## 快速预设
 
 ```bash
-# 睡前模式 (昏暗温暖)
+# 睡前模式 (昏暗暖光)
 openhue set room "Bedroom" --on --brightness 20 --temperature 450
 
-# 工作模式 (明亮冷色)
+# 工作模式 (明亮冷光)
 openhue set room "Office" --on --brightness 100 --temperature 250
 
 # 电影模式 (昏暗)
@@ -116,8 +116,8 @@ openhue set room "Living Room" --off
 
 ## 注意事项
 
-- Bridge 必须与运行 Hermes 的机器在同一本地网络
+- Bridge 必须与运行 Hermes 的机器在同一本地网络中
 - 首次运行需要物理按下 Hue Bridge 上的按钮进行授权
-- 颜色功能仅适用于支持彩色的灯泡（不适用于纯白色型号）
-- 灯具和房间名称区分大小写 — 使用 `openhue get light` 检查确切名称
+- 颜色功能仅适用于支持彩色的灯泡（非纯白型号）
+- 灯和房间名称区分大小写 — 使用 `openhue get light` 检查确切名称
 - 非常适合与定时任务结合，实现计划照明（例如，睡前调暗，起床时调亮）

@@ -1,14 +1,14 @@
 ---
-title: "Jupyter Live Kernel — 通过 hamelnb 使用实时 Jupyter 内核进行有状态、迭代式的 Python 执行"
+title: "Jupyter Live Kernel — 通过实时 Jupyter 内核进行迭代式 Python 编程 (hamelnb)"
 sidebar_label: "Jupyter Live Kernel"
-description: "通过 hamelnb 使用实时 Jupyter 内核进行有状态、迭代式的 Python 执行"
+description: "通过实时 Jupyter 内核进行迭代式 Python 编程 (hamelnb)"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Jupyter Live Kernel
 
-通过 hamelnb 使用实时 Jupyter 内核进行有状态、迭代式的 Python 执行。当任务涉及探索、迭代或检查中间结果时（例如数据科学、机器学习实验、API 探索或逐步构建复杂代码），请加载此技能。使用终端对实时 Jupyter 内核运行 CLI 命令。无需新工具。
+通过实时 Jupyter 内核进行迭代式 Python 编程 (hamelnb)。
 
 ## 技能元数据
 
@@ -29,14 +29,14 @@ description: "通过 hamelnb 使用实时 Jupyter 内核进行有状态、迭代
 
 # Jupyter Live Kernel (hamelnb)
 
-通过实时 Jupyter 内核提供一个**有状态的 Python REPL**。变量在多次执行间保持持久。当你需要逐步构建状态、探索 API、检查 DataFrame 或迭代复杂代码时，请使用此技能代替 `execute_code`。
+通过实时 Jupyter 内核为你提供一个**有状态的 Python REPL**。变量在多次执行间保持持久。当你需要逐步构建状态、探索 API、检查 DataFrame 或迭代复杂代码时，请使用此技能代替 `execute_code`。
 
-## 何时使用此技能 vs 其他工具
+## 何时使用此工具 vs 其他工具
 
 | 工具 | 使用场景 |
 |------|----------|
-| **此技能** | 迭代式探索、跨步骤保持状态、数据科学、机器学习、"让我试试这个并检查一下" |
-| `execute_code` | 需要访问 hermes 工具（web_search、文件操作）的一次性脚本。无状态。 |
+| **此技能** | 迭代式探索、跨步骤的状态保持、数据科学、机器学习、"让我试试这个并检查一下" |
+| `execute_code` | 需要访问 Hermes 工具（web_search、文件操作）的一次性脚本。无状态。 |
 | `terminal` | Shell 命令、构建、安装、git、进程管理 |
 
 **经验法则：** 如果某项任务你希望使用 Jupyter notebook，那么就使用此技能。
@@ -77,7 +77,7 @@ sleep 3
 
 ### 为 REPL 使用创建 Notebook
 
-如果你只需要一个 REPL（没有现有的 notebook），请创建一个最小的 notebook 文件：
+如果你只需要一个 REPL（没有现有的 notebook），创建一个最小的 notebook 文件：
 ```
 mkdir -p ~/notebooks
 ```
@@ -139,23 +139,23 @@ uv run "$SCRIPT" edit --path <notebook.ipynb> delete --cell-id <id> --compact
 
 ### 5. 验证（重启并运行全部）
 
-仅当用户要求进行干净的验证或你需要确认 notebook 能从头到尾运行时使用：
+仅在用户要求进行干净的验证或你需要确认 notebook 能从头到尾运行时使用：
 
 ```
 uv run "$SCRIPT" restart-run-all --path <notebook.ipynb> --save-outputs --compact
 ```
 
-## 实践经验技巧
+## 来自经验的实用技巧
 
-1.  **服务器启动后的首次执行可能会超时** —— 内核需要一点时间来初始化。如果遇到超时，只需重试即可。
-2.  **内核的 Python 是 JupyterLab 的 Python** —— 包必须安装在该环境中。如果需要额外的包，请先将其安装到 JupyterLab 工具环境中。
-3.  **`--compact` 标志能显著节省 Token** —— 始终使用它。没有它，JSON 输出会非常冗长。
-4.  **对于纯 REPL 使用**，创建一个 scratch.ipynb 文件，无需费心进行单元编辑。只需重复使用 `execute` 即可。
-5.  **参数顺序很重要** —— 像 `--path` 这样的子命令标志要放在子子命令**之前**。例如：`variables --path nb.ipynb list` 而不是 `variables list --path nb.ipynb`。
+1.  **服务器启动后的首次执行可能会超时** — 内核需要一点时间来初始化。如果遇到超时，只需重试。
+2.  **内核的 Python 是 JupyterLab 的 Python** — 包必须安装在该环境中。如果需要额外的包，请先将其安装到 JupyterLab 工具环境中。
+3.  **`--compact` 标志能显著节省 Token** — 始终使用它。没有它，JSON 输出会非常冗长。
+4.  **对于纯 REPL 使用**，创建一个 scratch.ipynb 文件，无需费心编辑单元。只需重复使用 `execute`。
+5.  **参数顺序很重要** — 像 `--path` 这样的子命令标志放在子子命令**之前**。例如：`variables --path nb.ipynb list` 而不是 `variables list --path nb.ipynb`。
 6.  **如果会话尚不存在**，你需要通过 REST API 启动一个（见设置部分）。没有活动的内核会话，工具无法执行。
-7.  **错误以 JSON 格式返回，并包含回溯信息** —— 阅读 `ename` 和 `evalue` 字段以了解出错原因。
-8.  **偶尔的 websocket 超时** —— 某些操作可能在第一次尝试时超时，尤其是在内核重启后。在升级问题之前先重试一次。
+7.  **错误以 JSON 格式返回并包含回溯** — 阅读 `ename` 和 `evalue` 字段以了解出错原因。
+8.  **偶尔的 websocket 超时** — 某些操作可能在第一次尝试时超时，尤其是在内核重启后。在升级问题前先重试一次。
 
-## 默认超时设置
+## 超时默认值
 
-脚本的每次执行默认超时为 30 秒。对于长时间运行的操作，请传递 `--timeout 120`。对于初始设置或繁重计算，请使用更长的超时时间（60+）。
+脚本的每次执行默认超时为 30 秒。对于长时间运行的操作，传递 `--timeout 120`。对于初始设置或繁重计算，请使用更长的超时时间（60+）。

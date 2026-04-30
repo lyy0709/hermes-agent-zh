@@ -1,6 +1,6 @@
 ---
 title: 凭证池
-description: 为每个提供商池化多个 API 密钥或 OAuth 令牌，以实现自动轮换和速率限制恢复。
+description: 为每个提供商池化多个 API 密钥或 OAuth 令牌，实现自动轮换和速率限制恢复。
 sidebar_label: 凭证池
 sidebar_position: 9
 ---
@@ -24,14 +24,14 @@ sidebar_position: 9
   → 402 计费错误？
       → 立即轮换到池中下一个密钥（24 小时冷却）
   → 401 认证过期？
-      → 尝试刷新令牌 (OAuth)
+      → 尝试刷新令牌（OAuth）
       → 刷新失败 → 轮换到池中下一个密钥
   → 成功 → 正常继续
 ```
 
 ## 快速开始
 
-如果您已在 `.env` 中设置了 API 密钥，Hermes 会自动将其发现为单密钥池。要利用池化优势，请添加更多密钥：
+如果您已经在 `.env` 中设置了 API 密钥，Hermes 会自动将其发现为单密钥池。要利用池化优势，请添加更多密钥：
 
 ```bash
 # 添加第二个 OpenRouter 密钥
@@ -40,7 +40,7 @@ hermes auth add openrouter --api-key sk-or-v1-your-second-key
 # 添加第二个 Anthropic 密钥
 hermes auth add anthropic --type api-key --api-key sk-ant-api03-your-second-key
 
-# 添加一个 Anthropic OAuth 凭证 (Claude Code 订阅)
+# 添加一个 Anthropic OAuth 凭证（需要 Claude Max 计划 + 额外使用额度）
 hermes auth add anthropic --type oauth
 # 打开浏览器进行 OAuth 登录
 ```
@@ -90,7 +90,7 @@ hermes auth
 anthropic 同时支持 API 密钥和 OAuth 登录。
   1. API 密钥（从提供商仪表板粘贴密钥）
   2. OAuth 登录（通过浏览器认证）
-类型 [1/2]：
+输入 [1/2]：
 ```
 
 ## CLI 命令
@@ -103,7 +103,7 @@ anthropic 同时支持 API 密钥和 OAuth 登录。
 | `hermes auth add <provider>` | 添加凭证（提示输入类型和密钥） |
 | `hermes auth add <provider> --type api-key --api-key <key>` | 非交互式添加 API 密钥 |
 | `hermes auth add <provider> --type oauth` | 通过浏览器登录添加 OAuth 凭证 |
-| `hermes auth remove <provider> <index>` | 按 1 起始索引移除凭证 |
+| `hermes auth remove <provider> <index>` | 按从 1 开始的索引移除凭证 |
 | `hermes auth reset <provider>` | 清除所有冷却/耗尽状态 |
 
 ## 轮换策略
@@ -118,7 +118,7 @@ credential_pool_strategies:
 
 | 策略 | 行为 |
 |----------|----------|
-| `fill_first` (默认) | 使用第一个健康密钥直到耗尽，然后移动到下一个 |
+| `fill_first`（默认） | 使用第一个健康密钥直到耗尽，然后移动到下一个 |
 | `round_robin` | 均匀循环使用密钥，每次选择后轮换 |
 | `least_used` | 始终选择请求计数最低的密钥 |
 | `random` | 在健康密钥中随机选择 |
@@ -131,7 +131,7 @@ credential_pool_strategies:
 |-------|----------|----------|
 | **429 速率限制** | 重试同一密钥一次（瞬时）。连续第二次 429 则轮换到下一个密钥 | 1 小时 |
 | **402 计费/配额** | 立即轮换到下一个密钥 | 24 小时 |
-| **401 认证过期** | 首先尝试刷新 OAuth 令牌。仅当刷新失败时才轮换 | — |
+| **401 认证过期** | 首先尝试刷新 OAuth 令牌。仅在刷新失败时轮换 | — |
 | **所有密钥耗尽** | 如果配置了 `fallback_model`，则回退到该模型 | — |
 
 `has_retried_429` 标志在每次成功的 API 调用后重置，因此单个瞬时 429 不会触发轮换。
@@ -166,7 +166,7 @@ hermes auth add Together.ai --api-key sk-together-second-key
 
 ## 自动发现
 
-Hermes 自动从多个来源发现凭证，并在启动时填充凭证池：
+Hermes 在启动时自动从多个来源发现凭证并填充凭证池：
 
 | 来源 | 示例 | 自动填充？ |
 |--------|---------|-------------|
@@ -177,7 +177,7 @@ Hermes 自动从多个来源发现凭证，并在启动时填充凭证池：
 | 自定义端点配置 | `config.yaml` 中的 `model.api_key` | 是 (自定义端点) |
 | 手动条目 | 通过 `hermes auth add` 添加 | 持久化在 auth.json 中 |
 
-自动填充的条目在每次加载凭证池时更新——如果您移除了环境变量，其对应的池条目会自动被修剪。手动条目（通过 `hermes auth add` 添加）永远不会被自动修剪。
+自动填充的条目在每次加载凭证池时更新——如果您移除了环境变量，其对应的池条目会自动被清除。手动条目（通过 `hermes auth add` 添加）永远不会被自动清除。
 
 ## 委派与子 Agent 共享
 
@@ -187,15 +187,15 @@ Hermes 自动从多个来源发现凭证，并在启动时填充凭证池：
 - **不同提供商** — 子 Agent 加载该提供商自己的凭证池（如果已配置）
 - **未配置凭证池** — 子 Agent 回退到继承的单个 API 密钥
 
-这意味着子 Agent 无需额外配置即可享受与父 Agent 相同的速率限制恢复能力。按任务凭证租赁确保子 Agent 在并发轮换密钥时不会相互冲突。
+这意味着子 Agent 无需额外配置即可获得与父 Agent 相同的速率限制恢复能力。按任务凭证租赁确保子 Agent 在并发轮换密钥时不会相互冲突。
 
 ## 线程安全
 
-凭证池对所有状态变更（`select()`、`mark_exhausted_and_rotate()`、`try_refresh_current()`、`mark_used()`）使用线程锁。这确保了当消息网关同时处理多个聊天会话时，并发访问是安全的。
+凭证池对所有状态变更（`select()`、`mark_exhausted_and_rotate()`、`try_refresh_current()`、`mark_used()`）使用线程锁。这确保了当消息网关同时处理多个聊天会话时的安全并发访问。
 
 ## 架构
 
-有关完整的数据流图，请参阅仓库中的 [`docs/credential-pool-flow.excalidraw`](https://excalidraw.com/#json=2Ycqhqpi6f12E_3ITyiwh,c7u9jSt5BwrmiVzHGbm87g)。
+完整的数据流图，请参阅仓库中的 [`docs/credential-pool-flow.excalidraw`](https://excalidraw.com/#json=2Ycqhqpi6f12E_3ITyiwh,c7u9jSt5BwrmiVzHGbm87g)。
 
 凭证池集成在提供商解析层：
 
@@ -228,7 +228,7 @@ Hermes 自动从多个来源发现凭证，并在启动时填充凭证池：
 }
 ```
 
-策略存储在 `config.yaml` 中（而非 `auth.json`）：
+策略存储在 `config.yaml` 中（不在 `auth.json` 中）：
 
 ```yaml
 credential_pool_strategies:

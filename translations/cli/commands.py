@@ -2,7 +2,7 @@
 
 所有斜杠命令的中央注册表。每个使用者——CLI 帮助、消息网关分发、Telegram BotCommands、Slack 子命令映射、自动补全——都从 ``COMMAND_REGISTRY`` 派生其数据。
 
-添加命令：在 ``COMMAND_REGISTRY`` 中添加一个 ``CommandDef`` 条目。
+添加命令：向 ``COMMAND_REGISTRY`` 添加一个 ``CommandDef`` 条目。
 添加别名：在现有的 ``CommandDef`` 上设置 ``aliases=("short",)``。
 """
 
@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from typing import Any
 
 # prompt_toolkit 是一个可选的 CLI 依赖项——仅 SlashCommandCompleter 和 SlashCommandAutoSuggest 需要。
-# 缺少它的消息网关和测试环境必须仍然能够导入此模块以使用 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
+# 缺少它的网关和测试环境必须仍然能够导入此模块以使用 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
 try:
     from prompt_toolkit.auto_suggest import AutoSuggest, Suggestion
     from prompt_toolkit.completion import Completer, Completion
@@ -37,15 +37,15 @@ except ImportError:  # pragma: no cover
 class CommandDef:
     """单个斜杠命令的定义。"""
 
-    name: str                          # 规范名称，不带斜杠："background"
+    name: str                          # 不带斜杠的规范名称："background"
     description: str                   # 人类可读的描述
-    category: str                      # "会话"、"配置" 等
+    category: str                      # "会话"、"配置"等
     aliases: tuple[str, ...] = ()      # 替代名称：("bg",)
     args_hint: str = ""                # 参数占位符："<prompt>"、"[name]"
     subcommands: tuple[str, ...] = ()  # 可制表符补全的子命令
     cli_only: bool = False             # 仅在 CLI 中可用
-    gateway_only: bool = False         # 仅在消息网关/消息传递中可用
-    gateway_config_gate: str | None = None  # 配置点路径；当为真值时，覆盖 gateway 的 cli_only
+    gateway_only: bool = False         # 仅在网关/消息传递中可用
+    gateway_config_gate: str | None = None  # 配置点路径；为真值时，会覆盖 gateway 的 cli_only
 
 
 # ---------------------------------------------------------------------------
@@ -54,11 +54,11 @@ class CommandDef:
 
 COMMAND_REGISTRY: list[CommandDef] = [
     # 会话
-    CommandDef("new", "启动新会话（新的会话 ID + 历史记录）", "会话",
+    CommandDef("new", "开始一个新会话（新的会话 ID + 历史记录）", "会话",
                aliases=("reset",)),
-    CommandDef("clear", "清屏并启动新会话", "会话",
+    CommandDef("clear", "清屏并开始一个新会话", "会话",
                cli_only=True),
-    CommandDef("redraw", "强制完整 UI 重绘（从终端漂移中恢复）", "会话",
+    CommandDef("redraw", "强制完全重绘 UI（从终端漂移中恢复）", "会话",
                cli_only=True),
     CommandDef("history", "显示对话历史记录", "会话",
                cli_only=True),
@@ -85,12 +85,12 @@ COMMAND_REGISTRY: list[CommandDef] = [
                aliases=("bg", "btw"), args_hint="<prompt>"),
     CommandDef("agents", "显示活跃的 Agent 和正在运行的任务", "会话",
                aliases=("tasks",)),
-    CommandDef("queue", "为下一轮排队一个提示词（不中断）", "会话",
+    CommandDef("queue", "为下一个回合排队一个提示词（不中断）", "会话",
                aliases=("q",), args_hint="<prompt>"),
     CommandDef("steer", "在下一次工具调用后注入一条消息而不中断", "会话",
                args_hint="<prompt>"),
     CommandDef("status", "显示会话信息", "会话"),
-    CommandDef("profile", "显示活跃的配置文件名称和主目录", "信息"),
+    CommandDef("profile", "显示活跃的配置文件名和主目录", "信息"),
     CommandDef("sethome", "将此聊天设置为主频道", "会话",
                gateway_only=True, aliases=("set-home",)),
     CommandDef("resume", "恢复一个先前命名的会话", "会话",
@@ -111,12 +111,12 @@ COMMAND_REGISTRY: list[CommandDef] = [
     CommandDef("verbose", "循环工具进度显示：关闭 -> 新 -> 全部 -> 详细",
                "配置", cli_only=True,
                gateway_config_gate="display.tool_progress_command"),
-    CommandDef("footer", "切换最终回复上的消息网关运行时元数据页脚",
+    CommandDef("footer", "切换最终回复上的网关运行时元数据页脚",
                "配置", args_hint="[on|off|status]",
                subcommands=("on", "off", "status")),
     CommandDef("yolo", "切换 YOLO 模式（跳过所有危险命令批准）",
                "配置"),
-    CommandDef("reasoning", "管理推理努力和显示", "配置",
+    CommandDef("reasoning", "管理推理力度和显示", "配置",
                args_hint="[level|show|hide]",
                subcommands=("none", "minimal", "low", "medium", "high", "xhigh", "show", "hide", "on", "off")),
     CommandDef("fast", "切换快速模式——OpenAI 优先处理 / Anthropic 快速模式（普通/快速）", "配置",
@@ -144,10 +144,15 @@ COMMAND_REGISTRY: list[CommandDef] = [
     CommandDef("cron", "管理定时任务", "工具 & 技能",
                cli_only=True, args_hint="[subcommand]",
                subcommands=("list", "add", "create", "edit", "pause", "resume", "run", "remove")),
+    CommandDef("curator", "后台技能维护（状态、运行、置顶、归档）",
+               "工具 & 技能", args_hint="[subcommand]",
+               subcommands=("status", "run", "pause", "resume", "pin", "unpin", "restore")),
     CommandDef("reload", "将 .env 变量重新加载到正在运行的会话中", "工具 & 技能",
                cli_only=True),
     CommandDef("reload-mcp", "从配置重新加载 MCP 服务器", "工具 & 技能",
                aliases=("reload_mcp",)),
+    CommandDef("reload-skills", "重新扫描 ~/.hermes/skills/ 以查找新安装或移除的技能",
+               "工具 & 技能", aliases=("reload_skills",)),
     CommandDef("browser", "通过 CDP 将浏览器工具连接到您正在运行的 Chrome", "工具 & 技能",
                cli_only=True, args_hint="[connect|disconnect|status]",
                subcommands=("connect", "disconnect", "status")),
@@ -158,12 +163,12 @@ COMMAND_REGISTRY: list[CommandDef] = [
     CommandDef("commands", "浏览所有命令和技能（分页）", "信息",
                gateway_only=True, args_hint="[page]"),
     CommandDef("help", "显示可用命令", "信息"),
-    CommandDef("restart", "在排空活跃运行后优雅地重启消息网关", "会话",
+    CommandDef("restart", "在排空活跃运行后优雅地重启网关", "会话",
                gateway_only=True),
     CommandDef("usage", "显示当前会话的 Token 使用情况和速率限制", "信息"),
     CommandDef("insights", "显示使用洞察和分析", "信息",
                args_hint="[days]"),
-    CommandDef("platforms", "显示消息网关/消息传递平台状态", "信息",
+    CommandDef("platforms", "显示网关/消息传递平台状态", "信息",
                cli_only=True, aliases=("gateway",)),
     CommandDef("copy", "将最后一条助手响应复制到剪贴板", "信息",
                cli_only=True, args_hint="[number]"),
@@ -218,7 +223,8 @@ for _cmd in COMMAND_REGISTRY:
     if not _cmd.gateway_only:
         COMMANDS[f"/{_cmd.name}"] = _build_description(_cmd)
         for _alias in _cmd.aliases:
-            COMMANDS[f"/{_alias}"] = f"{_cmd.description} (/别名 {_cmd.name})"
+            COMMANDS[f"/{_alias}"] = f"{_cmd.description} (/命令 {_cmd.name} 的别名)"
+
 
 # Backwards-compatible categorized dict
 COMMANDS_BY_CATEGORY: dict[str, dict[str, str]] = {}
@@ -631,17 +637,18 @@ def _collect_gateway_skill_entries(
 def telegram_menu_commands(max_commands: int = 100) -> tuple[list[tuple[str, str]], int]:
     """返回受 Bot API 限制的 Telegram 菜单命令。
 
-    优先级顺序（优先级越高 = 溢出时永不被移除）：
+    优先级顺序（优先级越高 = 溢出时不会被移除）：
       1. 核心 CommandDef 命令（始终包含）
       2. 插件斜杠命令（优先于技能）
       3. 内置技能命令（填充剩余槽位，按字母顺序）
 
     技能是唯一在达到上限时会被修剪的层级。
-    用户安装的 hub 技能被排除在外 —— 可通过 /skills 访问。
-    为 ``"telegram"`` 平台禁用的技能（通过 ``hermes skills config``）将完全从菜单中排除。
+    用户安装的 Hub 技能被排除在外 — 可通过 /skills 访问。
+    为 ``"telegram"`` 平台禁用的技能（通过 ``hermes skills
+    config``）会完全从菜单中排除。
 
-    Returns:
-        (menu_commands, hidden_count) 其中 hidden_count 是由于上限而被省略的技能命令数量。
+    返回：
+        (menu_commands, hidden_count)，其中 hidden_count 是由于上限而被省略的技能命令数量。
     """
     core_commands = list(telegram_bot_commands())
     reserved_names = {n for n, _ in core_commands}
@@ -655,7 +662,7 @@ def telegram_menu_commands(max_commands: int = 100) -> tuple[list[tuple[str, str
         desc_limit=40,
         sanitize_name=_sanitize_telegram_name,
     )
-    # 丢弃 cmd_key —— Telegram 只需要 (name, desc) 对。
+    # 丢弃 cmd_key — Telegram 只需要 (name, desc) 对。
     all_commands.extend((n, d) for n, d, _k in entries)
     return all_commands[:max_commands], hidden_count
 
@@ -666,22 +673,25 @@ def discord_skill_commands(
 ) -> tuple[list[tuple[str, str, str]], int]:
     """返回用于 Discord 斜杠命令注册的技能条目。
 
-    优先级和过滤逻辑与 :func:`telegram_menu_commands` 相同（插件 > 技能，hub 排除，按平台禁用排除），但根据 Discord 的限制进行了调整：
+    与 :func:`telegram_menu_commands` 相同的优先级和过滤逻辑
+    （插件 > 技能，排除 Hub，排除按平台禁用的技能），但根据 Discord 的限制进行了调整：
 
     - 名称中允许连字符（无需 ``-`` → ``_`` 清理）
     - 描述限制在 100 个字符内（Discord 的每字段最大值）
 
-    Args:
+    参数：
         max_slots: 可用命令槽位（100 减去现有内置命令数量）。
         reserved_names: 已注册的内置命令名称。
 
-    Returns:
-        ``(entries, hidden_count)`` 其中 *entries* 是 ``(discord_name, description, cmd_key)`` 三元组的列表。``cmd_key`` 是原始的 ``/skill-name`` 键，用于斜杠处理程序回调。
+    返回：
+        ``(entries, hidden_count)``，其中 *entries* 是
+        ``(discord_name, description, cmd_key)`` 三元组的列表。``cmd_key`` 是
+        斜杠处理程序回调所需的原始 ``/skill-name`` 键。
     """
     return _collect_gateway_skill_entries(
         platform="discord",
         max_slots=max_slots,
-        reserved_names=set(reserved_names),  # 复制 —— 不要修改调用者的集合
+        reserved_names=set(reserved_names),  # 复制 — 不要修改调用者的集合
         desc_limit=100,
     )
 
@@ -691,16 +701,21 @@ def discord_skill_commands_by_category(
 ) -> tuple[dict[str, list[tuple[str, str, str]]], list[tuple[str, str, str]], int]:
     """返回按类别组织的技能条目，用于 Discord ``/skill`` 子命令组。
 
-    目录在 ``SKILLS_DIR`` 下至少嵌套 2 层的技能（例如 ``creative/ascii-art/SKILL.md``）按其顶级类别分组。根级技能（例如 ``dogfood/SKILL.md``）作为 *未分类* 返回 —— 调用者应将它们注册为 ``/skill`` 组的直接子命令。
+    目录在 ``SKILLS_DIR`` 下至少嵌套 2 层的技能
+    （例如 ``creative/ascii-art/SKILL.md``）按其顶级类别分组。
+    根级技能（例如 ``dogfood/SKILL.md``）作为 *未分类* 返回 — 调用者应将它们注册为
+    ``/skill`` 组的直接子命令。
 
-    应用与 :func:`discord_skill_commands` 相同的过滤：hub 技能排除，按平台禁用排除，名称截断。
+    应用与 :func:`discord_skill_commands` 相同的过滤：排除 Hub
+    技能，排除按平台禁用的技能，名称被截断。
 
-    Returns:
+    返回：
         ``(categories, uncategorized, hidden_count)``
 
         - *categories*: ``{category_name: [(name, description, cmd_key), ...]}``
         - *uncategorized*: ``[(name, description, cmd_key), ...]``
-        - *hidden_count*: 由于 Discord 组限制（25 个子命令组，每组 25 个子命令）而被丢弃的技能数量
+        - *hidden_count*: 由于 Discord 组限制而被丢弃的技能数量
+          （25 个子命令组，每组 25 个子命令）
     """
     from pathlib import Path as _P
 
@@ -730,7 +745,7 @@ def discord_skill_commands_by_category(
             if not skill_path:
                 continue
             sp = _P(skill_path).resolve()
-            # 跳过 SKILLS_DIR 之外的技能或来自 hub 的技能
+            # 跳过不在 SKILLS_DIR 内或来自 Hub 的技能
             if not str(sp).startswith(str(_skills_dir)):
                 continue
             if str(sp).startswith(str(_hub_dir)):
@@ -794,8 +809,8 @@ def discord_skill_commands_by_category(
 # Slack 原生斜杠命令
 # ---------------------------------------------------------------------------
 
-# Slack 斜杠命令名称约束：小写 a-z, 0-9, 连字符，
-# 下划线。最多 32 个字符。Slack 应用清单每个应用最多接受 50 个斜杠
+# Slack 斜杠命令名称约束：小写 a-z、0-9、连字符、
+# 下划线。最多 32 个字符。Slack 应用清单最多接受每个应用 50 个斜杠
 # 命令。
 _SLACK_MAX_SLASH_COMMANDS = 50
 _SLACK_NAME_LIMIT = 32
@@ -860,7 +875,7 @@ def slack_native_slashes() -> list[tuple[str, str, str]]:
         for alias in cmd.aliases:
             # Skip aliases that only differ from canonical by case/punctuation
             # normalization (already covered by _add dedup).
-            _add(alias, f"/{cmd.name} 的别名 — {cmd.description}", cmd.args_hint or "")
+            _add(alias, f"别名 /{cmd.name} — {cmd.description}", cmd.args_hint or "")
 
     # Third pass: plugin commands.
     for name, description, args_hint in _iter_plugin_command_entries():
@@ -922,8 +937,8 @@ def slack_subcommand_map() -> dict[str, str]:
 # ---------------------------------------------------------------------------
 
 
-# 用于 /model<space> LM Studio 自动补全的进程内缓存。每次按键都探测会阻塞 UI；
-# 短暂的 TTL 可以保持其活跃，又不会过度冲击服务器。
+# 每个进程的缓存，用于 /model<空格> LM Studio 自动补全。每次按键都探测会阻塞 UI；
+# 较短的 TTL 可以保持其活跃，同时不会过度冲击服务器。
 _LMSTUDIO_COMPLETION_CACHE: tuple[float, list[str]] | None = None
 
 
@@ -957,7 +972,7 @@ def _lmstudio_completion_models() -> list[str]:
 
 
 class SlashCommandCompleter(Completer):
-    """用于内置斜杠命令、子命令和技能命令的自动补全。"""
+    """内置斜杠命令、子命令和技能命令的自动补全。"""
 
     def __init__(
         self,
@@ -989,11 +1004,11 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _completion_text(cmd_name: str, word: str) -> str:
-        """返回补全项的替换文本。
+        """返回补全的替换文本。
 
-        当用户已经精确输入了完整命令（``/help``）时，
-        返回 ``help`` 将是无操作，并且 prompt_toolkit 会抑制菜单显示。
-        添加一个尾随空格可以保持下拉菜单可见，并使退格键能自然地重新触发它。
+        当用户已经准确输入了完整命令（``/help``）时，返回 ``help`` 将是无操作，
+        prompt_toolkit 会抑制菜单显示。添加一个尾随空格可以保持下拉菜单可见，
+        并使退格键能自然地重新触发它。
         """
         return f"{cmd_name} " if cmd_name == word else cmd_name
 
@@ -1001,21 +1016,21 @@ class SlashCommandCompleter(Completer):
     def _extract_path_word(text: str) -> str | None:
         """如果当前单词看起来像文件路径，则提取它。
 
-        返回光标下的类路径标记，如果当前单词看起来不像路径则返回 None。
-        当一个单词以 ``./``、``../``、``~/``、``/`` 开头，或者包含
-        ``/`` 分隔符（例如 ``src/main.py``）时，它被认为是类路径的。
+        返回光标下的类似路径的标记，如果当前单词看起来不像路径则返回 None。
+        当一个单词以 ``./``、``../``、``~/``、``/`` 开头，或包含 ``/`` 分隔符
+        （例如 ``src/main.py``）时，它被认为是类似路径的。
         """
         if not text:
             return None
         # 向后遍历以找到当前“单词”的起始位置。
-        # 单词由空格分隔，但路径几乎可以包含任何内容。
+        # 单词由空格分隔，但路径可以包含几乎任何内容。
         i = len(text) - 1
         while i >= 0 and text[i] != " ":
             i -= 1
         word = text[i + 1:]
         if not word:
             return None
-        # 仅对类路径标记触发路径补全
+        # 仅对类似路径的标记触发路径补全
         if word.startswith(("./", "../", "~/", "/")) or "/" in word:
             return word
         return None
@@ -1073,7 +1088,7 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _extract_context_word(text: str) -> str | None:
-        """提取用于上下文引用补全的裸 ``@`` 标记。"""
+        """提取一个裸的 ``@`` 标记用于上下文引用补全。"""
         if not text:
             return None
         # 向后遍历以找到当前单词的起始位置
@@ -1088,7 +1103,7 @@ class SlashCommandCompleter(Completer):
     def _context_completions(self, word: str, limit: int = 30):
         """生成 Claude Code 风格的 @ 上下文补全。
 
-        裸 ``@`` 或 ``@partial`` 显示静态引用和匹配的文件/文件夹。
+        裸的 ``@`` 或 ``@partial`` 显示静态引用和匹配的文件/文件夹。
         ``@file:path`` 和 ``@folder:path`` 由现有的路径补全路径处理。
         """
         lowered = word.lower()
@@ -1111,7 +1126,7 @@ class SlashCommandCompleter(Completer):
                     display_meta=meta,
                 )
 
-        # 如果用户输入了 @file: / @folder:（或者只是 @file / @folder 但
+        # 如果用户输入了 @file: / @folder:（或者只是 @file / @folder 且
         # 还没有冒号），则委托给路径补全。接受裸形式可以让选择器在用户输入
         # `@folder` 后立即显示目录，而无需他们先接受静态的 `@folder:` 提示
         # 并重新触发补全。
@@ -1143,10 +1158,10 @@ class SlashCommandCompleter(Completer):
                         continue
                     full_path = os.path.join(search_dir, entry)
                     is_dir = os.path.isdir(full_path)
-                    # `@folder:` 必须只显示目录；`@file:` 只显示
-                    # 常规文件。没有这个过滤器，`@folder:` 会列出
-                    # 当前工作目录中的每个 .env / .gitignore，违背了
-                    # 明确的前缀意图，并让期望目录选择器的用户感到困惑。
+                    # `@folder:` 必须只显示目录；`@file:` 只显示常规文件。
+                    # 没有这个过滤器，`@folder:` 会列出当前工作目录中的每个
+                    # .env / .gitignore，违背了明确的前缀，并让期望目录选择器
+                    # 的用户感到困惑。
                     if want_dir != is_dir:
                         continue
                     if count >= limit:
@@ -1164,7 +1179,7 @@ class SlashCommandCompleter(Completer):
                     count += 1
                 return
 
-        # 裸 @ 或 @partial — 模糊项目范围文件搜索
+        # 裸 @ 或 @partial — 模糊的项目范围文件搜索
         query = word[1:]  # 去掉 @
         yield from self._fuzzy_file_completions(word, query, limit)
 
@@ -1263,7 +1278,7 @@ class SlashCommandCompleter(Completer):
             for fp in files[:limit]:
                 is_dir = fp.endswith("/")
                 filename = os.path.basename(fp)
-                kind = "文件夹" if is_dir else "文件"
+                kind = "folder" if is_dir else "file"
                 meta = "目录" if is_dir else _file_size_label(
                     os.path.join(os.getcwd(), fp)
                 )
@@ -1286,7 +1301,7 @@ class SlashCommandCompleter(Completer):
         for _, fp in scored[:limit]:
             is_dir = fp.endswith("/")
             filename = os.path.basename(fp)
-            kind = "文件夹" if is_dir else "文件"
+            kind = "folder" if is_dir else "file"
             meta = "目录" if is_dir else _file_size_label(
                 os.path.join(os.getcwd(), fp)
             )
@@ -1374,8 +1389,8 @@ class SlashCommandCompleter(Completer):
                     )
         except Exception:
             pass
-        # LM Studio：显示本地加载的模型。受控于用户实际配置了 LM Studio
-        #（环境变量或 auth-store 条目），这样我们就不会为不使用它的用户
+        # LM Studio：显示本地加载的模型。根据用户实际配置了 LM Studio
+        # （环境变量或 auth-store 条目）来控制，这样我们就不会为不使用它的用户
         # 在每次按键时都探测 127.0.0.1。
         for name in _lmstudio_completion_models():
             if name in seen:
@@ -1479,10 +1494,10 @@ class SlashCommandCompleter(Completer):
 # 斜杠命令的内联自动建议（幽灵文本）
 # ---------------------------------------------------------------------------
 class SlashCommandAutoSuggest(AutoSuggest):
-    """Inline ghost-text suggestions for slash commands and their subcommands.
+    """斜杠命令及其子命令的内联幽灵文本建议。
 
-    Shows the rest of a command or subcommand in dim text as you type.
-    Falls back to history-based suggestions for non-slash input.
+    在您输入时以暗淡文本显示命令或子命令的其余部分。
+    对于非斜杠输入，回退到基于历史的建议。
     """
 
     def __init__(
@@ -1491,14 +1506,14 @@ class SlashCommandAutoSuggest(AutoSuggest):
         completer: SlashCommandCompleter | None = None,
     ) -> None:
         self._history = history_suggest
-        self._completer = completer  # Reuse its model cache
+        self._completer = completer  # 复用其模型缓存
 
     def get_suggestion(self, buffer, document):
         text = document.text_before_cursor
 
-        # Only suggest for slash commands
+        # 仅对斜杠命令提供建议
         if not text.startswith("/"):
-            # Fall back to history for regular text
+            # 对于常规文本，回退到历史建议
             if self._history:
                 return self._history.get_suggestion(buffer, document)
             return None
@@ -1507,21 +1522,21 @@ class SlashCommandAutoSuggest(AutoSuggest):
         base_cmd = parts[0].lower()
 
         if len(parts) == 1 and not text.endswith(" "):
-            # Still typing the command name: /upd → suggest "ate"
+            # 仍在输入命令名称：/upd → 建议 "ate"
             word = text[1:].lower()
             for cmd in COMMANDS:
                 if self._completer is not None and not self._completer._command_allowed(cmd):
                     continue
-                cmd_name = cmd[1:]  # strip leading /
+                cmd_name = cmd[1:]  # 去除前导 /
                 if cmd_name.startswith(word) and cmd_name != word:
                     return Suggestion(cmd_name[len(word):])
             return None
 
-        # Command is complete — suggest subcommands or model names
+        # 命令已输入完整 — 建议子命令或模型名称
         sub_text = parts[1] if len(parts) > 1 else ""
         sub_lower = sub_text.lower()
 
-        # Static subcommands
+        # 静态子命令
         if self._completer is not None and not self._completer._command_allowed(base_cmd):
             return None
         if base_cmd in SUBCOMMANDS and SUBCOMMANDS[base_cmd]:
@@ -1530,14 +1545,14 @@ class SlashCommandAutoSuggest(AutoSuggest):
                     if sub.startswith(sub_lower) and sub != sub_lower:
                         return Suggestion(sub[len(sub_text):])
 
-        # Fall back to history
+        # 回退到历史建议
         if self._history:
             return self._history.get_suggestion(buffer, document)
         return None
 
 
 def _file_size_label(path: str) -> str:
-    """Return a compact human-readable file size, or '' on error."""
+    """返回一个紧凑的人类可读文件大小，出错时返回 ''。"""
     try:
         size = os.path.getsize(path)
     except OSError:

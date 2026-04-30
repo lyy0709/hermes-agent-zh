@@ -1,14 +1,14 @@
 ---
-title: "Himalaya — 通过 IMAP/SMTP 管理邮件的 CLI"
+title: "Himalaya — Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件"
 sidebar_label: "Himalaya"
-description: "通过 IMAP/SMTP 管理邮件的 CLI"
+description: "Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Himalaya
 
-通过 IMAP/SMTP 管理邮件的 CLI。使用 himalaya 可以在终端中列出、读取、撰写、回复、转发、搜索和组织邮件。支持多账户以及使用 MML（MIME 元语言）撰写邮件。
+Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件。
 
 ## 技能元数据
 
@@ -29,7 +29,7 @@ description: "通过 IMAP/SMTP 管理邮件的 CLI"
 
 # Himalaya 邮件 CLI
 
-Himalaya 是一个 CLI 邮件客户端，允许你使用 IMAP、SMTP、Notmuch 或 Sendmail 后端从终端管理邮件。
+Himalaya 是一个 CLI 邮件客户端，允许你使用 IMAP、SMTP、Notmuch 或 Sendmail 后端在终端中管理邮件。
 
 ## 参考资料
 
@@ -90,8 +90,8 @@ message.send.backend.auth.cmd = "pass show email/smtp"
 
 ## Hermes 集成说明
 
--   **读取、列出、搜索、移动、删除** 都可以直接通过终端工具完成
--   **撰写/回复/转发** — 建议使用管道输入（`cat << EOF | himalaya template send`）以获得可靠性。交互式 `$EDITOR` 模式可以与 `pty=true` + 后台 + 进程工具配合使用，但需要了解编辑器及其命令
+-   **读取、列出、搜索、移动、删除** 邮件都可以直接通过终端工具完成
+-   **撰写/回复/转发** — 建议使用管道输入（`cat << EOF | himalaya template send`）以获得更好的可靠性。交互式 `$EDITOR` 模式可以与 `pty=true` + 后台 + 进程工具配合使用，但需要了解编辑器及其命令
 -   使用 `--output json` 获取结构化输出，便于程序解析
 -   `himalaya account configure` 向导需要交互式输入 — 使用 PTY 模式：`terminal(command="himalaya account configure", pty=true)`
 
@@ -145,7 +145,7 @@ himalaya message export 42 --full
 
 ### 回复邮件
 
-要从 Hermes 非交互式回复，请读取原始邮件，撰写回复，并通过管道发送：
+要从 Hermes 非交互式回复，请读取原始消息，撰写回复，并通过管道发送：
 
 ```bash
 # 获取回复模板，编辑并发送
@@ -192,13 +192,13 @@ Hello from Himalaya!
 EOF
 ```
 
-或者使用 header 标志：
+或者使用 headers 标志：
 
 ```bash
 himalaya message write -H "To:recipient@example.com" -H "Subject:Test" "Message body here"
 ```
 
-注意：不带管道输入的 `himalaya message write` 会打开 `$EDITOR`。这可以与 `pty=true` + 后台模式配合使用，但使用管道更简单可靠。
+注意：不带管道输入的 `himalaya message write` 会打开 `$EDITOR`。这可以与 `pty=true` + 后台模式配合使用，但使用管道更简单、更可靠。
 
 ### 移动/复制邮件
 
@@ -279,7 +279,7 @@ himalaya envelope list --output plain
 RUST_LOG=debug himalaya envelope list
 ```
 
-完整跟踪与回溯：
+完整跟踪（含回溯）：
 
 ```bash
 RUST_LOG=trace RUST_BACKTRACE=1 himalaya envelope list
@@ -290,4 +290,4 @@ RUST_LOG=trace RUST_BACKTRACE=1 himalaya envelope list
 -   使用 `himalaya --help` 或 `himalaya <command> --help` 获取详细用法。
 -   邮件 ID 相对于当前文件夹；更改文件夹后请重新列出。
 -   要撰写带附件的富文本邮件，请使用 MML 语法（参见 `references/message-composition.md`）。
--   使用 `pass`、系统密钥环或输出密码的命令安全存储密码。
+-   使用 `pass`、系统密钥环或输出密码的命令安全地存储密码。

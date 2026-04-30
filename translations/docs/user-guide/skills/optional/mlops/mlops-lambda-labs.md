@@ -1,20 +1,20 @@
 ---
-title: "Lambda Labs GPU 云 — 用于 ML 训练和推理的预留及按需 GPU 云实例"
+title: "Lambda Labs GPU 云 — 用于 ML 训练和推理的预留和按需 GPU 云实例"
 sidebar_label: "Lambda Labs GPU 云"
-description: "用于 ML 训练和推理的预留及按需 GPU 云实例"
+description: "用于 ML 训练和推理的预留和按需 GPU 云实例"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Lambda Labs GPU 云
 
-用于 ML 训练和推理的预留及按需 GPU 云实例。当您需要具有简单 SSH 访问权限、持久性文件系统或用于大规模训练的高性能多节点集群的专用 GPU 实例时使用。
+用于 ML 训练和推理的预留和按需 GPU 云实例。当您需要具有简单 SSH 访问、持久文件系统或用于大规模训练的高性能多节点集群的专用 GPU 实例时使用。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/mlops/lambda-labs` 安装 |
+| 来源 | Optional — 使用 `hermes skills install official/mlops/lambda-labs` 安装 |
 | 路径 | `optional-skills/mlops/lambda-labs` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
@@ -25,7 +25,7 @@ description: "用于 ML 训练和推理的预留及按需 GPU 云实例"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Lambda Labs GPU 云
@@ -35,25 +35,25 @@ description: "用于 ML 训练和推理的预留及按需 GPU 云实例"
 ## 何时使用 Lambda Labs
 
 **在以下情况使用 Lambda Labs：**
-- 需要具有完整 SSH 访问权限的专用 GPU 实例
-- 运行长时间的训练任务（数小时到数天）
+- 需要具有完全 SSH 访问权限的专用 GPU 实例
+- 运行长时间训练任务（数小时至数天）
 - 希望获得简单定价且无出口费用
-- 需要在会话间保持持久存储
+- 需要跨会话的持久存储
 - 需要高性能多节点集群（16-512 个 GPU）
 - 希望使用预安装的 ML 堆栈（包含 PyTorch、CUDA、NCCL 的 Lambda Stack）
 
 **主要特性：**
-- **GPU 多样性**：B200、H100、GH200、A100、A10、A6000、V100
+- **GPU 种类**：B200、H100、GH200、A100、A10、A6000、V100
 - **Lambda Stack**：预安装 PyTorch、TensorFlow、CUDA、cuDNN、NCCL
-- **持久性文件系统**：在实例重启间保留数据
+- **持久文件系统**：在实例重启间保留数据
 - **1-Click Clusters**：具有 InfiniBand 的 16-512 GPU Slurm 集群
 - **简单定价**：按分钟付费，无出口费用
 - **全球区域**：全球 12+ 个区域
 
-**改用其他方案：**
+**改用替代方案的情况：**
 - **Modal**：适用于无服务器、自动扩缩的工作负载
 - **SkyPilot**：适用于多云编排和成本优化
-- **RunPod**：适用于更便宜的 Spot 实例和无服务器端点
+- **RunPod**：适用于更便宜的竞价实例和无服务器端点
 - **Vast.ai**：适用于价格最低的 GPU 市场
 
 ## 快速开始
@@ -105,7 +105,7 @@ ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 ```
 8x GPU: 最适合分布式训练 (DDP, FSDP)
 4x GPU: 大模型，多 GPU 训练
-2x GPU: 中等工作量
+2x GPU: 中等工作负载
 1x GPU: 微调，推理，开发
 ```
 
@@ -121,7 +121,7 @@ ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 ```bash
 # 包含的软件
 - Ubuntu 22.04 LTS
-- NVIDIA 驱动程序（最新）
+- NVIDIA 驱动（最新）
 - CUDA 12.x
 - cuDNN 8.x
 - NCCL（用于多 GPU）
@@ -284,14 +284,15 @@ python train.py --checkpoint-dir /lambda/nfs/my-storage/checkpoints
 3.  选择区域（必须与实例区域匹配）
 4.  命名并创建
 
-### 挂载到实例
+### 附加到实例
 
-文件系统必须在实例启动时挂载：
+文件系统必须在实例启动时附加：
 -   通过控制台：启动时选择文件系统
 -   通过 API：在启动请求中包含 `file_system_names`
 
 ### 最佳实践
 
+<!-- ascii-guard-ignore -->
 ```bash
 # 存储在文件系统上（持久化）
 /lambda/nfs/storage/
@@ -304,6 +305,7 @@ python train.py --checkpoint-dir /lambda/nfs/my-storage/checkpoints
 /home/ubuntu/
   └── working/  # 临时文件
 ```
+<!-- ascii-guard-ignore-end -->
 
 ## SSH 配置
 
@@ -349,7 +351,7 @@ ssh -L 8888:localhost:8888 -L 6006:localhost:6006 ubuntu@<IP>
 ### 从控制台启动
 
 1.  进入 Instances 页面
-2.  点击 Cloud IDE 列的 "Launch"
+2.  点击 Cloud IDE 列中的 "Launch"
 3.  JupyterLab 将在浏览器中打开
 
 ### 手动访问
@@ -484,7 +486,7 @@ ip addr show | grep 'inet '
 ### 工作流 1：微调 LLM
 
 ```bash
-# 1. 启动带有文件系统的 8x H100 实例
+# 1. 启动带文件系统的 8x H100 实例
 
 # 2. SSH 连接并设置
 ssh ubuntu@<IP>
@@ -533,7 +535,7 @@ python inference.py \
 1.  **使用文件系统**：避免重复下载数据
 2.  **频繁保存检查点**：恢复中断的训练
 3.  **合理配置规模**：不要过度配置 GPU
-4.  **终止闲置实例**：无自动停止，需手动终止
+4.  **终止闲置实例**：无自动停止功能，需手动终止
 ### 监控使用情况
 
 - 仪表板显示实时 GPU 利用率
@@ -545,7 +547,7 @@ python inference.py \
 |-------|----------|
 | 实例无法启动 | 检查区域可用性，尝试不同的 GPU |
 | SSH 连接被拒绝 | 等待实例初始化（3-15 分钟） |
-| 终止后数据丢失 | 使用持久性文件系统 |
+| 终止后数据丢失 | 使用持久化文件系统 |
 | 数据传输缓慢 | 使用同一区域内的文件系统 |
 | 未检测到 GPU | 重启实例，检查驱动程序 |
 

@@ -1,14 +1,14 @@
 ---
-title: "Github Auth — 使用 git（通用）或 gh CLI 为 Agent 设置 GitHub 认证"
+title: "Github Auth — GitHub 认证设置：HTTPS 令牌、SSH 密钥、gh CLI 登录"
 sidebar_label: "Github Auth"
-description: "使用 git（通用）或 gh CLI 为 Agent 设置 GitHub 认证"
+description: "GitHub 认证设置：HTTPS 令牌、SSH 密钥、gh CLI 登录"
 ---
 
-{/* 此页面由技能目录下的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Github Auth
 
-使用 git（通用）或 gh CLI 为 Agent 设置 GitHub 认证。涵盖 HTTPS Token、SSH 密钥、凭证助手和 gh auth —— 并包含一个检测流程以自动选择正确的方法。
+GitHub 认证设置：HTTPS 令牌、SSH 密钥、gh CLI 登录。
 
 ## 技能元数据
 
@@ -25,19 +25,19 @@ description: "使用 git（通用）或 gh CLI 为 Agent 设置 GitHub 认证"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # GitHub 认证设置
 
-此技能用于设置认证，以便 Agent 可以处理 GitHub 仓库、PR、Issue 和 CI。它涵盖两条路径：
+此技能设置认证，以便 Agent 能够处理 GitHub 仓库、PR、Issue 和 CI。它涵盖两条路径：
 
-- **`git`（始终可用）** —— 使用 HTTPS 个人访问令牌或 SSH 密钥
-- **`gh` CLI（如果已安装）** —— 通过更简单的认证流程获得更丰富的 GitHub API 访问权限
+- **`git`（始终可用）** — 使用 HTTPS 个人访问令牌或 SSH 密钥
+- **`gh` CLI（如果已安装）** — 通过更简单的认证流程获得更丰富的 GitHub API 访问权限
 
 ## 检测流程
 
-当用户要求你处理 GitHub 相关任务时，首先运行此检查：
+当用户要求你处理 GitHub 时，首先运行此检查：
 
 ```bash
 # 检查可用的工具
@@ -58,11 +58,11 @@ git config --global credential.helper 2>/dev/null || echo "no git credential hel
 
 ## 方法 1：仅 Git 认证（无需 gh，无需 sudo）
 
-此方法适用于任何安装了 `git` 的机器。无需 root 权限。
+此方法适用于任何安装了 `git` 的机器。无需 root 访问权限。
 
 ### 选项 A：使用 HTTPS 和个人访问令牌（推荐）
 
-这是最便携的方法 —— 随处可用，无需 SSH 配置。
+这是最便携的方法 — 随处可用，无需 SSH 配置。
 
 **步骤 1：创建个人访问令牌**
 
@@ -71,20 +71,20 @@ git config --global credential.helper 2>/dev/null || echo "no git credential hel
 - 点击 "Generate new token (classic)"
 - 为其命名，例如 "hermes-agent"
 - 选择权限范围：
-  - `repo`（完整的仓库访问权限 —— 读、写、推送、PR）
+  - `repo`（完整的仓库访问权限 — 读、写、推送、PR）
   - `workflow`（触发和管理 GitHub Actions）
   - `read:org`（如果处理组织仓库）
 - 设置有效期（90 天是个不错的默认值）
-- 复制令牌 —— 它不会再次显示
+- 复制令牌 — 它不会再次显示
 
 **步骤 2：配置 git 以存储令牌**
 
 ```bash
 # 设置凭证助手来缓存凭证
-# "store" 将凭证以明文保存到 ~/.git-credentials（简单、持久）
+# "store" 将凭证以明文形式保存到 ~/.git-credentials（简单、持久）
 git config --global credential.helper store
 
-# 现在执行一个会触发认证的测试操作 —— git 将提示输入凭证
+# 现在执行一个触发认证的测试操作 — git 将提示输入凭证
 # 用户名: <他们的-github-用户名>
 # 密码: <粘贴个人访问令牌，而非他们的 GitHub 密码>
 git ls-remote https://github.com/<他们的用户名>/<任意仓库>.git
@@ -99,17 +99,17 @@ git ls-remote https://github.com/<他们的用户名>/<任意仓库>.git
 git config --global credential.helper 'cache --timeout=28800'
 ```
 
-**替代方案：直接在远程 URL 中设置令牌（针对每个仓库）**
+**替代方案：直接在远程 URL 中设置令牌（按仓库）**
 
 ```bash
 # 将令牌嵌入远程 URL（完全避免凭证提示）
 git remote set-url origin https://<用户名>:<令牌>@github.com/<所有者>/<仓库>.git
 ```
 
-**步骤 3：配置 git 身份信息**
+**步骤 3：配置 git 身份**
 
 ```bash
-# 提交所必需 —— 设置姓名和邮箱
+# 提交所必需 — 设置姓名和邮箱
 git config --global user.name "他们的姓名"
 git config --global user.email "他们的邮箱@example.com"
 ```
@@ -117,10 +117,10 @@ git config --global user.email "他们的邮箱@example.com"
 **步骤 4：验证**
 
 ```bash
-# 测试推送权限（现在应该无需任何提示即可工作）
+# 测试推送访问（现在应该无需任何提示即可工作）
 git ls-remote https://github.com/<他们的用户名>/<任意仓库>.git
 
-# 验证身份信息
+# 验证身份
 git config --global user.name
 git config --global user.email
 ```
@@ -141,14 +141,14 @@ ls -la ~/.ssh/id_*.pub 2>/dev/null || echo "No SSH keys found"
 # 生成 ed25519 密钥（现代、安全、快速）
 ssh-keygen -t ed25519 -C "他们的邮箱@example.com" -f ~/.ssh/id_ed25519 -N ""
 
-# 显示公钥，供用户添加到 GitHub
+# 显示公钥供他们添加到 GitHub
 cat ~/.ssh/id_ed25519.pub
 ```
 
 告知用户将公钥添加到：**https://github.com/settings/keys**
 - 点击 "New SSH key"
 - 粘贴公钥内容
-- 为其设置标题，例如 "hermes-agent-&lt;机器名>"
+- 为其设置标题，例如 "hermes-agent-&lt;机器名称>"
 
 **步骤 3：测试连接**
 
@@ -164,7 +164,7 @@ ssh -T git@github.com
 git config --global url."git@github.com:".insteadOf "https://github.com/"
 ```
 
-**步骤 5：配置 git 身份信息**
+**步骤 5：配置 git 身份**
 
 ```bash
 git config --global user.name "他们的姓名"
@@ -175,9 +175,9 @@ git config --global user.email "他们的邮箱@example.com"
 
 ## 方法 2：gh CLI 认证
 
-如果 `gh` 已安装，它可以在一个步骤中同时处理 API 访问和 git 凭证。
+如果 `gh` 已安装，它在一个步骤中同时处理 API 访问和 git 凭证。
 
-### 交互式浏览器登录（桌面环境）
+### 交互式浏览器登录（桌面）
 
 ```bash
 gh auth login
@@ -205,12 +205,12 @@ gh auth status
 
 ## 在没有 gh 的情况下使用 GitHub API
 
-当 `gh` 不可用时，你仍然可以使用 `curl` 和个人访问令牌访问完整的 GitHub API。这是其他 GitHub 技能实现其备用方案的方式。
+当 `gh` 不可用时，你仍然可以使用带有个人访问令牌的 `curl` 访问完整的 GitHub API。其他 GitHub 技能就是这样实现其备用方案的。
 
 ### 为 API 调用设置令牌
 
 ```bash
-# 选项 1：导出为环境变量（首选 —— 避免出现在命令中）
+# 选项 1：导出为环境变量（首选 — 避免出现在命令中）
 export GITHUB_TOKEN="<令牌>"
 
 # 然后在 curl 调用中使用：
@@ -256,9 +256,9 @@ fi
 | 问题 | 解决方案 |
 |---------|----------|
 | `git push` 要求输入密码 | GitHub 已禁用密码认证。使用个人访问令牌作为密码，或切换到 SSH |
-| `remote: Permission to X denied` | 令牌可能缺少 `repo` 权限范围 —— 使用正确的权限范围重新生成 |
-| `fatal: Authentication failed` | 缓存的凭证可能已过期 —— 运行 `git credential reject` 然后重新认证 |
+| `remote: Permission to X denied` | 令牌可能缺少 `repo` 权限范围 — 使用正确的权限范围重新生成 |
+| `fatal: Authentication failed` | 缓存的凭证可能已过期 — 运行 `git credential reject` 然后重新认证 |
 | `ssh: connect to host github.com port 22: Connection refused` | 尝试通过 HTTPS 端口使用 SSH：在 `~/.ssh/config` 中添加 `Host github.com`，并设置 `Port 443` 和 `Hostname ssh.github.com` |
-| 凭证未持久化 | 检查 `git config --global credential.helper` —— 必须是 `store` 或 `cache` |
-| 多个 GitHub 账户 | 在 `~/.ssh/config` 中为每个主机别名使用不同的 SSH 密钥，或使用针对每个仓库的凭证 URL |
-| `gh: command not found` + 无 sudo | 使用上面的仅 Git 方法 1 —— 无需安装 |
+| 凭证未持久化 | 检查 `git config --global credential.helper` — 必须为 `store` 或 `cache` |
+| 多个 GitHub 账户 | 在 `~/.ssh/config` 中为每个主机别名使用不同的 SSH 密钥，或使用按仓库的凭证 URL |
+| `gh: command not found` + 无 sudo | 使用上面的仅 Git 方法 1 — 无需安装 |

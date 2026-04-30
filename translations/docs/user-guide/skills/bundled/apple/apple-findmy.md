@@ -1,14 +1,14 @@
 ---
-title: "Findmy — 通过 FindMy 追踪 Apple 设备和 AirTag"
+title: "Findmy — 通过 FindMy 追踪 Apple 设备/AirTag"
 sidebar_label: "Findmy"
-description: "通过 FindMy 追踪 Apple 设备和 AirTag"
+description: "通过 FindMy 追踪 Apple 设备/AirTag"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Findmy
 
-通过 AppleScript 和屏幕截图，在 macOS 上使用 FindMy.app 追踪 Apple 设备和 AirTag。
+通过 macOS 上的 FindMy.app 追踪 Apple 设备和 AirTag。
 
 ## 技能元数据
 
@@ -25,12 +25,12 @@ description: "通过 FindMy 追踪 Apple 设备和 AirTag"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # Find My (Apple)
 
-通过 macOS 上的 FindMy.app 追踪 Apple 设备和 AirTag。由于 Apple 没有为 FindMy 提供 CLI，此技能使用 AppleScript 打开应用并通过屏幕截图读取设备位置。
+通过 macOS 上的 FindMy.app 追踪 Apple 设备和 AirTag。由于 Apple 没有为 FindMy 提供 CLI，此技能使用 AppleScript 打开应用并通过屏幕截图来读取设备位置。
 
 ## 先决条件
 
@@ -58,7 +58,7 @@ osascript -e 'tell application "FindMy" to activate'
 # 等待加载
 sleep 3
 
-# 截取 Find My 窗口的屏幕截图
+# 对 Find My 窗口截图
 screencapture -w -o /tmp/findmy.png
 ```
 
@@ -67,7 +67,7 @@ screencapture -w -o /tmp/findmy.png
 vision_analyze(image_url="/tmp/findmy.png", question="显示了哪些设备/物品？它们的位置是什么？")
 ```
 
-### 在标签页之间切换
+### 在标签页间切换
 
 ```bash
 # 切换到“设备”标签页
@@ -125,7 +125,7 @@ sleep 3
 # 3. 定期捕获位置
 while true; do
     screencapture -w -o /tmp/findmy-$(date +%H%M%S).png
-    sleep 300  # 每 5 分钟
+    sleep 300  # 每 5 分钟一次
 done
 ```
 
@@ -135,13 +135,13 @@ done
 
 - FindMy **没有 CLI 或 API** — 必须使用 UI 自动化
 - AirTag 仅在 FindMy 页面处于活动显示状态时更新位置
-- 位置准确性取决于 FindMy 网络中附近的 Apple 设备
+- 位置精度取决于 FindMy 网络中附近的 Apple 设备
 - 截图需要屏幕录制权限
 - AppleScript UI 自动化可能在不同 macOS 版本间失效
 
 ## 规则
 
-1.  追踪 AirTag 时，保持 FindMy 应用在前台（最小化时停止更新）
+1.  追踪 AirTag 时，保持 FindMy 应用在前台（最小化后停止更新）
 2.  使用 `vision_analyze` 读取截图内容 — 不要尝试解析像素
 3.  对于持续追踪，使用定时任务定期捕获并记录位置
 4.  尊重隐私 — 仅追踪用户拥有的设备/物品

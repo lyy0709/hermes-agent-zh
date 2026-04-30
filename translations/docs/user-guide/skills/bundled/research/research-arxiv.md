@@ -1,14 +1,14 @@
 ---
-title: "Arxiv — 使用其免费的 REST API 搜索和检索 arXiv 学术论文"
+title: "Arxiv — 按关键词、作者、类别或 ID 搜索 arXiv 论文"
 sidebar_label: "Arxiv"
-description: "使用其免费的 REST API 搜索和检索 arXiv 学术论文"
+description: "按关键词、作者、类别或 ID 搜索 arXiv 论文"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Arxiv
 
-使用 arXiv 免费的 REST API 搜索和检索学术论文。无需 API 密钥。可通过关键词、作者、类别或 ID 进行搜索。可与 `web_extract` 或 `ocr-and-documents` 技能结合以阅读完整的论文内容。
+按关键词、作者、类别或 ID 搜索 arXiv 论文。
 
 ## 技能元数据
 
@@ -25,12 +25,12 @@ description: "使用其免费的 REST API 搜索和检索 arXiv 学术论文"
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # arXiv 研究
 
-通过其免费的 REST API 搜索和检索 arXiv 上的学术论文。无需 API 密钥，无依赖——只需 curl。
+通过 arXiv 的免费 REST API 搜索和检索学术论文。无需 API 密钥，无依赖——只需 curl。
 
 ## 快速参考
 
@@ -43,15 +43,15 @@ description: "使用其免费的 REST API 搜索和检索 arXiv 学术论文"
 
 ## 搜索论文
 
-API 返回 Atom XML。使用 `grep`/`sed` 解析或通过 `python3` 管道传输以获得清晰输出。
+API 返回 Atom XML。使用 `grep`/`sed` 解析或通过 `python3` 管道传输以获得干净输出。
 
-### 基础搜索
+### 基本搜索
 
 ```bash
 curl -s "https://export.arxiv.org/api/query?search_query=all:GRPO+reinforcement+learning&max_results=5"
 ```
 
-### 清晰输出（将 XML 解析为可读格式）
+### 干净输出（将 XML 解析为可读格式）
 
 ```bash
 curl -s "https://export.arxiv.org/api/query?search_query=all:GRPO+reinforcement+learning&max_results=5&sortBy=submittedDate&sortOrder=descending" | python3 -c "
@@ -76,7 +76,7 @@ for i, entry in enumerate(root.findall('a:entry', ns)):
 
 ## 搜索查询语法
 
-| 前缀 | 搜索字段 | 示例 |
+| 前缀 | 搜索范围 | 示例 |
 |--------|----------|---------|
 | `all:` | 所有字段 | `all:transformer+attention` |
 | `ti:` | 标题 | `ti:large+language+models` |
@@ -88,7 +88,7 @@ for i, entry in enumerate(root.findall('a:entry', ns)):
 ### 布尔运算符
 
 ```
-# AND（使用 + 时的默认行为）
+# AND（使用 + 时的默认值）
 search_query=all:transformer+attention
 
 # OR
@@ -125,10 +125,10 @@ curl -s "https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submit
 curl -s "https://export.arxiv.org/api/query?id_list=2402.03300")
 
 # 多篇论文
-curl -s "https://export.arxiv.org/api/query?id_list=2402.03300,2401.12345,2403.00001")
+curl -s "https://export.arxiv.org/api/query?id_list=2402.03300,2401.12345,2403.00001"
 ```
 
-## 生成 BibTeX 条目
+## 生成 BibTeX
 
 获取论文元数据后，生成 BibTeX 条目：
 
@@ -165,7 +165,7 @@ print('}')
 找到论文后，阅读它：
 
 ```
-# 摘要页面（快速，包含元数据和摘要）
+# 摘要页面（快速，元数据 + 摘要）
 web_extract(urls=["https://arxiv.org/abs/2402.03300"])
 
 # 全文（PDF → 通过 Firecrawl 转换为 markdown）
@@ -191,7 +191,7 @@ web_extract(urls=["https://arxiv.org/pdf/2402.03300"])
 
 ## 辅助脚本
 
-`scripts/search_arxiv.py` 脚本处理 XML 解析并提供清晰的输出：
+`scripts/search_arxiv.py` 脚本处理 XML 解析并提供干净输出：
 
 ```bash
 python scripts/search_arxiv.py "GRPO reinforcement learning"
@@ -208,7 +208,7 @@ python scripts/search_arxiv.py --id 2402.03300,2401.12345
 
 ## Semantic Scholar（引用、相关论文、作者档案）
 
-arXiv 不提供引用数据或推荐。为此请使用 **Semantic Scholar API**——免费，基础使用无需密钥（1 次请求/秒），返回 JSON。
+arXiv 不提供引用数据或推荐。使用 **Semantic Scholar API** 来实现——免费，基本使用无需密钥（1 次请求/秒），返回 JSON。
 
 ### 获取论文详情 + 引用
 
@@ -277,7 +277,7 @@ curl -s "https://api.semanticscholar.org/graph/v1/author/search?query=Yann+LeCun
 
 ## 注意事项
 
--   arXiv 返回 Atom XML——使用辅助脚本或解析片段以获得清晰输出
+-   arXiv 返回 Atom XML——使用辅助脚本或解析片段以获得干净输出
 -   Semantic Scholar 返回 JSON——通过 `python3 -m json.tool` 管道传输以提高可读性
 -   arXiv ID：旧格式（`hep-th/0601001`）与新格式（`2402.03300`）
 -   PDF：`https://arxiv.org/pdf/{id}` —— 摘要：`https://arxiv.org/abs/{id}`
@@ -291,9 +291,9 @@ curl -s "https://api.semanticscholar.org/graph/v1/author/search?query=Yann+LeCun
 -   生成引用时，保留您实际阅读的版本后缀，以防止引用漂移（后续版本可能大幅更改内容）
 -   API 的 `<id>` 字段返回带版本的 URL（例如，`http://arxiv.org/abs/1706.03762v7`）
 
-## 已撤回的论文
+## 撤回的论文
 
-论文可能在提交后被撤回。发生这种情况时：
+论文在提交后可能被撤回。发生这种情况时：
 -   `<summary>` 字段包含撤回通知（查找 "withdrawn" 或 "retracted"）
 -   元数据字段可能不完整
 -   在将结果视为有效论文之前，请务必检查摘要

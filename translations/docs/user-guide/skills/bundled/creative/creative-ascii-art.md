@@ -1,14 +1,14 @@
 ---
-title: "ASCII 艺术"
-sidebar_label: "ASCII 艺术"
-description: "使用 pyfiglet（571 种字体）、cowsay、boxes、toilet、image-to-ascii、远程 API（asciified、ascii.co.uk）生成 ASCII 艺术。无需 API 密钥。"
+title: "Ascii Art — ASCII 艺术：pyfiglet、cowsay、boxes、image-to-ascii"
+sidebar_label: "Ascii Art"
+description: "ASCII 艺术：pyfiglet、cowsay、boxes、image-to-ascii"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。*/}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# ASCII 艺术
+# Ascii Art
 
-使用 pyfiglet（571 种字体）、cowsay、boxes、toilet、image-to-ascii、远程 API（asciified、ascii.co.uk）以及 LLM 回退方案生成 ASCII 艺术。无需 API 密钥。
+ASCII 艺术：pyfiglet、cowsay、boxes、image-to-ascii。
 
 ## 技能元数据
 
@@ -28,11 +28,11 @@ description: "使用 pyfiglet（571 种字体）、cowsay、boxes、toilet、ima
 以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
-# ASCII 艺术技能
+# ASCII Art 技能
 
-多种工具满足不同的 ASCII 艺术需求。所有工具均为本地 CLI 程序或免费的 REST API——无需 API 密钥。
+满足不同 ASCII 艺术需求的多种工具。所有工具均为本地 CLI 程序或免费的 REST API——无需 API 密钥。
 
-## 工具 1：文本横幅（pyfiglet — 本地）
+## 工具 1：文本横幅 (pyfiglet — 本地)
 
 将文本渲染为大型 ASCII 艺术横幅。内置 571 种字体。
 
@@ -66,12 +66,12 @@ python3 -m pyfiglet --list_fonts             # 列出所有 571 种字体
 ### 提示
 
 - 预览 2-3 种字体，让用户选择他们最喜欢的
-- 短文本（1-8 个字符）最适合使用 `doom` 或 `block` 等细节丰富的字体
-- 长文本更适合使用 `small` 或 `mini` 等紧凑字体
+- 短文本（1-8 个字符）最适合 `doom` 或 `block` 等细节丰富的字体
+- 长文本更适合 `small` 或 `mini` 等紧凑字体
 
-## 工具 2：文本横幅（asciified API — 远程，无需安装）
+## 工具 2：文本横幅 (asciified API — 远程，无需安装)
 
-免费的 REST API，可将文本转换为 ASCII 艺术。250+ 种 FIGlet 字体。直接返回纯文本——无需解析。当 pyfiglet 未安装或作为快速替代方案时使用此工具。
+将文本转换为 ASCII 艺术的免费 REST API。250+ 种 FIGlet 字体。直接返回纯文本——无需解析。当 pyfiglet 未安装或作为快速替代方案时使用此工具。
 
 ### 用法（通过终端 curl）
 
@@ -93,13 +93,13 @@ curl -s "https://asciified.thelicato.io/api/v2/fonts"
 ### 提示
 
 - 在文本参数中将空格 URL 编码为 `+`
-- 响应是纯文本 ASCII 艺术——没有 JSON 包装，可直接显示
+- 响应是纯文本 ASCII 艺术——无 JSON 包装，可直接显示
 - 字体名称区分大小写；使用 fonts 端点获取确切名称
-- 任何带有 curl 的终端都可以使用——无需 Python 或 pip
+- 任何带有 curl 的终端均可使用——无需 Python 或 pip
 
 ## 工具 3：Cowsay（消息艺术）
 
-经典工具，用 ASCII 字符将文本包裹在对话气泡中。
+将文本包裹在带有 ASCII 角色的对话气泡中的经典工具。
 
 ### 安装
 
@@ -119,7 +119,7 @@ cowthink "Hmm..."                  # 思考气泡
 cowsay -l                          # 列出所有角色
 ```
 
-### 可用角色（50+）
+### 可用角色 (50+)
 
 `beavis.zen`, `bong`, `bunny`, `cheese`, `daemon`, `default`, `dragon`,
 `dragon-and-cow`, `elephant`, `eyes`, `flaming-skull`, `ghostbusters`,
@@ -143,7 +143,7 @@ cowsay -T "U " "Msg"   # 自定义舌头
 
 ## 工具 4：Boxes（装饰边框）
 
-在任何文本周围绘制装饰性的 ASCII 艺术边框/框架。70+ 种内置设计。
+在任何文本周围绘制装饰性 ASCII 艺术边框/框架。70+ 种内置设计。
 
 ### 安装
 
@@ -276,12 +276,12 @@ for art in arts:
 
 **提示：**
 - 保留艺术家签名/首字母——重要的礼仪
-- 每页有多个艺术作品——为用户选择最好的一个
+- 每页多个艺术作品——为用户选择最佳的一个
 - 通过 curl 可靠工作，无需 JavaScript
 
 ### 来源 B：GitHub Octocat API（有趣的彩蛋）
 
-返回一个随机的 GitHub Octocat 和一句智慧名言。无需认证。
+返回一个带有智慧引语的随机 GitHub Octocat。无需认证。
 
 ```bash
 curl -s https://api.github.com/octocat
@@ -306,7 +306,7 @@ curl -s "wttr.in/Moon"            # ASCII 艺术中的月相
 curl -s "v2.wttr.in/London"       # 详细版本
 ```
 
-## 工具 9：LLM 生成的自定义艺术（回退方案）
+## 工具 9：LLM 生成的自定义艺术（备用方案）
 
 当上述工具没有所需内容时，直接使用这些 Unicode 字符生成 ASCII 艺术：
 
@@ -322,12 +322,12 @@ curl -s "v2.wttr.in/London"       # 详细版本
 
 - 最大宽度：每行 60 个字符（终端安全）
 - 最大高度：横幅 15 行，场景 25 行
-- 仅等宽字体：输出必须在等宽字体中正确渲染
+- 仅限等宽字体：输出必须在等宽字体中正确渲染
 
 ## 决策流程
 
 1.  **文本作为横幅** → 如果已安装则使用 pyfiglet，否则通过 curl 使用 asciified API
-2.  **用有趣的角色艺术包裹消息** → cowsay
+2.  **将消息包裹在有趣的角色艺术中** → cowsay
 3.  **添加装饰性边框/框架** → boxes（可与 pyfiglet/asciified 结合使用）
 4.  **特定事物的艺术**（猫、火箭、龙）→ 通过 curl + 解析使用 ascii.co.uk
 5.  **将图像转换为 ASCII** → ascii-image-converter 或 jp2a

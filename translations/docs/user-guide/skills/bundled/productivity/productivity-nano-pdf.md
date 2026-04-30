@@ -1,14 +1,14 @@
 ---
-title: "Nano Pdf — 使用 nano-pdf CLI 通过自然语言指令编辑 PDF"
+title: "Nano Pdf — 通过 nano-pdf CLI 编辑 PDF 文本/拼写错误/标题（自然语言提示）"
 sidebar_label: "Nano Pdf"
-description: "使用 nano-pdf CLI 通过自然语言指令编辑 PDF"
+description: "通过 nano-pdf CLI 编辑 PDF 文本/拼写错误/标题（自然语言提示）"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Nano Pdf
 
-使用 nano-pdf CLI 通过自然语言指令编辑 PDF。修改文本、修正拼写错误、更新标题，以及对特定页面进行内容更改，无需手动编辑。
+通过 nano-pdf CLI 编辑 PDF 文本/拼写错误/标题（自然语言提示）。
 
 ## 技能元数据
 
@@ -29,7 +29,7 @@ description: "使用 nano-pdf CLI 通过自然语言指令编辑 PDF"
 
 # nano-pdf
 
-使用自然语言指令编辑 PDF。指定页面并描述要更改的内容。
+使用自然语言指令编辑 PDF。指向特定页面并描述需要更改的内容。
 
 ## 先决条件
 
@@ -37,7 +37,7 @@ description: "使用 nano-pdf CLI 通过自然语言指令编辑 PDF"
 # 使用 uv 安装（推荐 — Hermes 中已可用）
 uv pip install nano-pdf
 
-# 或使用 pip
+# 或使用 pip 安装
 pip install nano-pdf
 ```
 
@@ -53,16 +53,16 @@ nano-pdf edit <file.pdf> <page_number> "<instruction>"
 # 更改第 1 页的标题
 nano-pdf edit deck.pdf 1 "将标题改为 'Q3 Results' 并修正副标题中的拼写错误"
 
-# 更新特定页面的日期
+# 更新特定页面上的日期
 nano-pdf edit report.pdf 3 "将日期从一月更新为 2026 年二月"
 
 # 修正内容
 nano-pdf edit contract.pdf 2 "将客户名称从 'Acme Corp' 改为 'Acme Industries'"
 ```
 
-## 注意
+## 注意事项
 
-- 页码可能基于 0 或基于 1，具体取决于版本 — 如果编辑了错误的页面，请尝试使用 ±1 重新操作
+- 页码可能基于 0 或基于 1，具体取决于版本 — 如果编辑了错误的页面，请尝试页码 ±1 后重试
 - 编辑后务必验证输出 PDF（使用 `read_file` 检查文件大小，或直接打开）
-- 该工具底层使用 LLM — 需要 API 密钥（查看 `nano-pdf --help` 了解配置）
+- 该工具底层使用了 LLM — 需要 API 密钥（查看 `nano-pdf --help` 了解配置）
 - 适用于文本更改；复杂的布局修改可能需要不同的方法
