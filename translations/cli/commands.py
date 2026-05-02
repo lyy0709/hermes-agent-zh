@@ -19,10 +19,8 @@ from typing import Any
 
 from utils import is_truthy_value
 
-# prompt_toolkit 是一个可选的 CLI 依赖项——仅用于
-# SlashCommandCompleter 和 SlashCommandAutoSuggest。缺少它的网关和测试
-# 环境仍然必须能够导入此模块
-# 以用于 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
+# prompt_toolkit 是一个可选的 CLI 依赖项——仅 SlashCommandCompleter 和 SlashCommandAutoSuggest 需要。
+# 缺少它的消息网关和测试环境必须仍然能够导入此模块以使用 resolve_command、gateway_help_lines 和 COMMAND_REGISTRY。
 try:
     from prompt_toolkit.auto_suggest import AutoSuggest, Suggestion
     from prompt_toolkit.completion import Completer, Completion
@@ -43,13 +41,13 @@ class CommandDef:
 
     name: str                          # 不带斜杠的规范名称："background"
     description: str                   # 人类可读的描述
-    category: str                      # "会话", "配置", 等。
+    category: str                      # "Session", "Configuration", 等。
     aliases: tuple[str, ...] = ()      # 替代名称：("bg",)
     args_hint: str = ""                # 参数占位符："<prompt>", "[name]"
     subcommands: tuple[str, ...] = ()  # 可标签补全的子命令
     cli_only: bool = False             # 仅在 CLI 中可用
-    gateway_only: bool = False         # 仅在网关/消息传递中可用
-    gateway_config_gate: str | None = None  # 配置点路径；当为真值时，覆盖网关的 cli_only
+    gateway_only: bool = False         # 仅在消息网关/消息传递中可用
+    gateway_config_gate: str | None = None  # 配置点路径；当为真值时，覆盖 gateway 的 cli_only
 
 
 # ---------------------------------------------------------------------------
@@ -58,139 +56,141 @@ class CommandDef:
 
 COMMAND_REGISTRY: list[CommandDef] = [
     # 会话
-    CommandDef("new", "开始一个新会话（新的会话 ID + 历史记录）", "会话",
+    CommandDef("new", "启动新会话（新的会话 ID + 历史记录）", "Session",
                aliases=("reset",)),
-    CommandDef("clear", "清屏并开始一个新会话", "会话",
+    CommandDef("clear", "清屏并启动新会话", "Session",
                cli_only=True),
-    CommandDef("redraw", "强制完整重绘 UI（从终端漂移中恢复）", "会话",
+    CommandDef("redraw", "强制完整 UI 重绘（从终端漂移中恢复）", "Session",
                cli_only=True),
-    CommandDef("history", "显示对话历史记录", "会话",
+    CommandDef("history", "显示对话历史记录", "Session",
                cli_only=True),
-    CommandDef("save", "保存当前对话", "会话",
+    CommandDef("save", "保存当前对话", "Session",
                cli_only=True),
-    CommandDef("retry", "重试最后一条消息（重新发送给 Agent）", "会话"),
-    CommandDef("undo", "移除最后一个用户/助手交换", "会话"),
-    CommandDef("title", "为当前会话设置标题", "会话",
+    CommandDef("retry", "重试最后一条消息（重新发送给 Agent）", "Session"),
+    CommandDef("undo", "移除最后一条用户/助手交换", "Session"),
+    CommandDef("title", "为当前会话设置标题", "Session",
                args_hint="[name]"),
-    CommandDef("branch", "分支当前会话（探索不同路径）", "会话",
+    CommandDef("branch", "分支当前会话（探索不同路径）", "Session",
                aliases=("fork",), args_hint="[name]"),
-    CommandDef("compress", "手动压缩对话上下文", "会话",
+    CommandDef("compress", "手动压缩对话上下文", "Session",
                args_hint="[focus topic]"),
-    CommandDef("rollback", "列出或恢复文件系统检查点", "会话",
+    CommandDef("rollback", "列出或恢复文件系统检查点", "Session",
                args_hint="[number]"),
-    CommandDef("snapshot", "创建或恢复 Hermes 配置/状态的状态快照", "会话",
+    CommandDef("snapshot", "创建或恢复 Hermes 配置/状态的状态快照", "Session",
                cli_only=True, aliases=("snap",), args_hint="[create|restore <id>|prune]"),
-    CommandDef("stop", "终止所有正在运行的后台进程", "会话"),
-    CommandDef("approve", "批准一个待处理的危险命令", "会话",
+    CommandDef("stop", "终止所有正在运行的后台进程", "Session"),
+    CommandDef("approve", "批准一个待处理的危险命令", "Session",
                gateway_only=True, args_hint="[session|always]"),
-    CommandDef("deny", "拒绝一个待处理的危险命令", "会话",
+    CommandDef("deny", "拒绝一个待处理的危险命令", "Session",
                gateway_only=True),
-    CommandDef("background", "在后台运行一个提示词", "会话",
+    CommandDef("background", "在后台运行一个提示词", "Session",
                aliases=("bg", "btw"), args_hint="<prompt>"),
-    CommandDef("agents", "显示活跃的 Agent 和正在运行的任务", "会话",
+    CommandDef("agents", "显示活跃的 Agent 和正在运行的任务", "Session",
                aliases=("tasks",)),
-    CommandDef("queue", "为下一轮排队一个提示词（不中断）", "会话",
+    CommandDef("queue", "为下一轮排队一个提示词（不中断）", "Session",
                aliases=("q",), args_hint="<prompt>"),
-    CommandDef("steer", "在下一次工具调用后注入一条消息而不中断", "会话",
+    CommandDef("steer", "在下一次工具调用后注入一条消息而不中断", "Session",
                args_hint="<prompt>"),
-    CommandDef("status", "显示会话信息", "会话"),
-    CommandDef("profile", "显示活跃的配置文件名称和主目录", "信息"),
-    CommandDef("sethome", "将此聊天设置为主频道", "会话",
+    CommandDef("goal", "设置一个 Hermes 在多个轮次中持续努力直到达成的长期目标", "Session",
+               args_hint="[text | pause | resume | clear | status]"),
+    CommandDef("status", "显示会话信息", "Session"),
+    CommandDef("profile", "显示活跃的配置文件名称和主目录", "Info"),
+    CommandDef("sethome", "将此聊天设置为主频道", "Session",
                gateway_only=True, aliases=("set-home",)),
-    CommandDef("resume", "恢复一个先前命名的会话", "会话",
+    CommandDef("resume", "恢复一个先前命名的会话", "Session",
                args_hint="[name]"),
 
     # 配置
-    CommandDef("config", "显示当前配置", "配置",
+    CommandDef("config", "显示当前配置", "Configuration",
                cli_only=True),
-    CommandDef("model", "为此会话切换模型", "配置",
+    CommandDef("model", "为此会话切换模型", "Configuration",
                aliases=("provider",), args_hint="[model] [--provider name] [--global]"),
-    CommandDef("gquota", "显示 Google Gemini Code Assist 配额使用情况", "信息",
+    CommandDef("gquota", "显示 Google Gemini Code Assist 配额使用情况", "Info",
                cli_only=True),
 
-    CommandDef("personality", "设置一个预定义的人格", "配置",
+    CommandDef("personality", "设置预定义的人格", "Configuration",
                args_hint="[name]"),
-    CommandDef("statusbar", "切换上下文/模型状态栏", "配置",
+    CommandDef("statusbar", "切换上下文/模型状态栏", "Configuration",
                cli_only=True, aliases=("sb",)),
-    CommandDef("verbose", "循环工具进度显示：关闭 -> 新 -> 全部 -> 详细",
-               "配置", cli_only=True,
+    CommandDef("verbose", "循环工具进度显示：关闭 -> 仅新 -> 全部 -> 详细",
+               "Configuration", cli_only=True,
                gateway_config_gate="display.tool_progress_command"),
-    CommandDef("footer", "切换网关运行时元数据页脚在最终回复上的显示",
-               "配置", args_hint="[on|off|status]",
+    CommandDef("footer", "切换消息网关运行时元数据页脚在最终回复上的显示",
+               "Configuration", args_hint="[on|off|status]",
                subcommands=("on", "off", "status")),
     CommandDef("yolo", "切换 YOLO 模式（跳过所有危险命令批准）",
-               "配置"),
-    CommandDef("reasoning", "管理推理努力和显示", "配置",
+               "Configuration"),
+    CommandDef("reasoning", "管理推理努力和显示", "Configuration",
                args_hint="[level|show|hide]",
                subcommands=("none", "minimal", "low", "medium", "high", "xhigh", "show", "hide", "on", "off")),
-    CommandDef("fast", "切换快速模式——OpenAI 优先处理 / Anthropic 快速模式（普通/快速）", "配置",
+    CommandDef("fast", "切换快速模式——OpenAI 优先处理 / Anthropic 快速模式（普通/快速）", "Configuration",
                args_hint="[normal|fast|status]",
                subcommands=("normal", "fast", "status", "on", "off")),
-    CommandDef("skin", "显示或更改显示皮肤/主题", "配置",
+    CommandDef("skin", "显示或更改显示皮肤/主题", "Configuration",
                cli_only=True, args_hint="[name]"),
-    CommandDef("indicator", "选择 TUI 忙碌指示器样式", "配置",
+    CommandDef("indicator", "选择 TUI 忙碌指示器样式", "Configuration",
                cli_only=True, args_hint="[kaomoji|emoji|unicode|ascii]",
                subcommands=("kaomoji", "emoji", "unicode", "ascii")),
-    CommandDef("voice", "切换语音模式", "配置",
+    CommandDef("voice", "切换语音模式", "Configuration",
                args_hint="[on|off|tts|status]", subcommands=("on", "off", "tts", "status")),
-    CommandDef("busy", "控制当 Hermes 工作时 Enter 键的作用", "配置",
+    CommandDef("busy", "控制当 Hermes 正在工作时 Enter 键的作用", "Configuration",
                cli_only=True, args_hint="[queue|steer|interrupt|status]",
                subcommands=("queue", "steer", "interrupt", "status")),
 
-    # 工具与技能
-    CommandDef("tools", "管理工具：/tools [list|disable|enable] [name...]", "工具与技能",
+    # 工具 & 技能
+    CommandDef("tools", "管理工具：/tools [list|disable|enable] [name...]", "Tools & Skills",
                args_hint="[list|disable|enable] [name...]", cli_only=True),
-    CommandDef("toolsets", "列出可用的工具集", "工具与技能",
+    CommandDef("toolsets", "列出可用的工具集", "Tools & Skills",
                cli_only=True),
     CommandDef("skills", "搜索、安装、检查或管理技能",
-               "工具与技能", cli_only=True,
+               "Tools & Skills", cli_only=True,
                subcommands=("search", "browse", "inspect", "install")),
-    CommandDef("cron", "管理定时任务", "工具与技能",
+    CommandDef("cron", "管理定时任务", "Tools & Skills",
                cli_only=True, args_hint="[subcommand]",
                subcommands=("list", "add", "create", "edit", "pause", "resume", "run", "remove")),
     CommandDef("curator", "后台技能维护（状态、运行、固定、归档）",
-               "工具与技能", args_hint="[subcommand]",
+               "Tools & Skills", args_hint="[subcommand]",
                subcommands=("status", "run", "pause", "resume", "pin", "unpin", "restore")),
-    CommandDef("kanban", "多配置文件协作板（任务、链接、评论）",
-               "工具与技能", args_hint="[subcommand]",
+    CommandDef("kanban", "多配置文件协作看板（任务、链接、评论）",
+               "Tools & Skills", args_hint="[subcommand]",
                subcommands=("list", "ls", "show", "create", "assign", "link", "unlink",
                             "claim", "comment", "complete", "block", "unblock", "archive",
                             "tail", "dispatch", "context", "init", "gc")),
-    CommandDef("reload", "将 .env 变量重新加载到正在运行的会话中", "工具与技能",
+    CommandDef("reload", "将 .env 变量重新加载到正在运行的会话中", "Tools & Skills",
                cli_only=True),
-    CommandDef("reload-mcp", "从配置重新加载 MCP 服务器", "工具与技能",
+    CommandDef("reload-mcp", "从配置重新加载 MCP 服务器", "Tools & Skills",
                aliases=("reload_mcp",)),
     CommandDef("reload-skills", "重新扫描 ~/.hermes/skills/ 以查找新安装或移除的技能",
-               "工具与技能", aliases=("reload_skills",)),
-    CommandDef("browser", "通过 CDP 将浏览器工具连接到你的实时 Chrome", "工具与技能",
+               "Tools & Skills", aliases=("reload_skills",)),
+    CommandDef("browser", "通过 CDP 将浏览器工具连接到您正在运行的 Chrome", "Tools & Skills",
                cli_only=True, args_hint="[connect|disconnect|status]",
                subcommands=("connect", "disconnect", "status")),
     CommandDef("plugins", "列出已安装的插件及其状态",
-               "工具与技能", cli_only=True),
+               "Tools & Skills", cli_only=True),
 
     # 信息
-    CommandDef("commands", "浏览所有命令和技能（分页）", "信息",
+    CommandDef("commands", "浏览所有命令和技能（分页）", "Info",
                gateway_only=True, args_hint="[page]"),
-    CommandDef("help", "显示可用命令", "信息"),
-    CommandDef("restart", "在排空活跃运行后优雅地重启网关", "会话",
+    CommandDef("help", "显示可用命令", "Info"),
+    CommandDef("restart", "在排空活跃运行后优雅地重启消息网关", "Session",
                gateway_only=True),
-    CommandDef("usage", "显示当前会话的 Token 使用情况和速率限制", "信息"),
-    CommandDef("insights", "显示使用洞察和分析", "信息",
+    CommandDef("usage", "显示当前会话的 Token 使用情况和速率限制", "Info"),
+    CommandDef("insights", "显示使用洞察和分析", "Info",
                args_hint="[days]"),
-    CommandDef("platforms", "显示网关/消息传递平台状态", "信息",
+    CommandDef("platforms", "显示消息网关/消息传递平台状态", "Info",
                cli_only=True, aliases=("gateway",)),
-    CommandDef("copy", "将最后一个助手响应复制到剪贴板", "信息",
+    CommandDef("copy", "将最后一条助手响应复制到剪贴板", "Info",
                cli_only=True, args_hint="[number]"),
-    CommandDef("paste", "从剪贴板附加图像", "信息",
+    CommandDef("paste", "从剪贴板附加图像", "Info",
                cli_only=True),
-    CommandDef("image", "为你的下一个提示词附加一个本地图像文件", "信息",
+    CommandDef("image", "为您的下一个提示词附加本地图像文件", "Info",
                cli_only=True, args_hint="<path>"),
-    CommandDef("update", "将 Hermes Agent 更新到最新版本", "信息",
+    CommandDef("update", "将 Hermes Agent 更新到最新版本", "Info",
                gateway_only=True),
-    CommandDef("debug", "上传调试报告（系统信息 + 日志）并获取可分享链接", "信息"),
+    CommandDef("debug", "上传调试报告（系统信息 + 日志）并获取可分享链接", "Info"),
 
     # 退出
-    CommandDef("quit", "退出 CLI", "退出",
+    CommandDef("quit", "退出 CLI", "Exit",
                cli_only=True, aliases=("exit",)),
 ]
 
@@ -403,7 +403,7 @@ def gateway_help_lines() -> list[str]:
             if a.replace("-", "_") == cmd.name.replace("-", "_") and a != cmd.name:
                 continue
             alias_parts.append(f"`/{a}`")
-        alias_note = f" (别名: {', '.join(alias_parts)})" if alias_parts else ""
+        alias_note = f" (alias: {', '.join(alias_parts)})" if alias_parts else ""
         lines.append(f"`/{cmd.name}{args}` -- {cmd.description}{alias_note}")
     return lines
 def _iter_plugin_command_entries() -> list[tuple[str, str, str]]:
@@ -653,7 +653,7 @@ def telegram_menu_commands(max_commands: int = 100) -> tuple[list[tuple[str, str
     技能是唯一在达到上限时会被修剪的层级。
     用户安装的 Hub 技能被排除在外——可通过 /skills 访问。
     为 ``"telegram"`` 平台禁用的技能（通过 ``hermes skills
-    config``）将完全从菜单中排除。
+    config``）会完全从菜单中排除。
 
     返回：
         (menu_commands, hidden_count)，其中 hidden_count 是由于上限而被省略的技能命令数量。
@@ -682,18 +682,19 @@ def discord_skill_commands(
     """返回用于 Discord 斜杠命令注册的技能条目。
 
     与 :func:`telegram_menu_commands` 相同的优先级和过滤逻辑
-    （插件 > 技能，排除 Hub，排除按平台禁用的），但根据 Discord 的限制进行了调整：
+    （插件 > 技能，排除 Hub，排除按平台禁用的），但
+    适应了 Discord 的限制：
 
     - 名称中允许连字符（无需 ``-`` → ``_`` 清理）
     - 描述限制在 100 个字符内（Discord 的每字段最大值）
 
     参数：
-        max_slots: 可用命令槽位（100 减去现有内置命令数量）。
-        reserved_names: 已注册的内置命令名称。
+        max_slots: 可用的命令槽位（100 减去现有的内置命令数量）。
+        reserved_names: 已注册的内置命令的名称。
 
     返回：
-        ``(entries, hidden_count)``，其中 *entries* 是
-        ``(discord_name, description, cmd_key)`` 三元组的列表。``cmd_key`` 是
+        ``(entries, hidden_count)``，其中 *entries* 是一个
+        ``(discord_name, description, cmd_key)`` 三元组列表。``cmd_key`` 是
         斜杠处理程序回调所需的原始 ``/skill-name`` 键。
     """
     return _collect_gateway_skill_entries(
@@ -710,12 +711,12 @@ def discord_skill_commands_by_category(
     """返回按类别组织的技能条目，用于 Discord ``/skill`` 子命令组。
 
     目录在 ``SKILLS_DIR`` 下至少嵌套 2 层的技能
-    （例如 ``creative/ascii-art/SKILL.md``）按其顶级类别分组。
-    根级技能（例如 ``dogfood/SKILL.md``）作为 *未分类* 返回 —— 调用者应将它们注册为
-    ``/skill`` 组的直接子命令。
+    （例如 ``creative/ascii-art/SKILL.md``）按其顶级
+    类别分组。根级技能（例如 ``dogfood/SKILL.md``）作为
+    *未分类* 返回 —— 调用者应将它们注册为 ``/skill`` 组的直接子命令。
 
     应用与 :func:`discord_skill_commands` 相同的过滤：排除 Hub
-    技能，排除按平台禁用的技能，名称被截断。
+    技能，排除按平台禁用的，名称被截断。
 
     返回：
         ``(categories, uncategorized, hidden_count)``
@@ -753,7 +754,7 @@ def discord_skill_commands_by_category(
             if not skill_path:
                 continue
             sp = _P(skill_path).resolve()
-            # 跳过 SKILLS_DIR 之外的技能或来自 Hub 的技能
+            # 跳过不在 SKILLS_DIR 内或来自 Hub 的技能
             if not str(sp).startswith(str(_skills_dir)):
                 continue
             if str(sp).startswith(str(_hub_dir)):
@@ -817,12 +818,19 @@ def discord_skill_commands_by_category(
 # Slack 原生斜杠命令
 # ---------------------------------------------------------------------------
 
-# Slack 斜杠命令名称约束：小写 a-z、0-9、连字符、
-# 下划线。最多 32 个字符。Slack 应用清单每个应用最多接受 50 个斜杠
+# Slack 斜杠命令名称约束：小写 a-z, 0-9, 连字符，
+# 下划线。最多 32 个字符。Slack 应用清单最多接受每个应用 50 个斜杠
 # 命令。
 _SLACK_MAX_SLASH_COMMANDS = 50
 _SLACK_NAME_LIMIT = 32
 _SLACK_INVALID_CHARS = re.compile(r"[^a-z0-9_\-]")
+_SLACK_RESERVED_COMMANDS = frozenset({
+    # Slack 内置的斜杠命令，应用无法注册。
+    # https://slack.com/help/articles/201259356-Use-built-in-slash-commands
+    "me", "status", "away", "dnd", "shrug", "remind", "msg", "feed",
+    "who", "collapse", "expand", "leave", "join", "open", "search",
+    "topic", "mute", "pro", "shortcuts",
+})
 def _sanitize_slack_name(raw: str) -> str:
     """Convert a command name to a valid Slack slash command name.
 
@@ -847,6 +855,10 @@ def slack_native_slashes() -> list[tuple[str, str, str]]:
     documented form (e.g. ``/background``, ``/bg``, and ``/btw`` all work).
     Plugin-registered slash commands are included too.
 
+    Commands whose sanitized name collides with a Slack built-in
+    (e.g. ``/status``, ``/me``, ``/join``) are silently skipped.  Users
+    can still reach them via ``/hermes <command>``.
+
     Results are clamped to Slack's 50-command limit with duplicate-name
     avoidance. ``/hermes`` is always reserved as the first entry so the
     legacy ``/hermes <subcommand>`` form keeps working for anything that
@@ -857,12 +869,14 @@ def slack_native_slashes() -> list[tuple[str, str, str]]:
     seen: set[str] = set()
 
     # Reserve /hermes as the catch-all top-level command.
-    entries.append(("hermes", "与 Hermes 对话或运行子命令", "[子命令] [参数]"))
+    entries.append(("hermes", "与 Hermes 对话或运行子命令", "[subcommand] [args]"))
     seen.add("hermes")
 
     def _add(name: str, desc: str, hint: str) -> None:
         slack_name = _sanitize_slack_name(name)
         if not slack_name or slack_name in seen:
+            return
+        if slack_name in _SLACK_RESERVED_COMMANDS:
             return
         if len(entries) >= _SLACK_MAX_SLASH_COMMANDS:
             return
@@ -890,8 +904,6 @@ def slack_native_slashes() -> list[tuple[str, str, str]]:
         _add(name, description, args_hint or "")
 
     return entries
-
-
 def slack_app_manifest(request_url: str = "https://hermes-agent.local/slack/commands") -> dict[str, Any]:
     """Generate a Slack app manifest with all gateway commands as slashes.
 
@@ -917,6 +929,8 @@ def slack_app_manifest(request_url: str = "https://hermes-agent.local/slack/comm
             entry["usage_hint"] = usage
         slashes.append(entry)
     return {"features": {"slash_commands": slashes}}
+
+
 def slack_subcommand_map() -> dict[str, str]:
     """Return subcommand -> /command mapping for Slack /hermes handler.
 
@@ -978,10 +992,8 @@ def _lmstudio_completion_models() -> list[str]:
         models = []
     _LMSTUDIO_COMPLETION_CACHE = (now, models)
     return models
-
-
 class SlashCommandCompleter(Completer):
-    """Autocomplete for built-in slash commands, subcommands, and skill commands."""
+    """内置斜杠命令、子命令和技能命令的自动补全。"""
 
     def __init__(
         self,
@@ -990,7 +1002,7 @@ class SlashCommandCompleter(Completer):
     ) -> None:
         self._skill_commands_provider = skill_commands_provider
         self._command_filter = command_filter
-        # Cached project file list for fuzzy @ completions
+        # 用于模糊 @ 补全的缓存项目文件列表
         self._file_cache: list[str] = []
         self._file_cache_time: float = 0.0
         self._file_cache_cwd: str = ""
@@ -1013,44 +1025,42 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _completion_text(cmd_name: str, word: str) -> str:
-        """Return replacement text for a completion.
+        """返回补全的替换文本。
 
-        When the user has already typed the full command exactly (``/help``),
-        returning ``help`` would be a no-op and prompt_toolkit suppresses the
-        menu. Appending a trailing space keeps the dropdown visible and makes
-        backspacing retrigger it naturally.
+        当用户已经精确输入了完整命令（``/help``）时，
+        返回 ``help`` 将是无操作，并且 prompt_toolkit 会隐藏菜单。
+        添加一个尾随空格可以保持下拉菜单可见，并使退格键能自然地重新触发它。
         """
         return f"{cmd_name} " if cmd_name == word else cmd_name
 
     @staticmethod
     def _extract_path_word(text: str) -> str | None:
-        """Extract the current word if it looks like a file path.
+        """如果当前单词看起来像文件路径，则提取它。
 
-        Returns the path-like token under the cursor, or None if the
-        current word doesn't look like a path.  A word is path-like when
-        it starts with ``./``, ``../``, ``~/``, ``/``, or contains a
-        ``/`` separator (e.g. ``src/main.py``).
+        返回光标下的类路径标记，如果当前单词看起来不像路径则返回 None。
+        一个单词在以下情况下是类路径的：以 ``./``、``../``、``~/``、``/`` 开头，
+        或者包含 ``/`` 分隔符（例如 ``src/main.py``）。
         """
         if not text:
             return None
-        # Walk backwards to find the start of the current "word".
-        # Words are delimited by spaces, but paths can contain almost anything.
+        # 向后遍历以找到当前“单词”的开头。
+        # 单词由空格分隔，但路径可以包含几乎任何内容。
         i = len(text) - 1
         while i >= 0 and text[i] != " ":
             i -= 1
         word = text[i + 1:]
         if not word:
             return None
-        # Only trigger path completion for path-like tokens
+        # 仅对类路径标记触发路径补全
         if word.startswith(("./", "../", "~/", "/")) or "/" in word:
             return word
         return None
 
     @staticmethod
     def _path_completions(word: str, limit: int = 30):
-        """Yield Completion objects for file paths matching *word*."""
+        """为匹配 *word* 的文件路径生成 Completion 对象。"""
         expanded = os.path.expanduser(word)
-        # Split into directory part and prefix to match inside it
+        # 拆分为目录部分和前缀以在其中匹配
         if expanded.endswith("/"):
             search_dir = expanded
             prefix = ""
@@ -1074,13 +1084,13 @@ class SlashCommandCompleter(Completer):
             full_path = os.path.join(search_dir, entry)
             is_dir = os.path.isdir(full_path)
 
-            # Build the completion text (what replaces the typed word)
+            # 构建补全文本（替换已输入单词的内容）
             if word.startswith("~"):
                 display_path = "~/" + os.path.relpath(full_path, os.path.expanduser("~"))
             elif os.path.isabs(word):
                 display_path = full_path
             else:
-                # Keep relative
+                # 保持相对路径
                 display_path = os.path.relpath(full_path)
 
             if is_dir:
@@ -1099,10 +1109,10 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _extract_context_word(text: str) -> str | None:
-        """Extract a bare ``@`` token for context reference completions."""
+        """提取一个裸的 ``@`` 标记用于上下文引用补全。"""
         if not text:
             return None
-        # Walk backwards to find the start of the current word
+        # 向后遍历以找到当前单词的开头
         i = len(text) - 1
         while i >= 0 and text[i] != " ":
             i -= 1
@@ -1112,17 +1122,16 @@ class SlashCommandCompleter(Completer):
         return word
 
     def _context_completions(self, word: str, limit: int = 30):
-        """Yield Claude Code-style @ context completions.
+        """生成 Claude Code 风格的 @ 上下文补全。
 
-        Bare ``@`` or ``@partial`` shows static references and matching
-        files/folders.  ``@file:path`` and ``@folder:path`` are handled
-        by the existing path completion path.
+        裸的 ``@`` 或 ``@partial`` 显示静态引用和匹配的文件/文件夹。
+        ``@file:path`` 和 ``@folder:path`` 由现有的路径补全路径处理。
         """
         lowered = word.lower()
 
-        # Static context references
+        # 静态上下文引用
         _STATIC_REFS = (
-            ("@diff", "Git 工作区差异"),
+            ("@diff", "Git 工作树差异"),
             ("@staged", "Git 暂存区差异"),
             ("@file:", "附加文件"),
             ("@folder:", "附加文件夹"),
@@ -1138,11 +1147,9 @@ class SlashCommandCompleter(Completer):
                     display_meta=meta,
                 )
 
-        # If the user typed @file: / @folder: (or just @file / @folder with
-        # no colon yet), delegate to path completions.  Accepting the bare
-        # form lets the picker surface directories as soon as the user has
-        # typed `@folder`, without requiring them to first accept the static
-        # `@folder:` hint and re-trigger completion.
+        # 如果用户输入了 @file: / @folder:（或者只是 @file / @folder 还没有冒号），
+        # 委托给路径补全。接受裸形式可以让选择器在用户输入 `@folder` 后立即显示目录，
+        # 而无需他们先接受静态的 `@folder:` 提示并重新触发补全。
         for prefix in ("@file:", "@folder:"):
             bare = prefix[:-1]
 
@@ -1171,11 +1178,9 @@ class SlashCommandCompleter(Completer):
                         continue
                     full_path = os.path.join(search_dir, entry)
                     is_dir = os.path.isdir(full_path)
-                    # `@folder:` must only surface directories; `@file:` only
-                    # regular files.  Without this filter `@folder:` listed
-                    # every .env / .gitignore in the cwd, defeating the
-                    # explicit prefix and confusing users expecting a
-                    # directory picker.
+                    # `@folder:` 必须只显示目录；`@file:` 只显示常规文件。
+                    # 没有这个过滤器，`@folder:` 会列出当前目录中的每个 .env / .gitignore，
+                    # 违背了明确的前缀，并让期望目录选择器的用户感到困惑。
                     if want_dir != is_dir:
                         continue
                     if count >= limit:
@@ -1193,12 +1198,12 @@ class SlashCommandCompleter(Completer):
                     count += 1
                 return
 
-        # Bare @ or @partial — fuzzy project-wide file search
-        query = word[1:]  # strip the @
+        # 裸 @ 或 @partial — 模糊项目范围文件搜索
+        query = word[1:]  # 去掉 @
         yield from self._fuzzy_file_completions(word, query, limit)
 
     def _get_project_files(self) -> list[str]:
-        """Return cached list of project files (refreshed every 5s)."""
+        """返回缓存的项目文件列表（每 5 秒刷新一次）。"""
         cwd = os.getcwd()
         now = time.monotonic()
         if (
@@ -1209,7 +1214,7 @@ class SlashCommandCompleter(Completer):
             return self._file_cache
 
         files: list[str] = []
-        # Try rg first (fast, respects .gitignore), then fd, then find.
+        # 先尝试 rg（快速，尊重 .gitignore），然后 fd，最后 find。
         for cmd in [
             ["rg", "--files", "--sortr=modified", cwd],
             ["rg", "--files", cwd],
@@ -1225,7 +1230,7 @@ class SlashCommandCompleter(Completer):
                 )
                 if proc.returncode == 0 and proc.stdout.strip():
                     raw = proc.stdout.strip().split("\n")
-                    # Store relative paths
+                    # 存储相对路径
                     for p in raw[:5000]:
                         rel = os.path.relpath(p, cwd) if os.path.isabs(p) else p
                         files.append(rel)
@@ -1240,38 +1245,38 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _score_path(filepath: str, query: str) -> int:
-        """Score a file path against a fuzzy query. Higher = better match."""
+        """根据模糊查询对文件路径进行评分。分数越高 = 匹配越好。"""
         if not query:
-            return 1  # show everything when query is empty
+            return 1  # 查询为空时显示所有内容
 
         filename = os.path.basename(filepath)
         lower_file = filename.lower()
         lower_path = filepath.lower()
         lower_q = query.lower()
 
-        # Exact filename match
+        # 精确文件名匹配
         if lower_file == lower_q:
             return 100
-        # Filename starts with query
+        # 文件名以查询开头
         if lower_file.startswith(lower_q):
             return 80
-        # Filename contains query as substring
+        # 文件名包含查询作为子字符串
         if lower_q in lower_file:
             return 60
-        # Full path contains query
+        # 完整路径包含查询
         if lower_q in lower_path:
             return 40
-        # Initials / abbreviation match: e.g. "fo" matches "file_operations"
-        # Check if query chars appear in order in filename
+        # 首字母/缩写匹配：例如 "fo" 匹配 "file_operations"
+        # 检查查询字符是否按顺序出现在文件名中
         qi = 0
         for c in lower_file:
             if qi < len(lower_q) and c == lower_q[qi]:
                 qi += 1
         if qi == len(lower_q):
-            # Bonus if matches land on word boundaries (after _, -, /, .)
+            # 如果匹配落在单词边界上（在 _、-、/、. 之后）则加分
             boundary_hits = 0
             qi = 0
-            prev = "_"  # treat start as boundary
+            prev = "_"  # 将开头视为边界
             for c in lower_file:
                 if qi < len(lower_q) and c == lower_q[qi]:
                     if prev in "_-./":
@@ -1284,15 +1289,15 @@ class SlashCommandCompleter(Completer):
         return 0
 
     def _fuzzy_file_completions(self, word: str, query: str, limit: int = 20):
-        """Yield fuzzy file completions for bare @query."""
+        """为裸 @query 生成模糊文件补全。"""
         files = self._get_project_files()
 
         if not query:
-            # No query — show recently modified files (already sorted by mtime)
+            # 无查询 — 显示最近修改的文件（已按修改时间排序）
             for fp in files[:limit]:
                 is_dir = fp.endswith("/")
                 filename = os.path.basename(fp)
-                kind = "文件夹" if is_dir else "文件"
+                kind = "folder" if is_dir else "file"
                 meta = "目录" if is_dir else _file_size_label(
                     os.path.join(os.getcwd(), fp)
                 )
@@ -1304,7 +1309,7 @@ class SlashCommandCompleter(Completer):
                 )
             return
 
-        # Score and rank
+        # 评分和排序
         scored = []
         for fp in files:
             s = self._score_path(fp, query)
@@ -1315,7 +1320,7 @@ class SlashCommandCompleter(Completer):
         for _, fp in scored[:limit]:
             is_dir = fp.endswith("/")
             filename = os.path.basename(fp)
-            kind = "文件夹" if is_dir else "文件"
+            kind = "folder" if is_dir else "file"
             meta = "目录" if is_dir else _file_size_label(
                 os.path.join(os.getcwd(), fp)
             )
@@ -1328,7 +1333,7 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _skin_completions(sub_text: str, sub_lower: str):
-        """Yield completions for /skin from available skins."""
+        """从可用皮肤中为 /skin 生成补全。"""
         try:
             from hermes_cli.skin_engine import list_skins
             for s in list_skins():
@@ -1345,7 +1350,7 @@ class SlashCommandCompleter(Completer):
 
     @staticmethod
     def _personality_completions(sub_text: str, sub_lower: str):
-        """Yield completions for /personality from configured personalities."""
+        """从配置的人格中为 /personality 生成补全。"""
         try:
             from hermes_cli.config import load_config
             personalities = load_config().get("agent", {}).get("personalities", {})
@@ -1354,7 +1359,7 @@ class SlashCommandCompleter(Completer):
                     "none",
                     start_position=-len(sub_text),
                     display="none",
-                    display_meta="清除人格覆盖层",
+                    display_meta="清除人格覆盖",
                 )
             for name, prompt in personalities.items():
                 if name.startswith(sub_lower) and name != sub_lower:
@@ -1372,9 +1377,9 @@ class SlashCommandCompleter(Completer):
             pass
 
     def _model_completions(self, sub_text: str, sub_lower: str):
-        """Yield completions for /model from config aliases + built-in aliases."""
+        """从配置别名 + 内置别名中为 /model 生成补全。"""
         seen = set()
-        # Config-based direct aliases (preferred — include provider info)
+        # 基于配置的直接别名（首选 — 包含提供商信息）
         try:
             from hermes_cli.model_switch import (
                 _ensure_direct_aliases, DIRECT_ALIASES, MODEL_ALIASES,
@@ -1389,7 +1394,7 @@ class SlashCommandCompleter(Completer):
                         display=name,
                         display_meta=f"{da.model} ({da.provider})",
                     )
-            # Built-in catalog aliases not already covered
+            # 内置目录别名，尚未覆盖的
             for name in sorted(MODEL_ALIASES.keys()):
                 if name in seen:
                     continue
@@ -1403,9 +1408,8 @@ class SlashCommandCompleter(Completer):
                     )
         except Exception:
             pass
-        # LM Studio: surface locally-loaded models. Gated on the user actually
-        # having LM Studio configured (env var or auth-store entry) so we
-        # don't probe 127.0.0.1 on every keystroke for users who don't use it.
+        # LM Studio：显示本地加载的模型。根据用户实际配置了 LM Studio（环境变量或认证存储条目）来启用，
+        # 这样我们就不会为不使用它的用户在每次按键时探测 127.0.0.1。
         for name in _lmstudio_completion_models():
             if name in seen:
                 continue
@@ -1420,25 +1424,25 @@ class SlashCommandCompleter(Completer):
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor
         if not text.startswith("/"):
-            # Try @ context completion (Claude Code-style)
+            # 尝试 @ 上下文补全（Claude Code 风格）
             ctx_word = self._extract_context_word(text)
             if ctx_word is not None:
                 yield from self._context_completions(ctx_word)
                 return
-            # Try file path completion for non-slash input
+            # 尝试为非斜杠输入进行文件路径补全
             path_word = self._extract_path_word(text)
             if path_word is not None:
                 yield from self._path_completions(path_word)
             return
 
-        # Check if we're completing a subcommand (base command already typed)
+        # 检查我们是否正在补全一个子命令（基本命令已输入）
         parts = text.split(maxsplit=1)
         base_cmd = parts[0].lower()
         if len(parts) > 1 or (len(parts) == 1 and text.endswith(" ")):
             sub_text = parts[1] if len(parts) > 1 else ""
             sub_lower = sub_text.lower()
 
-            # Dynamic completions for commands with runtime lists
+            # 具有运行时列表的命令的动态补全
             if " " not in sub_text:
                 if base_cmd == "/model":
                     yield from self._model_completions(sub_text, sub_lower)
@@ -1450,7 +1454,7 @@ class SlashCommandCompleter(Completer):
                     yield from self._personality_completions(sub_text, sub_lower)
                     return
 
-            # Static subcommand completions
+            # 静态子命令补全
             if " " not in sub_text and base_cmd in SUBCOMMANDS and self._command_allowed(base_cmd):
                 for sub in SUBCOMMANDS[base_cmd]:
                     if sub.startswith(sub_lower) and sub != sub_lower:
@@ -1487,7 +1491,7 @@ class SlashCommandCompleter(Completer):
                     display_meta=f"⚡ {short_desc}",
                 )
 
-        # Plugin-registered slash commands
+        # 插件注册的斜杠命令
         try:
             from hermes_cli.plugins import get_plugin_commands
             for cmd_name, cmd_info in get_plugin_commands().items():
@@ -1505,7 +1509,7 @@ class SlashCommandCompleter(Completer):
 
 
 # ---------------------------------------------------------------------------
-# Inline auto-suggest (ghost text) for slash commands
+# 斜杠命令的内联自动建议（幽灵文本）
 # ---------------------------------------------------------------------------
 class SlashCommandAutoSuggest(AutoSuggest):
     """Inline ghost-text suggestions for slash commands and their subcommands.
