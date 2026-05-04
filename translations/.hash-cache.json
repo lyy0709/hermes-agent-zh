@@ -250,8 +250,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/environment-variables.md": {
-    "source_hash": "sha256:a4442bb3614286c4b52a812b4952243173c573193457149cb200b67eead5a3e3",
-    "translated_at": "2026-05-01T05:46:06.912900+00:00",
+    "source_hash": "sha256:4ed0f8a3ce3ea4f6d0675040a1973c90cdf72715130b324b7e55840a49e6ad04",
+    "translated_at": "2026-05-04T05:38:21.278340+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/slash-commands.md": {
@@ -525,8 +525,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/telegram.md": {
-    "source_hash": "sha256:2a68bacc417157f8b6c47aaa7081456b4d747fbad8bb00ed1b2ee28948f5c52c",
-    "translated_at": "2026-04-30T06:00:40.063155+00:00",
+    "source_hash": "sha256:edcd2cacc2a6bcfbe6eaaa9e64c553ffac29357fb8a699e5d48dd6eefb9b8d0d",
+    "translated_at": "2026-05-04T05:34:10.455844+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/whatsapp.md": {
@@ -605,8 +605,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/commands.py": {
-    "source_hash": "sha256:1c85b618f674d59ad288e0fc7ce4ef54ac854cb85a8df24602f3e6296246a6b7",
-    "translated_at": "2026-05-03T05:34:59.690896+00:00",
+    "source_hash": "sha256:718b5b862358bb5710eaa54cc1a2f3aa450a5456d3d645ca2046b88cb43df284",
+    "translated_at": "2026-05-04T05:39:37.363574+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/doctor.py": {
