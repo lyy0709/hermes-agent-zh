@@ -14,10 +14,10 @@ description: "如何将 Hermes Agent 更新到最新版本或卸载它"
 hermes update
 ```
 
-此命令会拉取最新代码、更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
+此命令会拉取最新代码，更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
 
 :::tip
-`hermes update` 会自动检测新的配置选项并提示你添加。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
+`hermes update` 会自动检测新的配置选项并提示你添加它们。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
 :::
 
 ### 更新期间会发生什么
@@ -32,7 +32,7 @@ hermes update
 
 ### 仅预览：`hermes update --check`
 
-想在实际拉取之前知道你落后于 `origin/main` 吗？运行 `hermes update --check` — 它会获取、并排打印你的本地提交和最新的远程提交，如果同步则退出码为 `0`，如果落后则退出码为 `1`。不会修改任何文件，也不会重启任何消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
+想在实际拉取之前知道你落后于 `origin/main` 吗？运行 `hermes update --check` — 它会获取、并排打印你的本地提交和最新的远程提交，如果同步则退出 `0`，如果落后则退出 `1`。不会修改任何文件，也不会重启任何消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
 
 ### 完整的更新前备份：`--backup`
 
@@ -72,9 +72,9 @@ $ hermes update
 
 `hermes update` 处理主要的更新路径，但快速验证可以确认一切顺利落地：
 
-1.  `git status --short` — 如果工作树意外地变脏，请在继续之前检查
+1.  `git status --short` — 如果工作树意外地变脏了，请在继续之前检查
 2.  `hermes doctor` — 检查配置、依赖项和服务健康状况
-3.  `hermes --version` — 确认版本号按预期更新
+3.  `hermes --version` — 确认版本按预期更新
 4.  如果你使用消息网关：`hermes gateway status`
 5.  如果 `doctor` 报告 npm audit 问题：在标记的目录中运行 `npm audit fix`
 
@@ -87,7 +87,7 @@ $ hermes update
 `hermes update` 会保护自己免受意外终端丢失的影响：
 
 *   更新会忽略 `SIGHUP`，因此关闭 SSH 会话或终端窗口不再会在安装过程中终止它。`pip` 和 `git` 子进程继承了这种保护，因此 Python 环境不会因连接断开而处于半安装状态。
-*   所有输出在更新运行时都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失，请重新连接并检查日志，查看更新是否完成以及消息网关重启是否成功：
+*   所有输出在更新运行时都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失了，重新连接并检查日志，看看更新是否完成以及消息网关重启是否成功：
 
 ```bash
 tail -f ~/.hermes/logs/update.log
@@ -107,13 +107,13 @@ hermes version
 
 ### 从消息平台更新
 
-你也可以直接从 Telegram、Discord、Slack 或 WhatsApp 发送以下命令进行更新：
+你也可以直接从 Telegram、Discord、Slack、WhatsApp 或 Teams 发送以下命令进行更新：
 
 ```
 /update
 ```
 
-这会拉取最新代码、更新依赖项并重启正在运行的消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
+这会拉取最新代码，更新依赖项，并重启正在运行的消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
 
 ### 手动更新
 
@@ -167,7 +167,7 @@ uv pip install -e ".[all]"
 如果添加了新选项，回滚可能会导致配置不兼容。回滚后运行 `hermes config check`，如果遇到错误，请从 `config.yaml` 中删除任何无法识别的选项。
 :::
 
-### 给 Nix 用户的说明
+### 给 Nix 用户的注意事项
 
 如果你通过 Nix flake 安装，更新是通过 Nix 包管理器管理的：
 
@@ -195,7 +195,7 @@ nix profile rollback
 hermes uninstall
 ```
 
-卸载程序会给你保留配置文件（`~/.hermes/`）以便将来重新安装的选项。
+卸载程序会给你保留配置文件 (`~/.hermes/`) 以便将来重新安装的选项。
 
 ### 手动卸载
 

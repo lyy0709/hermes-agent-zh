@@ -37,13 +37,13 @@ Hermes 的不同之处：
 - **通过技能自我改进** — Hermes 通过将可重用过程保存为技能来从经验中学习。当它解决复杂问题、发现工作流或得到纠正时，可以将该知识持久化为技能文档，加载到未来的会话中。技能会随时间积累，使 Agent 更擅长您的特定任务和环境。
 - **跨会话的持久记忆** — 记住您是谁、您的偏好、环境细节和学到的经验教训。可插拔的记忆后端（内置、Honcho、Mem0 等）让您可以选择记忆的工作方式。
 - **多平台消息网关** — 同一个 Agent 可在 Telegram、Discord、Slack、WhatsApp、Signal、Matrix、Email 等 10 多个平台上运行，并拥有完整的工具访问权限，而不仅仅是聊天。
-- **提供商无关** — 在工作流中更换模型和提供商，无需更改其他任何内容。凭证池会自动在多个 API 密钥之间轮换。
+- **提供商无关** — 在工作流中随时更换模型和提供商，无需更改其他任何内容。凭证池会自动在多个 API 密钥之间轮换。
 - **配置文件** — 运行多个独立的 Hermes 实例，具有隔离的配置、会话、技能和记忆。
-- **可扩展** — 插件、MCP 服务器、自定义工具、webhook 触发器、定时任务调度以及完整的 Python 生态系统。
+- **可扩展** — 插件、MCP 服务器、自定义工具、Webhook 触发器、定时任务调度以及完整的 Python 生态系统。
 
 人们使用 Hermes 进行软件开发、研究、系统管理、数据分析、内容创作、家庭自动化，以及任何其他受益于具有持久上下文和完整系统访问权限的 AI Agent 的任务。
 
-**此技能帮助您有效地使用 Hermes Agent** — 设置它、配置功能、生成额外的 Agent 实例、排查问题、查找正确的命令和设置，以及在需要扩展或贡献时理解系统的工作原理。
+**此技能帮助您有效地使用 Hermes Agent** — 设置它、配置功能、生成额外的 Agent 实例、排查问题、找到正确的命令和设置，以及在您需要扩展或贡献时理解系统的工作原理。
 
 **文档：** https://hermes-agent.nousresearch.com/docs/
 
@@ -140,7 +140,7 @@ hermes skills update        更新过时的技能
 hermes skills uninstall N   移除一个中心技能
 hermes skills publish PATH  发布到注册表
 hermes skills browse        浏览所有可用技能
-hermes skills tap add REPO  添加 GitHub 仓库作为技能源
+hermes skills tap add REPO  添加一个 GitHub 仓库作为技能源
 ```
 ### MCP 服务器
 
@@ -164,7 +164,7 @@ hermes gateway status       检查状态
 hermes gateway setup        配置平台
 ```
 
-支持平台：Telegram、Discord、Slack、WhatsApp、Signal、Email、SMS、Matrix、Mattermost、Home Assistant、钉钉、飞书、企业微信、BlueBubbles（iMessage）、微信、API 服务器、Webhooks。Open WebUI 通过 API 服务器适配器连接。
+支持平台：Telegram、Discord、Slack、WhatsApp、Signal、Email、SMS、Matrix、Mattermost、Home Assistant、钉钉、飞书、企业微信、BlueBubbles（iMessage）、微信、Microsoft Teams、API 服务器、Webhooks。Open WebUI 通过 API 服务器适配器连接。
 
 平台文档：https://hermes-agent.nousresearch.com/docs/user-guide/messaging/
 
@@ -247,9 +247,9 @@ hermes uninstall            卸载 Hermes
 
 ### 会话控制
 ```
-/new (/reset)        新建会话
-/clear               清屏 + 新建会话（CLI）
-/retry               重新发送上一条消息
+/new (/reset)        新会话
+/clear               清屏 + 新会话（CLI）
+/retry               重新发送最后一条消息
 /undo                移除最后一次交互
 /title [name]        为会话命名
 /compress            手动压缩上下文
@@ -268,7 +268,7 @@ hermes uninstall            卸载 Hermes
 /reasoning [level]   设置推理级别（none|minimal|low|medium|high|xhigh|show|hide）
 /verbose             循环：关闭 → 新消息 → 全部 → 详细
 /voice [on|off|tts]  语音模式
-/yolo                切换批准绕过
+/yolo                切换绕过批准
 /skin [name]         更改主题（CLI）
 /statusbar           切换状态栏（CLI）
 ```
@@ -357,7 +357,7 @@ $HERMES_HOME/skills/        已安装的技能
 
 ### 提供商
 
-支持 20+ 个提供商。通过 `hermes model` 或 `hermes setup` 设置。
+支持 20+ 提供商。通过 `hermes model` 或 `hermes setup` 设置。
 
 | 提供商 | 认证方式 | 密钥环境变量 |
 |----------|------|-------------|
@@ -410,7 +410,7 @@ $HERMES_HOME/skills/        已安装的技能
 | `search` | 仅网络搜索（`web` 的子集） |
 | `todo` | 会话内任务规划和跟踪 |
 | `rl` | 强化学习工具（默认关闭） |
-| `moa` | 混合 Agent（默认关闭） |
+| `moa` | Agent 混合（默认关闭） |
 | `homeassistant` | 智能家居控制（默认关闭） |
 
 工具更改在 `/reset`（新会话）后生效。它们不会在对话中途应用，以保留提示词缓存。
@@ -458,7 +458,7 @@ hermes config set approvals.mode smart       # 推荐的折中方案
 hermes config set approvals.mode off         # 绕过所有提示（不推荐）
 ```
 
-在不更改配置的情况下，按次调用绕过：
+在不更改配置的情况下，每次调用绕过：
 - `hermes --yolo …`
 - `export HERMES_YOLO_MODE=1`
 
@@ -469,7 +469,7 @@ hermes config set approvals.mode off         # 绕过所有提示（不推荐）
 某些 shell 钩子集成需要在触发前明确允许。通过 `~/.hermes/shell-hooks-allowlist.json` 管理——首次有钩子想要运行时，会进行交互式提示。
 ### 禁用 Web/浏览器/图像生成工具
 
-要完全阻止模型访问网络或媒体工具，请打开 `hermes tools` 并按平台切换开关。更改将在下次会话（`/reset`）时生效。请参阅上文的“工具与技能”部分。
+要完全阻止模型访问网络或媒体工具，请打开 `hermes tools` 并按平台切换。更改将在下次会话生效（使用 `/reset`）。请参阅上文的“工具与技能”部分。
 
 ---
 
@@ -503,9 +503,9 @@ stt:
 | OpenAI | `VOICE_TOOLS_OPENAI_KEY` | 付费 |
 | MiniMax | `MINIMAX_API_KEY` | 付费 |
 | Mistral (Voxtral) | `MISTRAL_API_KEY` | 付费 |
-| NeuTTS (本地) | 无 (`pip install neutts[all]` + `espeak-ng`) | 免费 |
+| NeuTTS (本地) | 无（`pip install neutts[all]` + `espeak-ng`） | 免费 |
 
-语音命令：`/voice on`（语音到语音），`/voice tts`（始终语音），`/voice off`。
+语音命令：`/voice on`（语音对语音），`/voice tts`（始终语音），`/voice off`。
 
 ---
 
@@ -519,9 +519,9 @@ stt:
 |-|-----------------|--------------------------|
 | 隔离性 | 独立对话，共享进程 | 完全独立的进程 |
 | 持续时间 | 分钟级（受父循环限制） | 小时/天级 |
-| 工具访问 | 父工具的子集 | 完整的工具访问权限 |
+| 工具访问 | 父进程工具的子集 | 完整的工具访问权限 |
 | 交互性 | 否 | 是（PTY 模式） |
-| 使用场景 | 快速并行子任务 | 长时间自主任务 |
+| 用例 | 快速的并行子任务 | 长期自主任务 |
 
 ### 一次性模式
 
@@ -534,7 +534,7 @@ terminal(command="hermes chat -q 'Set up CI/CD for ~/myapp'", background=true)
 
 ### 交互式 PTY 模式（通过 tmux）
 
-Hermes 使用 prompt_toolkit，这需要一个真实的终端。使用 tmux 进行交互式启动：
+Hermes 使用 prompt_toolkit，需要一个真实的终端。使用 tmux 进行交互式启动：
 
 ```
 # 启动
@@ -556,11 +556,11 @@ terminal(command="tmux send-keys -t agent1 '/exit' Enter && sleep 2 && tmux kill
 ### 多 Agent 协调
 
 ```
-# Agent A：后端
+# Agent A: 后端
 terminal(command="tmux new-session -d -s backend -x 120 -y 40 'hermes -w'", timeout=10)
 terminal(command="sleep 8 && tmux send-keys -t backend 'Build REST API for user management' Enter", timeout=15)
 
-# Agent B：前端
+# Agent B: 前端
 terminal(command="tmux new-session -d -s frontend -x 120 -y 40 'hermes -w'", timeout=10)
 terminal(command="sleep 8 && tmux send-keys -t frontend 'Build React dashboard for user management' Enter", timeout=15)
 
@@ -586,7 +586,7 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 - **为一次性模式设置超时** — 复杂任务可能需要 5-10 分钟
 - **对于“发射后不管”的任务，使用 `hermes chat -q`** — 不需要 PTY
 - **对于交互式会话，使用 tmux** — 原始 PTY 模式与 prompt_toolkit 存在 `\r` 与 `\n` 的问题
-- **对于定时任务**，使用 `cronjob` 工具而不是启动新进程 — 它处理交付和重试
+- **对于定时任务**，使用 `cronjob` 工具而不是启动进程 — 它处理交付和重试
 
 ---
 
@@ -598,15 +598,15 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 3. 在消息网关中：`/restart`。在 CLI 中：退出并重新启动。
 
 ### 工具不可用
-1. `hermes tools` — 检查工具集是否在您的平台上启用
+1. `hermes tools` — 检查工具集是否在你的平台上启用
 2. 某些工具需要环境变量（检查 `.env`）
-3. 启用工具后执行 `/reset`
+3. 启用工具后使用 `/reset`
 
 ### 模型/提供商问题
 1. `hermes doctor` — 检查配置和依赖项
-2. `hermes login` — 重新进行 OAuth 提供商身份验证
-3. 检查 `.env` 中是否有正确的 API 密钥
-4. **Copilot 403**：`gh auth login` 的 Token 对 Copilot API **无效**。您必须通过 `hermes model` → GitHub Copilot 使用 Copilot 特定的 OAuth 设备代码流程。
+2. `hermes login` — 重新验证 OAuth 提供商
+3. 检查 `.env` 是否有正确的 API 密钥
+4. **Copilot 403**：`gh auth login` 的 Token 对 Copilot API **无效**。你必须通过 `hermes model` → GitHub Copilot 使用 Copilot 特定的 OAuth 设备代码流程。
 
 ### 更改未生效
 - **工具/技能：** `/reset` 会启动一个带有更新工具集的新会话
@@ -626,15 +626,15 @@ grep -i "failed to send\|error" ~/.hermes/logs/gateway.log | tail -20
 
 常见消息网关问题：
 - **SSH 注销后消息网关终止**：启用 linger：`sudo loginctl enable-linger $USER`
-- **WSL2 关闭后消息网关终止**：WSL2 需要在 `/etc/wsl.conf` 中设置 `systemd=true` 才能使 systemd 服务正常工作。如果没有设置，消息网关会回退到 `nohup`（会话关闭时终止）。
+- **WSL2 关闭后消息网关终止**：WSL2 需要在 `/etc/wsl.conf` 中设置 `systemd=true` 才能使 systemd 服务正常工作。没有它，消息网关会回退到 `nohup`（会话关闭时终止）。
 - **消息网关崩溃循环**：重置失败状态：`systemctl --user reset-failed hermes-gateway`
 
 ### 平台特定问题
 - **Discord 机器人静默**：必须在 Bot → Privileged Gateway Intents 中启用 **Message Content Intent**。
-- **Slack 机器人仅在私聊中工作**：必须订阅 `message.channels` 事件。没有它，机器人会忽略公共频道。
+- **Slack 机器人仅在私信中工作**：必须订阅 `message.channels` 事件。没有它，机器人会忽略公共频道。
 - **Windows HTTP 400 "No models provided"**：配置文件编码问题（BOM）。确保 `config.yaml` 保存为 UTF-8 无 BOM 格式。
 ### 辅助模型无法工作
-如果 `auxiliary` 任务（vision、compression、session_search）静默失败，`auto` 提供商将无法找到后端。请设置 `OPENROUTER_API_KEY` 或 `GOOGLE_API_KEY`，或者显式配置每个辅助任务的提供商：
+如果 `auxiliary` 任务（vision, compression, session_search）静默失败，`auto` 提供商将无法找到后端。请设置 `OPENROUTER_API_KEY` 或 `GOOGLE_API_KEY`，或者显式配置每个辅助任务的提供商：
 ```bash
 hermes config set auxiliary.vision.provider <your_provider>
 hermes config set auxiliary.vision.model <model_name>
@@ -684,18 +684,18 @@ hermes-agent/
 │   ├── config.py         # DEFAULT_CONFIG，环境变量定义
 │   └── main.py           # CLI 入口点和 argparse
 ├── tools/                # 每个工具一个文件
-│   └── registry.py       # 中央工具注册表
+│   └── registry.py       # 中心工具注册表
 ├── gateway/              # 消息网关
 │   └── platforms/        # 平台适配器 (telegram, discord 等)
 ├── cron/                 # 任务调度器
-├── tests/                # 约 3000 个 pytest 测试
+├── tests/                # ~3000 个 pytest 测试
 └── website/              # Docusaurus 文档站点
 ```
 <!-- ascii-guard-ignore-end -->
 
-配置：`~/.hermes/config.yaml` (设置)，`~/.hermes/.env` (API 密钥)。
+配置：`~/.hermes/config.yaml`（设置），`~/.hermes/.env`（API 密钥）。
 
-### 添加工具 (3 个文件)
+### 添加工具（3 个文件）
 
 **1. 创建 `tools/your_tool.py`:**
 ```python
@@ -721,25 +721,25 @@ registry.register(
 
 **2. 添加到 `toolsets.py`** → `_HERMES_CORE_TOOLS` 列表。
 
-自动发现：任何包含顶层 `registry.register()` 调用的 `tools/*.py` 文件都会被自动导入 —— 无需手动维护列表。
+自动发现：任何包含顶级 `registry.register()` 调用的 `tools/*.py` 文件都会被自动导入 —— 无需手动列出。
 
-所有处理程序必须返回 JSON 字符串。使用 `get_hermes_home()` 获取路径，切勿硬编码 `~/.hermes`。
+所有处理程序必须返回 JSON 字符串。使用 `get_hermes_home()` 处理路径，切勿硬编码 `~/.hermes`。
 
 ### 添加斜杠命令
 
 1. 在 `hermes_cli/commands.py` 的 `COMMAND_REGISTRY` 中添加 `CommandDef`
-2. 在 `cli.py` 的 `process_command()` 中添加处理程序
-3. (可选) 在 `gateway/run.py` 中添加网关处理程序
+2. 在 `cli.py` → `process_command()` 中添加处理程序
+3. （可选）在 `gateway/run.py` 中添加消息网关处理程序
 
-所有消费者（帮助文本、自动补全、Telegram 菜单、Slack 映射）都会自动从中央注册表派生。
+所有使用者（帮助文本、自动补全、Telegram 菜单、Slack 映射）都会自动从中心注册表派生。
 
-### Agent 循环 (高层概述)
+### Agent 循环（高层概述）
 
 ```
 run_conversation():
   1. 构建系统提示词
   2. 当迭代次数 < 最大值时循环：
-     a. 调用 LLM (OpenAI 格式的消息 + 工具模式)
+     a. 调用 LLM（OpenAI 格式的消息 + 工具模式）
      b. 如果 tool_calls → 通过 handle_function_call() 分发每个调用 → 追加结果 → 继续
      c. 如果是文本响应 → 返回
   3. 在接近 Token 限制时自动触发上下文压缩
@@ -769,7 +769,7 @@ type: 简洁的主题行
 ### 关键规则
 
 - **绝不破坏提示词缓存** —— 不要在对话中途更改上下文、工具或系统提示词
-- **消息角色交替** —— 绝不连续出现两条助手或用户消息
-- 对所有路径使用 `hermes_constants` 中的 `get_hermes_home()` (支持配置文件)
+- **消息角色交替** —— 绝不连续出现两个助手或两个用户消息
+- 对所有路径使用 `hermes_constants` 中的 `get_hermes_home()`（支持配置文件）
 - 配置值放在 `config.yaml` 中，密钥放在 `.env` 中
 - 新工具需要一个 `check_fn`，以便仅在满足要求时出现

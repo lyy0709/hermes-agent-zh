@@ -18,19 +18,23 @@ flowchart LR
     B -->|SSE 流式响应| A
 ```
 
-Open WebUI 连接到 Hermes Agent 的 API 服务器，就像连接到 OpenAI 一样。您的 Agent 会使用其完整的工具集（终端、文件操作、网络搜索、记忆、技能）处理请求，并返回最终响应。
+Open WebUI 连接到 Hermes Agent 的 API 服务器，就像连接到 OpenAI 一样。您的 Agent 使用其完整的工具集（终端、文件操作、网络搜索、记忆、技能等）处理请求，并返回最终响应。
 
-Open WebUI 与 Hermes 是服务器到服务器的通信，因此此集成不需要 `API_SERVER_CORS_ORIGINS`。
+Open WebUI 以服务器到服务器的方式与 Hermes 通信，因此此集成不需要 `API_SERVER_CORS_ORIGINS`。
 
 ## 快速设置
 
 ### 1. 启用 API 服务器
 
-添加到 `~/.hermes/.env`：
+```bash
+hermes config set API_SERVER_ENABLED true
+hermes config set API_SERVER_KEY your-secret-key
+```
+
+`hermes config set` 会自动将标志路由到 `config.yaml`，并将密钥路由到 `~/.hermes/.env`。如果消息网关已在运行，请重启它以使更改生效：
 
 ```bash
-API_SERVER_ENABLED=true
-API_SERVER_KEY=your-secret-key
+hermes gateway stop && hermes gateway
 ```
 
 ### 2. 启动 Hermes Agent 消息网关
@@ -39,18 +43,31 @@ API_SERVER_KEY=your-secret-key
 hermes gateway
 ```
 
-您应该看到：
+您应该会看到：
 
 ```
 [API Server] API server listening on http://127.0.0.1:8642
 ```
 
-### 3. 启动 Open WebUI
+### 3. 验证 API 服务器可达
+
+```bash
+curl -s http://127.0.0.1:8642/health
+# {"status": "ok", ...}
+
+curl -s -H "Authorization: Bearer your-secret-key" http://127.0.0.1:8642/v1/models
+# {"object":"list","data":[{"id":"hermes-agent", ...}]}
+```
+
+如果 `/health` 失败，说明消息网关未获取到 `API_SERVER_ENABLED=true`——请重启它。如果 `/v1/models` 返回 `401`，说明您的 `Authorization` 请求头与 `API_SERVER_KEY` 不匹配。
+
+### 4. 启动 Open WebUI
 
 ```bash
 docker run -d -p 3000:8080 \
   -e OPENAI_API_BASE_URL=http://host.docker.internal:8642/v1 \
   -e OPENAI_API_KEY=your-secret-key \
+  -e ENABLE_OLLAMA_API=false \
   --add-host=host.docker.internal:host-gateway \
   -v open-webui:/app/backend/data \
   --name open-webui \
@@ -58,7 +75,11 @@ docker run -d -p 3000:8080 \
   ghcr.io/open-webui/open-webui:main
 ```
 
-### 4. 打开界面
+`ENABLE_OLLAMA_API=false` 会抑制默认的 Ollama 后端，否则它会显示为空并扰乱模型选择器。如果您确实同时运行了 Ollama，请省略此参数。
+
+首次启动需要 15-30 秒：Open WebUI 在第一次启动时会下载 sentence-transformer 嵌入模型（约 150MB）。在打开 UI 之前，请等待 `docker logs open-webui` 稳定下来。
+
+### 5. 打开 UI
 
 访问 **http://localhost:3000**。创建您的管理员账户（第一个用户将成为管理员）。您应该在模型下拉列表中看到您的 Agent（以您的配置文件命名，或默认配置文件的 **hermes-agent**）。开始聊天吧！
 
@@ -77,6 +98,7 @@ services:
     environment:
       - OPENAI_API_BASE_URL=http://host.docker.internal:8642/v1
       - OPENAI_API_KEY=your-secret-key
+      - ENABLE_OLLAMA_API=false
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: always
@@ -85,7 +107,7 @@ volumes:
   open-webui:
 ```
 
-然后运行：
+然后：
 
 ```bash
 docker compose up -d
@@ -93,7 +115,7 @@ docker compose up -d
 
 ## 通过管理界面配置
 
-如果您更喜欢通过界面而不是环境变量来配置连接：
+如果您更喜欢通过 UI 而不是环境变量来配置连接：
 
 1. 登录 Open WebUI：**http://localhost:3000**
 2. 点击您的**个人资料头像** → **管理设置**
@@ -103,13 +125,13 @@ docker compose up -d
 6. 输入：
    - **URL**：`http://host.docker.internal:8642/v1`
    - **API 密钥**：您的密钥或任何非空值（例如 `not-needed`）
-7. 点击**对勾**验证连接
+7. 点击**对勾图标**验证连接
 8. **保存**
 
 您的 Agent 模型现在应该出现在模型下拉列表中（以您的配置文件命名，或默认配置文件的 **hermes-agent**）。
 
 :::warning
-环境变量仅在 Open WebUI **首次启动**时生效。之后，连接设置将存储在其内部数据库中。要稍后更改它们，请使用管理界面或删除 Docker 卷并重新开始。
+环境变量仅在 Open WebUI **首次启动**时生效。之后，连接设置会存储在其内部数据库中。要稍后更改它们，请使用管理界面或删除 Docker 卷并重新开始。
 :::
 
 ## API 类型：Chat Completions 与 Responses
@@ -134,10 +156,10 @@ Open WebUI 在连接到后端时支持两种 API 模式：
 3. 将 **API 类型** 从 "Chat Completions" 更改为 **"Responses (Experimental)"**
 4. 保存
 
-使用 Responses API 时，Open WebUI 以 Responses 格式（`input` 数组 + `instructions`）发送请求，并且 Hermes Agent 可以通过 `previous_response_id` 在多个回合中保留完整的工具调用历史。当 `stream: true` 时，Hermes 还会流式传输规范原生的 `function_call` 和 `function_call_output` 项，这使客户端能够呈现 Responses 事件，从而实现自定义的结构化工具调用界面。
+使用 Responses API 时，Open WebUI 以 Responses 格式（`input` 数组 + `instructions`）发送请求，并且 Hermes Agent 可以通过 `previous_response_id` 在多轮对话中保留完整的工具调用历史。当 `stream: true` 时，Hermes 还会流式传输规范原生的 `function_call` 和 `function_call_output` 项，这使客户端能够渲染 Responses 事件，实现自定义的结构化工具调用 UI。
 
 :::note
-即使在 Responses 模式下，Open WebUI 目前仍在客户端管理对话历史——它在每个请求中发送完整的消息历史记录，而不是使用 `previous_response_id`。如今 Responses 模式的主要优势是结构化的事件流：文本增量、`function_call` 和 `function_call_output` 项作为 OpenAI Responses SSE 事件到达，而不是 Chat Completions 块。
+Open WebUI 目前在 Responses 模式下仍以客户端方式管理对话历史——它在每个请求中发送完整的消息历史，而不是使用 `previous_response_id`。如今 Responses 模式的主要优势是结构化的事件流：文本增量、`function_call` 和 `function_call_output` 项作为 OpenAI Responses SSE 事件到达，而不是 Chat Completions 块。
 :::
 
 ## 工作原理
@@ -147,14 +169,14 @@ Open WebUI 在连接到后端时支持两种 API 模式：
 1. Open WebUI 发送一个 `POST /v1/chat/completions` 请求，包含您的消息和对话历史
 2. Hermes Agent 创建一个具有完整工具集的 AIAgent 实例
 3. Agent 处理您的请求——它可能会调用工具（终端、文件操作、网络搜索等）
-4. 当工具执行时，**内联进度消息会流式传输到界面**，以便您可以看到 Agent 正在做什么（例如 `` `💻 ls -la` ``, `` `🔍 Python 3.12 release` ``）
+4. 当工具执行时，**内联进度消息会流式传输到 UI**，以便您可以看到 Agent 正在做什么（例如 `` `💻 ls -la` ``, `` `🔍 Python 3.12 release` ``）
 5. Agent 的最终文本响应流式传输回 Open WebUI
 6. Open WebUI 在其聊天界面中显示响应
 
-您的 Agent 可以访问与使用 CLI 或 Telegram 时相同的所有工具和功能——唯一的区别是前端。
+您的 Agent 拥有与使用 CLI 或 Telegram 时相同的所有工具和功能——唯一的区别是前端。
 
 :::tip 工具进度
-启用流式传输（默认）后，您将在工具运行时看到简短的内联指示器——工具表情符号及其关键参数。这些出现在 Agent 最终答案之前的响应流中，让您了解幕后发生的情况。
+启用流式传输（默认）后，您将在工具运行时看到简短的内联指示器——工具表情符号及其关键参数。这些会在 Agent 最终答案之前出现在响应流中，让您了解幕后发生的情况。
 :::
 
 ## 配置参考
@@ -166,27 +188,28 @@ Open WebUI 在连接到后端时支持两种 API 模式：
 | `API_SERVER_ENABLED` | `false` | 启用 API 服务器 |
 | `API_SERVER_PORT` | `8642` | HTTP 服务器端口 |
 | `API_SERVER_HOST` | `127.0.0.1` | 绑定地址 |
-| `API_SERVER_KEY` | _(必填)_ | 用于身份验证的 Bearer Token。与 `OPENAI_API_KEY` 匹配。 |
+| `API_SERVER_KEY` | _(必填)_ | 用于身份验证的 Bearer Token。需与 `OPENAI_API_KEY` 匹配。 |
 
 ### Open WebUI
 
 | 变量 | 描述 |
 |----------|-------------|
 | `OPENAI_API_BASE_URL` | Hermes Agent 的 API URL（包含 `/v1`） |
-| `OPENAI_API_KEY` | 必须非空。与您的 `API_SERVER_KEY` 匹配。 |
+| `OPENAI_API_KEY` | 必须为非空。需与您的 `API_SERVER_KEY` 匹配。 |
 
 ## 故障排除
 
-### 下拉列表中没有出现模型
+### 下拉列表中没有模型出现
 
-- **检查 URL 是否有 `/v1` 后缀**：`http://host.docker.internal:8642/v1`（不仅仅是 `:8642`）
+- **检查 URL 是否包含 `/v1` 后缀**：`http://host.docker.internal:8642/v1`（不仅仅是 `:8642`）
 - **验证消息网关是否正在运行**：`curl http://localhost:8642/health` 应返回 `{"status": "ok"}`
-- **检查模型列表**：`curl http://localhost:8642/v1/models` 应返回包含 `hermes-agent` 的列表
-- **Docker 网络**：从 Docker 内部，`localhost` 指的是容器，而不是您的主机。使用 `host.docker.internal` 或 `--network=host`。
+- **检查模型列表**：`curl -H "Authorization: Bearer your-secret-key" http://localhost:8642/v1/models` 应返回包含 `hermes-agent` 的列表
+- **Docker 网络**：从 Docker 内部看，`localhost` 指的是容器，而不是您的主机。请使用 `host.docker.internal` 或 `--network=host`。
+- **空的 Ollama 后端遮蔽了选择器**：如果您省略了 `ENABLE_OLLAMA_API=false`，Open WebUI 会在您的 Hermes 模型上方显示一个空的 Ollama 部分。使用 `-e ENABLE_OLLAMA_API=false` 重启容器，或在**管理设置 → 连接**中禁用 Ollama。
 
 ### 连接测试通过但模型未加载
 
-这几乎总是缺少 `/v1` 后缀。Open WebUI 的连接测试是基本的连通性检查——它不验证模型列表是否有效。
+这几乎总是因为缺少 `/v1` 后缀。Open WebUI 的连接测试是基本的连通性检查——它不验证模型列表是否正常工作。
 
 ### 响应时间很长
 

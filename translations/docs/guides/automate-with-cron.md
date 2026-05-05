@@ -1,26 +1,30 @@
 ---
 sidebar_position: 11
 title: "使用 Cron 自动化一切"
-description: "使用 Hermes cron 的现实世界自动化模式——监控、报告、流水线和多技能工作流"
+description: "使用 Hermes cron 的现实世界自动化模式 —— 监控、报告、流水线和多技能工作流"
 ---
 
 # 使用 Cron 自动化一切
 
-[每日简报机器人教程](/docs/guides/daily-briefing-bot) 涵盖了基础知识。本指南更进一步——介绍五种现实世界的自动化模式，你可以将其应用于自己的工作流。
+[每日简报机器人教程](/docs/guides/daily-briefing-bot) 涵盖了基础知识。本指南更进一步 —— 介绍五种现实世界的自动化模式，你可以将其适配到自己的工作流中。
 
-完整的功能参考，请参见 [定时任务 (Cron)](/docs/user-guide/features/cron)。
+完整的功能参考，请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。
 
 :::info 关键概念
-Cron 任务在新的 Agent 会话中运行，没有你当前聊天的记忆。提示词必须是**完全自包含的**——包含 Agent 需要知道的一切。
+Cron 任务在新的 Agent 会话中运行，没有你当前聊天的记忆。提示词必须是 **完全自包含的** —— 包含 Agent 需要知道的一切。
+:::
+
+:::tip 不需要 LLM？使用无 Agent 模式。
+对于脚本已经生成你想要发送的确切消息（内存警报、磁盘警报、CI 心跳、健康检查）的周期性监控任务，可以使用 [纯脚本 cron 任务](/docs/guides/cron-script-only) 完全跳过 LLM。零 Token 消耗，相同的调度器。你可以在聊天中让 Hermes 为你设置一个 —— `cronjob` 工具知道何时选择 `no_agent=True` 并为你编写脚本。
 :::
 
 ---
 
 ## 模式 1：网站变更监控
 
-监控 URL 的变更，仅在发生更改时收到通知。
+监控 URL 的变更，仅在内容发生变化时收到通知。
 
-`script` 参数是这里的秘密武器。Python 脚本在每次执行前运行，其标准输出成为 Agent 的上下文。脚本处理机械性工作（获取、对比）；Agent 处理推理（这个变更有趣吗？）。
+这里的 `script` 参数是秘密武器。每次执行前都会运行一个 Python 脚本，其标准输出会成为 Agent 的上下文。脚本处理机械性工作（获取、对比）；Agent 处理推理（这个变更有趣吗？）。
 
 创建监控脚本：
 
@@ -66,14 +70,14 @@ else:
 ```
 
 :::tip [SILENT] 技巧
-当 Agent 的最终响应包含 `[SILENT]` 时，将抑制消息传递。这意味着你只在实际发生某些事情时收到通知——在安静时段没有垃圾信息。
+当 Agent 的最终响应包含 `[SILENT]` 时，消息传递会被抑制。这意味着你只在实际发生事情时收到通知 —— 在安静时段没有垃圾信息。
 :::
 
 ---
 
 ## 模式 2：每周报告
 
-将来自多个来源的信息编译成格式化的摘要。此任务每周运行一次，并发送到你的主频道。
+将来自多个来源的信息编译成格式化的摘要。这每周运行一次，并发送到你的主频道。
 
 ```bash
 /cron add "0 9 * * 1" "Generate a weekly report covering:
@@ -101,7 +105,7 @@ hermes cron create "0 9 * * 1" \
 
 ## 模式 3：GitHub 仓库监视器
 
-监控仓库的新 issue、PR 或 release。
+监控仓库的新 issue、PR 或发布。
 
 ```bash
 /cron add "every 6h" "Check the GitHub repository NousResearch/hermes-agent for:
@@ -117,8 +121,8 @@ Filter to only items from the last 6 hours. If nothing new, respond with [SILENT
 Otherwise, provide a concise summary of the activity." --name "Repo watcher" --deliver discord
 ```
 
-:::warning 自包含提示词
-注意提示词如何包含确切的 `gh` 命令。Cron Agent 没有之前运行的记忆或你的偏好——请详细说明一切。
+:::warning 自包含的提示词
+注意提示词如何包含确切的 `gh` 命令。Cron Agent 没有之前运行的记忆或你的偏好 —— 请详细说明一切。
 :::
 
 ---
@@ -198,14 +202,14 @@ cronjob(
 )
 ```
 
-技能按顺序加载——首先是 `arxiv`（教 Agent 如何搜索论文），然后是 `obsidian`（教如何写笔记）。提示词将它们联系在一起。
+技能按顺序加载 —— 先是 `arxiv`（教 Agent 如何搜索论文），然后是 `obsidian`（教如何写笔记）。提示词将它们联系在一起。
 
 ---
 
 ## 管理你的任务
 
 ```bash
-# 列出所有活动任务
+# 列出所有活跃任务
 /cron list
 
 # 立即触发任务（用于测试）
@@ -214,7 +218,7 @@ cronjob(
 # 暂停任务而不删除它
 /cron pause <job_id>
 
-# 编辑正在运行的任务的计划或提示词
+# 编辑运行中任务的计划或提示词
 /cron edit <job_id> --schedule "every 4h"
 /cron edit <job_id> --prompt "Updated task description"
 
@@ -234,7 +238,7 @@ cronjob(
 
 | 目标 | 示例 | 用例 |
 |--------|---------|----------|
-| `origin` | `--deliver origin` | 发送到创建任务的同一聊天（默认） |
+| `origin` | `--deliver origin` | 创建任务的同一聊天（默认） |
 | `local` | `--deliver local` | 仅保存到本地文件 |
 | `telegram` | `--deliver telegram` | 你的 Telegram 主频道 |
 | `discord` | `--deliver discord` | 你的 Discord 主频道 |
@@ -248,14 +252,14 @@ cronjob(
 
 **使提示词自包含。** Cron 任务中的 Agent 没有你对话的记忆。直接在提示词中包含 URL、仓库名称、格式偏好和传递指令。
 
-**自由使用 `[SILENT]`。** 对于监控任务，始终包含类似“如果没有任何变化，请用 `[SILENT]` 响应”的指令。这可以防止通知噪音。
+**自由使用 `[SILENT]`。** 对于监控任务，始终包含类似“如果没有任何变化，用 `[SILENT]` 响应”的指令。这可以防止通知噪音。
 
-**使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。Agent 只看到脚本的标准输出并对其应用推理。这比让 Agent 自己进行获取更便宜、更可靠。
+**使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。Agent 只看到脚本的标准输出并对其应用推理。这比让 Agent 自己获取更便宜、更可靠。
 
 **使用 `/cron run` 进行测试。** 在等待计划触发之前，使用 `/cron run <job_id>` 立即执行并验证输出是否正确。
 
-**计划表达式。** 支持的格式：相对延迟（`30m`）、间隔（`every 2h`）、标准 cron 表达式（`0 9 * * *`）和 ISO 时间戳（`2025-06-15T09:00:00`）。不支持自然语言如 `daily at 9am`——请改用 `0 9 * * *`。
+**计划表达式。** 支持的格式：相对延迟（`30m`）、间隔（`every 2h`）、标准 cron 表达式（`0 9 * * *`）和 ISO 时间戳（`2025-06-15T09:00:00`）。不支持自然语言如 `daily at 9am` —— 请改用 `0 9 * * *`。
 
 ---
 
-*完整的 cron 参考——所有参数、边界情况和内部原理——请参见 [定时任务 (Cron)](/docs/user-guide/features/cron)。*
+*完整的 cron 参考 —— 所有参数、边界情况和内部原理 —— 请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。*
