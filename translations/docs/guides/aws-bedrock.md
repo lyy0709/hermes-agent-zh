@@ -21,7 +21,7 @@ Hermes Agent 支持将 Amazon Bedrock 作为原生提供商，使用 **Converse 
   - `bedrock:ListFoundationModels` 和 `bedrock:ListInferenceProfiles`（用于模型发现）
 
 :::tip EC2 / ECS / Lambda
-在 AWS 计算资源上，附加一个具有 `AmazonBedrockFullAccess` 权限的 IAM 角色即可。无需 API 密钥，无需 `.env` 配置 — Hermes 会自动检测实例角色。
+在 AWS 计算资源上，附加一个具有 `AmazonBedrockFullAccess` 权限的 IAM 角色即可完成。无需 API 密钥，无需 `.env` 配置 — Hermes 会自动检测实例角色。
 :::
 
 ## 快速开始
@@ -90,11 +90,11 @@ bedrock:
 
 ## 可用模型
 
-Bedrock 模型使用 **推理配置文件 ID** 进行按需调用。`hermes model` 选择器会自动显示这些 ID，并将推荐模型置顶：
+Bedrock 模型使用**推理配置文件 ID** 进行按需调用。`hermes model` 选择器会自动显示这些 ID，并将推荐模型置顶：
 
 | 模型 | ID | 备注 |
 |-------|-----|-------|
-| Claude Sonnet 4.6 | `us.anthropic.claude-sonnet-4-6` | 推荐 — 速度和能力的最佳平衡 |
+| Claude Sonnet 4.6 | `us.anthropic.claude-sonnet-4-6` | 推荐 — 速度与能力的最佳平衡 |
 | Claude Opus 4.6 | `us.anthropic.claude-opus-4-6-v1` | 能力最强 |
 | Claude Haiku 4.5 | `us.anthropic.claude-haiku-4-5-20251001-v1:0` | 最快的 Claude |
 | Amazon Nova Pro | `us.amazon.nova-pro-v1:0` | Amazon 旗舰模型 |
@@ -103,12 +103,12 @@ Bedrock 模型使用 **推理配置文件 ID** 进行按需调用。`hermes mode
 | Llama 4 Scout 17B | `us.meta.llama4-scout-17b-instruct-v1:0` | Meta 最新模型 |
 
 :::info 跨区域推理
-以 `us.` 为前缀的模型使用跨区域推理配置文件，可提供更好的容量和跨 AWS 区域的自动故障转移。以 `global.` 为前缀的模型则在全球所有可用区域进行路由。
+前缀为 `us.` 的模型使用跨区域推理配置文件，可提供更好的容量和跨 AWS 区域的自动故障转移。前缀为 `global.` 的模型则路由到全球所有可用区域。
 :::
 
 ## 会话中切换模型
 
-在对话中使用 `/model` 命令：
+在对话过程中使用 `/model` 命令：
 
 ```
 /model us.amazon.nova-pro-v1:0
@@ -122,7 +122,7 @@ Bedrock 模型使用 **推理配置文件 ID** 进行按需调用。`hermes mode
 hermes doctor
 ```
 
-诊断程序检查：
+诊断程序会检查：
 - AWS 凭证是否可用（环境变量、IAM 角色、SSO）
 - `boto3` 是否已安装
 - Bedrock API 是否可达（ListFoundationModels）
@@ -137,11 +137,11 @@ hermes gateway setup
 hermes gateway start
 ```
 
-网关读取 `config.yaml` 并使用相同的 Bedrock 提供商配置。
+网关会读取 `config.yaml` 并使用相同的 Bedrock 提供商配置。
 
 ## 故障排除
 
-### "未找到 API 密钥" / "未找到 AWS 凭证"
+### "No API key found" / "No AWS credentials"
 
 Hermes 按以下顺序检查凭证：
 1. `AWS_BEARER_TOKEN_BEDROCK`
@@ -151,14 +151,20 @@ Hermes 按以下顺序检查凭证：
 5. ECS 容器凭证
 6. Lambda 执行角色
 
-如果均未找到，请运行 `aws configure` 或将 IAM 角色附加到您的计算实例。
+如果都未找到，请运行 `aws configure` 或将 IAM 角色附加到您的计算实例。
 
-### "不支持使用按需吞吐量调用模型 ID ..."
+### "Invocation of model ID ... with on-demand throughput isn't supported"
 
-请使用 **推理配置文件 ID**（以 `us.` 或 `global.` 为前缀），而不是裸基础模型 ID。例如：
+请使用**推理配置文件 ID**（前缀为 `us.` 或 `global.`），而不是裸基础模型 ID。例如：
 - ❌ `anthropic.claude-sonnet-4-6`
 - ✅ `us.anthropic.claude-sonnet-4-6`
 
 ### "ThrottlingException"
 
-您已达到 Bedrock 的每模型速率限制。Hermes 会自动进行退避重试。要提高限制，请在 [AWS Service Quotas 控制台](https://console.aws.amazon.com/servicequotas/)中申请增加配额。
+您已触达 Bedrock 的每模型速率限制。Hermes 会自动进行退避重试。要提高限制，请在 [AWS Service Quotas 控制台](https://console.aws.amazon.com/servicequotas/)中申请配额增加。
+
+## 一键式 AWS 部署
+
+如需在 EC2 上使用 CloudFormation 进行全自动部署：
+
+**[sample-hermes-agent-on-aws-with-bedrock](https://github.com/JiaDe-Wu/sample-hermes-agent-on-aws-with-bedrock)** — 创建 VPC、IAM 角色、EC2 实例，并自动配置 Bedrock。一键部署到任何区域。

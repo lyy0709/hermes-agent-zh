@@ -44,9 +44,11 @@ description: "将编码任务委派给 OpenAI Codex CLI（功能、PR）"
 ## 先决条件
 
 - 已安装 Codex：`npm install -g @openai/codex`
-- 已配置 OpenAI API 密钥
+- 已配置 OpenAI 认证：可以是 `OPENAI_API_KEY` 或来自 Codex CLI 登录流程的 Codex OAuth 凭据
 - **必须在 git 仓库内运行** — Codex 拒绝在仓库外运行
-- 在终端调用中使用 `pty=true` — Codex 是一个交互式终端应用程序
+- 在终端调用中使用 `pty=true` — Codex 是一个交互式终端应用
+
+对于 Hermes 本身，`model.provider: openai-codex` 使用 Hermes 管理的 Codex OAuth（来自 `~/.hermes/auth.json`，在运行 `hermes auth add openai-codex` 后）。对于独立的 Codex CLI，有效的 CLI OAuth 会话可能位于 `~/.codex/auth.json` 下；不要仅凭缺少 `OPENAI_API_KEY` 就断定 Codex 认证缺失。
 
 ## 一次性任务
 
@@ -59,10 +61,10 @@ terminal(command="codex exec 'Add dark mode toggle to settings'", workdir="~/pro
 terminal(command="cd $(mktemp -d) && git init && codex exec 'Build a snake game in Python'", pty=true)
 ```
 
-## 后台模式（长时任务）
+## 后台模式（长任务）
 
 ```
-# 在后台启动并启用 PTY
+# 在后台启动并使用 PTY
 terminal(command="codex exec --full-auto 'Refactor the auth module'", workdir="~/project", background=true, pty=true)
 # 返回 session_id
 
@@ -96,11 +98,11 @@ terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.
 ## 使用 Worktrees 并行修复问题
 
 ```
-# 创建工作树
+# 创建 worktrees
 terminal(command="git worktree add -b fix/issue-78 /tmp/issue-78 main", workdir="~/project")
 terminal(command="git worktree add -b fix/issue-99 /tmp/issue-99 main", workdir="~/project")
 
-# 在每个工作树中启动 Codex
+# 在每个目录中启动 Codex
 terminal(command="codex --yolo exec 'Fix issue #78: <description>. Commit when done.'", workdir="/tmp/issue-78", background=true, pty=true)
 terminal(command="codex --yolo exec 'Fix issue #99: <description>. Commit when done.'", workdir="/tmp/issue-99", background=true, pty=true)
 
@@ -131,10 +133,10 @@ terminal(command="gh pr comment 86 --body '<review>'", workdir="~/project")
 
 ## 规则
 
-1. **始终使用 `pty=true`** — Codex 是一个交互式终端应用程序，没有 PTY 会挂起
+1. **始终使用 `pty=true`** — Codex 是一个交互式终端应用，没有 PTY 会挂起
 2. **需要 Git 仓库** — Codex 不会在 git 目录外运行。对于临时工作，使用 `mktemp -d && git init`
 3. **一次性任务使用 `exec`** — `codex exec "prompt"` 运行并干净退出
-4. **构建时使用 `--full-auto`** — 自动批准沙盒内的更改
-5. **长时任务使用后台模式** — 使用 `background=true` 并通过 `process` 工具监控
-6. **不要干扰** — 使用 `poll`/`log` 监控，对长时任务保持耐心
+4. **构建时使用 `--full-auto`** — 在沙盒内自动批准更改
+5. **长任务使用后台模式** — 使用 `background=true` 并通过 `process` 工具监控
+6. **不要干扰** — 使用 `poll`/`log` 监控，对长时间运行的任务保持耐心
 7. **可以并行运行** — 对于批量工作，可以同时运行多个 Codex 进程
