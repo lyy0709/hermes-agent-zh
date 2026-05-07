@@ -28,7 +28,7 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
    - `api_key`
    - `source`
 3. `run_agent.py` 使用 `api_mode` 来决定如何构建和发送请求。
-4. `hermes_cli/models.py` 和 `hermes_cli/main.py` 使提供商出现在 CLI 中。（`hermes_cli/setup.py` 会自动委派给 `main.py` — 那里不需要更改。）
+4. `hermes_cli/models.py` 和 `hermes_cli/main.py` 使该提供商出现在 CLI 中。（`hermes_cli/setup.py` 会自动委派给 `main.py` — 那里不需要更改。）
 5. `agent/auxiliary_client.py` 和 `agent/model_metadata.py` 确保辅助任务和 Token 预算正常工作。
 
 重要的抽象是 `api_mode`。
@@ -36,7 +36,7 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 - 大多数提供商使用 `chat_completions`。
 - Codex 使用 `codex_responses`。
 - Anthropic 使用 `anthropic_messages`。
-- 一个新的非 OpenAI 协议通常意味着添加一个新的适配器和一个新的 `api_mode` 分支。
+- 新的非 OpenAI 协议通常意味着添加一个新的适配器和一个新的 `api_mode` 分支。
 
 ## 首先选择实现路径
 
@@ -72,7 +72,7 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 
 ## 文件清单
 
-### 每个内置提供商都必需的
+### 每个内置提供商都需要的
 
 1. `hermes_cli/auth.py`
 2. `hermes_cli/models.py`
@@ -81,10 +81,10 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 5. `agent/auxiliary_client.py`
 6. `agent/model_metadata.py`
 7. 测试
-8. 面向用户的文档，位于 `website/docs/` 下
+8. `website/docs/` 下的面向用户的文档
 
 :::tip
-`hermes_cli/setup.py` **不需要**更改。设置向导将提供商/模型选择委派给 `main.py` 中的 `select_provider_and_model()` — 任何添加在那里的提供商都会自动在 `hermes setup` 中可用。
+`hermes_cli/setup.py` **不需要**更改。设置向导将提供商/模型选择委派给 `main.py` 中的 `select_provider_and_model()` — 任何在那里添加的提供商都会自动在 `hermes setup` 中可用。
 :::
 
 ### 原生 / 非 OpenAI 提供商额外需要的
@@ -102,7 +102,7 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 1. 在 `plugins/model-providers/<your-provider>/` 下的一个插件目录，包含：
    - `__init__.py` — 在模块级别调用 `register_provider(profile)`
    - `plugin.yaml` — 清单（名称，kind: model-provider，版本，描述）
-2. 就这样。提供商插件会在第一次调用 `get_provider_profile()` 或 `list_providers()` 时自动加载 — 捆绑插件（此仓库）和用户插件（位于 `$HERMES_HOME/plugins/model-providers/`）都会被拾取。
+2. 就这样。提供商插件会在第一次有任何东西调用 `get_provider_profile()` 或 `list_providers()` 时自动加载 — 捆绑插件（此仓库）和位于 `$HERMES_HOME/plugins/model-providers/` 的用户插件都会被拾取。
 
 当你添加一个插件并调用 `register_provider()` 时，以下内容会自动连接：
 
@@ -111,25 +111,25 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 3. `base_url` 从配置或声明的环境变量中获取
 4. 按优先级顺序检查 `env_vars` 以获取 API 密钥
 5. 为提供商注册 `fallback_models` 列表
-6. `--provider` CLI 标志接受提供商 id
+6. CLI 标志 `--provider` 接受提供商 id
 7. `hermes model` 菜单包含该提供商
 8. `hermes setup` 向导自动委派给 `main.py`
 9. `provider:model` 别名语法有效
 10. 运行时解析器返回正确的 `base_url` 和 `api_key`
-11. `HERMES_INFERENCE_PROVIDER` 环境变量覆盖接受提供商 id
+11. 环境变量覆盖 `HERMES_INFERENCE_PROVIDER` 接受提供商 id
 12. 回退模型激活可以干净地切换到该提供商
 
-位于 `$HERMES_HOME/plugins/model-providers/<name>/` 的用户插件会覆盖同名的捆绑插件（`register_provider()` 中后写者胜）— 因此第三方可以在不编辑仓库的情况下修补或替换任何内置配置文件。
+位于 `$HERMES_HOME/plugins/model-providers/<name>/` 的用户插件会覆盖同名的捆绑插件（在 `register_provider()` 中后写者胜）— 因此第三方可以猴子补丁或替换任何内置配置文件，而无需编辑仓库。
 
-请参阅 `plugins/model-providers/nvidia/` 或 `plugins/model-providers/gmi/` 作为模板，并参阅 `plugins/model-providers/README.md` 了解完整约定。
+请参阅 `plugins/model-providers/nvidia/` 或 `plugins/model-providers/gmi/` 作为模板，以及完整的[模型提供商插件指南](/docs/developer-guide/model-provider-plugin)以获取字段参考、钩子惯用法和端到端示例。
 
 ## 完整路径：OAuth 和复杂提供商
 
 当你的提供商需要以下任何一项时，请使用下面的完整清单：
 
-- OAuth 或 Token 刷新（Nous Portal、Codex、Google Gemini、Qwen Portal、Copilot）
-- 需要新适配器的非 OpenAI API 格式（Anthropic Messages、Codex Responses）
-- 自定义端点检测或多区域探测（z.ai、Kimi）
+- OAuth 或 Token 刷新（Nous Portal, Codex, Google Gemini, Qwen Portal, Copilot）
+- 需要新适配器的非 OpenAI API 格式（Anthropic Messages, Codex Responses）
+- 自定义端点检测或多区域探测（z.ai, Kimi）
 - 精选的静态模型目录或实时 `/models` 获取
 - 具有特定认证流程的提供商特定 `hermes model` 菜单条目
 
@@ -152,9 +152,9 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 - 设置 / 模型选择分支
 - 辅助模型默认值
 - 测试
+如果这些文件中的 id 不一致，该提供商将处于半连接状态：身份验证可能正常工作，但 `/model`、设置或运行时解析会静默地忽略它。
 
-如果这些文件之间的 id 不同，提供商将感觉连接了一半：认证可能有效，而 `/model`、设置或运行时解析会静默地忽略它。
-## 步骤 2：在 `hermes_cli/auth.py` 中添加认证元数据
+## 步骤 2：在 `hermes_cli/auth.py` 中添加身份验证元数据
 
 对于 API 密钥提供商，向 `PROVIDER_REGISTRY` 添加一个 `ProviderConfig` 条目，包含：
 
@@ -167,25 +167,25 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 
 同时向 `_PROVIDER_ALIASES` 添加别名。
 
-使用现有提供商作为模板：
+使用现有的提供商作为模板：
 
 - 简单的 API 密钥路径：Z.AI, MiniMax
 - 带端点检测的 API 密钥路径：Kimi, Z.AI
 - 原生 Token 解析：Anthropic
-- OAuth / 认证存储路径：Nous, OpenAI Codex
+- OAuth / 身份验证存储路径：Nous, OpenAI Codex
 
 这里需要回答的问题：
 
 - Hermes 应该检查哪些环境变量，优先级顺序是什么？
 - 该提供商是否需要基础 URL 覆盖？
 - 它是否需要端点探测或 Token 刷新？
-- 当凭证缺失时，认证错误信息应该显示什么？
+- 当凭证缺失时，身份验证错误应该提示什么？
 
-如果提供商需要的不仅仅是“查找 API 密钥”，请添加专用的凭证解析器，而不是将逻辑塞入不相关的分支中。
+如果提供商需要的不仅仅是“查找 API 密钥”，请添加专用的凭证解析器，而不是将逻辑塞入不相关的分支。
 
 ## 步骤 3：在 `hermes_cli/models.py` 中添加模型目录和别名
 
-更新提供商目录，使提供商在菜单和 `provider:model` 语法中正常工作。
+更新提供商目录，以便该提供商在菜单和 `provider:model` 语法中正常工作。
 
 典型的编辑：
 
@@ -195,7 +195,7 @@ Hermes 已经可以通过自定义提供商路径与任何 OpenAI 兼容的端�
 - `list_available_providers()` 内部的提供商显示顺序
 - 如果提供商支持实时获取 `/models`，则更新 `provider_model_ids()`
 
-如果提供商暴露实时模型列表，优先使用该列表，并将 `_PROVIDER_MODELS` 作为静态回退。
+如果提供商暴露实时模型列表，请优先使用该列表，并将 `_PROVIDER_MODELS` 作为静态备用。
 
 这个文件也使得以下输入能够工作：
 
@@ -204,7 +204,7 @@ anthropic:claude-sonnet-4-6
 kimi:model-name
 ```
 
-如果这里缺少别名，提供商可能认证成功，但在 `/model` 解析时仍然失败。
+如果这里缺少别名，提供商可能正确通过身份验证，但在 `/model` 解析中仍然失败。
 
 ## 步骤 4：在 `hermes_cli/runtime_provider.py` 中解析运行时数据
 
@@ -225,7 +225,7 @@ kimi:model-name
 
 如果提供商是 OpenAI 兼容的，`api_mode` 通常应保持为 `chat_completions`。
 
-注意 API 密钥的优先级。Hermes 已经包含逻辑来避免将 OpenRouter 密钥泄露给不相关的端点。新提供商应同样明确哪个密钥对应哪个基础 URL。
+注意 API 密钥的优先级。Hermes 已经包含逻辑来避免将 OpenRouter 密钥泄露给不相关的端点。新的提供商应该同样明确地说明哪个密钥用于哪个基础 URL。
 
 ## 步骤 5：在 `hermes_cli/main.py` 中连接 CLI
 
@@ -235,13 +235,13 @@ kimi:model-name
 
 - `provider_labels` 字典
 - `select_provider_and_model()` 中的 `providers` 列表
-- 提供商分发 (`if selected_provider == ...`)
+- 提供商分发（`if selected_provider == ...`）
 - `--provider` 参数选项
-- 如果提供商支持这些流程，则添加登录/注销选项
-- 一个 `_model_flow_<provider>()` 函数，如果适用则复用 `_model_flow_api_key_provider()`
+- 如果提供商支持这些流程，则更新登录/注销选项
+- 一个 `_model_flow_<provider>()` 函数，如果适用，可以重用 `_model_flow_api_key_provider()`
 
 :::tip
-`hermes_cli/setup.py` 不需要更改 — 它调用 `main.py` 中的 `select_provider_and_model()`，因此你的新提供商会自动出现在 `hermes model` 和 `hermes setup` 中。
+`hermes_cli/setup.py` 不需要更改——它调用 `main.py` 中的 `select_provider_and_model()`，因此你的新提供商会自动出现在 `hermes model` 和 `hermes setup` 中。
 :::
 
 ## 步骤 6：保持辅助调用正常工作
@@ -260,7 +260,7 @@ kimi:model-name
 - 会话搜索摘要
 - 记忆刷新
 
-如果提供商没有合适的辅助默认值，辅助任务可能会回退得很差，或者意外地使用昂贵的主模型。
+如果提供商没有合适的辅助默认值，辅助任务可能会严重回退，或者意外地使用昂贵的主模型。
 
 ### `agent/model_metadata.py`
 
@@ -276,7 +276,7 @@ kimi:model-name
 
 ### 新的适配器文件
 
-典型职责：
+典型的职责：
 
 - 构建 SDK / HTTP 客户端
 - 解析 Token
@@ -289,18 +289,18 @@ kimi:model-name
 
 搜索 `api_mode` 并审核每个切换点。至少验证：
 
-- `__init__` 选择了新的 `api_mode`
+- `__init__` 选择新的 `api_mode`
 - 客户端构建适用于该提供商
 - `_build_api_kwargs()` 知道如何格式化请求
 - `_interruptible_api_call()` 分发到正确的客户端调用
 - 中断 / 客户端重建路径正常工作
-- 响应验证接受提供商的格式
+- 响应验证接受提供商的形状
 - 完成原因提取正确
 - Token 使用情况提取正确
 - 回退模型激活可以干净地切换到新提供商
 - 摘要生成和记忆刷新路径仍然有效
 
-同时搜索 `run_agent.py` 中的 `self.client.`。任何假设标准 OpenAI 客户端存在的代码路径，当原生提供商使用不同的客户端对象或 `self.client = None` 时，都可能中断。
+同时搜索 `run_agent.py` 中的 `self.client.`。任何假设标准 OpenAI 客户端存在的代码路径，在原生提供商使用不同的客户端对象或 `self.client = None` 时都可能中断。
 
 ### 提示词缓存和提供商特定的请求字段
 
@@ -326,8 +326,8 @@ kimi:model-name
 - `tests/test_setup_model_selection.py`
 - `tests/test_provider_parity.py`
 - `tests/test_run_agent.py`
-- 对于原生提供商，添加 `tests/test_<provider>_adapter.py`
-对于纯文档示例，具体的文件集合可能有所不同。重点在于涵盖：
+- 对于原生提供商，还需要 `tests/test_<provider>_adapter.py`
+对于纯文档示例，具体的文件集合可能有所不同。重点是覆盖：
 
 - 身份验证解析
 - CLI 菜单 / 提供商选择
@@ -359,7 +359,7 @@ source venv/bin/activate
 python -m hermes_cli.main chat -q "Say hello" --provider your-provider --model your-model
 ```
 
-如果更改了菜单，也测试一下交互式流程：
+如果更改了菜单，也测试一下交互流程：
 
 ```bash
 source venv/bin/activate
@@ -377,7 +377,7 @@ python -m hermes_cli.main setup
 - `website/docs/user-guide/configuration.md`
 - `website/docs/reference/environment-variables.md`
 
-开发者可以完美地连接提供商，但仍然可能让用户无法发现所需的环境变量或设置流程。
+开发者可以完美地接入提供商，但仍可能让用户无法发现所需的环境变量或设置流程。
 
 ## OpenAI 兼容提供商清单
 
@@ -387,7 +387,7 @@ python -m hermes_cli.main setup
 - [ ] 在 `hermes_cli/auth.py` 和 `hermes_cli/models.py` 中添加了别名
 - [ ] 在 `hermes_cli/models.py` 中添加了模型目录
 - [ ] 在 `hermes_cli/runtime_provider.py` 中添加了运行时分支
-- [ ] 在 `hermes_cli/main.py` 中添加了 CLI 连接（setup.py 会自动继承）
+- [ ] 在 `hermes_cli/main.py` 中添加了 CLI 接入（setup.py 会自动继承）
 - [ ] 在 `agent/auxiliary_client.py` 中添加了辅助模型
 - [ ] 在 `agent/model_metadata.py` 中添加了上下文长度
 - [ ] 更新了运行时 / CLI 测试
@@ -414,19 +414,19 @@ python -m hermes_cli.main setup
 
 ### 2. 忘记 `config["model"]` 可以是字符串或字典
 
-许多提供商选择代码必须对两种形式进行规范化。
+许多提供商选择代码必须对这两种形式进行规范化。
 
 ### 3. 假设需要内置提供商
 
-如果服务只是 OpenAI 兼容的，自定义提供商可能已经以更少的维护工作解决了用户的问题。
+如果服务只是 OpenAI 兼容的，自定义提供商可能已经以更少的维护成本解决了用户的问题。
 
 ### 4. 忘记辅助路径
 
-主聊天路径可能正常工作，而摘要、记忆刷新或视觉助手却失败，因为辅助路由从未更新。
+主聊天路径可能正常工作，而摘要、记忆刷新或视觉助手失败，因为辅助路由从未更新。
 
 ### 5. 原生提供商分支隐藏在 `run_agent.py` 中
 
-搜索 `api_mode` 和 `self.client.`。不要假设显而易见的请求路径是唯一的路径。
+搜索 `api_mode` 和 `self.client.`。不要假设明显的请求路径是唯一的路径。
 
 ### 6. 将仅适用于 OpenRouter 的旋钮发送给其他提供商
 
@@ -434,7 +434,7 @@ python -m hermes_cli.main setup
 
 ### 7. 更新了 `hermes model` 但没有更新 `hermes setup`
 
-两个流程都需要了解该提供商。
+这两个流程都需要了解该提供商。
 
 ## 实现时的良好搜索目标
 

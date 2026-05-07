@@ -6,7 +6,7 @@ description: "基于浏览器的仪表盘，用于管理配置、API 密钥、�
 
 # Web 仪表盘
 
-Web 仪表盘是一个基于浏览器的用户界面，用于管理您的 Hermes Agent 安装。您可以通过简洁的 Web 界面配置设置、管理 API 密钥和监控会话，而无需编辑 YAML 文件或运行 CLI 命令。
+Web 仪表盘是一个基于浏览器的用户界面，用于管理您的 Hermes Agent 安装。您无需编辑 YAML 文件或运行 CLI 命令，即可通过简洁的 Web 界面配置设置、管理 API 密钥和监控会话。
 
 ## 快速开始
 
@@ -20,32 +20,32 @@ hermes dashboard
 
 | 标志 | 默认值 | 描述 |
 |------|---------|-------------|
-| `--port` | `9119` | Web 服务器运行的端口 |
+| `--port` | `9119` | 运行 Web 服务器的端口 |
 | `--host` | `127.0.0.1` | 绑定地址 |
 | `--no-open` | — | 不自动打开浏览器 |
-| `--insecure` | off | 允许绑定到非本地主机地址（**危险** —— 会在网络上暴露 API 密钥；需配合防火墙和强身份验证使用） |
-| `--tui` | off | 在浏览器中暴露 Chat 标签页（通过 PTY/WebSocket 嵌入 `hermes --tui`）。或者设置 `HERMES_DASHBOARD_TUI=1`。 |
+| `--insecure` | off | 允许绑定到非 localhost 的主机（**危险** —— 会在网络上暴露 API 密钥；需配合防火墙和强身份验证使用） |
+| `--tui` | off | 在浏览器中启用 Chat 标签页（通过 PTY/WebSocket 嵌入 `hermes --tui`）。或者设置 `HERMES_DASHBOARD_TUI=1`。 |
 
 ```bash
 # 自定义端口
 hermes dashboard --port 8080
 
-# 绑定到所有网络接口（在共享网络上使用需谨慎）
+# 绑定到所有接口（在共享网络上使用需谨慎）
 hermes dashboard --host 0.0.0.0
 
-# 启动但不打开浏览器
+# 启动时不打开浏览器
 hermes dashboard --no-open
 ```
 
 ## 前提条件
 
-默认的 `hermes-agent` 安装不包含 HTTP 栈或 PTY 助手 —— 这些是可选的额外组件。**Web 仪表盘**需要 FastAPI 和 Uvicorn（`web` 额外依赖）。**Chat** 标签页还需要 `ptyprocess` 来在伪终端后生成嵌入式 TUI（POSIX 系统上的 `pty` 额外依赖）。使用以下命令安装两者：
+默认的 `hermes-agent` 安装包不包含 HTTP 栈或 PTY 辅助程序 —— 这些是可选的额外组件。**Web 仪表盘** 需要 FastAPI 和 Uvicorn（`web` 额外组件）。**Chat** 标签页还需要 `ptyprocess` 来在伪终端后生成嵌入式 TUI（POSIX 系统上的 `pty` 额外组件）。使用以下命令安装两者：
 
 ```bash
 pip install 'hermes-agent[web,pty]'
 ```
 
-`web` 额外依赖会拉取 FastAPI/Uvicorn；`pty` 会拉取 `ptyprocess`（POSIX）或 `pywinpty`（原生 Windows —— 请注意嵌入式 TUI 本身仍需要 WSL）。`pip install hermes-agent[all]` 包含这两个额外依赖，如果您还想要消息/语音等功能，这是最简单的路径。
+`web` 额外组件会引入 FastAPI/Uvicorn；`pty` 会引入 `ptyprocess`（POSIX）或 `pywinpty`（原生 Windows —— 请注意嵌入式 TUI 本身仍需要 WSL）。`pip install hermes-agent[all]` 包含这两个额外组件，如果您还想要消息/语音等功能，这是最简单的路径。
 
 当您在没有依赖项的情况下运行 `hermes dashboard` 时，它会告诉您需要安装什么。如果前端尚未构建且 `npm` 可用，它会在首次启动时自动构建。
 
@@ -55,8 +55,8 @@ pip install 'hermes-agent[web,pty]'
 
 落地页显示您安装的实时概览：
 
-- **Agent 版本**和发布日期
-- **消息网关状态** —— 运行/停止状态、PID、连接的平台及其状态
+- **Agent 版本** 和发布日期
+- **消息网关状态** —— 运行/停止、PID、连接的平台及其状态
 - **活跃会话** —— 过去 5 分钟内活跃的会话数量
 - **最近会话** —— 最近 20 个会话的列表，包含模型、消息数量、Token 使用量以及对话预览
 
@@ -64,11 +64,11 @@ pip install 'hermes-agent[web,pty]'
 
 ### Chat
 
-**Chat** 标签页将完整的 Hermes TUI（与您从 `hermes --tui` 获得的界面相同）直接嵌入到浏览器中。您在终端 TUI 中可以做的所有事情 —— 斜杠命令、模型选择器、工具调用卡片、Markdown 流式输出、澄清/sudo/批准提示、皮肤主题 —— 在这里都完全相同，因为仪表盘正在运行真正的 TUI 二进制文件，并通过 [xterm.js](https://xtermjs.org/) 及其 WebGL 渲染器渲染其 ANSI 输出，以实现像素完美的单元格布局。
+**Chat** 标签页将完整的 Hermes TUI（与 `hermes --tui` 获得的界面相同）直接嵌入到浏览器中。您在终端 TUI 中可以做的所有事情 —— 斜杠命令、模型选择器、工具调用卡片、Markdown 流式输出、澄清/sudo/批准提示、皮肤主题 —— 在这里都完全相同，因为仪表盘运行的是真正的 TUI 二进制文件，并通过 [xterm.js](https://xtermjs.org/) 及其 WebGL 渲染器渲染其 ANSI 输出，以实现像素完美的单元格布局。
 
 **工作原理：**
 
-- `/api/pty` 打开一个使用仪表盘会话 Token 认证的 WebSocket
+- `/api/pty` 打开一个使用仪表盘会话 Token 进行身份验证的 WebSocket
 - 服务器在 POSIX 伪终端后生成 `hermes --tui`
 - 按键传输到 PTY；ANSI 输出流回浏览器
 - xterm.js 的 WebGL 渲染器将每个单元格绘制到整数像素网格；鼠标跟踪（SGR 1006）、宽字符（Unicode 11）和方框绘制字形都能原生渲染
@@ -79,14 +79,14 @@ pip install 'hermes-agent[web,pty]'
 **前提条件：**
 
 - Node.js（与 `hermes --tui` 的要求相同；TUI 包在首次启动时构建）
-- `ptyprocess` —— 由 `pty` 额外依赖安装（`pip install 'hermes-agent[web,pty]'`，或 `[all]` 包含两者）
+- `ptyprocess` —— 由 `pty` 额外组件安装（`pip install 'hermes-agent[web,pty]'`，或 `[all]` 包含两者）
 - POSIX 内核（Linux、macOS 或 WSL）。不支持原生 Windows Python —— 请使用 WSL。
 
 关闭浏览器标签页，服务器上的 PTY 会被干净地回收。重新打开会生成一个新的会话。
 
 ### 配置
 
-一个基于表单的 `config.yaml` 编辑器。所有 150 多个配置字段都从 `DEFAULT_CONFIG` 自动发现，并按标签页分类组织：
+一个基于表单的 `config.yaml` 编辑器。所有 150 多个配置字段都从 `DEFAULT_CONFIG` 自动发现，并按标签类别组织：
 
 - **model** —— 默认模型、提供商、基础 URL、推理设置
 - **terminal** —— 后端（local/docker/ssh/modal）、超时、Shell 偏好
@@ -97,13 +97,13 @@ pip install 'hermes-agent[web,pty]'
 - **approvals** —— 危险命令批准模式（ask/yolo/deny）
 - 以及更多 —— config.yaml 的每个部分都有对应的表单字段
 
-具有已知有效值的字段（终端后端、皮肤、批准模式等）渲染为下拉菜单。布尔值渲染为开关。其他所有内容都是文本输入框。
+具有已知有效值的字段（终端后端、皮肤、批准模式等）呈现为下拉菜单。布尔值呈现为切换开关。其他所有内容都是文本输入框。
 
 **操作：**
 
 - **保存** —— 立即将更改写入 `config.yaml`
-- **重置为默认值** —— 将所有字段恢复为其默认值（在您点击保存之前不会保存）
-- **导出** —— 将当前配置下载为 JSON 文件
+- **重置为默认值** —— 将所有字段恢复为其默认值（点击保存前不会保存）
+- **导出** —— 将当前配置下载为 JSON
 - **导入** —— 上传 JSON 配置文件以替换当前值
 
 :::tip
@@ -114,9 +114,9 @@ pip install 'hermes-agent[web,pty]'
 
 管理存储 API 密钥和凭据的 `.env` 文件。密钥按类别分组：
 
-- **LLM 提供商** —— OpenRouter、Anthropic、OpenAI、DeepSeek 等
-- **工具 API 密钥** —— Browserbase、Firecrawl、Tavily、ElevenLabs 等
-- **消息平台** —— Telegram、Discord、Slack 机器人 Token 等
+- **LLM 提供商** —— OpenRouter、Anthropic、OpenAI、DeepSeek 等。
+- **工具 API 密钥** —— Browserbase、Firecrawl、Tavily、ElevenLabs 等。
+- **消息平台** —— Telegram、Discord、Slack 机器人 Token 等。
 - **Agent 设置** —— 非机密环境变量，如 `API_SERVER_ENABLED`
 
 每个密钥显示：
@@ -129,7 +129,7 @@ pip install 'hermes-agent[web,pty]'
 
 ### 会话
 
-浏览和检查所有 Agent 会话。每一行显示会话标题、来源平台图标（CLI、Telegram、Discord、Slack、cron）、模型名称、消息数量、工具调用数量以及上次活跃时间。活跃会话会有一个脉动徽章标记。
+浏览和检查所有 Agent 会话。每行显示会话标题、来源平台图标（CLI、Telegram、Discord、Slack、cron）、模型名称、消息数量、工具调用数量以及上次活跃时间。活跃会话会用一个脉动徽章标记。
 
 - **搜索** — 使用 FTS5 对所有消息内容进行全文搜索。结果会显示高亮片段，展开时会自动滚动到第一条匹配的消息。
 - **展开** — 点击一个会话以加载其完整的消息历史记录。消息按角色（用户、助手、系统、工具）进行颜色编码，并以 Markdown 格式渲染，支持语法高亮。
@@ -143,15 +143,15 @@ pip install 'hermes-agent[web,pty]'
 - **文件** — 在 `agent`、`errors` 和 `gateway` 日志文件之间切换
 - **级别** — 按日志级别过滤：ALL、DEBUG、INFO、WARNING 或 ERROR
 - **组件** — 按来源组件过滤：all、gateway、agent、tools、cli 或 cron
-- **行数** — 选择显示多少行（50、100、200 或 500）
+- **行数** — 选择要显示的行数（50、100、200 或 500）
 - **自动刷新** — 切换实时跟踪功能，每 5 秒轮询一次新的日志行
-- **颜色编码** — 日志行按严重程度着色（红色表示错误，黄色表示警告，灰色表示调试信息）
+- **颜色编码** — 日志行按严重程度着色（错误为红色，警告为黄色，调试信息为灰色）
 
 ### 分析
 
 根据会话历史记录计算的使用情况和成本分析。选择一个时间段（7、30 或 90 天）以查看：
 
-- **摘要卡片** — 总 Token 数（输入/输出）、缓存命中率、总估计或实际成本，以及总会话数和日均值
+- **摘要卡片** — 总 Token 数（输入/输出）、缓存命中率、总估计或实际成本、总会话数及日均值
 - **每日 Token 图表** — 堆叠条形图，显示每天的输入和输出 Token 使用情况，悬停提示显示细分和成本
 - **每日细分表** — 日期、会话数、输入 Token、输出 Token、缓存命中率和每日成本
 - **按模型细分** — 显示每个使用过的模型、其会话数、Token 使用量和估计成本的表格
@@ -172,27 +172,27 @@ pip install 'hermes-agent[web,pty]'
 
 - **搜索** — 按名称、描述或类别过滤技能和工具集
 - **类别过滤器** — 点击类别标签以缩小列表范围（例如 MLOps、MCP、Red Teaming、AI）
-- **切换** — 使用开关启用或禁用单个技能。更改将在下一个会话中生效。
+- **切换** — 使用开关启用或禁用单个技能。更改将在下一个会话生效。
 - **工具集** — 一个单独的部分显示内置工具集（文件操作、网页浏览等），包括其活动/非活动状态、设置要求和包含的工具列表
 
 :::warning 安全
-Web 仪表板会读取和写入您的 `.env` 文件，该文件包含 API 密钥和机密信息。它默认绑定到 `127.0.0.1` — 仅可从您的本地机器访问。如果您绑定到 `0.0.0.0`，您网络上的任何人都可以查看和修改您的凭据。仪表板本身没有身份验证机制。
+Web 仪表板会读取和写入你的 `.env` 文件，该文件包含 API 密钥和机密信息。它默认绑定到 `127.0.0.1` —— 仅可从你的本地机器访问。如果你绑定到 `0.0.0.0`，你网络上的任何人都可以查看和修改你的凭据。仪表板本身没有身份验证功能。
 :::
 
 ## `/reload` 斜杠命令
 
-仪表板 PR 还为交互式 CLI 添加了一个 `/reload` 斜杠命令。通过 Web 仪表板（或直接编辑 `.env`）更改 API 密钥后，在活动的 CLI 会话中使用 `/reload` 来获取更改而无需重启：
+仪表板 PR 还在交互式 CLI 中添加了一个 `/reload` 斜杠命令。通过 Web 仪表板（或直接编辑 `.env`）更改 API 密钥后，在活动的 CLI 会话中使用 `/reload` 来获取更改而无需重启：
 
 ```
-You → /reload
-  已重新加载 .env (更新了 3 个变量)
+你 → /reload
+  已重新加载 .env（更新了 3 个变量）
 ```
 
-这将重新读取 `~/.hermes/.env` 到正在运行的进程环境中。当您通过仪表板添加了新的提供商密钥并希望立即使用时，这非常有用。
+这将重新读取 `~/.hermes/.env` 到正在运行的进程环境中。当你通过仪表板添加了新的提供商密钥并希望立即使用时，这非常有用。
 
 ## REST API
 
-Web 仪表板公开了一个供前端使用的 REST API。您也可以直接调用这些端点以实现自动化：
+Web 仪表板公开了一个供前端使用的 REST API。你也可以直接调用这些端点以实现自动化：
 
 ### GET /api/status
 
@@ -212,7 +212,7 @@ Web 仪表板公开了一个供前端使用的 REST API。您也可以直接调�
 
 ### GET /api/config/schema
 
-返回描述每个配置字段的模式 — 类型、描述、类别以及适用的选项。前端使用此信息为每个字段渲染正确的输入控件。
+返回描述每个配置字段的模式 —— 类型、描述、类别以及适用的选项。前端使用此信息为每个字段渲染正确的输入控件。
 
 ### PUT /api/config
 
@@ -240,7 +240,7 @@ Web 仪表板公开了一个供前端使用的 REST API。您也可以直接调�
 
 ### GET /api/sessions/search
 
-对消息内容进行全文搜索。查询参数：`q`。返回匹配的会话 ID 和高亮片段。
+跨消息内容进行全文搜索。查询参数：`q`。返回匹配的会话 ID 及高亮片段。
 
 ### DELETE /api/sessions/\{session_id\}
 
@@ -297,11 +297,11 @@ Web 服务器将 CORS 限制为仅限 localhost 源：
 - `http://localhost:3000` / `http://127.0.0.1:3000`
 - `http://localhost:5173` / `http://127.0.0.1:5173` (Vite 开发服务器)
 
-如果你在自定义端口上运行服务器，该源会自动添加。
+如果您在自定义端口上运行服务器，该源会自动添加。
 
 ## 开发
 
-如果你正在为 Web 仪表板前端做贡献：
+如果您正在为 Web 仪表盘前端做贡献：
 
 ```bash
 # 终端 1：启动后端 API
@@ -319,11 +319,11 @@ npm run dev
 
 ## 更新时自动构建
 
-当你运行 `hermes update` 时，如果 `npm` 可用，Web 前端会自动重新构建。这使仪表板与代码更新保持同步。如果未安装 `npm`，更新将跳过前端构建，`hermes dashboard` 将在首次启动时构建它。
+当您运行 `hermes update` 时，如果 `npm` 可用，Web 前端会自动重新构建。这使仪表盘与代码更新保持同步。如果未安装 `npm`，更新将跳过前端构建，`hermes dashboard` 将在首次启动时构建它。
 
 ## 主题与插件
 
-仪表板内置了六个主题，并可通过用户定义的主题、插件标签和后端 API 路由进行扩展——全部即插即用，无需克隆仓库。
+仪表盘内置了六个主题，并可通过用户定义的主题、插件标签页和后端 API 路由进行扩展——所有这些都是即插即用的，无需克隆仓库。
 
 **实时切换主题**——从标题栏中，点击语言切换器旁边的调色板图标。选择会持久化到 `config.yaml` 中的 `dashboard.theme` 下，并在页面加载时恢复。
 
@@ -332,16 +332,17 @@ npm run dev
 | 主题 | 特点 |
 |-------|-----------|
 | **Hermes 蓝绿色** (`default`) | 深蓝绿色 + 奶油色，系统字体，舒适的间距 |
+| **Hermes 蓝绿色 (大号)** (`default-large`) | 与默认主题相同，但使用 18px 文本和更宽松的间距 |
 | **午夜** (`midnight`) | 深蓝紫色，Inter + JetBrains Mono 字体 |
 | **余烬** (`ember`) | 暖深红色 + 青铜色，Spectral 衬线体 + IBM Plex Mono 字体 |
 | **单色** (`mono`) | 灰度，IBM Plex 字体，紧凑 |
 | **赛博朋克** (`cyberpunk`) | 黑色背景上的霓虹绿色，Share Tech Mono 字体 |
 | **玫瑰** (`rose`) | 粉色 + 象牙色，Fraunces 衬线体，宽敞 |
 
-要构建自己的主题、添加插件标签、注入到 shell 插槽或暴露插件特定的 REST 端点，请参阅 **[扩展仪表板](./extending-the-dashboard)**——完整指南涵盖：
+要构建您自己的主题、添加插件标签页、注入到 shell 插槽或暴露插件特定的 REST 端点，请参阅 **[扩展仪表盘](./extending-the-dashboard)** ——完整指南涵盖：
 
-- 主题 YAML 模式——调色板、排版、布局、资源、componentStyles、colorOverrides、customCSS
-- 布局变体——`standard`、`cockpit`、`tiled`
+- 主题 YAML 模式 —— 调色板、排版、布局、资源、componentStyles、colorOverrides、customCSS
+- 布局变体 —— `standard`、`cockpit`、`tiled`
 - 插件清单、SDK、shell 插槽、页面作用域插槽（将小部件注入到内置页面中，而无需覆盖它们）、后端 FastAPI 路由
-- 完整的主题加插件组合演练（强袭自由驾驶舱演示）
+- 一个完整的主题加插件组合演练（强袭自由驾驶舱演示）
 - 发现、重新加载和故障排除

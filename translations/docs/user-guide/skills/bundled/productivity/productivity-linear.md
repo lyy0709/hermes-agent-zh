@@ -24,7 +24,7 @@ Linear：通过 GraphQL + curl 管理问题、项目和团队。
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Linear — 问题与项目管理
@@ -33,15 +33,15 @@ Linear：通过 GraphQL + curl 管理问题、项目和团队。
 
 ## 设置
 
-1.  从 **Linear 设置 > API > 个人 API 密钥** 获取个人 API 密钥
-2.  在您的环境中设置 `LINEAR_API_KEY`（通过 `hermes setup` 或您的环境配置）
+1.  从 **Linear 设置 > 账户 > 安全与访问 > 个人 API 密钥**（URL：https://linear.app/settings/account/security）获取个人 API 密钥。注意：组织级别的*设置 > API* 页面仅显示 OAuth 应用和工作区成员密钥，不显示个人密钥。
+2.  在你的环境中设置 `LINEAR_API_KEY`（通过 `hermes setup` 或你的环境配置）
 
 ## API 基础
 
-- **端点：** `https://api.linear.app/graphql` (POST)
-- **认证头：** `Authorization: $LINEAR_API_KEY`（API 密钥无需 "Bearer" 前缀）
-- **所有请求均为 POST**，附带 `Content-Type: application/json`
-- **UUID 和短标识符**（例如 `ENG-123`）均可用于 `issue(id:)`
+-   **端点：** `https://api.linear.app/graphql` (POST)
+-   **认证头：** `Authorization: $LINEAR_API_KEY`（API 密钥无需 "Bearer" 前缀）
+-   **所有请求均为 POST**，附带 `Content-Type: application/json`
+-   **UUID 和短标识符**（例如 `ENG-123`）都适用于 `issue(id:)`
 
 基础 curl 模式：
 ```bash
@@ -50,6 +50,24 @@ curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ viewer { id name } }"}' | python3 -m json.tool
 ```
+
+## Python 辅助脚本（更符合人体工学的替代方案）
+
+对于不需要手写 GraphQL 的快速单行命令，此技能附带了一个位于 `scripts/linear_api.py` 的标准库 Python CLI。零依赖。使用相同的认证（读取 `LINEAR_API_KEY`）。
+
+```bash
+SCRIPT=$(dirname "$(find ~/.hermes -path '*skills/productivity/linear/scripts/linear_api.py' 2>/dev/null | head -1)")/linear_api.py
+
+python3 "$SCRIPT" whoami
+python3 "$SCRIPT" list-teams
+python3 "$SCRIPT" get-issue ENG-42
+python3 "$SCRIPT" get-document 38359beef67c      # 通过 URL 中的 slugId 获取文档
+python3 "$SCRIPT" raw 'query { viewer { name } }'
+```
+
+所有子命令：`whoami`, `list-teams`, `list-projects`, `list-states`, `list-issues`, `get-issue`, `search-issues`, `create-issue`, `update-issue`, `update-status`, `add-comment`, `list-documents`, `get-document`, `search-documents`, `raw`。使用 `--help` 查看标志。
+
+何时使用脚本：你想快速获得答案而无需构建 GraphQL。何时使用 curl：你需要脚本未封装的查询，或者你想内联组合过滤器。
 
 ## 工作流状态
 
@@ -64,9 +82,9 @@ Linear 使用带有 `type` 字段的 `WorkflowState` 对象。**6 种状态类�
 | `completed` | 已完成 |
 | `canceled` | 不会处理 |
 
-每个团队都有自己的命名状态（例如，"进行中" 的类型是 `started`）。要更改问题的状态，您需要目标状态的 `stateId`（UUID）—— 请先查询工作流状态。
+每个团队都有自己的命名状态（例如，"进行中" 的类型是 `started`）。要更改问题的状态，你需要目标状态的 `stateId`（UUID）—— 首先查询工作流状态。
 
-**优先级值：** 0 = 无，1 = 紧急，2 = 高，3 = 中，4 = 低
+**优先级值：** 0 = 无, 1 = 紧急, 2 = 高, 3 = 中, 4 = 低
 
 ## 常用查询
 
@@ -133,7 +151,6 @@ curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ issues(filter: { state: { type: { in: [\"started\"] } } }, first: 20) { nodes { identifier title state { name } assignee { name } } } }"}' | python3 -m json.tool
 ```
-
 ### 按团队和负责人筛选
 ```bash
 curl -s -X POST https://api.linear.app/graphql \
@@ -187,7 +204,7 @@ curl -s -X POST https://api.linear.app/graphql \
 ```
 
 ### 更新问题状态
-首先从上面的工作流状态查询中获取目标状态 UUID，然后：
+首先从上面的工作流状态查询中获取目标状态的 UUID，然后：
 ```bash
 curl -s -X POST https://api.linear.app/graphql \
   -H "Authorization: $LINEAR_API_KEY" \
@@ -260,6 +277,69 @@ curl -s -X POST https://api.linear.app/graphql \
   }' | python3 -m json.tool
 ```
 
+## 文档
+
+Linear **文档**是与问题一起存储的散文文档（RFC、规范、笔记）。它们有自己的 `documents` 根查询和 `document(id:)` 单次获取。
+
+### 文档 URL 和 `slugId`
+
+文档 URL 格式如下：
+```
+https://linear.app/<workspace>/document/<slug>-<hexSlugId>
+```
+
+末尾的十六进制部分是 `slugId`。例如：`https://linear.app/nousresearch/document/rfc-hermes-permission-gateway-discord-38359beef67c` → `slugId` 是 `38359beef67c`。
+
+**重要的模式细节：** Markdown 正文在 `content` 字段中。ProseMirror JSON 在 `contentState` 中（不是 `contentData` —— 该字段不存在，API 会返回 400）。
+
+### 通过 slugId 获取文档
+
+`document(id:)` 只接受 UUID。要通过 URL 中的十六进制 slug 获取，请过滤集合：
+
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "query($s: String!) { documents(filter: { slugId: { eq: $s } }, first: 1) { nodes { id title content contentState slugId url creator { name } project { name } updatedAt } } }", "variables": {"s": "38359beef67c"}}' \
+  | python3 -m json.tool
+```
+
+或者通过 Python 辅助工具：
+```bash
+python3 scripts/linear_api.py get-document 38359beef67c
+```
+
+### 通过 UUID 获取文档
+
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ document(id: \"11700cff-b514-4db3-afcc-3ed1afacba1c\") { title content url } }"}' \
+  | python3 -m json.tool
+```
+### 列出最近文档
+
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ documents(first: 25, orderBy: updatedAt) { nodes { id title slugId url updatedAt project { name } } } }"}' \
+  | python3 -m json.tool
+```
+
+### 按标题搜索文档
+
+Linear 的 GraphQL 模式没有 `searchDocuments` 根查询。请改用标题子字符串过滤器：
+
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ documents(filter: { title: { containsIgnoreCase: \"RFC\" } }, first: 25) { nodes { title slugId url } } }"}' \
+  | python3 -m json.tool
+```
+
 ## 分页
 
 Linear 使用 Relay 风格的光标分页：
@@ -271,42 +351,42 @@ curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ issues(first: 20) { nodes { identifier title } pageInfo { hasNextPage endCursor } } }"}' | python3 -m json.tool
 
-# 下一页 — 使用上一个响应中的 endCursor
+# 下一页 — 使用上一响应的 endCursor
 curl -s -X POST https://api.linear.app/graphql \
   -H "Authorization: $LINEAR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"query": "{ issues(first: 20, after: \"CURSOR_FROM_PREVIOUS\") { nodes { identifier title } pageInfo { hasNextPage endCursor } } }"}' | python3 -m json.tool
 ```
 
-默认页面大小：50。最大：250。始终使用 `first: N` 来限制结果。
+默认页面大小：50。最大值：250。始终使用 `first: N` 来限制结果数量。
 
-## 筛选参考
+## 过滤器参考
 
-比较器：`eq`, `neq`, `in`, `nin`, `lt`, `lte`, `gt`, `gte`, `contains`, `startsWith`, `containsIgnoreCase`
+比较运算符：`eq`, `neq`, `in`, `nin`, `lt`, `lte`, `gt`, `gte`, `contains`, `startsWith`, `containsIgnoreCase`
 
-使用 `or: [...]` 组合筛选器以实现 OR 逻辑（默认在筛选器对象内是 AND）。
+使用 `or: [...]` 组合过滤器以实现 OR 逻辑（在过滤器对象内默认为 AND）。
 
 ## 典型工作流
 
-1.  **查询团队** 以获取团队 ID 和键
-2.  **查询工作流状态** 以获取目标团队的状态 UUID
-3.  **列出或搜索问题** 以找到需要处理的内容
-4.  **创建问题**，附带团队 ID、标题、描述、优先级
+1.  **查询团队**以获取团队 ID 和键
+2.  **查询目标团队的工作流状态**以获取状态 UUID
+3.  **列出或搜索事项**以找到需要处理的工作
+4.  **创建事项**，包含团队 ID、标题、描述、优先级
 5.  **更新状态**，将 `stateId` 设置为目标工作流状态
-6.  **添加评论** 以跟踪进度
-7.  **标记完成**，将 `stateId` 设置为团队的 "completed" 类型状态
+6.  **添加评论**以跟踪进度
+7.  **标记为完成**，将 `stateId` 设置为团队的“已完成”类型状态
 
 ## 速率限制
 
 - 每个 API 密钥每小时 5,000 个请求
 - 每小时 3,000,000 复杂度点数
-- 使用 `first: N` 限制结果并降低复杂度成本
+- 使用 `first: N` 来限制结果并降低复杂度成本
 - 监控响应头 `X-RateLimit-Requests-Remaining`
 
 ## 重要说明
 
-- 始终使用 `terminal` 工具配合 `curl` 进行 API 调用 —— 请**不要**使用 `web_extract` 或 `browser`
-- 始终检查 GraphQL 响应中的 `errors` 数组 —— HTTP 200 仍可能包含错误
-- 如果创建问题时省略 `stateId`，Linear 默认使用第一个 backlog 状态
+- 进行 API 调用时，始终使用 `terminal` 工具配合 `curl` — 请**不要**使用 `web_extract` 或 `browser`
+- 始终检查 GraphQL 响应中的 `errors` 数组 — HTTP 200 状态码仍可能包含错误
+- 创建事项时如果省略 `stateId`，Linear 将默认为第一个待办状态
 - `description` 字段支持 Markdown
-- 使用 `python3 -m json.tool` 或 `jq` 格式化 JSON 响应以提高可读性
+- 使用 `python3 -m json.tool` 或 `jq` 来格式化 JSON 响应以提高可读性
