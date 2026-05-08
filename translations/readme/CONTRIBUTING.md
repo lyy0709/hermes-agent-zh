@@ -10,42 +10,42 @@
 
 1.  **Bug 修复** — 崩溃、错误行为、数据丢失。始终是最高优先级。
 2.  **跨平台兼容性** — macOS、不同的 Linux 发行版以及 Windows 上的 WSL2。我们希望 Hermes 能在任何地方运行。
-3.  **安全加固** — Shell 注入、提示词注入、路径遍历、权限提升。请参阅[安全注意事项](#security-considerations)。
+3.  **安全加固** — shell 注入、提示词注入、路径遍历、权限提升。请参阅[安全注意事项](#security-considerations)。
 4.  **性能和健壮性** — 重试逻辑、错误处理、优雅降级。
-5.  **新技能** — 但仅限于广泛有用的技能。请参阅[应该是技能还是工具？](#should-it-be-a-skill-or-a-tool)
+5.  **新技能** — 但仅限于广泛有用的技能。请参阅[它应该是一个技能还是一个工具？](#should-it-be-a-skill-or-a-tool)
 6.  **新工具** — 很少需要。大多数功能都应该是技能。请参阅下文。
-7.  **文档** — 修复、澄清、新示例。
+7.  **文档** — 修复、澄清、新增示例。
 
 ---
 
-## 应该是技能还是工具？
+## 它应该是一个技能还是一个工具？
 
 这是新贡献者最常见的问题。答案几乎总是**技能**。
 
 ### 在以下情况下，将其设为技能：
 
-- 该功能可以表示为指令 + shell 命令 + 现有工具
-- 它包装了一个外部 CLI 或 API，Agent 可以通过 `terminal` 或 `web_extract` 调用
-- 它不需要与 Agent 框架深度集成的自定义 Python 集成或 API 密钥管理
-- 示例：arXiv 搜索、git 工作流、Docker 管理、PDF 处理、通过 CLI 工具发送邮件
+*   该功能可以表示为指令 + shell 命令 + 现有工具
+*   它包装了一个外部 CLI 或 API，Agent 可以通过 `terminal` 或 `web_extract` 调用
+*   它不需要与 Agent 框架深度集成的自定义 Python 代码或 API 密钥管理
+*   示例：arXiv 搜索、git 工作流、Docker 管理、PDF 处理、通过 CLI 工具发送邮件
 
 ### 在以下情况下，将其设为工具：
 
-- 它需要与由 Agent 框架管理的 API 密钥、认证流程或多组件配置进行端到端集成
-- 它需要自定义处理逻辑，并且每次都必须精确执行（不能依赖 LLM 解释的“尽力而为”）
-- 它处理二进制数据、流式传输或无法通过终端的实时事件
-- 示例：浏览器自动化（Browserbase 会话管理）、TTS（音频编码 + 平台交付）、视觉分析（base64 图像处理）
+*   它需要与由 Agent 框架管理的 API 密钥、认证流程或多组件配置进行端到端集成
+*   它需要每次都必须精确执行的自定义处理逻辑（而不是 LLM 解释的“尽力而为”）
+*   它处理二进制数据、流式传输或无法通过终端的实时事件
+*   示例：浏览器自动化（Browserbase 会话管理）、TTS（音频编码 + 平台交付）、视觉分析（base64 图像处理）
 
-### 技能应该被捆绑吗？
+### 该技能是否应该捆绑发布？
 
-捆绑技能（位于 `skills/` 目录中）随每个 Hermes 安装一起发布。它们应该**对大多数用户广泛有用**：
+捆绑技能（位于 `skills/` 目录下）随每个 Hermes 安装包一起发布。它们应该**对大多数用户广泛有用**：
 
-- 文档处理、网络研究、常见的开发工作流、系统管理
-- 被广泛人群定期使用
+*   文档处理、网络研究、常见的开发工作流、系统管理
+*   被广泛人群定期使用
 
-如果您的技能是官方的且有用，但并非普遍需要（例如，付费服务集成、重量级依赖项），请将其放入 **`optional-skills/`** 目录 — 它随代码仓库一起发布，但默认不激活。用户可以通过 `hermes skills browse` 发现它（标记为“official”），并使用 `hermes skills install` 安装它（没有第三方警告，内置信任）。
+如果您的技能是官方的且有用，但并非普遍需要（例如，付费服务集成、重量级依赖项），请将其放入 **`optional-skills/`** 目录 — 它随代码仓库一起发布，但默认不激活。用户可以通过 `hermes skills browse`（标记为“官方”）发现它，并使用 `hermes skills install` 安装（没有第三方警告，内置信任）。
 
-如果您的技能是专业的、社区贡献的或小众的，它更适合放在 **技能中心** — 将其上传到技能注册表，并在 [Nous Research Discord](https://discord.gg/NousResearch) 中分享。用户可以使用 `hermes skills install` 安装它。
+如果您的技能是专业化的、社区贡献的或小众的，它更适合放在 **技能中心** — 将其上传到技能注册中心，并在 [Nous Research Discord](https://discord.gg/NousResearch) 上分享。用户可以使用 `hermes skills install` 安装它。
 
 ---
 
@@ -80,14 +80,14 @@ uv pip install -e ".[all,dev]"
 npm install
 ```
 
-### 配置开发环境
+### 为开发配置
 
 ```bash
 mkdir -p ~/.hermes/{cron,sessions,logs,memories,skills}
 cp cli-config.yaml.example ~/.hermes/config.yaml
 touch ~/.hermes/.env
 
-# 至少添加一个 LLM 提供商密钥：
+# 至少添加一个 LLM 提供商的密钥：
 echo "OPENROUTER_API_KEY=***" >> ~/.hermes/.env
 ```
 
@@ -106,6 +106,10 @@ hermes chat -q "Hello"
 ### 运行测试
 
 ```bash
+# 首选 — 与 CI 匹配（封闭环境，4 个 xdist 工作进程）；参见 AGENTS.md
+scripts/run_tests.sh
+
+# 替代方案（首先激活虚拟环境）。在您打开 PR 之前，仍建议使用包装器脚本以确保与 GitHub Actions 的一致性：
 pytest tests/ -v
 ```
 
@@ -115,11 +119,11 @@ pytest tests/ -v
 
 ```
 hermes-agent/
-├── run_agent.py              # AIAgent 类 — 核心对话循环、工具分发、会话持久化
+├── run_agent.py              # AIAgent 类 — 核心对话循环、工具调度、会话持久化
 ├── cli.py                    # HermesCLI 类 — 交互式 TUI、prompt_toolkit 集成
 ├── model_tools.py            # 工具编排（tools/registry.py 的薄层封装）
 ├── toolsets.py               # 工具分组和预设（hermes-cli, hermes-telegram 等）
-├── hermes_state.py           # 带有 FTS5 全文搜索和会话标题的 SQLite 会话数据库
+├── hermes_state.py           # 带 FTS5 全文搜索和会话标题的 SQLite 会话数据库
 ├── batch_runner.py           # 用于轨迹生成的并行批量处理
 │
 ├── agent/                    # Agent 内部模块（提取出的模块）
@@ -144,14 +148,14 @@ hermes-agent/
 │   └── skin_engine.py            # 皮肤/主题引擎 — 数据驱动的 CLI 视觉定制
 │
 ├── tools/                    # 工具实现（自注册）
-│   ├── registry.py               # 中央工具注册表（模式、处理器、分发）
+│   ├── registry.py               # 中央工具注册表（模式、处理器、调度）
 │   ├── approval.py               # 危险命令检测 + 每会话批准
 │   ├── terminal_tool.py          # 终端编排（sudo、环境生命周期、后端）
 │   ├── file_operations.py        # read_file, write_file, search, patch 等
 │   ├── web_tools.py              # web_search, web_extract（Parallel/Firecrawl + Gemini 摘要）
 │   ├── vision_tools.py           # 通过多模态模型进行图像分析
 │   ├── delegate_tool.py          # 子 Agent 生成和并行任务执行
-│   ├── code_execution_tool.py    # 带有 RPC 工具访问权限的沙盒化 Python
+│   ├── code_execution_tool.py    # 带 RPC 工具访问的沙盒化 Python
 │   ├── session_search_tool.py    # 使用 FTS5 + 摘要搜索过去的对话
 │   ├── cronjob_tools.py          # 定时任务管理
 │   ├── skill_tools.py            # 技能搜索、加载、管理
@@ -175,10 +179,10 @@ hermes-agent/
 ├── optional-skills/          # 官方可选技能（可通过中心发现，默认不激活）
 ├── environments/             # RL 训练环境（Atropos 集成）
 ├── tests/                    # 测试套件
-├── website/                  # 文档网站（hermes-agent.nousresearch.com）
+├── website/                  # 文档站点（hermes-agent.nousresearch.com）
 │
 ├── cli-config.yaml.example   # 示例配置（复制到 ~/.hermes/config.yaml）
-└── AGENTS.md                 # AI 编码助手开发指南
+└── AGENTS.md                 # AI 编码助手的开发指南
 ```
 ### 用户配置（存储在 `~/.hermes/`）
 
@@ -221,17 +225,17 @@ hermes-agent/
 - **工具集分组**：工具被分组到工具集（`web`、`terminal`、`file`、`browser` 等）中，可以按平台启用/禁用。
 - **会话持久化**：所有对话都存储在 SQLite 中（`hermes_state.py`），支持全文搜索和唯一的会话标题。JSON 日志存储在 `~/.hermes/sessions/`。
 - **临时注入**：系统提示词和预填充消息在 API 调用时注入，永远不会持久化到数据库或日志中。
-- **提供商抽象**：Agent 可与任何 OpenAI 兼容的 API 协同工作。提供商解析在初始化时进行（Nous Portal OAuth、OpenRouter API 密钥或自定义端点）。
+- **提供商抽象**：Agent 可与任何 OpenAI 兼容的 API 配合使用。提供商解析在初始化时进行（Nous Portal OAuth、OpenRouter API 密钥或自定义端点）。
 - **提供商路由**：使用 OpenRouter 时，`config.yaml` 中的 `provider_routing` 控制提供商选择（按吞吐量/延迟/价格排序，允许/忽略特定提供商，数据保留策略）。这些作为 `extra_body.provider` 注入到 API 请求中。
 
 ---
 
 ## 代码风格
 
-- **PEP 8**，但有实际例外（我们不强制严格的代码行长度）
-- **注释**：仅在解释非显而易见的意图、权衡或 API 特性时使用。不要叙述代码做了什么——`# 递增计数器` 毫无意义
-- **错误处理**：捕获特定异常。使用 `logger.warning()`/`logger.error()` 记录日志——对于意外错误，使用 `exc_info=True` 以便在日志中显示堆栈跟踪
-- **跨平台**：切勿假设是 Unix 系统。参见 [跨平台兼容性](#cross-platform-compatibility)
+- **PEP 8**，但有实际例外（我们不强制执行严格的行长度限制）
+- **注释**：仅在解释非显而易见的意图、权衡或 API 特性时使用。不要叙述代码做了什么——`# 递增计数器` 没有增加任何信息
+- **错误处理**：捕获特定异常。使用 `logger.warning()`/`logger.error()` 记录日志——对于意外错误，使用 `exc_info=True`，以便堆栈跟踪出现在日志中
+- **跨平台**：切勿假设是 Unix。参见 [跨平台兼容性](#cross-platform-compatibility)
 
 ---
 
@@ -239,7 +243,7 @@ hermes-agent/
 
 在编写工具之前，先问：[这应该是一个技能吗？](#should-it-be-a-skill-or-a-tool)
 
-工具会向中央注册表自注册。每个工具文件将其模式、处理程序和注册放在一起：
+工具向中央注册表自注册。每个工具文件将其模式、处理程序和注册放在一起：
 
 ```python
 """my_tool — 简要描述此工具的功能。"""
@@ -285,16 +289,11 @@ registry.register(
 )
 ```
 
-然后将导入添加到 `model_tools.py` 的 `_modules` 列表中：
+**连接到工具集（必需）**：内置工具是自动发现的：任何包含顶级 `registry.register(...)` 调用的 `tools/*.py` 文件，在 `model_tools` 加载时，都会被 `tools/registry.py` 中的 `discover_builtin_tools()` 导入。`model_tools.py` 中**没有**需要维护的手动导入列表。
 
-```python
-_modules = [
-    # ... 现有模块 ...
-    "tools.my_tool",
-]
-```
+您仍然需要将工具名称添加到 `toolsets.py` 中的相应列表（例如 `_HERMES_CORE_TOOLS` 或专用的工具集）；否则工具会注册，但永远不会暴露给 Agent。如果您引入了一个新的工具集，请在 `toolsets.py` 中添加它，并将其连接到相关的平台预设中。
 
-如果是新的工具集，请将其添加到 `toolsets.py` 和相关的平台预设中。
+有关配置文件感知路径以及插件与核心工具的指导，请参阅 `AGENTS.md`（**添加新工具**部分）。
 
 ---
 
@@ -324,7 +323,7 @@ skills/
 name: my-skill
 description: 简要描述（显示在技能搜索结果中）
 version: 1.0.0
-author: Your Name
+author: 您的姓名
 license: MIT
 platforms: [macos, linux]          # 可选 — 限制在特定的操作系统平台
                                    #   有效值：macos, linux, windows
@@ -332,10 +331,10 @@ platforms: [macos, linux]          # 可选 — 限制在特定的操作系统�
 required_environment_variables:    # 可选 — 安全的加载时设置元数据
   - name: MY_API_KEY
     prompt: API 密钥
-    help: 在哪里获取
+    help: 在哪里获取它
     required_for: 完整功能
-prerequisites:                     # 可选的旧版运行时要求
-  env_vars: [MY_API_KEY]           #   required_environment_variables 的向后兼容别名
+prerequisites:                     # 可选的传统运行时要求
+  env_vars: [MY_API_KEY]           #   必需环境变量的向后兼容别名
   commands: [curl, jq]             #   仅建议性；不会隐藏技能
 metadata:
   hermes:
@@ -358,15 +357,15 @@ metadata:
 ## 步骤
 Agent 遵循的分步说明。
 
-## 常见问题
-已知的失败模式及处理方法。
+## 陷阱
+已知的失败模式以及如何处理它们。
 
 ## 验证
 Agent 如何确认其工作正常。
 ```
 ### 平台特定技能
 
-技能可以通过 `platforms` frontmatter 字段声明其支持的操作系统平台。具有此字段的技能会在不兼容的平台上自动从系统提示词、`skills_list()` 和斜杠命令中隐藏。
+技能可以通过 `platforms` frontmatter 字段声明其支持的操作系统平台。具有此字段的技能在不兼容的平台上会自动从系统提示词、`skills_list()` 和斜杠命令中隐藏。
 
 ```yaml
 platforms: [macos]            # 仅 macOS（例如，iMessage、Apple Reminders）
@@ -374,11 +373,11 @@ platforms: [macos, linux]     # macOS 和 Linux
 platforms: [windows]          # 仅 Windows
 ```
 
-如果省略该字段或字段为空，则技能在所有平台上加载（向后兼容）。有关仅限 macOS 的技能示例，请参阅 `skills/apple/`。
+如果省略该字段或字段为空，则技能在所有平台上加载（向后兼容）。有关仅限 macOS 技能的示例，请参阅 `skills/apple/`。
 
 ### 条件性技能激活
 
-技能可以声明一些条件，这些条件基于当前会话中可用的工具和工具集来控制技能何时出现在系统提示词中。这主要用于**后备技能**——即仅当主要工具不可用时才应显示的替代方案。
+技能可以声明条件，根据当前会话中可用的工具和工具集来控制其何时出现在系统提示词中。这主要用于**后备技能**——即仅当主要工具不可用时才应显示的替代方案。
 
 在 `metadata.hermes` 下支持四个字段：
 
@@ -393,7 +392,7 @@ metadata:
 
 **语义：**
 - `fallback_for_*`：该技能是备用方案。当列出的工具/工具集可用时**隐藏**，当它们不可用时**显示**。将此用于付费工具的免费替代方案。
-- `requires_*`：该技能需要某些工具才能运行。当列出的工具/工具集不可用时**隐藏**。将此用于依赖特定功能的技能（例如，仅在有终端访问权限时才有意义的技能）。
+- `requires_*`：该技能需要某些工具才能运行。当列出的工具/工具集不可用时**隐藏**。将此用于依赖特定功能的技能（例如，仅在具有终端访问权限时才有意义的技能）。
 - 如果同时指定了两者，则必须同时满足两个条件，技能才会出现。
 - 如果两者都未指定，则技能始终显示（向后兼容）。
 
@@ -405,7 +404,7 @@ metadata:
   hermes:
     fallback_for_toolsets: [web]
 
-# 智能家居技能 —— 仅当终端可用时才有用
+# 智能家居技能 —— 仅当终端可用时有用
 metadata:
   hermes:
     requires_toolsets: [terminal]
@@ -430,7 +429,7 @@ required_environment_variables:
     required_for: 完整功能
 ```
 
-用户可以跳过设置并继续加载技能。Hermes 仅向模型公开元数据（`stored_as`、`skipped`、`validated`）——绝不公开密钥值。
+用户可以跳过设置并继续加载技能。Hermes 仅向模型公开元数据（`stored_as`、`skipped`、`validated`）——绝不会公开密钥值。
 
 旧的 `prerequisites.env_vars` 仍然受支持，并已规范化为新的表示形式。
 
@@ -447,7 +446,7 @@ prerequisites:
 - 如果用户跳过设置，技能仍然有用，但功能可能会适度降级
 
 **何时声明命令先决条件：**
-- 技能依赖可能未安装的 CLI 工具（例如 `himalaya`、`openhue`、`ddgs`）
+- 技能依赖可能未安装的 CLI 工具（例如，`himalaya`、`openhue`、`ddgs`）
 - 将命令检查视为指导，而非发现时隐藏
 
 有关示例，请参阅 `skills/gifs/gif-search/` 和 `skills/email/himalaya/`。
@@ -455,9 +454,9 @@ prerequisites:
 ### 技能指南
 
 - **除非绝对必要，否则不要有外部依赖。** 优先使用标准库 Python、curl 和现有的 Hermes 工具（`web_extract`、`terminal`、`read_file`）。
-- **渐进式披露。** 将最常见的工作流放在前面。边缘情况和高级用法放在底部。
+- **渐进式披露。** 将最常见的工作流程放在前面。边缘情况和高级用法放在底部。
 - **包含辅助脚本**用于 XML/JSON 解析或复杂逻辑——不要期望 LLM 每次都内联编写解析器。
-- **测试它。** 运行 `hermes --toolsets skills -q "使用 X 技能来做 Y"` 并验证 Agent 是否正确遵循指令。
+- **测试它。** 运行 `hermes --toolsets skills -q "使用 X 技能执行 Y"` 并验证 Agent 是否正确遵循指令。
 
 ---
 
@@ -506,7 +505,7 @@ tool_prefix: "╎"             # 工具输出行前缀
 **激活方式：**
 - CLI：`/skin mytheme` 或在 config.yaml 中设置 `display.skin: mytheme`
 - 配置：`display: { skin: mytheme }`
-完整模式和现有皮肤示例请参见 `hermes_cli/skin_engine.py`。
+完整模式和现有皮肤的示例请参见 `hermes_cli/skin_engine.py`。
 
 ---
 
@@ -546,23 +545,23 @@ Hermes 可在 Linux、macOS 和 Windows 的 WSL2 上运行。编写涉及操作�
 
 4.  **路径分隔符。** 使用 `pathlib.Path` 而不是用 `/` 进行字符串拼接。
 
-5.  **安装程序中的 Shell 命令。** 如果修改了 `scripts/install.sh`，请检查是否需要在 `scripts/install.ps1` 中进行等效更改。
+5.  **安装程序中的 Shell 命令。** 如果修改了 `scripts/install.sh`，请检查 `scripts/install.ps1` 中是否需要做等效的更改。
 
 ---
 
 ## 安全注意事项
 
-Hermes 具有终端访问权限。安全至关重要。
+Hermes 拥有终端访问权限。安全至关重要。
 
 ### 现有保护措施
 
 | 层级 | 实现 |
 |-------|---------------|
 | **Sudo 密码管道** | 使用 `shlex.quote()` 防止 Shell 注入 |
-| **危险命令检测** | `tools/approval.py` 中的正则表达式模式，附带用户批准流程 |
+| **危险命令检测** | `tools/approval.py` 中的正则表达式模式，配合用户审批流程 |
 | **定时任务提示词注入** | `tools/cronjob_tools.py` 中的扫描器会阻止指令覆盖模式 |
-| **写入拒绝列表** | 受保护路径（`~/.ssh/authorized_keys`、`/etc/shadow`）通过 `os.path.realpath()` 解析，以防止符号链接绕过 |
-| **技能防护** | 对通过 Hub 安装的技能进行安全扫描（`tools/skills_guard.py`） |
+| **写入拒绝列表** | 通过 `os.path.realpath()` 解析受保护路径（`~/.ssh/authorized_keys`、`/etc/shadow`）以防止符号链接绕过 |
+| **技能防护** | 对 Hub 安装的技能进行安全扫描（`tools/skills_guard.py`） |
 | **代码执行沙盒** | `execute_code` 子进程运行时，环境变量中的 API 密钥已被剥离 |
 | **容器加固** | Docker：所有能力被丢弃，无权限提升，PID 限制，大小受限的 tmpfs |
 
@@ -570,7 +569,7 @@ Hermes 具有终端访问权限。安全至关重要。
 
 - **始终使用 `shlex.quote()`** 将用户输入插入到 Shell 命令时
 - **在基于路径的访问控制检查之前**，使用 `os.path.realpath()` 解析符号链接
-- **不要记录密钥。** API 密钥、Token 和密码不应出现在日志输出中
+- **不要记录密钥。** API 密钥、Token 和密码绝不应出现在日志输出中
 - **捕获工具执行周围的宽泛异常**，以便单个故障不会导致 Agent 循环崩溃
 - **在所有平台上测试**，如果你的更改涉及文件路径、进程管理或 Shell 命令
 
@@ -592,17 +591,17 @@ refactor/description   # 代码重构
 
 ### 提交前
 
-1.  **运行测试**：`pytest tests/ -v`
+1.  **运行测试**：`scripts/run_tests.sh`（推荐；与 CI 相同）或在项目虚拟环境激活状态下运行 `pytest tests/ -v`
 2.  **手动测试**：运行 `hermes` 并测试你更改的代码路径
 3.  **检查跨平台影响**：如果你的更改涉及文件 I/O、进程管理或终端处理，请考虑 macOS、Linux 和 WSL2
-4.  **保持 PR 专注**：每个 PR 只包含一个逻辑变更。不要将错误修复、重构和新功能混在一起。
+4.  **保持 PR 专注**：每个 PR 只做一个逻辑更改。不要将错误修复、重构和新功能混在一起。
 
 ### PR 描述
 
-请包含：
-- **变更内容**和**原因**
+包含：
+- **什么** 改变了以及 **为什么**
 - **如何测试**（针对错误的复现步骤，针对功能的使用示例）
-- **在哪些平台**上进行了测试
+- **在哪些平台** 上进行了测试
 - 引用任何相关的问题
 
 ### 提交信息
@@ -637,9 +636,9 @@ test(tools): add unit tests for file_operations
 ## 报告问题
 
 - 使用 [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
-- 请包含：操作系统、Python 版本、Hermes 版本（`hermes version`）、完整的错误回溯
+- 包含：操作系统、Python 版本、Hermes 版本（`hermes version`）、完整的错误回溯
 - 包含复现步骤
-- 创建问题前请检查是否已有重复问题
+- 创建问题前检查是否已有重复问题
 - 对于安全漏洞，请私下报告
 
 ---

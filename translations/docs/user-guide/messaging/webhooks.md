@@ -1,14 +1,14 @@
 ---
 sidebar_position: 13
 title: "Webhooks"
-description: "接收来自 GitHub、GitLab 等服务的事件，以触发 Hermes Agent 运行"
+description: "接收来自 GitHub、GitLab 等服务的事件以触发 Hermes Agent 运行"
 ---
 
 # Webhooks
 
-接收来自外部服务（GitHub、GitLab、JIRA、Stripe 等）的事件，并自动触发 Hermes Agent 运行。Webhook 适配器运行一个 HTTP 服务器，用于接收 POST 请求、验证 HMAC 签名、将有效载荷转换为 Agent 提示词，并将响应路由回源服务或另一个配置的平台。
+接收来自外部服务（GitHub、GitLab、JIRA、Stripe 等）的事件，并自动触发 Hermes Agent 运行。Webhook 适配器运行一个 HTTP 服务器，接受 POST 请求，验证 HMAC 签名，将有效载荷转换为 Agent 提示词，并将响应路由回源或另一个配置的平台。
 
-Agent 处理事件后，可以通过在 PR 上发布评论、向 Telegram/Discord 发送消息或记录结果来做出响应。
+Agent 处理事件，并可以通过在 PR 上发布评论、向 Telegram/Discord 发送消息或记录结果来响应。
 
 ## 视频教程
 
@@ -26,15 +26,15 @@ Agent 处理事件后，可以通过在 PR 上发布评论、向 Telegram/Discor
 
 ## 快速开始
 
-1. 通过 `hermes gateway setup` 或环境变量启用
-2. 在 `config.yaml` 中定义路由 **或** 使用 `hermes webhook subscribe` 动态创建
-3. 将你的服务指向 `http://your-server:8644/webhooks/<route-name>`
+1.  通过 `hermes gateway setup` 或环境变量启用
+2.  在 `config.yaml` 中定义路由 **或** 使用 `hermes webhook subscribe` 动态创建
+3.  将你的服务指向 `http://your-server:8644/webhooks/<route-name>`
 
 ---
 
 ## 设置
 
-有两种方式可以启用 Webhook 适配器。
+有两种方法可以启用 Webhook 适配器。
 
 ### 通过设置向导
 
@@ -42,7 +42,7 @@ Agent 处理事件后，可以通过在 PR 上发布评论、向 Telegram/Discor
 hermes gateway setup
 ```
 
-按照提示启用 Webhooks、设置端口和全局 HMAC 密钥。
+按照提示启用 Webhooks，设置端口，并设置全局 HMAC 密钥。
 
 ### 通过环境变量
 
@@ -79,12 +79,12 @@ curl http://localhost:8644/health
 | 属性 | 必需 | 描述 |
 |----------|----------|-------------|
 | `events` | 否 | 要接受的事件类型列表（例如 `["pull_request"]`）。如果为空，则接受所有事件。事件类型从 `X-GitHub-Event`、`X-GitLab-Event` 或有效载荷中的 `event_type` 读取。 |
-| `secret` | **是** | 用于签名验证的 HMAC 密钥。如果未在路由上设置，则回退到全局 `secret`。仅用于测试时，可设置为 `"INSECURE_NO_AUTH"`（跳过验证）。 |
+| `secret` | **是** | 用于签名验证的 HMAC 密钥。如果未在路由上设置，则回退到全局 `secret`。仅用于测试时设置为 `"INSECURE_NO_AUTH"`（跳过验证）。 |
 | `prompt` | 否 | 使用点号表示法访问有效载荷的模板字符串（例如 `{pull_request.title}`）。如果省略，则完整的 JSON 有效载荷将被转储到提示词中。 |
 | `skills` | 否 | 为 Agent 运行加载的技能名称列表。 |
 | `deliver` | 否 | 发送响应的位置：`github_comment`、`telegram`、`discord`、`slack`、`signal`、`sms`、`whatsapp`、`matrix`、`mattermost`、`homeassistant`、`email`、`dingtalk`、`feishu`、`wecom`、`weixin`、`bluebubbles`、`qqbot` 或 `log`（默认）。 |
-| `deliver_extra` | 否 | 额外的交付配置 —— 键取决于 `deliver` 类型（例如 `repo`、`pr_number`、`chat_id`）。值支持与 `prompt` 相同的 `{dot.notation}` 模板。 |
-| `deliver_only` | 否 | 如果为 `true`，则完全跳过 Agent —— 渲染后的 `prompt` 模板将成为直接发送的字面消息。零 LLM 成本，亚秒级交付。有关用例，请参阅[直接交付模式](#direct-delivery-mode)。要求 `deliver` 是一个真实的目标（不是 `log`）。 |
+| `deliver_extra` | 否 | 额外的交付配置 — 键取决于 `deliver` 类型（例如 `repo`、`pr_number`、`chat_id`）。值支持与 `prompt` 相同的 `{dot.notation}` 模板。 |
+| `deliver_only` | 否 | 如果为 `true`，则完全跳过 Agent — 渲染后的 `prompt` 模板成为直接发送的字面消息。零 LLM 成本，亚秒级交付。有关用例，请参阅 [直接交付模式](#direct-delivery-mode)。要求 `deliver` 是一个真实的目标（不是 `log`）。 |
 
 ### 完整示例
 
@@ -121,13 +121,13 @@ platforms:
 
 ### 提示词模板
 
-提示词使用点号表示法来访问 Webhook 有效载荷中的嵌套字段：
+提示词使用点号表示法访问 Webhook 有效载荷中的嵌套字段：
 
 - `{pull_request.title}` 解析为 `payload["pull_request"]["title"]`
 - `{repository.full_name}` 解析为 `payload["repository"]["full_name"]`
-- `{__raw__}` —— 特殊标记，将**整个有效载荷**作为缩进的 JSON 转储（截断为 4000 个字符）。对于监控警报或需要完整上下文的通用 Webhook 很有用。
-- 缺失的键将保留为字面字符串 `{key}`（无错误）
-- 嵌套的字典和列表会被 JSON 序列化并截断为 2000 个字符
+- `{__raw__}` — 特殊标记，将 **整个有效载荷** 作为缩进 JSON 转储（截断为 4000 个字符）。对于监控警报或需要完整上下文的通用 Webhook 很有用。
+- 缺失的键将保留为字面量 `{key}` 字符串（无错误）
+- 嵌套字典和列表被 JSON 序列化并截断为 2000 个字符
 
 你可以将 `{__raw__}` 与常规模板变量混合使用：
 
@@ -135,7 +135,7 @@ platforms:
 prompt: "PR #{pull_request.number} by {pull_request.user.login}: {__raw__}"
 ```
 
-如果路由没有配置 `prompt` 模板，则整个有效载荷将作为缩进的 JSON 转储（截断为 4000 个字符）。
+如果未为路由配置 `prompt` 模板，则整个有效载荷将作为缩进 JSON 转储（截断为 4000 个字符）。
 
 相同的点号表示法模板适用于 `deliver_extra` 值。
 
@@ -155,7 +155,7 @@ webhooks:
         message_thread_id: "42"
 ```
 
-如果 `deliver_extra` 中没有提供 `chat_id`，则交付将回退到为目标平台配置的主频道。
+如果 `deliver_extra` 中未提供 `chat_id`，则交付将回退到为目标平台配置的主频道。
 
 ---
 
@@ -191,7 +191,7 @@ gh auth login
 
 ## GitLab Webhook 设置 {#gitlab-webhook-setup}
 
-GitLab Webhook 的工作方式类似，但使用不同的认证机制。GitLab 将密钥作为纯文本的 `X-Gitlab-Token` 头发送（精确字符串匹配，而非 HMAC）。
+GitLab Webhook 的工作方式类似，但使用不同的认证机制。GitLab 将密钥作为纯文本 `X-Gitlab-Token` 头发送（精确字符串匹配，而非 HMAC）。
 
 ### 1. 在 GitLab 中创建 Webhook
 
@@ -226,7 +226,7 @@ platforms:
 
 ## 交付选项 {#delivery-options}
 
-`deliver` 字段控制在处理完 Webhook 事件后，Agent 的响应发送到哪里。
+`deliver` 字段控制在处理 Webhook 事件后，Agent 的响应发送到哪里。
 
 | 交付类型 | 描述 |
 |-------------|-------------|
@@ -248,7 +248,7 @@ platforms:
 | `weixin` | 将响应路由到 Weixin (WeChat)。使用主频道，或在 `deliver_extra` 中指定 `chat_id`。 |
 | `bluebubbles` | 将响应路由到 BlueBubbles (iMessage)。使用主频道，或在 `deliver_extra` 中指定 `chat_id`。 |
 
-对于跨平台交付，目标平台也必须在消息网关中启用并连接。如果 `deliver_extra` 中没有提供 `chat_id`，响应将被发送到该平台配置的主频道。
+对于跨平台交付，目标平台也必须在网关中启用并连接。如果 `deliver_extra` 中没有提供 `chat_id`，响应将发送到该平台配置的主频道。
 
 ---
 
@@ -256,7 +256,7 @@ platforms:
 
 默认情况下，每个 Webhook POST 请求都会触发一次 Agent 运行——负载成为提示词，Agent 处理它，然后 Agent 的响应被交付。这会在每次事件上消耗 LLM Token。
 
-对于你只想**推送纯文本通知**的用例——无需推理，无需 Agent 循环，只需交付消息——请在路由上设置 `deliver_only: true`。渲染后的 `prompt` 模板成为字面消息体，适配器将其直接分派到配置的交付目标。
+对于你只想**推送纯通知**的用例——无需推理，无需 Agent 循环，只需交付消息——请在路由上设置 `deliver_only: true`。渲染后的 `prompt` 模板成为字面消息体，适配器将其直接分派到配置的交付目标。
 
 ### 何时使用直接交付
 
@@ -268,11 +268,11 @@ platforms:
 优势：
 
 -   **零 LLM Token** — 从不调用 Agent
--   **亚秒级交付** — 只需一次适配器调用，无需推理循环
+-   **亚秒级交付** — 仅一次适配器调用，无推理循环
 -   **与 Agent 模式相同的安全性** — HMAC 认证、速率限制、幂等性和正文大小限制仍然适用
 -   **同步响应** — POST 请求在交付成功后返回 `200 OK`，如果目标拒绝则返回 `502`，因此你的上游服务可以智能地重试
 
-### 示例：从 Supabase 推送至 Telegram
+### 示例：来自 Supabase 的 Telegram 推送
 
 ```yaml
 platforms:
@@ -319,7 +319,7 @@ hermes webhook subscribe antenna-matches \
 ### 配置注意事项
 
 - `deliver_only: true` 要求 `deliver` 是一个真实的目标。`deliver: log`（或省略 `deliver`）会在启动时被拒绝——如果适配器发现配置错误的路由，它将拒绝启动。
-- 在直接发送模式下，`skills` 字段会被忽略（没有 Agent 运行，因此没有可以注入技能的对象）。
+- 在直接发送模式下，`skills` 字段会被忽略（没有 Agent 运行，因此没有注入技能的对象）。
 - 模板渲染使用与 Agent 模式相同的 `{dot.notation}` 语法，包括 `{__raw__}` Token。
 - 幂等性使用相同的 `X-GitHub-Delivery` / `X-Request-ID` 请求头——使用相同 ID 的重试会返回 `status=duplicate` 并且**不会**重新发送。
 
@@ -371,20 +371,20 @@ hermes webhook test github-issues --payload '{"issue": {"number": 42, "title": "
 
 ### Agent 驱动的订阅
 
-当 Agent 在 `webhook-subscriptions` 技能的引导下，可以通过终端工具创建订阅。要求 Agent “为 GitHub issues 设置一个 webhook”，它将运行相应的 `hermes webhook subscribe` 命令。
+当 Agent 在 `webhook-subscriptions` 技能的引导下，可以通过终端工具创建订阅。要求 Agent "为 GitHub issues 设置一个 webhook"，它将运行相应的 `hermes webhook subscribe` 命令。
 
 ---
 
-## 安全性 {#security}
+## 安全 {#security}
 
 Webhook 适配器包含多层安全措施：
 
 ### HMAC 签名验证
 
-适配器使用适合每个来源的方法验证传入的 Webhook 签名：
+适配器使用适用于每个来源的相应方法验证传入的 Webhook 签名：
 
 - **GitHub**: `X-Hub-Signature-256` 请求头——以 `sha256=` 为前缀的 HMAC-SHA256 十六进制摘要
-- **GitLab**: `X-Gitlab-Token` 请求头——纯文本密钥字符串匹配
+- **GitLab**: `X-Gitlab-Token` 请求头——纯密钥字符串匹配
 - **通用**: `X-Webhook-Signature` 请求头——原始的 HMAC-SHA256 十六进制摘要
 
 如果配置了密钥但不存在可识别的签名请求头，请求将被拒绝。
@@ -392,6 +392,8 @@ Webhook 适配器包含多层安全措施：
 ### 密钥是必需的
 
 每个路由都必须有一个密钥——可以直接在路由上设置，也可以从全局 `secret` 继承。没有密钥的路由会导致适配器在启动时失败并报错。仅用于开发/测试时，你可以将密钥设置为 `"INSECURE_NO_AUTH"` 以完全跳过验证。
+
+`INSECURE_NO_AUTH` 仅在消息网关绑定到环回主机（`127.0.0.1`、`localhost`、`::1`）时才被接受。如果它与非环回绑定（如 `0.0.0.0` 或局域网 IP）结合使用，适配器将拒绝启动——这可以防止在公共接口上意外暴露未经身份验证的端点。
 
 ### 速率限制
 
@@ -404,7 +406,7 @@ platforms:
       rate_limit: 60  # 每分钟请求数
 ```
 
-超过限制的请求会收到 `429 Too Many Requests` 响应。
+超过限制的请求将收到 `429 Too Many Requests` 响应。
 
 ### 幂等性
 
@@ -424,7 +426,7 @@ platforms:
 ### 提示词注入风险
 
 :::warning
-Webhook 负载包含攻击者控制的数据——PR 标题、提交消息、问题描述等都可能包含恶意指令。当暴露在互联网上时，请在沙盒环境（Docker、VM）中运行消息网关。考虑使用 Docker 或 SSH 终端后端进行隔离。
+Webhook 负载包含攻击者控制的数据——PR 标题、提交消息、问题描述等都可能包含恶意指令。当暴露在互联网上时，请在沙盒环境（Docker、虚拟机）中运行消息网关。考虑使用 Docker 或 SSH 终端后端进行隔离。
 :::
 
 ---
@@ -437,13 +439,13 @@ Webhook 负载包含攻击者控制的数据——PR 标题、提交消息、问
 - 检查防火墙规则——端口 `8644`（或你配置的端口）必须开放
 - 验证 URL 路径是否匹配：`http://your-server:8644/webhooks/<route-name>`
 - 使用 `/health` 端点确认服务器正在运行
-
 ### 签名验证失败
 
-- 确保路由配置中的密钥与 Webhook 源中配置的密钥完全匹配
-- 对于 GitHub，密钥是基于 HMAC 的——检查 `X-Hub-Signature-256`
-- 对于 GitLab，密钥是纯文本 Token 匹配——检查 `X-Gitlab-Token`
+- 确保路由配置中的密钥与 Webhook 源中配置的密钥完全一致
+- 对于 GitHub，密钥基于 HMAC — 检查 `X-Hub-Signature-256`
+- 对于 GitLab，密钥是纯令牌匹配 — 检查 `X-Gitlab-Token`
 - 检查消息网关日志中的 `Invalid signature` 警告
+
 ### 事件被忽略
 
 - 检查事件类型是否在路由的 `events` 列表中
@@ -455,14 +457,14 @@ Webhook 负载包含攻击者控制的数据——PR 标题、提交消息、问
 
 - 在前台运行消息网关以查看日志：`hermes gateway run`
 - 检查提示词模板是否正确渲染
-- 验证投递目标是否已配置并已连接
+- 验证交付目标是否已配置并已连接
 
 ### 重复响应
 
-- 幂等性缓存应能防止此问题 —— 检查 Webhook 源是否发送了投递 ID 头（`X-GitHub-Delivery` 或 `X-Request-ID`）
-- 投递 ID 会缓存 1 小时
+- 幂等性缓存应能防止此问题 — 检查 Webhook 源是否发送了交付 ID 头（`X-GitHub-Delivery` 或 `X-Request-ID`）
+- 交付 ID 会缓存 1 小时
 
-### `gh` CLI 错误（GitHub 评论投递）
+### `gh` CLI 错误（GitHub 评论交付）
 
 - 在消息网关主机上运行 `gh auth login`
 - 确保经过身份验证的 GitHub 用户对仓库具有写入权限

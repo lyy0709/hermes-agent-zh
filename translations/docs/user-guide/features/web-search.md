@@ -1,6 +1,6 @@
 ---
 title: 网页搜索与内容提取
-description: 使用多个后端提供商进行网页搜索、提取页面内容以及爬取网站——包括免费自托管的 SearXNG。
+description: 使用多个后端提供商（包括免费自托管的 SearXNG）搜索网页、提取页面内容以及爬取网站。
 sidebar_label: 网页搜索
 sidebar_position: 6
 ---
@@ -9,11 +9,11 @@ sidebar_position: 6
 
 Hermes Agent 包含三个由多个提供商支持的网页工具：
 
-- **`web_search`** — 搜索网页并返回排序结果
+- **`web_search`** — 搜索网页并返回排序后的结果
 - **`web_extract`** — 从一个或多个 URL 获取并提取可读内容
 - **`web_crawl`** — 递归爬取网站并返回结构化内容
 
-所有三个工具都通过单一的后端选择进行配置。提供商通过 `hermes tools` 选择或直接在 `config.yaml` 中设置。
+这三者都通过单一的后端选择进行配置。提供商通过 `hermes tools` 选择或直接在 `config.yaml` 中设置。
 
 ## 后端
 
@@ -25,10 +25,10 @@ Hermes Agent 包含三个由多个提供商支持的网页工具：
 | **Exa** | `EXA_API_KEY` | ✔ | ✔ | — | 1 000 次搜索/月 |
 | **Parallel** | `PARALLEL_API_KEY` | ✔ | ✔ | — | 付费 |
 
-**按能力拆分：** 你可以为搜索和提取独立使用不同的提供商——例如，用 SearXNG（免费）进行搜索，用 Firecrawl 进行提取。请参阅下面的[按能力配置](#per-capability-configuration)。
+**按能力拆分：** 你可以为搜索和提取独立使用不同的提供商——例如，使用 SearXNG（免费）进行搜索，使用 Firecrawl 进行提取。请参阅下面的[按能力配置](#per-capability-configuration)。
 
 :::tip Nous 订阅用户
-如果你拥有付费的 [Nous Portal](https://portal.nousresearch.com) 订阅，网页搜索和提取可通过 **[Tool Gateway](tool-gateway.md)** 通过托管的 Firecrawl 获得——无需 API 密钥。运行 `hermes tools` 来启用它。
+如果你拥有付费的 [Nous Portal](https://portal.nousresearch.com) 订阅，网页搜索和提取可通过 **[工具网关](tool-gateway.md)** 通过托管的 Firecrawl 获得——无需 API 密钥。运行 `hermes tools` 来启用它。
 :::
 
 ---
@@ -63,7 +63,7 @@ FIRECRAWL_API_KEY=fc-your-key-here
 FIRECRAWL_API_URL=http://localhost:3002
 ```
 
-当设置了 `FIRECRAWL_API_URL` 时，API 密钥是可选的（通过 `USE_DB_AUTHENTICATION=false` 禁用服务器身份验证）。
+当设置了 `FIRECRAWL_API_URL` 时，API 密钥是可选的（通过 `USE_DB_AUTHENTICATION=false` 禁用服务器认证）。
 
 ---
 
@@ -116,7 +116,7 @@ SearXNG 默认禁用 JSON 输出。复制生成的配置并启用它：
 docker cp searxng:/etc/searxng/settings.yml ~/searxng/searxng/settings.yml
 ```
 
-打开 `~/searxng/searxng/settings.yml` 并找到 `formats` 块（大约第 84 行）：
+打开 `~/searxng/searxng/settings.yml` 并找到 `formats` 块（大约在第 84 行）：
 
 ```yaml
 # 之前 (默认 — JSON 禁用):
@@ -143,13 +143,20 @@ curl -s "http://localhost:8888/search?q=test&format=json" | python3 -c \
   "import sys,json; d=json.load(sys.stdin); print(f'{len(d[\"results\"])} results')"
 ```
 
-你应该会看到类似 `10 results` 的内容。如果收到 `403 Forbidden`，则 JSON 格式仍被禁用——请重新检查步骤 4。
+你应该会看到类似 `10 results` 的内容。如果收到 `403 Forbidden`，JSON 格式仍然被禁用——请重新检查第 4 步。
 
 **7. 配置 Hermes：**
 
 ```bash
-# ~/.hermes/config.yaml
-SEARXNG_URL: http://localhost:8888
+# ~/.hermes/.env
+SEARXNG_URL=http://localhost:8888
+```
+
+然后在 `~/.hermes/config.yaml` 中选择 SearXNG 作为搜索后端：
+
+```yaml
+web:
+  search_backend: "searxng"
 ```
 
 或者通过 `hermes tools` → Web Search & Extract → SearXNG 设置。
@@ -161,12 +168,12 @@ SEARXNG_URL: http://localhost:8888
 公共 SearXNG 实例在 [searx.space](https://searx.space/) 列出。筛选出**启用了 JSON 格式**的实例（在表格中显示）。
 
 ```bash
-# ~/.hermes/config.yaml
-SEARXNG_URL: https://searx.example.com
+# ~/.hermes/.env
+SEARXNG_URL=https://searx.example.com
 ```
 
 :::caution 公共实例
-公共实例有速率限制，正常运行时间不定，并且可能随时禁用 JSON 格式。对于生产用途，强烈建议自托管。
+公共实例有速率限制，可用性不稳定，并且可能随时禁用 JSON 格式。对于生产用途，强烈建议自托管。
 :::
 
 ---
@@ -239,7 +246,7 @@ web:
 
 ### 按能力配置
 
-为搜索和提取使用不同的提供商。这让你可以结合免费搜索 (SearXNG) 与付费提取提供商，反之亦然：
+为搜索和提取使用不同的提供商。这让你可以结合免费搜索 (SearXNG) 和付费提取提供商，反之亦然：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -302,7 +309,7 @@ python -m tools.web_tools
 - 如果收到 HTTP 403，JSON 格式被禁用——在 `settings.yml` 的 `formats` 列表中添加 `json` 并重启
 - 如果收到连接错误，容器可能没有运行：`docker ps | grep searxng`
 
-### `web_extract` 显示 "search-only backend"
+### `web_extract` 提示 "search-only backend"
 
 SearXNG 无法提取 URL 内容。将 `web.extract_backend` 设置为支持提取的提供商：
 
@@ -319,21 +326,21 @@ web:
 - 来自 [searx.space](https://searx.space/) 的不同公共实例
 - 自托管你自己的实例以获得可靠结果
 
-### 在公共实例上被限制速率
+### 在公共实例上被限速
 
-切换到自托管实例（见上面的[选项 A](#option-a--self-host-with-docker-recommended)）。使用 Docker，你自己的实例没有速率限制。
+切换到自托管实例（参见上面的[选项 A](#option-a--self-host-with-docker-recommended)）。使用 Docker，你自己的实例没有速率限制。
 
 ---
 
 ## 可选技能：`searxng-search`
 
-对于需要通过 `curl` 直接使用 SearXNG 的 Agent（例如，当网页工具集不可用时作为回退），安装 `searxng-search` 可选技能：
+对于需要直接通过 `curl` 使用 SearXNG 的 Agent（例如，当网页工具集不可用时作为备用方案），安装 `searxng-search` 可选技能：
 
 ```bash
 hermes skills install official/research/searxng-search
 ```
 
-这增加了一个技能，教会 Agent 如何：
+这添加了一个技能，教导 Agent 如何：
 - 通过 `curl` 或 Python 调用 SearXNG JSON API
 - 按类别筛选 (`general`, `news`, `science` 等)
 - 处理分页和错误情况
