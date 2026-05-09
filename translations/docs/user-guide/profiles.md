@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # 配置文件：运行多个 Agent
 
-在同一台机器上运行多个独立的 Hermes Agent —— 每个 Agent 拥有自己的配置、API 密钥、记忆、会话、技能和消息网关状态。
+在同一台机器上运行多个独立的 Hermes Agent —— 每个 Agent 都拥有自己的配置、API 密钥、记忆、会话、技能和消息网关状态。
 
 ## 什么是配置文件？
 
@@ -20,7 +20,7 @@ coder setup                       # 配置 API 密钥和模型
 coder chat                        # 开始聊天
 ```
 
-就是这样。`coder` 现在是一个独立的 Hermes 配置文件，拥有自己的配置、记忆和状态。
+就是这样。`coder` 现在是一个拥有自己配置、记忆和状态的 Hermes 配置文件。
 
 ## 创建配置文件
 
@@ -38,7 +38,7 @@ hermes profile create mybot
 hermes profile create work --clone
 ```
 
-将当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新配置文件中。使用相同的 API 密钥和模型，但会话和记忆是全新的。编辑 `~/.hermes/profiles/work/.env` 以使用不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以获得不同的人格。
+将当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新配置文件中。使用相同的 API 密钥和模型，但会话和记忆是全新的。编辑 `~/.hermes/profiles/work/.env` 以使用不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以赋予不同的灵魂（人格）。
 
 ### 克隆所有内容 (`--clone-all`)
 
@@ -46,7 +46,7 @@ hermes profile create work --clone
 hermes profile create backup --clone-all
 ```
 
-复制**所有内容** —— 配置、API 密钥、人格、所有记忆、完整的会话历史、技能、定时任务、插件。一个完整的快照。适用于备份或分叉一个已有上下文的 Agent。
+复制**所有内容** —— 配置、API 密钥、灵魂（人格）、所有记忆、完整的会话历史、技能、定时任务、插件。一个完整的快照。适用于备份或分叉一个已经拥有上下文的 Agent。
 
 ### 从特定配置文件克隆
 
@@ -55,7 +55,7 @@ hermes profile create work --clone --clone-from coder
 ```
 
 :::tip Honcho 记忆 + 配置文件
-启用 Honcho 后，`--clone` 会自动为新配置文件创建一个专用的 AI 对等体，同时共享相同的工作空间。每个配置文件都会构建自己的观察和身份。详情请参阅 [Honcho -- 多 Agent / 配置文件](./features/memory-providers.md#honcho)。
+启用 Honcho 后，`--clone` 会自动为新配置文件创建一个专用的 AI 对等体，同时共享相同的用户工作空间。每个配置文件都会构建自己的观察和身份。详情请参阅 [Honcho -- 多 Agent / 配置文件](./features/memory-providers.md#honcho)。
 :::
 
 ## 使用配置文件
@@ -128,7 +128,7 @@ terminal:
 
 - `SOUL.md` 可以指导模型，但它不强制执行工作空间边界。
 - 对 `SOUL.md` 的更改会在新会话中干净地生效。现有会话可能仍在使用旧的提示词状态。
-- 询问模型“你在哪个目录中？”并不是一个可靠的隔离测试。如果您需要为工具设置一个可预测的起始目录，请显式设置 `terminal.cwd`。
+- 询问模型“你在哪个目录中？”并不是一个可靠的隔离测试。如果您需要为工具设置可预测的起始目录，请显式设置 `terminal.cwd`。
 
 ## 运行消息网关
 
@@ -170,7 +170,7 @@ assistant gateway install     # 创建 hermes-gateway-assistant 服务
 
 - **`config.yaml`** —— 模型、提供商、工具集、所有设置
 - **`.env`** —— API 密钥、机器人令牌
-- **`SOUL.md`** —— 人格和指令
+- **`SOUL.md`** —— 灵魂（人格）和指令
 
 ```bash
 coder config set model.default anthropic/claude-sonnet-4
@@ -189,7 +189,7 @@ coder config set terminal.cwd /absolute/path/to/project
 
 ```bash
 hermes update
-# → 代码已更新 (12 次提交)
+# → 代码已更新 (12 commits)
 # → 技能已同步：default (已是最新), coder (+2 个新技能), assistant (+2 个新技能)
 ```
 
@@ -238,3 +238,17 @@ eval "$(hermes completion zsh)"
 这与终端工作目录是分开的。工具执行从 `terminal.cwd` 开始（或者在本地后端上使用 `cwd: "."` 时，从启动目录开始），而不是自动从 `HERMES_HOME` 开始。
 
 默认配置文件就是 `~/.hermes` 本身。无需迁移 —— 现有安装的工作方式完全相同。
+
+## 将配置文件作为发行版共享
+
+您在一台机器上构建的配置文件可以打包成一个 **git 仓库**，并通过一个命令安装在另一台机器上 —— 无论是您自己的工作站、队友的笔记本电脑还是社区用户的环境。共享包包括 SOUL、配置、技能、定时任务和 MCP 连接。凭据、记忆和会话则保留在每台机器上。
+
+```bash
+# 从 git 仓库安装整个 Agent
+hermes profile install github.com/you/research-bot --alias
+
+# 当作者发布新版本时稍后更新（保留您的记忆 + .env）
+hermes profile update research-bot
+```
+
+请参阅 **[配置文件发行版：共享整个 Agent](./profile-distributions.md)** 获取完整指南 —— 包括创作、发布、更新语义、安全模型和用例。
