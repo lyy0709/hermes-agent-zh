@@ -17,6 +17,7 @@ description: "通过 AgentMail 为 Agent 提供专属邮箱"
 | 来源 | 可选 — 使用 `hermes skills install official/email/agentmail` 安装 |
 | 路径 | `optional-skills/email/agentmail` |
 | 版本 | `1.0.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `email`, `communication`, `agentmail`, `mcp` |
 
 ## 参考：完整的 SKILL.md
@@ -29,7 +30,7 @@ description: "通过 AgentMail 为 Agent 提供专属邮箱"
 
 ## 要求
 
-- **AgentMail API 密钥**（必需） — 在 https://console.agentmail.to 注册（免费套餐：3 个邮箱，每月 3,000 封邮件；付费计划起价 20 美元/月）
+- **AgentMail API 密钥**（必需） — 在 https://console.agentmail.to 注册（免费版：3 个邮箱，每月 3,000 封邮件；付费计划起价 20 美元/月）
 - Node.js 18+（用于 MCP 服务器）
 
 ## 使用场景
@@ -39,9 +40,9 @@ description: "通过 AgentMail 为 Agent 提供专属邮箱"
 - 接收和阅读收到的电子邮件
 - 管理邮件线程和对话
 - 通过电子邮件注册服务或进行身份验证
-- 通过电子邮件与其他 Agent 或人类通信
+- 通过电子邮件与其他 Agent 或人类沟通
 
-此技能**不**用于读取用户的个人电子邮件（请使用 himalaya 或 Gmail 技能）。
+此技能**不**用于读取用户的个人电子邮件（请使用 himalaya 或 Gmail）。
 AgentMail 为 Agent 提供其自身的身份和收件箱。
 
 ## 设置
@@ -102,7 +103,7 @@ hermes
 
 ### 回复邮件
 1. 使用 `get_thread` 获取线程
-2. 使用 `reply_to_message` 并指定消息 ID 和您的回复文本
+2. 使用 `reply_to_message`，指定消息 ID 和您的回复文本
 
 ## 示例工作流
 
@@ -122,11 +123,11 @@ hermes
 ```
 
 ## 注意事项
-- 免费套餐限制为 3 个邮箱和每月 3,000 封邮件
-- 免费套餐的邮件来自 `@agentmail.to` 域名（付费计划支持自定义域名）
+- 免费版限制为 3 个邮箱和每月 3,000 封邮件
+- 免费版邮件来自 `@agentmail.to` 域名（付费计划支持自定义域名）
 - MCP 服务器需要 Node.js (18+) (`npx -y agentmail-mcp`)
 - 必须安装 `mcp` Python 包：`pip install mcp`
-- 实时接收邮件（Webhook）需要公共服务器 — 对于个人使用，请改用通过定时任务轮询 `list_threads`
+- 实时接收邮件（Webhook）需要公共服务器 — 对于个人使用，建议通过定时任务轮询 `list_threads` 代替
 
 ## 验证
 设置完成后，使用以下命令测试：

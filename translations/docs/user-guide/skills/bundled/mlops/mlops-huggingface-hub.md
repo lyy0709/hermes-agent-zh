@@ -19,11 +19,12 @@ HuggingFace hf CLI：搜索/下载/上传模型、数据集。
 | 版本 | `1.0.0` |
 | 作者 | Hugging Face |
 | 许可证 | MIT |
+| 支持平台 | linux, macos, windows |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Hugging Face CLI (`hf`) 参考指南
@@ -57,12 +58,12 @@ HuggingFace hf CLI：搜索/下载/上传模型、数据集。
 *   `create` / `delete`：创建或永久删除仓库。
 *   `duplicate`：将模型、数据集或 Space 克隆到新的 ID。
 *   `move`：在命名空间之间转移仓库。
-*   `branch` / `tag`：管理类 Git 的引用。
+*   `branch` / `tag`：管理类 Git 引用。
 *   `delete-files`：使用模式删除特定文件。
 
 ---
 
-## 专门的 Hub 交互
+## 专用的 Hub 交互
 
 ### 数据集与模型
 *   **数据集：** `hf datasets list`、`info` 和 `parquet`（列出 parquet URL）。
@@ -73,11 +74,11 @@ HuggingFace hf CLI：搜索/下载/上传模型、数据集。
 ### 讨论与拉取请求 (`hf discussions`)
 *   管理 Hub 贡献的生命周期：`list`、`create`、`info`、`comment`、`close`、`reopen` 和 `rename`。
 *   `diff`：查看 PR 中的更改。
-*   `merge`：完成拉取请求。
+*   `merge`：最终确定拉取请求。
 
 ### 基础设施与计算
 *   **端点：** 部署和管理推理端点 (`deploy`、`pause`、`resume`、`scale-to-zero`、`catalog`)。
-*   **作业：** 在 HF 基础设施上运行计算任务。包括 `hf jobs uv`（用于运行带有内联依赖项的 Python 脚本）和 `stats`（用于资源监控）。
+*   **作业：** 在 HF 基础设施上运行计算任务。包括 `hf jobs uv`（用于运行带有内联依赖的 Python 脚本）和 `stats`（用于资源监控）。
 *   **Spaces：** 管理交互式应用。包括 `dev-mode` 和 `hot-reload`，用于无需完全重启即可热重载 Python 文件。
 
 ### 存储与自动化

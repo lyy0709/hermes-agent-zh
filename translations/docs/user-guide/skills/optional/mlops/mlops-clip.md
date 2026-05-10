@@ -14,12 +14,13 @@ OpenAI 连接视觉与语言的模型。支持零样本图像分类、图文匹�
 
 | | |
 |---|---|
-| 来源 | Optional — 使用 `hermes skills install official/mlops/clip` 安装 |
+| 来源 | Optional — 通过 `hermes skills install official/mlops/clip` 安装 |
 | 路径 | `optional-skills/mlops/clip` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `transformers`, `torch`, `pillow` |
+| 平台 | linux, macos, windows |
 | 标签 | `Multimodal`, `CLIP`, `Vision-Language`, `Zero-Shot`, `Image Classification`, `OpenAI`, `Image Search`, `Cross-Modal Retrieval`, `Content Moderation` |
 
 ## 参考：完整的 SKILL.md
@@ -43,12 +44,12 @@ OpenAI 的模型，能够从自然语言理解图像。
 - 跨模态检索（图像→文本，文本→图像）
 
 **指标**：
-- **GitHub 星标 25,300+**
+- **GitHub 星标数 25,300+**
 - 基于 4 亿图文对训练
 - 在 ImageNet 上零样本匹配 ResNet-50 性能
 - MIT 许可证
 
-**改用其他方案的情况**：
+**改用替代方案的情况**：
 - **BLIP-2**：更好的图像描述
 - **LLaVA**：视觉语言对话
 - **Segment Anything**：图像分割
@@ -239,12 +240,12 @@ results = collection.query(
 
 ## 最佳实践
 
-1. **大多数情况下使用 ViT-B/32** - 良好的平衡
+1. **大多数情况使用 ViT-B/32** - 良好的平衡
 2. **归一化嵌入** - 余弦相似度必需
 3. **批处理** - 效率更高
 4. **缓存嵌入** - 重新计算成本高
 5. **使用描述性标签** - 零样本性能更好
-6. **推荐使用 GPU** - 速度快 10-50 倍
+6. **推荐使用 GPU** - 速度提升 10-50 倍
 7. **预处理图像** - 使用提供的预处理函数
 
 ## 性能

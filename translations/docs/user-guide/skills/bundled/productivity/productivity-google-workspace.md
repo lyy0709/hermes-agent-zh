@@ -1,14 +1,14 @@
 ---
-title: "Google Workspace — 通过 gws CLI 或 Python 使用 Gmail、Calendar、Drive、Docs、Sheets"
+title: "Google Workspace — 通过 gws CLI 或 Python 使用 Gmail、日历、Drive、Docs、Sheets"
 sidebar_label: "Google Workspace"
-description: "通过 gws CLI 或 Python 使用 Gmail、Calendar、Drive、Docs、Sheets"
+description: "通过 gws CLI 或 Python 使用 Gmail、日历、Drive、Docs、Sheets"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Google Workspace
 
-通过 gws CLI 或 Python 使用 Gmail、Calendar、Drive、Docs、Sheets。
+通过 gws CLI 或 Python 使用 Gmail、日历、Drive、Docs、Sheets。
 
 ## 技能元数据
 
@@ -16,9 +16,10 @@ description: "通过 gws CLI 或 Python 使用 Gmail、Calendar、Drive、Docs�
 |---|---|
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/productivity/google-workspace` |
-| 版本 | `1.0.0` |
+| 版本 | `1.1.0` |
 | 作者 | Nous Research |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Google`, `Gmail`, `Calendar`, `Drive`, `Sheets`, `Docs`, `Contacts`, `Email`, `OAuth` |
 | 相关技能 | [`himalaya`](/docs/user-guide/skills/bundled/email/email-himalaya) |
 
@@ -30,11 +31,11 @@ description: "通过 gws CLI 或 Python 使用 Gmail、Calendar、Drive、Docs�
 
 # Google Workspace
 
-Gmail、Calendar、Drive、Contacts、Sheets 和 Docs —— 通过 Hermes 管理的 OAuth 和一个轻量级 CLI 包装器。当 `gws` 安装后，该技能将其用作执行后端以获得更广泛的 Google Workspace 覆盖；否则回退到内置的 Python 客户端实现。
+Gmail、日历、Drive、联系人、Sheets 和 Docs —— 通过 Hermes 管理的 OAuth 和一个精简的 CLI 包装器。当 `gws` 已安装时，该技能将其用作执行后端以获得更广泛的 Google Workspace 覆盖；否则回退到内置的 Python 客户端实现。
 
-## 参考文档
+## 参考资料
 
-- `references/gmail-search-syntax.md` — Gmail 搜索运算符（is:unread, from:, newer_than: 等）
+- `references/gmail-search-syntax.md` — Gmail 搜索运算符 (is:unread, from:, newer_than:, 等)
 
 ## 脚本
 
@@ -43,7 +44,7 @@ Gmail、Calendar、Drive、Contacts、Sheets 和 Docs —— 通过 Hermes 管�
 
 ## 首次设置
 
-设置完全是非交互式的 —— 你可以逐步驱动它，使其在 CLI、Telegram、Discord 或任何平台上工作。
+设置完全是非交互式的 —— 你逐步驱动它，使其能在 CLI、Telegram、Discord 或任何平台上工作。
 
 首先定义一个简写：
 
@@ -57,23 +58,26 @@ GSETUP="python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspac
 $GSETUP --check
 ```
 
-如果打印 `AUTHENTICATED`，则跳转到“使用”部分 —— 设置已完成。
+如果打印 `AUTHENTICATED`，请跳至“使用”部分 —— 设置已完成。
 
 ### 步骤 1：分流 —— 询问用户需要什么
 
 在开始 OAuth 设置之前，询问用户两个问题：
 
-**问题 1：“你需要哪些 Google 服务？仅邮件，还是也需要 Calendar/Drive/Sheets/Docs？”**
+**问题 1："你需要哪些 Google 服务？仅电子邮件，还是也包括日历/Drive/Sheets/Docs？"**
 
-- **仅邮件** → 他们完全不需要此技能。改用 `himalaya` 技能 —— 它使用 Gmail 应用密码（设置 → 安全 → 应用密码）工作，设置只需 2 分钟。无需 Google Cloud 项目。加载 himalaya 技能并遵循其设置说明。
-- **邮件 + 日历** → 继续使用此技能，但在授权期间使用 `--services email,calendar`，以便同意屏幕仅请求他们实际需要的权限范围。
-- **仅 Calendar/Drive/Sheets/Docs** → 继续使用此技能，并使用更窄的 `--services` 集合，如 `calendar,drive,sheets,docs`。
-- **完整的 Workspace 访问** → 继续使用此技能并使用默认的 `all` 服务集。
+- **仅电子邮件** → 他们完全不需要此技能。请改用 `himalaya` 技能 —— 它使用 Gmail 应用密码（设置 → 安全 → 应用密码）工作，设置只需 2 分钟。无需 Google Cloud 项目。加载 himalaya 技能并遵循其设置说明。
 
-**问题 2：“你的 Google 账户是否使用高级保护（需要硬件安全密钥登录）？如果不确定，很可能没有 —— 这是你需要明确注册的功能。”**
+- **电子邮件 + 日历** → 继续使用此技能，但在授权期间使用 `--services email,calendar`，以便同意屏幕仅请求他们实际需要的权限范围。
+
+- **仅日历/Drive/Sheets/Docs** → 继续使用此技能，并使用更窄的 `--services` 集合，如 `calendar,drive,sheets,docs`。
+
+- **完整的 Workspace 访问权限** → 继续使用此技能，并使用默认的 `all` 服务集。
+
+**问题 2："你的 Google 账户是否使用高级保护（需要硬件安全密钥才能登录）？如果不确定，你可能没有 —— 这是你需要明确注册的功能。"**
 
 - **否 / 不确定** → 正常设置。继续下面的步骤。
-- **是** → 他们的 Workspace 管理员必须先将 OAuth 客户端 ID 添加到组织的允许应用列表中，步骤 4 才能生效。提前告知他们。
+- **是** → 他们的 Workspace 管理员必须先将 OAuth 客户端 ID 添加到组织的允许应用列表中，步骤 4 才能正常工作。请提前告知他们。
 
 ### 步骤 2：创建 OAuth 凭据（一次性，约 5 分钟）
 
@@ -81,21 +85,22 @@ $GSETUP --check
 
 > 你需要一个 Google Cloud OAuth 客户端。这是一次性设置：
 >
-> 1.  创建或选择一个项目：
->     https://console.cloud.google.com/projectselector2/home/dashboard
-> 2.  从 API 库启用所需的 API：
->     https://console.cloud.google.com/apis/library
->     启用：Gmail API、Google Calendar API、Google Drive API、Google Sheets API、Google Docs API、People API
-> 3.  在此处创建 OAuth 客户端：
->     https://console.cloud.google.com/apis/credentials
->     凭据 → 创建凭据 → OAuth 2.0 客户端 ID
-> 4.  应用类型：“桌面应用” → 创建
-> 5.  如果应用仍处于测试阶段，请在此处将用户的 Google 账户添加为测试用户：
->     https://console.cloud.google.com/auth/audience
->     受众群体 → 测试用户 → 添加用户
-> 6.  下载 JSON 文件并告诉我文件路径
+> 1. 创建或选择一个项目：
+>    https://console.cloud.google.com/projectselector2/home/dashboard
+> 2. 从 API 库启用所需的 API：
+>    https://console.cloud.google.com/apis/library
+>    启用：Gmail API、Google Calendar API、Google Drive API、
+>    Google Sheets API、Google Docs API、People API
+> 3. 在此处创建 OAuth 客户端：
+>    https://console.cloud.google.com/apis/credentials
+>    凭据 → 创建凭据 → OAuth 2.0 客户端 ID
+> 4. 应用程序类型："桌面应用" → 创建
+> 5. 如果应用仍处于测试阶段，请在此处将用户的 Google 账户添加为测试用户：
+>    https://console.cloud.google.com/auth/audience
+>    受众群体 → 测试用户 → 添加用户
+> 6. 下载 JSON 文件并告诉我文件路径
 >
-> 重要的 Hermes CLI 注意事项：如果文件路径以 `/` 开头，请**不要**在 CLI 中仅将裸路径作为单独消息发送，因为它可能被误认为是斜杠命令。请将其放在一个句子中发送，例如：
+> 重要的 Hermes CLI 注意事项：如果文件路径以 `/` 开头，请勿在 CLI 中仅将裸路径作为单独消息发送，因为它可能被误认为是斜杠命令。请将其放在一个句子中发送，例如：
 > `JSON 文件路径是：/home/user/Downloads/client_secret_....json`
 
 一旦他们提供路径：
@@ -104,11 +109,14 @@ $GSETUP --check
 $GSETUP --client-secret /path/to/client_secret.json
 ```
 
-如果他们粘贴的是原始的客户端 ID / 客户端密钥值，而不是文件路径，请自行为他们编写一个有效的桌面 OAuth JSON 文件，将其保存在某个明确的位置（例如 `~/Downloads/hermes-google-client-secret.json`），然后对该文件运行 `--client-secret`。
+如果他们粘贴的是原始的客户端 ID / 客户端密钥值，而不是文件路径，
+请自行为他们编写一个有效的桌面 OAuth JSON 文件，将其保存在某个明确的位置
+（例如 `~/Downloads/hermes-google-client-secret.json`），然后对该文件运行
+`--client-secret`。
 
 ### 步骤 3：获取授权 URL
 
-使用步骤 1 中选择的服务集。示例：
+使用在步骤 1 中选择的服务集。示例：
 
 ```bash
 $GSETUP --auth-url --services email,calendar --format json
@@ -116,23 +124,26 @@ $GSETUP --auth-url --services calendar,drive,sheets,docs --format json
 $GSETUP --auth-url --services all --format json
 ```
 
-这将返回带有 `auth_url` 字段的 JSON，并将确切的 URL 保存到 `~/.hermes/google_oauth_last_url.txt`。
+这将返回带有 `auth_url` 字段的 JSON，并将确切的 URL 保存到
+`~/.hermes/google_oauth_last_url.txt`。
 
 此步骤的 Agent 规则：
-- 提取 `auth_url` 字段，并将该确切 URL 作为单行发送给用户。
+- 提取 `auth_url` 字段，并将该确切的 URL 作为单行发送给用户。
 - 告诉用户，批准后浏览器很可能会在 `http://localhost:1` 上失败，这是预期情况。
-- 告诉他们从浏览器地址栏复制**整个**重定向后的 URL。
-- 如果用户遇到 `Error 403: access_denied`，直接引导他们访问 `https://console.cloud.google.com/auth/audience` 将自己添加为测试用户。
+- 告诉他们从浏览器地址栏复制完整的重定向 URL。
+- 如果用户收到 `Error 403: access_denied`，请直接引导他们访问 `https://console.cloud.google.com/auth/audience` 将自己添加为测试用户。
 
 ### 步骤 4：交换代码
 
-用户将粘贴回类似 `http://localhost:1/?code=4/0A...&scope=...` 的 URL 或仅代码字符串。两者都可以。`--auth-url` 步骤在本地存储了一个临时的待处理 OAuth 会话，因此 `--auth-code` 可以在以后完成 PKCE 交换，即使在无头系统上：
-
+用户将粘贴回类似 `http://localhost:1/?code=4/0A...&scope=...` 的 URL
+或仅仅是代码字符串。两者都可以。`--auth-url` 步骤在本地存储了一个临时的
+待处理 OAuth 会话，因此 `--auth-code` 可以在以后完成 PKCE 交换，
+即使在无头系统上也是如此：
 ```bash
-$GSETUP --auth-code "THE_URL_OR_CODE_THE_USER_PASTED" --format json
+$GSETUP --auth-code "用户粘贴的URL或代码" --format json
 ```
 
-如果 `--auth-code` 因代码过期、已使用或来自较旧的浏览器标签页而失败，它现在会返回一个新的 `fresh_auth_url`。在这种情况下，立即将新 URL 发送给用户，并让他们仅使用最新的浏览器重定向重试。
+如果 `--auth-code` 因代码过期、已被使用或来自旧浏览器标签页而失败，现在会返回一个新的 `fresh_auth_url`。在这种情况下，立即将新 URL 发送给用户，并让他们仅使用最新的浏览器重定向重试。
 
 ### 步骤 5：验证
 
@@ -140,18 +151,18 @@ $GSETUP --auth-code "THE_URL_OR_CODE_THE_USER_PASTED" --format json
 $GSETUP --check
 ```
 
-应打印 `AUTHENTICATED`。设置完成 —— 从现在开始 Token 会自动刷新。
+应打印 `AUTHENTICATED`。设置完成 — 从现在开始 Token 会自动刷新。
 
 ### 注意事项
 
 - Token 存储在 `~/.hermes/google_token.json` 并自动刷新。
 - 待处理的 OAuth 会话状态/验证器临时存储在 `~/.hermes/google_oauth_pending.json` 中，直到交换完成。
-- 如果安装了 `gws`，`google_api.py` 会将其指向相同的 `~/.hermes/google_token.json` 凭据文件。用户无需运行单独的 `gws auth login` 流程。
-- 要撤销：`$GSETUP --revoke`
+- 如果安装了 `gws`，`google_api.py` 会将其指向同一个 `~/.hermes/google_token.json` 凭证文件。用户无需运行单独的 `gws auth login` 流程。
+- 撤销授权：`$GSETUP --revoke`
 
-## 使用
+## 使用方法
 
-所有命令都通过 API 脚本执行。将 `GAPI` 设置为简写：
+所有命令都通过 API 脚本执行。设置 `GAPI` 作为简写：
 
 ```bash
 GAPI="python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/google_api.py"
@@ -202,8 +213,35 @@ $GAPI calendar delete EVENT_ID
 ### Drive
 
 ```bash
+# 搜索现有文件
 $GAPI drive search "quarterly report" --max 10
 $GAPI drive search "mimeType='application/pdf'" --raw-query --max 5
+
+# 获取单个文件的元数据
+$GAPI drive get FILE_ID
+
+# 上传本地文件（自动检测 MIME 类型）
+$GAPI drive upload /path/to/report.pdf
+$GAPI drive upload /path/to/image.png --name "Logo.png" --parent FOLDER_ID
+
+# 下载（二进制文件按原样下载；Google 原生文件导出为合理的默认格式 — Docs→pdf, Sheets→csv, Slides→pdf, Drawings→png）
+$GAPI drive download FILE_ID
+$GAPI drive download DOC_ID --output ~/doc.pdf
+$GAPI drive download DOC_ID --export-mime text/plain --output ~/doc.txt
+
+# 创建文件夹
+$GAPI drive create-folder "Reports"
+$GAPI drive create-folder "Q4" --parent FOLDER_ID
+
+# 共享
+$GAPI drive share FILE_ID --email alice@example.com --role reader
+$GAPI drive share FILE_ID --email alice@example.com --role writer --notify
+$GAPI drive share FILE_ID --type anyone --role reader        # 任何有链接的人
+$GAPI drive share FILE_ID --type domain --domain example.com --role reader
+
+# 删除 — 默认移至回收站（可恢复）。使用 --permanent 跳过回收站。
+$GAPI drive delete FILE_ID
+$GAPI drive delete FILE_ID --permanent
 ```
 
 ### Contacts
@@ -215,6 +253,10 @@ $GAPI contacts list --max 20
 ### Sheets
 
 ```bash
+# 创建新的电子表格
+$GAPI sheets create --title "Q4 Budget"
+$GAPI sheets create --title "Inventory" --sheet-name "Stock"
+
 # 读取
 $GAPI sheets get SHEET_ID "Sheet1!A1:D10"
 
@@ -228,40 +270,57 @@ $GAPI sheets append SHEET_ID "Sheet1!A:C" --values '[["new","row","data"]]'
 ### Docs
 
 ```bash
+# 读取
 $GAPI docs get DOC_ID
+
+# 创建新的 Doc（可选择包含初始正文文本）
+$GAPI docs create --title "Meeting Notes"
+$GAPI docs create --title "Draft" --body "First paragraph..."
+
+# 在现有 Doc 末尾追加文本
+$GAPI docs append DOC_ID --text "Additional content to append"
 ```
 
 ## 输出格式
 
 所有命令都返回 JSON。使用 `jq` 解析或直接读取。关键字段：
 
-- **Gmail 搜索**：`[{id, threadId, from, to, subject, date, snippet, labels}]`
-- **Gmail 获取**：`{id, threadId, from, to, subject, date, labels, body}`
-- **Gmail 发送/回复**：`{status: "sent", id, threadId}`
-- **Calendar 列表**：`[{id, summary, start, end, location, description, htmlLink}]`
-- **Calendar 创建**：`{status: "created", id, summary, htmlLink}`
-- **Drive 搜索**：`[{id, name, mimeType, modifiedTime, webViewLink}]`
-- **Contacts 列表**：`[{name, emails: [...], phones: [...]}]`
-- **Sheets 获取**：`[[cell, cell, ...], ...]`
-
+- **Gmail 搜索**: `[{id, threadId, from, to, subject, date, snippet, labels}]`
+- **Gmail 获取**: `{id, threadId, from, to, subject, date, labels, body}`
+- **Gmail 发送/回复**: `{status: "sent", id, threadId}`
+- **Calendar 列表**: `[{id, summary, start, end, location, description, htmlLink}]`
+- **Calendar 创建**: `{status: "created", id, summary, htmlLink}`
+- **Drive 搜索**: `[{id, name, mimeType, modifiedTime, webViewLink}]`
+- **Drive 获取**: `{id, name, mimeType, modifiedTime, size, webViewLink, parents, owners}`
+- **Drive 上传**: `{status: "uploaded", id, name, mimeType, webViewLink}`
+- **Drive 下载**: `{status: "downloaded", id, name, path, mimeType}`
+- **Drive 创建文件夹**: `{status: "created", id, name, webViewLink}`
+- **Drive 共享**: `{status: "shared", permissionId, fileId, role, type}`
+- **Drive 删除**: `{status: "trashed" | "deleted", fileId, permanent}`
+- **Contacts 列表**: `[{name, emails: [...], phones: [...]}]`
+- **Sheets 获取**: `[[cell, cell, ...], ...]`
+- **Sheets 创建**: `{status: "created", spreadsheetId, title, spreadsheetUrl}`
+- **Docs 创建**: `{status: "created", documentId, title, url}`
+- **Docs 追加**: `{status: "appended", documentId, inserted_at, characters}`
 ## 规则
 
-1.  **未经用户确认，切勿发送邮件或创建/删除事件。** 显示草稿内容并请求批准。
-2.  **首次使用前检查授权** —— 运行 `setup.py --check`。如果失败，引导用户完成设置。
-3.  **使用 Gmail 搜索语法参考**进行复杂查询 —— 使用 `skill_view("google-workspace", file_path="references/gmail-search-syntax.md")` 加载它。
-4.  **日历时间必须包含时区** —— 始终使用带偏移量的 ISO 8601 格式（例如 `2026-03-01T10:00:00-06:00`）或 UTC（`Z`）。
-5.  **遵守速率限制** —— 避免快速连续的 API 调用。尽可能批量读取。
+1. **未经用户确认，切勿发送邮件、创建/删除日历事件、删除 Drive 文件、共享文件或修改 Docs/Sheets。** 展示将要执行的操作（收件人、文件 ID、内容、共享角色）并请求批准。对于 `drive delete`，优先选择默认的回收站（可恢复）而非 `--permanent`。
+2. **首次使用前检查授权** — 运行 `setup.py --check`。如果失败，引导用户完成设置。
+3. **对于复杂查询，使用 Gmail 搜索语法参考** — 通过 `skill_view("google-workspace", file_path="references/gmail-search-syntax.md")` 加载它。
+4. **日历时间必须包含时区** — 始终使用带偏移量的 ISO 8601 格式（例如 `2026-03-01T10:00:00-06:00`）或 UTC（`Z`）。
+5. **遵守速率限制** — 避免快速连续的 API 调用。尽可能批量读取。
 
 ## 故障排除
 
 | 问题 | 解决方法 |
 |---------|-----|
 | `NOT_AUTHENTICATED` | 运行上述设置步骤 2-5 |
-| `REFRESH_FAILED` | Token 已撤销或过期 —— 重新执行步骤 3-5 |
-| `HttpError 403: Insufficient Permission` | 缺少 API 权限范围 —— `$GSETUP --revoke` 然后重新执行步骤 3-5 |
-| `HttpError 403: Access Not Configured` | API 未启用 —— 用户需要在 Google Cloud Console 中启用它 |
+| `REFRESH_FAILED` | Token 已撤销或过期 — 重新执行步骤 3-5 |
+| `HttpError 403: Insufficient Permission` | 缺少 API 范围 — `$GSETUP --revoke` 然后重新执行步骤 3-5 |
+| `AUTHENTICATED (partial)` 或 "Token missing scopes" | 新的写入能力（Drive 写入/删除，Docs 创建/编辑）需要重新授权。`$GSETUP --revoke` 然后重新执行步骤 3-5 以授予升级后的范围。 |
+| `HttpError 403: Access Not Configured` | API 未启用 — 用户需要在 Google Cloud Console 中启用它 |
 | `ModuleNotFoundError` | 运行 `$GSETUP --install-deps` |
-| 高级保护阻止授权 | Workspace 管理员必须将 OAuth 客户端 ID 加入允许列表 |
+| 高级保护阻止授权 | Workspace 管理员必须将 OAuth 客户端 ID 加入白名单 |
 
 ## 撤销访问权限
 

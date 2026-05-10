@@ -17,6 +17,7 @@ Manim CE 动画：3Blue1Brown 风格数学/算法视频。
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/creative/manim-video` |
 | 版本 | `1.0.0` |
+| 平台 | linux, macos, windows |
 
 ## 参考：完整的 SKILL.md
 
@@ -34,21 +35,21 @@ Manim CE 动画：3Blue1Brown 风格数学/算法视频。
 
 这是教育电影。每一帧都在教学。每一个动画都在揭示结构。
 
-**在编写任何一行代码之前**，先阐明叙事弧线。这个动画纠正了什么误解？"顿悟时刻"是什么？什么样的视觉故事能将观众从困惑带到理解？用户的提示词只是一个起点——要用教学抱负去解读它。
+**在编写任何一行代码之前**，先阐述叙事弧线。这个动画纠正了什么误解？"顿悟时刻"是什么？什么样的视觉故事能将观众从困惑带到理解？用户的提示词是一个起点——请以教学抱负来解读它。
 
-**几何先于代数。** 先展示形状，再展示方程。视觉记忆比符号记忆编码更快。当观众先看到几何模式再看到公式时，方程会让人觉得是应得的。
+**几何先于代数。** 先展示形状，再展示方程。视觉记忆比符号记忆编码更快。当观众先看到几何模式再看到公式时，方程会显得顺理成章。
 
-**首次渲染的卓越性不容妥协。** 输出必须在视觉上清晰、美学上协调，无需修改轮次。如果某些内容看起来杂乱、时间安排不当或像"AI 生成的幻灯片"，那就是错误的。
+**首次渲染的卓越性不容妥协。** 输出必须在视觉上清晰、美学上连贯，无需修改轮次。如果某些内容看起来杂乱、时间安排不当或像"AI 生成的幻灯片"，那就是错误的。
 
 **不透明度分层引导注意力。** 永远不要以全亮度显示所有内容。主要元素为 1.0，上下文元素为 0.4，结构元素（坐标轴、网格）为 0.15。大脑按层次处理视觉显著性。
 
-**呼吸空间。** 每个动画之后都需要 `self.wait()`。观众需要时间来吸收刚刚出现的内容。永远不要匆忙地从一个动画跳到下一个。关键揭示后的 2 秒暂停永远不会是浪费。
+**呼吸空间。** 每个动画之后都需要 `self.wait()`。观众需要时间来吸收刚刚出现的内容。永远不要匆忙地从一个动画跳到下一个。关键揭示后的 2 秒暂停绝不是浪费。
 
-**统一的视觉语言。** 所有场景共享一个调色板、一致的字体大小、匹配的动画速度。一个技术上正确但每个场景使用随机不同颜色的视频是美学上的失败。
+**连贯的视觉语言。** 所有场景共享一个调色板、一致的字体大小、匹配的动画速度。一个技术上正确但每个场景使用随机不同颜色的视频是美学上的失败。
 
 ## 先决条件
 
-运行 `scripts/setup.sh` 以验证所有依赖项。需要：Python 3.10+、Manim Community Edition v0.20+ (`pip install manim`)、LaTeX（Linux 上为 `texlive-full`，macOS 上为 `mactex`）和 ffmpeg。参考文档针对 Manim CE v0.20.1 测试。
+运行 `scripts/setup.sh` 以验证所有依赖项。需要：Python 3.10+、Manim Community Edition v0.20+ (`pip install manim`)、LaTeX（Linux 上为 `texlive-full`，macOS 上为 `mactex`）以及 ffmpeg。参考文档基于 Manim CE v0.20.1 测试。
 
 ## 模式
 
@@ -56,10 +57,10 @@ Manim CE 动画：3Blue1Brown 风格数学/算法视频。
 |------|-------|--------|-----------|
 | **概念讲解** | 主题/概念 | 带有几何直觉的动画解释 | `references/scene-planning.md` |
 | **方程推导** | 数学表达式 | 逐步动画证明 | `references/equations.md` |
-| **算法可视化** | 算法描述 | 带有数据结构的逐步执行 | `references/graphs-and-data.md` |
+| **算法可视化** | 算法描述 | 带有数据结构的逐步执行过程 | `references/graphs-and-data.md` |
 | **数据故事** | 数据/指标 | 动画图表、比较、计数器 | `references/graphs-and-data.md` |
-| **架构图** | 系统描述 | 组件构建与连接 | `references/mobjects.md` |
-| **论文讲解** | 研究论文 | 关键发现和方法的动画 | `references/scene-planning.md` |
+| **架构图** | 系统描述 | 组件逐步构建并建立连接 | `references/mobjects.md` |
+| **论文讲解** | 研究论文 | 关键发现和方法的动画展示 | `references/scene-planning.md` |
 | **3D 可视化** | 3D 概念 | 旋转曲面、参数曲线、空间几何 | `references/camera-and-3d.md` |
 
 ## 技术栈
@@ -84,7 +85,7 @@ Manim CE 动画：3Blue1Brown 风格数学/算法视频。
 3.  **渲染** — `manim -ql script.py Scene1 Scene2 ...` 用于草稿，`-qh` 用于生产
 4.  **拼接** — 使用 ffmpeg 将场景片段连接成 `final.mp4`
 5.  **音频** (可选) — 通过 ffmpeg 添加旁白和/或背景音乐。参见 `references/rendering.md`
-6.  **审查** — 渲染预览静帧，对照计划验证，调整
+6.  **审查** — 渲染预览静帧，对照计划验证，进行调整
 
 ## 项目结构
 
@@ -98,11 +99,11 @@ Manim CE 动画：3Blue1Brown 风格数学/算法视频。
     videos/script/480p15/
 ```
 
-## 创意指导
+## 创意方向
 
 ### 调色板
 
-| 调色板 | 背景 | 主色 | 辅色 | 强调色 | 使用场景 |
+| 调色板 | 背景 | 主色 | 辅色 | 强调色 | 用例 |
 |---------|-----------|---------|-----------|--------|----------|
 | **经典 3B1B** | `#1C1C1C` | `#58C4DD` (蓝色) | `#83C167` (绿色) | `#FFFF00` (黄色) | 通用数学/计算机科学 |
 | **温暖学术** | `#2D2B55` | `#FF6B6B` | `#FFD93D` | `#6BCB77` | 平易近人 |
@@ -182,9 +183,9 @@ class Scene1_Introduction(Scene):
 
 关键模式：
 - **每个动画都添加字幕**：`self.add_subcaption("text", duration=N)` 或在 `self.play()` 中使用 `subcaption="text"`
-- **在文件顶部定义共享的颜色常量**，以保证跨场景一致性
+- **在文件顶部定义共享的颜色常量**，以确保跨场景的一致性
 - **在每个场景中设置 `self.camera.background_color`**
-- **干净地退出** — 在场景结束时淡出所有 mobject：`self.play(FadeOut(Group(*self.mobjects)))`
+- **干净的退出** — 在场景结束时淡出所有 mobject：`self.play(FadeOut(Group(*self.mobjects)))`
 
 ### 步骤 3：渲染
 
@@ -228,10 +229,10 @@ label.to_edge(DOWN, buff=0.5)  # 永远不要 < 0.5
 self.play(ReplacementTransform(note1, note2))  # 不要在顶部 Write(note2)
 ```
 
-### 切勿动画化未添加的 Mobject
+### 切勿动画未添加的 Mobject
 ```python
 self.play(Create(circle))  # 必须先添加
-self.play(circle.animate.set_color(RED))  # 然后动画化
+self.play(circle.animate.set_color(RED))  # 然后动画
 ```
 
 ## 性能目标
@@ -257,7 +258,7 @@ self.play(circle.animate.set_color(RED))  # 然后动画化
 | `references/scene-planning.md` | 叙事弧线、布局模板、场景过渡、规划模板 |
 | `references/rendering.md` | CLI 参考、质量预设、ffmpeg、画外音工作流、GIF 导出 |
 | `references/troubleshooting.md` | LaTeX 错误、动画错误、常见错误、调试 |
-| `references/animation-design-thinking.md` | 何时动画化 vs 静态展示、分解、节奏、与旁白同步 |
+| `references/animation-design-thinking.md` | 何时动画 vs 静态显示、分解、节奏、与旁白同步 |
 | `references/updaters-and-trackers.md` | ValueTracker、add_updater、always_redraw、基于时间的更新器、模式 |
 | `references/paper-explainer.md` | 将研究论文转化为动画 — 工作流、模板、领域模式 |
 | `references/decorations.md` | SurroundingRectangle、Brace、箭头、DashedLine、Angle、注释生命周期 |
@@ -277,10 +278,10 @@ self.play(circle.animate.set_color(RED))  # 然后动画化
 - **替代**：替换标准的视觉隐喻（数轴 → 蜿蜒路径，矩阵 → 城市网格）
 - **组合**：合并两种解释方法（代数 + 几何同时进行）
 - **反转**：反向推导 — 从结果开始，解构到公理
-- **修改**：夸大一个参数以显示其重要性（学习率 10 倍，样本量 1000 倍）
+- **修改**：夸大一个参数以显示其重要性（10 倍学习率，1000 倍样本量）
 - **消除**：移除所有符号 — 纯粹通过动画和空间关系来解释
 ### 假设反转
 1. 列出关于该主题可视化方式的“标准”做法（从左到右、二维、离散步骤、形式化符号）
 2. 选取最根本的假设
-3. 将其反转（从右到左推导、二维概念的 3D 嵌入、连续变形而非离散步骤、零符号化）
-4. 探索反转所揭示的、标准方法所隐藏的内容
+3. 将其反转（从右到左推导、二维概念的 3D 嵌入、连续变形而非步骤、零符号）
+4. 探索反转揭示了哪些标准方法所隐藏的内容

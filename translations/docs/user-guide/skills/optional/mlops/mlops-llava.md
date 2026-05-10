@@ -8,7 +8,7 @@ description: "大型语言与视觉助手"
 
 # Llava
 
-大型语言与视觉助手。支持视觉指令微调和基于图像的对话。结合了 CLIP 视觉编码器与 Vicuna/LLaMA 语言模型。支持多轮图像聊天、视觉问答和指令跟随。适用于视觉语言聊天机器人或图像理解任务。最适合对话式图像分析。
+大型语言与视觉助手。支持视觉指令微调和基于图像的对话。结合了 CLIP 视觉编码器与 Vicuna/LLaMA 语言模型。支持多轮图像聊天、视觉问答和指令跟随。用于视觉语言聊天机器人或图像理解任务。最适合对话式图像分析。
 
 ## 技能元数据
 
@@ -20,6 +20,7 @@ description: "大型语言与视觉助手"
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `transformers`, `torch`, `pillow` |
+| 平台 | linux, macos, windows |
 | 标签 | `LLaVA`, `Vision-Language`, `Multimodal`, `Visual Question Answering`, `Image Chat`, `CLIP`, `Vicuna`, `Conversational AI`, `Instruction Tuning`, `VQA` |
 
 ## 参考：完整的 SKILL.md
@@ -126,7 +127,7 @@ model_7b = "liuhaotian/llava-v1.5-7b"
 model_13b = "liuhaotian/llava-v1.5-13b"
 model_34b = "liuhaotian/llava-v1.6-34b"
 
-# 4-bit 量化以降低 VRAM
+# 4位量化以降低 VRAM
 load_4bit = True  # 将 VRAM 减少约 4 倍
 ```
 
@@ -154,7 +155,7 @@ python -m llava.serve.gradio_web_server \
     --model-path liuhaotian/llava-v1.5-7b \
     --load-4bit  # 可选：减少 VRAM
 
-# 访问地址 http://localhost:7860
+# 访问 http://localhost:7860
 ```
 
 ## 多轮对话
@@ -231,7 +232,7 @@ bash scripts/v1_5/finetune.sh
 ## 量化（减少 VRAM）
 
 ```python
-# 4-bit 量化
+# 4 位量化
 tokenizer, model, image_processor, context_len = load_pretrained_model(
     model_path="liuhaotian/llava-v1.5-13b",
     model_base=None,
@@ -239,30 +240,30 @@ tokenizer, model, image_processor, context_len = load_pretrained_model(
     load_4bit=True  # 将 VRAM 减少约 4 倍
 )
 
-# 8-bit 量化
+# 8 位量化
 load_8bit=True  # 将 VRAM 减少约 2 倍
 ```
 
 ## 最佳实践
 
 1. **从 7B 模型开始** - 质量良好，VRAM 可管理
-2. **使用 4-bit 量化** - 显著减少 VRAM
+2. **使用 4 位量化** - 显著减少 VRAM
 3. **需要 GPU** - CPU 推理极慢
 4. **清晰的提示词** - 具体问题获得更好答案
 5. **多轮对话** - 保持对话上下文
-6. **温度 0.2-0.7** - 平衡创造力与一致性
+6. **温度 0.2-0.7** - 平衡创造力/一致性
 7. **max_new_tokens 512-1024** - 用于详细响应
 8. **批处理** - 顺序处理多张图像
 
 ## 性能
 
-| 模型 | VRAM (FP16) | VRAM (4-bit) | 速度 (tokens/s) |
+| 模型 | VRAM (FP16) | VRAM (4位) | 速度 (tokens/s) |
 |-------|-------------|--------------|------------------|
 | 7B | ~14 GB | ~4 GB | ~20 |
 | 13B | ~28 GB | ~8 GB | ~12 |
 | 34B | ~70 GB | ~18 GB | ~5 |
 
-*基于 A100 GPU*
+*在 A100 GPU 上*
 
 ## 基准测试
 
@@ -277,7 +278,7 @@ LLaVA 在以下方面取得有竞争力的分数：
 1. **幻觉** - 可能描述图像中不存在的内容
 2. **空间推理** - 难以处理精确位置
 3. **小文本** - 难以阅读细小的文字
-4. **目标计数** - 对多个目标计数不精确
+4. **目标计数** - 对于多个目标不精确
 5. **VRAM 要求** - 需要强大的 GPU
 6. **推理速度** - 比 CLIP 慢
 

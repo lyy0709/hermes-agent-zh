@@ -4,11 +4,11 @@ sidebar_label: "Qdrant 向量搜索"
 description: "用于 RAG 和语义搜索的高性能向量相似性搜索引擎"
 ---
 
-{/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Qdrant 向量搜索
 
-用于 RAG 和语义搜索的高性能向量相似性搜索引擎。在构建需要快速最近邻搜索、带过滤的混合搜索或具备 Rust 驱动性能的可扩展向量存储的生产级 RAG 系统时使用。
+用于 RAG 和语义搜索的高性能向量相似性搜索引擎。适用于构建需要快速最近邻搜索、带过滤的混合搜索或具备 Rust 驱动性能的可扩展向量存储的生产级 RAG 系统。
 
 ## 技能元数据
 
@@ -20,6 +20,7 @@ description: "用于 RAG 和语义搜索的高性能向量相似性搜索引擎"
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `qdrant-client>=1.12.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `RAG`, `Vector Search`, `Qdrant`, `Semantic Search`, `Embeddings`, `Similarity Search`, `HNSW`, `Production`, `Distributed` |
 
 ## 参考：完整的 SKILL.md
@@ -30,7 +31,7 @@ description: "用于 RAG 和语义搜索的高性能向量相似性搜索引擎"
 
 # Qdrant - 向量相似性搜索引擎
 
-用 Rust 编写的高性能向量数据库，适用于生产级 RAG 和语义搜索。
+用于生产级 RAG 和语义搜索的、由 Rust 编写的高性能向量数据库。
 
 ## 何时使用 Qdrant
 
@@ -39,13 +40,13 @@ description: "用于 RAG 和语义搜索的高性能向量相似性搜索引擎"
 - 需要混合搜索（向量 + 元数据过滤）
 - 需要通过分片/复制进行水平扩展
 - 希望进行本地部署并完全控制数据
-- 需要每条记录存储多个向量（稠密 + 稀疏）
+- 需要每条记录存储多向量（稠密 + 稀疏）
 - 构建实时推荐系统
 
 **主要特性：**
 - **Rust 驱动**：内存安全，高性能
-- **丰富的过滤功能**：在搜索期间按任何有效载荷字段过滤
-- **多向量支持**：每个点支持稠密、稀疏、多稠密向量
+- **丰富的过滤**：在搜索期间按任何有效载荷字段进行过滤
+- **多向量**：每个点支持稠密、稀疏、多稠密向量
 - **量化**：标量、乘积、二进制量化以提高内存效率
 - **分布式**：Raft 共识、分片、复制
 - **REST + gRPC**：两个 API 均具备完整功能对等性
@@ -173,7 +174,7 @@ print(f"Points: {info.points_count}, Vectors: {info.vectors_count}")
 
 ### 距离度量
 
-| 度量标准 | 用例 | 范围 |
+| 度量标准 | 使用场景 | 范围 |
 |--------|----------|-------|
 | `COSINE` | 文本嵌入，归一化向量 | 0 到 2 |
 | `EUCLID` | 空间数据，图像特征 | 0 到 ∞ |
@@ -234,7 +235,7 @@ results = client.search(
 ```python
 from qdrant_client.models import SearchRequest
 
-# 在一个请求中包含多个查询
+# 单个请求中包含多个查询
 results = client.search_batch(
     collection_name="documents",
     requests=[
@@ -381,7 +382,7 @@ client.upsert(
 ```python
 from qdrant_client.models import ScalarQuantization, ScalarQuantizationConfig, ScalarType
 
-# 标量量化（4倍内存减少）
+# 标量量化（内存减少 4 倍）
 client.create_collection(
     collection_name="quantized",
     vectors_config=VectorParams(size=384, distance=Distance.COSINE),
@@ -394,11 +395,11 @@ client.create_collection(
     )
 )
 
-# 使用重评分进行搜索
+# 使用重打分进行搜索
 results = client.search(
     collection_name="quantized",
     query_vector=query,
-    search_params={"quantization": {"rescore": True}},  # 对顶部结果进行重评分
+    search_params={"quantization": {"rescore": True}},  # 对顶部结果进行重打分
     limit=10
 )
 ```
@@ -408,7 +409,7 @@ results = client.search(
 ```python
 from qdrant_client.models import PayloadSchemaType
 
-# 创建负载索引以实现更快的过滤
+# 创建负载索引以加速过滤
 client.create_payload_index(
     collection_name="documents",
     field_name="category",
@@ -421,7 +422,7 @@ client.create_payload_index(
     field_schema=PayloadSchemaType.INTEGER
 )
 
-# 索引类型：KEYWORD, INTEGER, FLOAT, GEO, TEXT (全文), BOOL
+# 索引类型：KEYWORD, INTEGER, FLOAT, GEO, TEXT（全文）, BOOL
 ```
 
 ## 生产部署
@@ -457,7 +458,7 @@ client.update_collection(
 ## 最佳实践
 
 1.  **批量操作** - 使用批量 upsert/search 以提高效率
-2.  **负载索引** - 为过滤中使用的字段建立索引
+2.  **负载索引** - 为过滤条件中使用的字段建立索引
 3.  **量化** - 对于大型集合（>100 万向量）启用量化
 4.  **分片** - 对于超过 1000 万向量的集合使用分片
 5.  **磁盘存储** - 对于大型负载启用 `on_disk_payload`
@@ -466,7 +467,7 @@ client.update_collection(
 
 **带过滤器的搜索速度慢：**
 ```python
-# 为过滤字段创建有效负载索引
+# 为过滤字段创建载荷索引
 client.create_payload_index(
     collection_name="docs",
     field_name="category",

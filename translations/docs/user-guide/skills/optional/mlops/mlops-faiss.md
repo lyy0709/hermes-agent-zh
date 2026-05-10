@@ -1,26 +1,27 @@
 ---
-title: "Faiss — Facebook 用于高效相似性搜索和稠密向量聚类的库"
+title: "Faiss — Facebook 用于高效相似性搜索和密集向量聚类的库"
 sidebar_label: "Faiss"
-description: "Facebook 用于高效相似性搜索和稠密向量聚类的库"
+description: "Facebook 用于高效相似性搜索和密集向量聚类的库"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Faiss
 
-Facebook 用于高效相似性搜索和稠密向量聚类的库。支持数十亿向量、GPU 加速和各种索引类型（Flat、IVF、HNSW）。用于快速 k-NN 搜索、大规模向量检索，或当你需要纯相似性搜索而无需元数据过滤时。最适合高性能应用。
+Facebook 用于高效相似性搜索和密集向量聚类的库。支持数十亿向量、GPU 加速和各种索引类型（Flat、IVF、HNSW）。用于快速 k-NN 搜索、大规模向量检索，或当你需要纯相似性搜索而无需元数据过滤时。最适合高性能应用。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | 可选 — 通过 `hermes skills install official/mlops/faiss` 安装 |
+| 来源 | 可选 — 使用 `hermes skills install official/mlops/faiss` 安装 |
 | 路径 | `optional-skills/mlops/faiss` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `faiss-cpu`, `faiss-gpu`, `numpy` |
-| 标签 | `RAG`, `FAISS`, `相似性搜索`, `向量搜索`, `Facebook AI`, `GPU 加速`, `十亿规模`, `K-NN`, `HNSW`, `高性能`, `大规模` |
+| 平台 | linux, macos |
+| 标签 | `RAG`, `FAISS`, `相似性搜索`, `向量搜索`, `Facebook AI`, `GPU 加速`, `十亿级规模`, `K-NN`, `HNSW`, `高性能`, `大规模` |
 
 ## 参考：完整的 SKILL.md
 
@@ -30,7 +31,7 @@ Facebook 用于高效相似性搜索和稠密向量聚类的库。支持数十�
 
 # FAISS - 高效相似性搜索
 
-Facebook AI 用于十亿规模向量相似性搜索的库。
+Facebook AI 用于十亿级向量相似性搜索的库。
 
 ## 何时使用 FAISS
 
@@ -39,15 +40,15 @@ Facebook AI 用于十亿规模向量相似性搜索的库。
 - 需要 GPU 加速
 - 纯向量相似性（无需元数据过滤）
 - 高吞吐量、低延迟至关重要
-- 嵌入的离线/批处理
+- 嵌入的离线/批量处理
 
-**指标**：
+**指标**:
 - **GitHub 星标 31,700+**
-- Meta/Facebook AI Research
+- Meta/Facebook AI Research 出品
 - **处理数十亿向量**
-- **C++** 并带有 Python 绑定
+- **C++** 核心，提供 Python 绑定
 
-**改用替代方案的情况**：
+**改用替代方案的情况**:
 - **Chroma/Pinecone**：需要元数据过滤
 - **Weaviate**：需要完整的数据库功能
 - **Annoy**：更简单，功能较少
@@ -96,7 +97,7 @@ print(f"Distances: {distances}")
 # L2（欧几里得）距离
 index = faiss.IndexFlatL2(d)
 
-# 内积（归一化后为余弦相似度）
+# 内积（如果向量已归一化，则为余弦相似度）
 index = faiss.IndexFlatIP(d)
 
 # 最慢，最准确
@@ -108,7 +109,7 @@ index = faiss.IndexFlatIP(d)
 # 创建量化器
 quantizer = faiss.IndexFlatL2(d)
 
-# 具有 100 个簇的 IVF 索引
+# IVF 索引，包含 100 个聚类
 nlist = 100
 index = faiss.IndexIVFFlat(quantizer, d, nlist)
 
@@ -118,12 +119,12 @@ index.train(vectors)
 # 添加向量
 index.add(vectors)
 
-# 搜索（nprobe = 要搜索的簇数）
+# 搜索（nprobe = 要搜索的聚类数）
 index.nprobe = 10
 distances, indices = index.search(query, k)
 ```
 
-### 3. HNSW（分层可导航小世界） - 最佳质量/速度
+### 3. HNSW（分层可导航小世界） - 最佳质量/速度比
 
 ```python
 # HNSW 索引
@@ -140,7 +141,7 @@ distances, indices = index.search(query, k)
 ### 4. 乘积量化 - 内存高效
 
 ```python
-# PQ 将内存减少 16-32 倍
+# PQ 可将内存减少 16-32 倍
 m = 8   # 子量化器数量
 nbits = 8
 index = faiss.IndexPQ(d, m, nbits)
@@ -215,17 +216,17 @@ vector_store = FaissVectorStore(faiss_index=faiss_index)
 
 ## 最佳实践
 
-1. **选择正确的索引类型** - Flat 用于 &lt;10K，IVF 用于 10K-1M，HNSW 用于质量
+1. **选择正确的索引类型** - Flat 用于 <10K，IVF 用于 10K-1M，HNSW 用于追求质量
 2. **为余弦相似度归一化** - 对归一化向量使用 IndexFlatIP
 3. **对大型数据集使用 GPU** - 快 10-100 倍
-4. **保存训练好的索引** - 训练成本高
-5. **调整 nprobe/ef_search** - 平衡速度/精度
-6. **监控内存** - 对大型数据集使用 PQ
+4. **保存训练好的索引** - 训练成本高昂
+5. **调整 nprobe/ef_search** - 平衡速度/准确度
+6. **监控内存** - 大型数据集使用 PQ
 7. **批量查询** - 更好的 GPU 利用率
 
 ## 性能
 
-| 索引类型 | 构建时间 | 搜索时间 | 内存 | 准确率 |
+| 索引类型 | 构建时间 | 搜索时间 | 内存 | 准确度 |
 |------------|------------|-------------|--------|----------|
 | Flat | 快 | 慢 | 高 | 100% |
 | IVF | 中等 | 快 | 中等 | 95-99% |

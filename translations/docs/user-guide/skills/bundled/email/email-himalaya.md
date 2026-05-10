@@ -1,14 +1,14 @@
 ---
-title: "Himalaya — Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件"
+title: "Himalaya — Himalaya CLI：在终端中使用 IMAP/SMTP 邮件"
 sidebar_label: "Himalaya"
-description: "Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件"
+description: "Himalaya CLI：在终端中使用 IMAP/SMTP 邮件"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Himalaya
 
-Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件。
+Himalaya CLI：在终端中使用 IMAP/SMTP 邮件。
 
 ## 技能元数据
 
@@ -16,9 +16,10 @@ Himalaya CLI：在终端中使用 IMAP/SMTP 处理邮件。
 |---|---|
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/email/himalaya` |
-| 版本 | `1.0.0` |
+| 版本 | `1.1.0` |
 | 作者 | community |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Email`, `IMAP`, `SMTP`, `CLI`, `Communication` |
 
 ## 参考：完整的 SKILL.md
@@ -45,7 +46,7 @@ Himalaya 是一个 CLI 邮件客户端，允许你使用 IMAP、SMTP、Notmuch �
 ### 安装
 
 ```bash
-# 预编译二进制文件（Linux/macOS — 推荐）
+# 预构建二进制文件（Linux/macOS — 推荐）
 curl -sSL https://raw.githubusercontent.com/pimalaya/himalaya/master/install.sh | PREFIX=~/.local sh
 
 # macOS 通过 Homebrew
@@ -77,7 +78,7 @@ backend.port = 993
 backend.encryption.type = "tls"
 backend.login = "you@example.com"
 backend.auth.type = "password"
-backend.auth.cmd = "pass show email/imap"  # 或使用密钥环
+backend.auth.cmd = "pass show email/imap"  # 或使用 keyring
 
 message.send.backend.type = "smtp"
 message.send.backend.host = "smtp.example.com"
@@ -86,12 +87,26 @@ message.send.backend.encryption.type = "start-tls"
 message.send.backend.login = "you@example.com"
 message.send.backend.auth.type = "password"
 message.send.backend.auth.cmd = "pass show email/smtp"
+
+# 文件夹别名（himalaya v1.2.0+ 语法）。当服务器的文件夹名称与 himalaya 的规范名称
+#（inbox/sent/drafts/trash）不匹配时必须配置。Gmail 是常见情况 — 请参阅
+# `references/configuration.md` 了解 `[Gmail]/Sent Mail` 的映射。
+folder.aliases.inbox = "INBOX"
+folder.aliases.sent = "Sent"
+folder.aliases.drafts = "Drafts"
+folder.aliases.trash = "Trash"
 ```
 
-## Hermes 集成说明
+> **注意别名语法。** v1.2.0 之前的文档使用 `[accounts.NAME.folder.alias]` 子节（单数 `alias`）。
+> v1.2.0 会静默忽略该形式 — TOML 解析正常，但别名解析器从不读取它，因此每次查找都会回退到
+> 规范名称。在 Gmail 上，这意味着在 SMTP 投递成功后，保存到已发送文件夹会失败，并且 `himalaya message send` 以非零状态退出。
+> 任何基于该退出码重试的调用者（Agent、脚本、用户）都将重新运行整个发送过程 — 包括 SMTP — 从而向收件人
+> 产生重复邮件。请始终使用 `folder.aliases.X`（复数，点分隔键，直接在 `[accounts.NAME]` 下）。
 
--   **读取、列出、搜索、移动、删除** 邮件都可以直接通过终端工具完成
--   **撰写/回复/转发** — 建议使用管道输入（`cat << EOF | himalaya template send`）以获得更好的可靠性。交互式 `$EDITOR` 模式可以与 `pty=true` + 后台 + 进程工具配合使用，但需要了解编辑器及其命令
+## Hermes 集成注意事项
+
+-   **读取、列出、搜索、移动、删除** 都可以直接通过终端工具完成
+-   **撰写/回复/转发** — 建议使用管道输入（`cat << EOF | himalaya template send`）以获得可靠性。交互式 `$EDITOR` 模式可与 `pty=true` + 后台 + 进程工具配合使用，但需要了解编辑器及其命令
 -   使用 `--output json` 获取结构化输出，便于程序解析
 -   `himalaya account configure` 向导需要交互式输入 — 使用 PTY 模式：`terminal(command="himalaya account configure", pty=true)`
 
@@ -105,7 +120,7 @@ himalaya folder list
 
 ### 列出邮件
 
-列出 INBOX 中的邮件（默认）：
+列出 INBOX（默认）中的邮件：
 
 ```bash
 himalaya envelope list
@@ -148,7 +163,7 @@ himalaya message export 42 --full
 要从 Hermes 非交互式回复，请读取原始消息，撰写回复，并通过管道发送：
 
 ```bash
-# 获取回复模板，编辑并发送
+# 获取回复模板，编辑它，然后发送
 himalaya template reply 42 | sed 's/^$/\nYour reply text here\n/' | himalaya template send
 ```
 
@@ -165,7 +180,7 @@ Your reply here.
 EOF
 ```
 
-回复所有人（交互式 — 需要 $EDITOR，建议使用上述模板方法）：
+回复所有人（交互式 — 需要 $EDITOR，请改用上述模板方法）：
 
 ```bash
 himalaya message reply 42 --all
@@ -198,7 +213,7 @@ EOF
 himalaya message write -H "To:recipient@example.com" -H "Subject:Test" "Message body here"
 ```
 
-注意：不带管道输入的 `himalaya message write` 会打开 `$EDITOR`。这可以与 `pty=true` + 后台模式配合使用，但使用管道更简单、更可靠。
+注意：没有管道输入的 `himalaya message write` 会打开 `$EDITOR`。这可以与 `pty=true` + 后台模式配合使用，但使用管道更简单、更可靠。
 
 ### 移动/复制邮件
 
@@ -264,7 +279,7 @@ himalaya attachment download 42 --dir ~/Downloads
 
 ## 输出格式
 
-大多数命令支持 `--output` 以获取结构化输出：
+大多数命令支持 `--output` 用于结构化输出：
 
 ```bash
 himalaya envelope list --output json
@@ -279,7 +294,7 @@ himalaya envelope list --output plain
 RUST_LOG=debug himalaya envelope list
 ```
 
-完整跟踪（含回溯）：
+完整跟踪与回溯：
 
 ```bash
 RUST_LOG=trace RUST_BACKTRACE=1 himalaya envelope list
@@ -289,5 +304,5 @@ RUST_LOG=trace RUST_BACKTRACE=1 himalaya envelope list
 
 -   使用 `himalaya --help` 或 `himalaya <command> --help` 获取详细用法。
 -   邮件 ID 相对于当前文件夹；更改文件夹后请重新列出。
--   要撰写带附件的富文本邮件，请使用 MML 语法（参见 `references/message-composition.md`）。
+-   要撰写带有附件的富文本邮件，请使用 MML 语法（参见 `references/message-composition.md`）。
 -   使用 `pass`、系统密钥环或输出密码的命令安全地存储密码。

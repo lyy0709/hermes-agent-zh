@@ -19,6 +19,7 @@ Spotify：播放、搜索、队列、管理播放列表和设备。
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `spotify`, `music`, `playback`, `playlists`, `media` |
 | 相关技能 | [`gif-search`](/docs/user-guide/skills/bundled/media/media-gif-search) |
 
@@ -34,7 +35,7 @@ Spotify：播放、搜索、队列、管理播放列表和设备。
 
 ## 何时使用此技能
 
-当用户说类似“播放 X”、“暂停”、“跳过”、“将 X 加入队列”、“正在播放什么”、“搜索 X”、“添加到我的 X 播放列表”、“创建一个播放列表”、“将此保存到我的资料库”等内容时。
+当用户说类似“播放 X”、“暂停”、“跳过”、“将 X 加入队列”、“正在播放什么”、“搜索 X”、“添加到我的 X 播放列表”、“创建一个播放列表”、“保存到我的资料库”等内容时。
 
 ## 7 个工具
 
@@ -51,7 +52,7 @@ Spotify：播放、搜索、队列、管理播放列表和设备。
 ## 规范模式（最小化工具调用）
 
 ### "播放 &lt;艺术家/曲目/专辑>"
-一次搜索，然后通过 URI 播放。除非用户要求提供选项，否则不要循环遍历搜索结果并描述它们。
+一次搜索，然后通过 URI 播放。除非用户要求提供选项，否则**不要**遍历搜索结果并描述它们。
 
 ```
 spotify_search({"query": "miles davis kind of blue", "types": ["album"], "limit": 1})
@@ -59,7 +60,7 @@ spotify_search({"query": "miles davis kind of blue", "types": ["album"], "limit"
 spotify_playback({"action": "play", "context_uri": "spotify:album:1weenld61qoidwYuZ1GESA"})
 ```
 
-对于“播放一些 &lt;艺术家>”（无特定歌曲），优先使用 `types: ["artist"]` 并播放艺术家上下文 URI — Spotify 会处理智能随机播放。如果用户说“那首歌”或“那个曲目”，则搜索 `types: ["track"]` 并传递 `uris: [track_uri]` 进行播放。
+对于“播放一些 &lt;艺术家>”（无特定歌曲），优先使用 `types: ["artist"]` 并播放艺术家上下文 URI — Spotify 会处理智能随机播放。如果用户说“那首歌”或“那个曲目”，则搜索 `types: ["track"]` 并传递 `uris: [track_uri]` 来播放。
 
 ### "正在播放什么？" / "我在听什么？"
 单次调用 — 不要在 `get_currently_playing` 之后链式调用 `get_state`。
@@ -81,8 +82,8 @@ spotify_playback({"action": "set_volume", "volume_percent": 50})
 
 ### "添加到我的 &lt;播放列表名称> 播放列表"
 1. `spotify_playlists list` 通过名称查找播放列表 ID
-2. 获取曲目 URI（从当前播放内容或搜索中）
-3. 使用 `spotify_playlists add_items` 并传入 playlist_id 和 URIs
+2. 获取曲目 URI（从当前播放内容，或搜索）
+3. 使用 playlist_id 和 URIs 调用 `spotify_playlists add_items`
 
 ```
 spotify_playlists({"action": "list"})
@@ -119,32 +120,32 @@ spotify_devices({"action": "transfer", "device_id": "<id>", "play": true})
 
 ## 关键故障模式
 
-**在任何播放操作上出现 `403 Forbidden — No active device found`** 意味着 Spotify 在任何地方都没有运行。告诉用户：“请先在您的手机/桌面/网页播放器上打开 Spotify，播放任意曲目几秒钟，然后重试。”不要盲目重试工具调用 — 它会以同样的方式失败。您可以调用 `spotify_devices list` 来确认；空列表意味着没有活动设备。
+任何播放操作出现 **`403 Forbidden — No active device found`** 意味着 Spotify 在任何地方都没有运行。告诉用户：“请先在您的手机/桌面/网页播放器上打开 Spotify，播放任意曲目一秒钟，然后重试。”不要盲目重试工具调用 — 它会以同样的方式失败。你可以调用 `spotify_devices list` 来确认；空列表意味着没有活动设备。
 
 **`403 Forbidden — Premium required`** 意味着用户使用的是免费版并尝试改变播放状态。不要重试；告诉他们此操作需要 Premium。读取操作仍然有效（搜索、播放列表、资料库、获取状态）。
 
-**`get_currently_playing` 返回 `204 No Content`** 不是错误 — 它意味着没有内容在播放。该工具返回 `is_playing: false`。只需向用户报告此情况。
+`get_currently_playing` 返回 **`204 No Content`** 并**不是**错误 — 它意味着没有内容在播放。该工具返回 `is_playing: false`。只需向用户报告此情况。
 
-**`429 Too Many Requests`** = 速率限制。等待并重试一次。如果持续发生，说明您陷入了循环 — 请停止。
+**`429 Too Many Requests`** = 速率限制。等待并重试一次。如果持续发生，说明你在循环调用 — 停止。
 
-**重试后出现 `401 Unauthorized`** — 刷新令牌已撤销。告诉用户重新运行 `hermes auth spotify`。
+重试后出现 **`401 Unauthorized`** — 刷新令牌已撤销。告诉用户重新运行 `hermes auth spotify`。
 
 ## URI 和 ID 格式
 
-Spotify 使用三种可互换的 ID 格式。工具接受所有三种格式并进行规范化：
+Spotify 使用三种可互换的 ID 格式。工具接受所有三种并会进行标准化：
 
 - URI: `spotify:track:0DiWol3AO6WpXZgp0goxAV`（首选）
 - URL: `https://open.spotify.com/track/0DiWol3AO6WpXZgp0goxAV`
 - 裸 ID: `0DiWol3AO6WpXZgp0goxAV`
 
-不确定时，使用完整的 URI。搜索结果在 `uri` 字段中返回 URI — 直接传递这些 URI。
+不确定时，使用完整的 URI。搜索结果在 `uri` 字段中返回 URI — 直接传递这些值。
 
-实体类型：`track`, `album`, `artist`, `playlist`, `show`, `episode`。根据操作使用正确的类型 — 带有 `context_uri` 的 `spotify_playback.play` 期望专辑/播放列表/艺术家；`uris` 期望一个曲目 URI 数组。
+实体类型：`track`, `album`, `artist`, `playlist`, `show`, `episode`。根据操作使用正确的类型 — 使用 `context_uri` 的 `spotify_playback.play` 期望专辑/播放列表/艺术家；`uris` 期望一个曲目 URI 数组。
 
 ## 不要做什么
 
-- **不要在每次操作前都调用 `get_state`。** Spotify 接受播放/暂停/跳过而无需预先检查。仅当用户询问“正在播放什么”或您需要推理设备/曲目时才检查状态。
-- **除非被要求，否则不要描述搜索结果。** 如果用户说“播放 X”，则搜索，获取顶部 URI，播放它。如果错了，他们会听到。
-- **不要在 `403 Premium required` 或 `403 No active device` 时重试。** 这些情况在用户采取行动之前是永久性的。
+- **不要在每个操作前都调用 `get_state`。** Spotify 接受播放/暂停/跳过而无需预先检查。只有当用户询问“正在播放什么”或者你需要推理设备/曲目时才检查状态。
+- **除非被要求，否则不要描述搜索结果。** 如果用户说“播放 X”，搜索，获取顶部 URI，播放它。如果错了，他们会听到。
+- **不要在出现 `403 Premium required` 或 `403 No active device` 时重试。** 这些情况在用户采取行动之前是永久性的。
 - **不要使用 `spotify_search` 通过名称查找播放列表** — 那会搜索公共 Spotify 目录。用户的播放列表来自 `spotify_playlists list`。
-- **不要在 `spotify_library` 中将 `kind: "tracks"` 与专辑 URI 混用**（反之亦然）。该工具会规范化 ID，但 API 端点不同。
+- **不要在 `spotify_library` 中将 `kind: "tracks"` 与专辑 URI 混用**（反之亦然）。工具会标准化 ID，但 API 端点不同。

@@ -4,7 +4,7 @@ sidebar_label: "Docker 管理"
 description: "管理 Docker 容器、镜像、卷、网络和 Compose 堆栈——生命周期操作、调试、清理和 Dockerfile 优化"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。*/}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Docker 管理
 
@@ -19,6 +19,7 @@ description: "管理 Docker 容器、镜像、卷、网络和 Compose 堆栈—�
 | 版本 | `1.0.0` |
 | 作者 | sprmn24 |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `docker`, `containers`, `devops`, `infrastructure`, `compose`, `images`, `volumes`, `networks`, `debugging` |
 
 ## 参考：完整的 SKILL.md
@@ -31,11 +32,11 @@ description: "管理 Docker 容器、镜像、卷、网络和 Compose 堆栈—�
 
 使用标准的 Docker CLI 命令管理 Docker 容器、镜像、卷、网络和 Compose 堆栈。除了 Docker 本身外，无需额外依赖。
 
-## 何时使用
+## 使用时机
 
 - 运行、停止、重启、移除或检查容器
 - 构建、拉取、推送、标记或清理 Docker 镜像
-- 使用 Docker Compose（多服务堆栈）
+- 处理 Docker Compose（多服务堆栈）
 - 管理卷或网络
 - 调试崩溃的容器或分析日志
 - 检查 Docker 磁盘使用情况或释放空间
@@ -43,7 +44,7 @@ description: "管理 Docker 容器、镜像、卷、网络和 Compose 堆栈—�
 
 ## 先决条件
 
-- Docker Engine 已安装并运行
+- Docker Engine 已安装并正在运行
 - 用户已添加到 `docker` 组（或使用 `sudo`）
 - Docker Compose v2（现代 Docker 安装已包含）
 
@@ -86,7 +87,7 @@ docker --version && docker compose version
 **运行新容器：**
 
 ```bash
-# 带端口映射的后台服务
+# 带有端口映射的分离服务
 docker run -d --name web -p 8080:80 nginx
 
 # 带环境变量
@@ -105,7 +106,7 @@ docker run -it --rm ubuntu:22.04 /bin/bash
 docker run -d --memory=512m --cpus=1.5 --restart=unless-stopped --name app my-app
 ```
 
-关键标志：`-d` 后台运行，`-it` 交互式+tty，`--rm` 自动移除，`-p` 端口（主机:容器），`-e` 环境变量，`-v` 卷，`--name` 名称，`--restart` 重启策略。
+关键标志：`-d` 分离，`-it` 交互式+tty，`--rm` 自动移除，`-p` 端口（主机:容器），`-e` 环境变量，`-v` 卷，`--name` 名称，`--restart` 重启策略。
 
 **管理运行中的容器：**
 
@@ -126,7 +127,7 @@ docker container prune           # 移除所有已停止的容器
 docker exec -it NAME /bin/sh          # Shell 访问（如果可用，使用 /bin/bash）
 docker exec NAME env                   # 查看环境变量
 docker exec -u root NAME apt update    # 以特定用户身份运行
-docker logs --tail 100 -f NAME         # 跟随最后 100 行日志
+docker logs --tail 100 -f NAME         # 跟随最后 100 行
 docker logs --since 2h NAME            # 最近 2 小时的日志
 docker cp NAME:/path/file ./local      # 从容器复制文件
 docker cp ./file NAME:/path/           # 复制文件到容器
@@ -165,8 +166,8 @@ docker image prune -a --filter "until=168h"   # 移除超过 7 天的未使用�
 
 ```bash
 # 启动/停止
-docker compose up -d                   # 后台启动所有服务
-docker compose up -d --build           # 启动前重新构建镜像
+docker compose up -d                   # 分离模式启动所有服务
+docker compose up -d --build           # 启动前重建镜像
 docker compose down                    # 停止并移除容器
 docker compose down -v                 # 同时移除卷（销毁数据）
 
@@ -176,7 +177,7 @@ docker compose logs -f api             # 跟随特定服务的日志
 docker compose logs --tail 50          # 所有服务的最后 50 行日志
 
 # 交互
-docker compose exec api /bin/sh        # 进入运行中服务的 Shell
+docker compose exec api /bin/sh        # Shell 进入运行中的服务
 docker compose run --rm api npm test   # 一次性命令（新容器）
 docker compose restart api             # 重启特定服务
 
@@ -251,7 +252,7 @@ docker image prune                     # 悬空镜像
 docker volume prune                    # 未使用的卷
 docker network prune                   # 未使用的网络
 
-# 激进清理（先与用户确认！）
+# 激进清理（务必先与用户确认！）
 docker system prune                    # 容器 + 镜像 + 网络
 docker system prune -a                 # 加上未使用的镜像
 docker system prune -a --volumes       # 所有内容 — 包括命名卷
@@ -267,14 +268,14 @@ docker system prune -a --volumes       # 所有内容 — 包括命名卷
 | "端口已被分配" | 另一个进程正在使用该端口 | 使用 `docker ps` 或 `lsof -i :PORT` 查找 |
 | "设备上没有剩余空间" | Docker 磁盘已满 | 运行 `docker system df` 然后进行针对性清理 |
 | 无法连接到容器 | 应用在容器内绑定到 127.0.0.1 | 应用必须绑定到 `0.0.0.0`，检查 `-p` 映射 |
-| 卷上权限被拒绝 | 主机与容器间的 UID/GID 不匹配 | 使用 `--user $(id -u):$(id -g)` 或修复权限 |
+| 卷上权限被拒绝 | 主机与容器的 UID/GID 不匹配 | 使用 `--user $(id -u):$(id -g)` 或修复权限 |
 | Compose 服务无法相互访问 | 网络或服务名称错误 | 服务使用服务名作为主机名，检查 `docker compose config` |
-| 构建缓存不工作 | Dockerfile 中层的顺序错误 | 将很少变化的层放在前面（依赖项在源代码之前） |
+| 构建缓存不工作 | Dockerfile 中的层顺序错误 | 将很少变化的层放在前面（依赖项在源代码之前） |
 | 镜像太大 | 未使用多阶段构建，没有 .dockerignore | 使用多阶段构建，添加 `.dockerignore` |
 
 ## 验证
 
-任何 Docker 操作后，验证结果：
+执行任何 Docker 操作后，验证结果：
 
 - **容器启动了吗？** → `docker ps`（检查状态是否为 "Up"）
 - **日志干净吗？** → `docker logs --tail 20 NAME`（无错误）

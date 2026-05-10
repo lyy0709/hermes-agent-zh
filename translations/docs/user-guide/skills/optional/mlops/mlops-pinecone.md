@@ -8,24 +8,25 @@ description: "面向生产级 AI 应用的托管向量数据库"
 
 # Pinecone
 
-面向生产级 AI 应用的托管向量数据库。完全托管、自动扩缩容，支持混合搜索（稠密 + 稀疏向量）、元数据过滤和命名空间。低延迟（p95 <100ms）。用于生产级 RAG、推荐系统或大规模语义搜索。最适合无服务器、托管的基础设施。
+面向生产级 AI 应用的托管向量数据库。完全托管、自动扩缩容，支持混合搜索（稠密 + 稀疏）、元数据过滤和命名空间。低延迟（p95 <100ms）。用于生产级 RAG、推荐系统或大规模语义搜索。最适合无服务器、托管的基础设施。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/mlops/pinecone` 安装 |
+| 来源 | Optional — 使用 `hermes skills install official/mlops/pinecone` 安装 |
 | 路径 | `optional-skills/mlops/pinecone` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `pinecone-client` |
-| 标签 | `RAG`, `Pinecone`, `向量数据库`, `托管服务`, `无服务器`, `混合搜索`, `生产环境`, `自动扩缩容`, `低延迟`, `推荐系统` |
+| 平台 | linux, macos, windows |
+| 标签 | `RAG`, `Pinecone`, `Vector Database`, `Managed Service`, `Serverless`, `Hybrid Search`, `Production`, `Auto-Scaling`, `Low Latency`, `Recommendations` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Pinecone - 托管向量数据库
@@ -42,16 +43,16 @@ description: "面向生产级 AI 应用的托管向量数据库"
 - 不想管理基础设施
 - 需要混合搜索（稠密 + 稀疏向量）
 
-**指标**:
+**指标**：
 - 完全托管的 SaaS
 - 自动扩缩容至数十亿向量
 - **p95 延迟 <100ms**
 - 99.9% 正常运行时间 SLA
 
-**改用替代方案的情况**:
-- **Chroma**: 自托管，开源
-- **FAISS**: 离线，纯相似性搜索
-- **Weaviate**: 自托管，功能更多
+**改用替代方案的情况**：
+- **Chroma**：自托管、开源
+- **FAISS**：离线、纯相似性搜索
+- **Weaviate**：自托管，功能更多
 
 ## 快速开始
 
@@ -112,7 +113,7 @@ pc.create_index(
     )
 )
 
-# 基于 Pod（用于一致性能）
+# 基于 Pod（用于一致的性能）
 from pinecone import PodSpec
 
 pc.create_index(
@@ -228,7 +229,7 @@ print(stats['namespaces'])
 ## 混合搜索（稠密 + 稀疏）
 
 ```python
-# 插入带稀疏向量
+# 插入/更新稀疏向量
 index.upsert(vectors=[
     {
         "id": "doc1",
@@ -358,12 +359,12 @@ index.delete(delete_all=True)
 
 ## 定价（截至 2025 年）
 
-**无服务器**:
+**无服务器**：
 - 每百万读取单位 $0.096
 - 每百万写入单位 $0.06
 - 每 GB 存储/月 $0.06
 
-**免费层**:
+**免费层**：
 - 1 个无服务器索引
 - 10 万向量（1536 维度）
 - 非常适合原型设计

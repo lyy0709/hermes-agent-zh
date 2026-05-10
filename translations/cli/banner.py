@@ -1,4 +1,4 @@
-"""欢迎横幅、ASCII 艺术、技能摘要和 CLI 更新检查。
+"""CLI 的欢迎横幅、ASCII 艺术、技能摘要和更新检查。
 
 纯显示函数，不依赖 HermesCLI 状态。
 """
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 # =========================================================================
-# 用于对话显示的 ANSI 构建块
+# ANSI building blocks for conversation display
 # =========================================================================
 
-_GOLD = "\033[1;38;2;255;215;0m"  # 真彩色 #FFD700 粗体
+_GOLD = "\033[1;38;2;255;215;0m"  # True-color #FFD700 bold
 _BOLD = "\033[1m"
 _DIM = "\033[2m"
 _RST = "\033[0m"
@@ -40,7 +40,7 @@ def cprint(text: str):
 
 
 # =========================================================================
-# 皮肤感知的颜色辅助函数
+# Skin-aware color helpers
 # =========================================================================
 
 def _skin_color(key: str, fallback: str) -> str:
@@ -62,7 +62,7 @@ def _skin_branding(key: str, fallback: str) -> str:
 
 
 # =========================================================================
-# ASCII 艺术与品牌标识
+# ASCII Art & Branding
 # =========================================================================
 
 from hermes_cli import __version__ as VERSION, __release_date__ as RELEASE_DATE
@@ -93,7 +93,7 @@ HERMES_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀�
 
 
 # =========================================================================
-# 技能扫描
+# Skills scanning
 # =========================================================================
 def get_available_skills() -> Dict[str, List[str]]:
     """Return skills grouped by category, filtered by platform and disabled state.
@@ -119,21 +119,21 @@ def get_available_skills() -> Dict[str, List[str]]:
 # 更新检查
 # =========================================================================
 
-# 缓存更新检查结果6小时，避免重复的git获取
+# 缓存更新检查结果6小时，避免重复的 git fetch
 _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 
-# 当我们知道有更新但无法统计提交数时返回的标记
-# (例如 nix 构建的 hermes — 没有本地 git 历史记录可用来计数)。
+# 当我们知道有更新但无法统计提交数时返回的标记值
+# (例如 nix 构建的 hermes — 没有本地 git 历史记录来统计差异)。
 UPDATE_AVAILABLE_NO_COUNT = -1
 
 _UPSTREAM_REPO_URL = "https://github.com/NousResearch/hermes-agent.git"
 
 
 def _check_via_rev(local_rev: str) -> Optional[int]:
-    """通过 ls-remote 将嵌入的 git 修订版本与上游 main 分支进行比较。
+    """通过 ls-remote 比较嵌入的 git 修订版本与上游 main 分支。
 
     如果是最新则返回 0，如果落后则返回 ``UPDATE_AVAILABLE_NO_COUNT``，
-    失败时返回 ``None``。
+    失败则返回 ``None``。
     """
     try:
         result = subprocess.run(
@@ -177,13 +177,12 @@ def _check_via_local_git(repo_dir: Path) -> Optional[int]:
 def check_for_updates() -> Optional[int]:
     """检查是否有 Hermes 更新可用。
 
-    两条路径：如果设置了 ``HERMES_REVISION``（nix 构建会嵌入它），
-    则通过 ``git ls-remote`` 将其与上游 main 分支进行比较。
+    两条路径：如果设置了 ``HERMES_REVISION`` (nix 构建会嵌入它)，
+    则通过 ``git ls-remote`` 将其与上游 main 分支比较。
     否则查找本地 git 检出仓库并统计落后于 ``origin/main`` 的提交数。
 
-    返回落后提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
-    如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。
-    缓存6小时。
+    返回落后的提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
+    如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存6小时。
     """
     hermes_home = get_hermes_home()
     cache_file = hermes_home / ".update_check"
@@ -205,9 +204,12 @@ def check_for_updates() -> Optional[int]:
     if embedded_rev:
         behind = _check_via_rev(embedded_rev)
     else:
-        repo_dir = hermes_home / "hermes-agent"
+        # 优先使用运行代码的位置，而不是配置文件作用域的路径。
+        # $HERMES_HOME/hermes-agent/ 可能是来自 --clone-all 的陈旧副本；
+        # Path(__file__) 总是解析到实际安装的检出仓库。
+        repo_dir = Path(__file__).parent.parent.resolve()
         if not (repo_dir / ".git").exists():
-            repo_dir = Path(__file__).parent.parent.resolve()
+            repo_dir = hermes_home / "hermes-agent"
         if not (repo_dir / ".git").exists():
             return None
         behind = _check_via_local_git(repo_dir)
@@ -219,11 +221,16 @@ def check_for_updates() -> Optional[int]:
 
     return behind
 def _resolve_repo_dir() -> Optional[Path]:
-    """Return the active Hermes git checkout, or None if this isn't a git install."""
-    hermes_home = get_hermes_home()
-    repo_dir = hermes_home / "hermes-agent"
+    """Return the active Hermes git checkout, or None if this isn't a git install.
+
+    Prefers the running code's location over the profile-scoped path
+    because ``$HERMES_HOME/hermes-agent/`` may be a stale copy carried
+    over by ``--clone-all``.
+    """
+    repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
-        repo_dir = Path(__file__).parent.parent.resolve()
+        hermes_home = get_hermes_home()
+        repo_dir = hermes_home / "hermes-agent"
     return repo_dir if (repo_dir / ".git").exists() else None
 
 

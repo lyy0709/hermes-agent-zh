@@ -5,14 +5,14 @@ description: "Microsoft Teams 会议流水线的操作手册、上线检查清�
 
 # 操作 Teams 会议流水线
 
-在您已从 [Teams 会议](/docs/user-guide/messaging/teams-meetings) 启用该功能后，请使用本指南。
+本指南适用于已通过 [Teams 会议](/docs/user-guide/messaging/teams-meetings) 启用该功能后。
 
-本页涵盖：
+本页内容涵盖：
 - 操作员 CLI 流程
 - 常规订阅维护
 - 故障排查
 - 上线检查
-- 发布工作表
+- 部署工作表
 
 ## 核心操作员命令
 
@@ -22,16 +22,16 @@ description: "Microsoft Teams 会议流水线的操作手册、上线检查清�
 hermes teams-pipeline validate
 ```
 
-在任何配置更改后首先使用此命令。
+任何配置更改后，请首先使用此命令。
 
-### 检查 Token 健康状况
+### 检查 Token 健康状态
 
 ```bash
 hermes teams-pipeline token-health
 hermes teams-pipeline token-health --force-refresh
 ```
 
-当您怀疑身份验证状态过时时，使用 `--force-refresh`。
+当怀疑身份验证状态过时时，使用 `--force-refresh`。
 
 ### 检查订阅
 
@@ -48,27 +48,38 @@ hermes teams-pipeline maintain-subscriptions --dry-run
 
 ### 自动化订阅续订（生产环境必需）
 
-**Microsoft Graph 订阅最多在 72 小时后过期。** 如果没有东西续订它们，会议通知将在 3 天后静默停止，流水线看起来就“坏了”。这是任何基于 Graph 的集成的首要操作故障模式。
+**Microsoft Graph 订阅最多在 72 小时后过期。** 如果没有东西续订它们，会议通知将在 3 天后静默停止，流水线看起来就像“坏了”。这是任何基于 Graph 的集成的首要操作故障模式。
 
 您必须按计划运行 `maintain-subscriptions`。从以下三个选项中选择一个：
 
-#### 选项 1：Hermes 定时任务（如果您已运行 Hermes 消息网关，推荐使用）
+#### 选项 1：Hermes cron（如果已运行 Hermes 消息网关，推荐使用）
 
-Hermes 内置了一个定时任务调度器。添加一个仅脚本的定时任务，每 12 小时运行一次（针对 72 小时的过期窗口提供 6 倍余量）：
+Hermes 内置了一个 cron 调度器。`--no-agent` 模式将脚本作为作业运行（而不是使用 LLM），`--script` 必须指向 `~/.hermes/scripts/` 下的文件。首先创建脚本：
 
 ```bash
-hermes cron add \
-  --name "teams-pipeline-maintain-subscriptions" \
-  --schedule "0 */12 * * *" \
-  --script-only \
-  --command "hermes teams-pipeline maintain-subscriptions"
+mkdir -p ~/.hermes/scripts
+cat > ~/.hermes/scripts/maintain-teams-subscriptions.sh <<'EOF'
+#!/usr/bin/env bash
+exec hermes teams-pipeline maintain-subscriptions
+EOF
+chmod +x ~/.hermes/scripts/maintain-teams-subscriptions.sh
 ```
 
-验证它是否已注册并检查下一次运行时间：
+然后注册一个仅脚本的 cron 作业，每 12 小时运行一次（相对于 72 小时的过期窗口，提供 6 倍的安全余量）：
+
+```bash
+hermes cron create "0 */12 * * *" \
+  --name "teams-pipeline-maintain-subscriptions" \
+  --no-agent \
+  --script maintain-teams-subscriptions.sh \
+  --deliver local
+```
+
+验证是否已注册并检查下次运行时间：
 
 ```bash
 hermes cron list
-hermes cron show teams-pipeline-maintain-subscriptions
+hermes cron status        # 调度器状态
 ```
 
 #### 选项 2：systemd 定时器（推荐用于 Linux 生产部署）
@@ -116,7 +127,7 @@ systemctl list-timers hermes-teams-pipeline-maintain.timer
 0 */12 * * * /usr/local/bin/hermes teams-pipeline maintain-subscriptions >> /var/log/hermes/teams-pipeline-maintain.log 2>&1
 ```
 
-确保 crontab 环境具有 `MSGRAPH_*` 凭据。最简单的解决方法：在 crontab 调用的包装脚本顶部 source `~/.hermes/.env`。
+确保 cron 环境具有 `MSGRAPH_*` 凭据。最简单的解决方法：在 crontab 调用的包装脚本顶部 source `~/.hermes/.env`。
 
 #### 验证续订是否正常工作
 
@@ -137,13 +148,13 @@ hermes teams-pipeline list --status failed
 hermes teams-pipeline show <job-id>
 ```
 
-### 重放存储的作业
+### 重放已存储的作业
 
 ```bash
 hermes teams-pipeline run <job-id>
 ```
 
-### 试运行会议工件获取
+### 会议工件获取的试运行
 
 ```bash
 hermes teams-pipeline fetch --meeting-id <meeting-id>
@@ -173,9 +184,9 @@ hermes teams-pipeline show <job-id>
 
 - 运行 `hermes teams-pipeline maintain-subscriptions --dry-run`
 - 检查 `hermes teams-pipeline list --status failed`
-- 验证 Teams 交付目标仍然是正确的聊天或频道
+- 验证 Teams 投递目标仍然是正确的聊天或频道
 
-### 更改 Webhook URL 或交付目标前
+### 更改 Webhook URL 或投递目标前
 
 - 更新公共通知 URL 或 Teams 目标配置
 - 运行 `hermes teams-pipeline validate`
@@ -198,9 +209,9 @@ hermes teams-pipeline show <job-id>
 - 转录权限和可用性
 - 录制权限和工件可用性
 - 如果启用了录制回退，检查 `ffmpeg` 可用性
-- Graph Token 健康状况
+- Graph Token 健康状态
 
-### 生成了摘要但未交付到 Teams
+### 摘要已生成但未投递到 Teams
 
 检查：
 - `platforms.teams.enabled: true`
@@ -221,27 +232,27 @@ hermes teams-pipeline show <job-id>
 - [ ] Graph 凭据存在且正确
 - [ ] `msgraph_webhook` 已启用且可从公共互联网访问
 - [ ] `MSGRAPH_WEBHOOK_CLIENT_STATE` 已设置且与订阅匹配
-- [ ] 已创建转录订阅
-- [ ] 如果需要 STT 回退，已创建录制订阅
-- [ ] 如果启用了录制回退，已安装 `ffmpeg`
-- [ ] Teams 出站交付目标已配置并验证
+- [ ] 转录订阅已创建
+- [ ] 如果需要 STT 回退，录制订阅已创建
+- [ ] 如果启用了录制回退，`ffmpeg` 已安装
+- [ ] Teams 出站投递目标已配置并验证
 - [ ] Notion 和 Linear 接收端仅在确实需要时才配置
 - [ ] `hermes teams-pipeline validate` 返回 OK 快照
 - [ ] `hermes teams-pipeline token-health --force-refresh` 成功
-- [ ] **`maintain-subscriptions` 已安排计划**（Hermes 定时任务、systemd 定时器或 crontab — 参见[自动化订阅续订](#automating-subscription-renewal-required-for-production)）。没有这个，Graph 订阅将在 72 小时内静默过期。
+- [ ] **`maintain-subscriptions` 已安排计划**（Hermes cron、systemd 定时器或 crontab — 参见[自动化订阅续订](#automating-subscription-renewal-required-for-production)）。没有这个，Graph 订阅将在 72 小时内静默过期。
 - [ ] 一个真实的端到端会议事件已产生一个存储的作业
-- [ ] 至少有一个摘要已到达预期的交付接收端
+- [ ] 至少有一个摘要已到达预期的投递接收端
 
-## 交付模式决策指南
+## 投递模式决策指南
 
-| 模式 | 使用场景 | 权衡 |
+| 模式 | 适用场景 | 权衡 |
 |------|----------|----------|
 | `incoming_webhook` | 您只需要简单地向 Teams 发布 | 设置最简单，控制较少 |
-| `graph` | 您需要通过 Graph 向频道或聊天发布 | 更多控制，需要更多身份验证和目标配置 |
+| `graph` | 您需要通过 Graph 向频道或聊天发布 | 控制更多，需要更多身份验证和目标配置 |
 
 ## 操作员工作表
 
-在发布前填写此表：
+部署前填写此表：
 
 | 项目 | 值 |
 |------|-------|
@@ -251,7 +262,7 @@ hermes teams-pipeline show <job-id>
 | Webhook 客户端状态 | |
 | 转录资源订阅 | |
 | 录制资源订阅 | |
-| Teams 交付模式 | |
+| Teams 投递模式 | |
 | Teams 聊天 ID 或团队/频道 | |
 | Notion 数据库 ID | |
 | Linear 团队 ID | |
@@ -260,13 +271,13 @@ hermes teams-pipeline show <job-id>
 
 ## 变更审查工作表
 
-在更改部署前使用此表：
+更改部署前使用此表：
 
 | 问题 | 答案 |
 |----------|--------|
 | 我们是否在更改公共 webhook URL？ | |
 | 我们是否在轮换 Graph 凭据？ | |
-| 我们是否在更改 Teams 交付模式？ | |
+| 我们是否在更改 Teams 投递模式？ | |
 | 我们是否要迁移到新的 Teams 聊天或频道？ | |
 | 订阅是否需要重新创建或续订？ | |
 | 我们是否需要一次全新的端到端验证运行？ | |

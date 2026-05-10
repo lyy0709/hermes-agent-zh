@@ -1,14 +1,14 @@
 ---
 title: "Scrapling"
 sidebar_label: "Scrapling"
-description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现 HTTP 获取、隐身浏览器自动化、Cloudflare 绕过和蜘蛛爬虫"
+description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现 HTTP 获取、隐身浏览器自动化、Cloudflare 绕过和蜘蛛爬取"
 ---
 
-{/* 此页面由技能目录中的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Scrapling
 
-使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现 HTTP 获取、隐身浏览器自动化、Cloudflare 绕过和蜘蛛爬虫。
+使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现 HTTP 获取、隐身浏览器自动化、Cloudflare 绕过和蜘蛛爬取。
 
 ## 技能元数据
 
@@ -19,6 +19,7 @@ description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现
 | 版本 | `1.0.0` |
 | 作者 | FEUAZUR |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Web Scraping`, `Browser`, `Cloudflare`, `Stealth`, `Crawling`, `Spider` |
 | 相关技能 | [`duckduckgo-search`](/docs/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/docs/user-guide/skills/optional/research/research-domain-intel) |
 
@@ -32,7 +33,7 @@ description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现
 
 [Scrapling](https://github.com/D4Vinci/Scrapling) 是一个具有反机器人绕过、隐身浏览器自动化和蜘蛛框架的网页抓取框架。它提供三种获取策略（HTTP、动态 JS、隐身/Cloudflare）和一个完整的 CLI。
 
-**此技能仅用于教育和研究目的。** 用户必须遵守本地/国际数据抓取法律并尊重网站服务条款。
+**此技能仅用于教育和研究目的。** 用户必须遵守本地/国际数据抓取法律并尊重网站的《服务条款》。
 
 ## 何时使用
 
@@ -69,7 +70,7 @@ scrapling install
 | 隐身 | `StealthyFetcher` / `StealthySession` | Cloudflare、受反机器人保护的网站 |
 | 蜘蛛 | `Spider` | 带链接跟随的多页面爬取 |
 
-## CLI 用法
+## CLI 使用
 
 ### 提取静态页面
 
@@ -131,7 +132,7 @@ for q in quotes:
     print(q)
 ```
 
-### 会话（持久化 Cookie）
+### 会话（持久化 Cookies）
 
 ```python
 from scrapling.fetchers import FetcherSession
@@ -179,9 +180,9 @@ page = DynamicFetcher.fetch(
 )
 ```
 
-### 禁用资源以提高速度
+### 禁用资源以提升速度
 
-阻止字体、图片、媒体、样式表（速度提升约 25%）：
+阻止字体、图片、媒体、样式表（约快 25%）：
 
 ```python
 from scrapling.fetchers import DynamicSession
@@ -337,14 +338,14 @@ class SmartSpider(Spider):
 
 ```python
 spider = QuotesSpider(crawldir="./crawl_checkpoint")
-spider.start()  # 按 Ctrl+C 暂停，重新运行以从检查点恢复
+spider.start()  # Ctrl+C 暂停，重新运行以从检查点恢复
 ```
 
 ## 注意事项
 
 - **需要安装浏览器**：pip install 后运行 `scrapling install` — 否则 `DynamicFetcher` 和 `StealthyFetcher` 将失败
-- **超时设置**：DynamicFetcher/StealthyFetcher 的超时单位为**毫秒**（默认 30000），Fetcher 的超时单位为**秒**
-- **Cloudflare 绕过**：`solve_cloudflare=True` 会使获取时间增加 5-15 秒 — 仅在需要时启用
+- **超时**：DynamicFetcher/StealthyFetcher 的超时单位为**毫秒**（默认 30000），Fetcher 的超时单位为**秒**
+- **Cloudflare 绕过**：`solve_cloudflare=True` 会增加 5-15 秒的获取时间 — 仅在需要时启用
 - **资源使用**：StealthyFetcher 运行真实浏览器 — 限制并发使用
-- **法律问题**：抓取前务必检查 robots.txt 和网站服务条款。此库仅用于教育和研究目的
+- **法律**：抓取前务必检查 robots.txt 和网站《服务条款》。此库仅用于教育和研究目的
 - **Python 版本**：需要 Python 3.10+

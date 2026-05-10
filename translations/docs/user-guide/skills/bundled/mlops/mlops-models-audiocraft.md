@@ -20,7 +20,8 @@ AudioCraft：MusicGen 文本到音乐，AudioGen 文本到声音。
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `audiocraft`, `torch>=2.0.0`, `transformers>=4.30.0` |
-| 标签 | `多模态`, `音频生成`, `文本到音乐`, `文本到音频`, `MusicGen` |
+| 平台 | linux, macos |
+| 标签 | `Multimodal`, `Audio Generation`, `Text-to-Music`, `Text-to-Audio`, `MusicGen` |
 
 ## 参考：完整的 SKILL.md
 
@@ -37,9 +38,9 @@ AudioCraft：MusicGen 文本到音乐，AudioGen 文本到声音。
 **在以下情况下使用 AudioCraft：**
 - 需要根据文本描述生成音乐
 - 创建音效和环境音频
-- 构建音乐生成应用程序
-- 需要进行旋律条件音乐生成
-- 需要立体声音频输出
+- 构建音乐生成应用
+- 需要旋律条件音乐生成
+- 想要立体声音频输出
 - 需要具有风格迁移的可控音乐生成
 
 **主要特性：**
@@ -50,11 +51,11 @@ AudioCraft：MusicGen 文本到音乐，AudioGen 文本到声音。
 - **立体声支持**：完整的立体声音频生成
 - **风格条件**：MusicGen-Style 用于基于参考的生成
 
-**在以下情况下使用替代方案：**
+**改用替代方案：**
 - **Stable Audio**：用于生成长篇商业音乐
 - **Bark**：用于带有音乐/音效的文本到语音
 - **Riffusion**：用于基于频谱图的音乐生成
-- **OpenAI Jukebox**：用于带有歌词的原始音频生成
+- **OpenAI Jukebox**：用于带歌词的原始音频生成
 
 ## 快速开始
 
@@ -189,8 +190,8 @@ AudioCraft 架构：
 | `top_k` | 250 | Top-k 采样 |
 | `top_p` | 0.0 | 核心采样（0 = 禁用） |
 | `temperature` | 1.0 | 采样温度 |
-| `cfg_coef` | 3.0 | 无分类器引导 |
-## MusicGen 使用指南
+| `cfg_coef` | 3.0 | 无分类器指导 |
+## MusicGen 使用
 
 ### 文本到音乐生成
 
@@ -205,13 +206,13 @@ model.set_generation_params(
     duration=30,          # 最长 30 秒
     top_k=250,            # 采样多样性
     top_p=0.0,            # 0 = 仅使用 top_k
-    temperature=1.0,      # 创造性（值越高变化越多）
-    cfg_coef=3.0          # 文本遵循度（值越高越严格）
+    temperature=1.0,      # 创造性（越高越多样）
+    cfg_coef=3.0          # 文本遵循度（越高越严格）
 )
 
 # 生成多个样本
 descriptions = [
-    "史诗级管弦乐配乐，包含弦乐和铜管乐",
+    "史诗般的管弦乐配乐，包含弦乐和铜管乐",
     "轻松的 Lo-Fi 嘻哈节奏，带有爵士钢琴",
     "充满活力的摇滚歌曲，带有电吉他"
 ]
@@ -219,7 +220,7 @@ descriptions = [
 # 生成（返回 [batch, channels, samples]）
 wav = model.generate(descriptions)
 
-# 分别保存
+# 保存每个样本
 for i, audio in enumerate(wav):
     torchaudio.save(f"music_{i}.wav", audio.cpu(), sample_rate=32000)
 ```
@@ -253,7 +254,7 @@ from audiocraft.models import MusicGen
 model = MusicGen.get_pretrained('facebook/musicgen-stereo-medium')
 model.set_generation_params(duration=15)
 
-descriptions = ["具有宽广立体声场感的氛围电子音乐"]
+descriptions = ["具有宽广立体声平移的环境电子音乐"]
 wav = model.generate(descriptions)
 
 # wav 形状: [batch, 2, samples] 表示立体声
@@ -286,7 +287,7 @@ inputs = processor(
 audio_values = model.generate(**inputs, do_sample=True, guidance_scale=3, max_new_tokens=512)
 ```
 
-## MusicGen-Style 使用指南
+## MusicGen-Style 使用
 
 ### 风格条件生成
 
@@ -303,13 +304,13 @@ model.set_generation_params(
     cfg_coef_beta=5.0  # 风格影响力
 )
 
-# 配置风格条件器
+# 配置风格调节器参数
 model.set_style_conditioner_params(
     eval_q=3,          # RVQ 量化器 (1-6)
     excerpt_length=3.0  # 风格片段长度
 )
 
-# 加载风格参考
+# 加载风格参考音频
 style_audio, sr = torchaudio.load("reference_style.wav")
 
 # 使用文本 + 风格生成
@@ -320,7 +321,7 @@ wav = model.generate_with_style(descriptions, style_audio, sr)
 ### 纯风格生成（无文本）
 
 ```python
-# 在没有文本提示的情况下生成匹配风格
+# 在没有文本提示的情况下生成匹配的风格
 model.set_generation_params(
     duration=30,
     cfg_coef=3.0,
@@ -330,7 +331,7 @@ model.set_generation_params(
 wav = model.generate_with_style([None], style_audio, sr)
 ```
 
-## AudioGen 使用指南
+## AudioGen 使用
 
 ### 音效生成
 
@@ -355,7 +356,7 @@ for i, audio in enumerate(wav):
     torchaudio.save(f"sound_{i}.wav", audio.cpu(), sample_rate=16000)
 ```
 
-## EnCodec 使用指南
+## EnCodec 使用
 
 ### 音频压缩
 
@@ -425,10 +426,10 @@ class MusicGenerator:
     def save(self, audio, path):
         torchaudio.save(path, audio, sample_rate=self.sample_rate)
 
-# 使用示例
+# 使用
 generator = MusicGenerator()
 audio = generator.generate(
-    "史诗级电影管弦乐",
+    "史诗般的电影管弦乐",
     duration=30,
     temperature=1.0
 )
@@ -447,7 +448,7 @@ def batch_generate_sounds(sound_specs, output_dir):
     根据规格批量生成声音。
 
     Args:
-        sound_specs: 列表，包含 {"name": str, "description": str, "duration": float}
+        sound_specs: 规格列表，格式为 {"name": str, "description": str, "duration": float}
         output_dir: 输出目录路径
     """
     model = AudioGen.get_pretrained('facebook/audiogen-medium')
@@ -530,7 +531,7 @@ demo.launch()
 # 使用更小的模型
 model = MusicGen.get_pretrained('facebook/musicgen-small')
 
-# 在生成之间清空缓存
+# 在生成之间清除缓存
 torch.cuda.empty_cache()
 
 # 生成更短的时长

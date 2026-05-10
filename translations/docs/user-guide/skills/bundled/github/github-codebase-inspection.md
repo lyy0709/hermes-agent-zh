@@ -19,6 +19,7 @@ description: "使用 pygount 检查代码库：代码行数、语言、比例"
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `LOC`, `代码分析`, `pygount`, `代码库`, `指标`, `仓库` |
 | 相关技能 | [`github-repo-management`](/docs/user-guide/skills/bundled/github/github-github-repo-management) |
 
@@ -34,7 +35,7 @@ description: "使用 pygount 检查代码库：代码行数、语言、比例"
 
 ## 使用时机
 
-- 用户询问 LOC（代码行数）统计
+- 用户询问代码行数
 - 用户想要仓库的语言细分
 - 用户询问代码库大小或构成
 - 用户想要代码与注释比例
@@ -70,11 +71,11 @@ pygount --format=summary \
 # JavaScript/TypeScript 项目
 --folders-to-skip=".git,node_modules,dist,build,.next,.cache,.turbo,coverage"
 
-# 通用全能排除
+# 通用全能型
 --folders-to-skip=".git,node_modules,venv,.venv,__pycache__,.cache,dist,build,.next,.tox,vendor,third_party"
 ```
 
-## 3. 按特定语言过滤
+## 3. 按特定语言筛选
 
 ```bash
 # 仅统计 Python 文件
@@ -100,7 +101,7 @@ pygount --folders-to-skip=".git,node_modules,venv" . | sort -t$'\t' -k1 -nr | he
 # 摘要表格（默认推荐）
 pygount --format=summary .
 
-# JSON 输出，便于编程使用
+# JSON 输出，用于编程处理
 pygount --format=json .
 
 # 管道友好格式：语言、文件数、代码、文档、空行、字符串
@@ -110,10 +111,10 @@ pygount --format=summary . 2>/dev/null
 ## 6. 结果解读
 
 摘要表格列说明：
-- **Language** — 检测到的编程语言
-- **Files** — 该语言的文件数量
-- **Code** — 实际代码行数（可执行/声明性）
-- **Comment** — 注释或文档行数
+- **语言** — 检测到的编程语言
+- **文件** — 该语言的文件数量
+- **代码** — 实际代码行数（可执行/声明性）
+- **注释** — 注释或文档行数
 - **%** — 占总数的百分比
 
 特殊的伪语言：
@@ -125,7 +126,7 @@ pygount --format=summary . 2>/dev/null
 
 ## 注意事项
 
-1. **始终排除 .git、node_modules、venv** — 不使用 `--folders-to-skip` 时，pygount 会遍历所有内容，对于大型依赖树可能需要几分钟或卡住。
+1. **始终排除 .git、node_modules、venv** — 不使用 `--folders-to-skip` 时，pygount 会遍历所有内容，对于大型依赖树可能需要数分钟甚至卡住。
 2. **Markdown 显示 0 代码行** — pygount 将所有 Markdown 内容归类为注释，而非代码。这是预期行为。
 3. **JSON 文件显示较低的代码计数** — pygount 可能保守地统计 JSON 行数。如需准确的 JSON 行数，请直接使用 `wc -l`。
-4. **大型单体仓库** — 对于非常大的仓库，考虑使用 `--suffix` 来定位特定语言，而不是扫描所有内容。
+4. **大型单体仓库** — 对于非常大的仓库，考虑使用 `--suffix` 来针对特定语言，而不是扫描所有内容。

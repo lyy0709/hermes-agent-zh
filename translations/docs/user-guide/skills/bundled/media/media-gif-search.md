@@ -19,6 +19,7 @@ description: "通过 curl + jq 从 Tenor 搜索/下载 GIF"
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `GIF`, `Media`, `Search`, `Tenor`, `API` |
 
 ## 参考：完整的 SKILL.md
@@ -33,7 +34,7 @@ description: "通过 curl + jq 从 Tenor 搜索/下载 GIF"
 
 ## 使用场景
 
-适用于查找表情包 GIF、创建视觉内容以及在聊天中发送 GIF。
+适用于查找反应 GIF、创建视觉内容以及在聊天中发送 GIF。
 
 ## 设置
 
@@ -47,7 +48,7 @@ TENOR_API_KEY=your_key_here
 
 ## 先决条件
 
-- `curl` 和 `jq`（两者在 macOS/Linux 上都是标准工具）
+- `curl` 和 `jq`（两者在 macOS/Linux 上都是标准的）
 - `TENOR_API_KEY` 环境变量
 
 ## 搜索 GIF

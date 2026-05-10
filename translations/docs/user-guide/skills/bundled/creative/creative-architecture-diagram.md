@@ -19,6 +19,7 @@ description: "深色主题的 SVG 架构/云/基础设施图，以 HTML 形式�
 | 版本 | `1.0.0` |
 | 作者 | Cocoon AI (hello@cocoon-ai.com)，由 Hermes Agent 移植 |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `architecture`, `diagrams`, `SVG`, `HTML`, `visualization`, `infrastructure`, `cloud` |
 | 相关技能 | [`concept-diagrams`](/docs/user-guide/skills/optional/creative/creative-concept-diagrams), [`excalidraw`](/docs/user-guide/skills/bundled/creative/creative-excalidraw) |
 
@@ -30,7 +31,7 @@ description: "深色主题的 SVG 架构/云/基础设施图，以 HTML 形式�
 
 # 架构图技能
 
-生成专业的、深色主题的技术架构图，作为独立的 HTML 文件，包含内联 SVG 图形。无需外部工具、API 密钥或渲染库——只需编写 HTML 文件并在浏览器中打开。
+生成专业的、深色主题的技术架构图，作为独立的 HTML 文件，包含内联 SVG 图形。无需外部工具、API 密钥或渲染库 — 只需编写 HTML 文件并在浏览器中打开。
 
 ## 适用范围
 
@@ -48,7 +49,7 @@ description: "深色主题的 SVG 架构/云/基础设施图，以 HTML 形式�
 - 手绘白板草图（考虑使用 `excalidraw`）
 - 动画解说（考虑使用动画技能）
 
-如果有更专业的技能适用于该主题，请优先使用。如果没有合适的，此技能也可以作为通用的 SVG 图表备用方案——输出将保持下述的深色技术美学风格。
+如果有更专业的技能适用于该主题，请优先使用。如果没有合适的，此技能也可以作为通用的 SVG 图表备用方案 — 只是输出将遵循下述的深色技术美学风格。
 
 基于 [Cocoon AI 的 architecture-diagram-generator](https://github.com/Cocoon-AI/architecture-diagram-generator) (MIT)。
 
@@ -57,7 +58,7 @@ description: "深色主题的 SVG 架构/云/基础设施图，以 HTML 形式�
 1.  用户描述其系统架构（组件、连接、技术）
 2.  按照以下设计系统生成 HTML 文件
 3.  使用 `write_file` 保存为 `.html` 文件（例如 `~/architecture-diagram.html`）
-4.  用户在任意浏览器中打开——可离线工作，无依赖
+4.  用户在任意浏览器中打开 — 可离线工作，无依赖
 
 ### 输出位置
 
@@ -92,7 +93,7 @@ xdg-open ./my-architecture.html
 | **消息总线** | `rgba(251, 146, 60, 0.3)` | `#fb923c` (orange-400) |
 | **外部** | `rgba(30, 41, 59, 0.5)` | `#94a3b8` (slate-400) |
 
-### 排版与背景
+### 字体与背景
 - **字体：** JetBrains Mono（等宽字体），从 Google Fonts 加载
 - **大小：** 12px（名称），9px（子标签），8px（注释），7px（微小标签）
 - **背景：** Slate-950 (`#020617`) 带有微妙的 40px 网格图案
@@ -107,12 +108,12 @@ xdg-open ./my-architecture.html
 ## 技术实现细节
 
 ### 组件渲染
-组件是圆角矩形 (`rx="6"`)，描边宽度为 1.5px。为了防止箭头透过半透明填充色显示，使用**双矩形遮罩技术**：
+组件是圆角矩形 (`rx="6"`)，描边宽度为 1.5px。为防止箭头透过半透明填充色显示，使用**双矩形遮罩技术**：
 1.  绘制一个不透明的背景矩形 (`#0f172a`)
 2.  在其上方绘制带有样式的半透明矩形
 
 ### 连接规则
-- **Z 轴顺序：** 在 SVG 中*尽早*绘制箭头（在网格之后），使其渲染在组件框的后面
+- **Z 轴顺序：** *尽早*在 SVG 中绘制箭头（在网格之后），使其渲染在组件框的后面
 - **箭头头部：** 通过 SVG 标记定义
 - **安全流：** 使用玫瑰色 (`#fb7185`) 的虚线
 - **边界：**
@@ -121,8 +122,8 @@ xdg-open ./my-architecture.html
 
 ### 间距与布局逻辑
 - **标准高度：** 60px（服务）；80-120px（大型组件）
-- **垂直间距：** 组件之间最小 40px
-- **消息总线：** 必须*放置*在服务之间的间隙中，不能与它们重叠
+- **垂直间距：** 组件之间至少 40px
+- **消息总线：** 必须放置在服务*之间的间隙*中，不能重叠
 - **图例放置：** **至关重要。** 必须放置在所有边界框之外。计算所有边界的最低 Y 坐标，并将图例放置在其下方至少 20px 处。
 
 ## 文档结构
@@ -161,4 +162,4 @@ xdg-open ./my-architecture.html
 skill_view(name="architecture-diagram", file_path="templates/template.html")
 ```
 
-该模板包含每种组件类型（前端、后端、数据库、云、安全）、箭头样式（标准、虚线、曲线）、安全组、区域边界和图例的工作示例——在生成图表时将其用作您的结构参考。
+该模板包含每种组件类型（前端、后端、数据库、云、安全）、箭头样式（标准、虚线、曲线）、安全组、区域边界和图例的工作示例 — 在生成图表时将其用作您的结构参考。

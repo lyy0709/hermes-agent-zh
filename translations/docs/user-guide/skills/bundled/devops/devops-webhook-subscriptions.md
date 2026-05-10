@@ -17,6 +17,7 @@ Webhook 订阅：事件驱动的 Agent 运行。
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/devops/webhook-subscriptions` |
 | 版本 | `1.1.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `webhook`, `events`, `automation`, `integrations`, `notifications`, `push` |
 
 ## 参考：完整的 SKILL.md
@@ -27,11 +28,11 @@ Webhook 订阅：事件驱动的 Agent 运行。
 
 # Webhook 订阅
 
-创建动态 Webhook 订阅，以便外部服务（GitHub、GitLab、Stripe、CI/CD、物联网传感器、监控工具）可以通过向 URL 发送 POST 事件来触发 Hermes Agent 运行。
+创建动态 Webhook 订阅，以便外部服务（GitHub、GitLab、Stripe、CI/CD、IoT 传感器、监控工具）可以通过向 URL 发送 POST 事件来触发 Hermes Agent 运行。
 
 ## 设置（首次必需）
 
-必须先启用 Webhook 平台才能创建订阅。使用以下命令检查：
+必须先启用 Webhook 平台，然后才能创建订阅。使用以下命令检查：
 ```bash
 hermes webhook list
 ```
@@ -83,7 +84,7 @@ curl http://localhost:8644/health
 ### 创建订阅
 ```bash
 hermes webhook subscribe <name> \
-  --prompt "提示词模板，支持 {payload.fields}" \
+  --prompt "包含 {payload.fields} 的提示词模板" \
   --events "event1,event2" \
   --description "此订阅的作用" \
   --skills "skill1,skill2" \
@@ -92,7 +93,7 @@ hermes webhook subscribe <name> \
   --secret "optional-custom-secret"
 ```
 
-返回 Webhook URL 和 HMAC 密钥。用户配置其服务以向该 URL 发送 POST 请求。
+返回 Webhook URL 和 HMAC 密钥。用户配置其服务以 POST 到该 URL。
 
 ### 列出订阅
 ```bash
@@ -112,14 +113,14 @@ hermes webhook test <name> --payload '{"key": "value"}'
 
 ## 提示词模板
 
-提示词支持使用 `{dot.notation}` 访问嵌套的负载字段：
+提示词支持使用 `{dot.notation}` 访问嵌套的 payload 字段：
 
 - `{issue.title}` — GitHub issue 标题
 - `{pull_request.user.login}` — PR 作者
 - `{data.object.amount}` — Stripe 支付金额
-- `{sensor.temperature}` — 物联网传感器读数
+- `{sensor.temperature}` — IoT 传感器读数
 
-如果未指定提示词，则完整的 JSON 负载将被转储到 Agent 提示词中。
+如果未指定提示词，则完整的 JSON payload 会被转储到 Agent 提示词中。
 
 ## 常见模式
 
@@ -127,12 +128,12 @@ hermes webhook test <name> --payload '{"key": "value"}'
 ```bash
 hermes webhook subscribe github-issues \
   --events "issues" \
-  --prompt "新 GitHub issue #{issue.number}: {issue.title}\n\n操作: {action}\n作者: {issue.user.login}\n正文:\n{issue.body}\n\n请对此 issue 进行分类。" \
+  --prompt "新的 GitHub issue #{issue.number}: {issue.title}\n\n操作: {action}\n作者: {issue.user.login}\n正文:\n{issue.body}\n\n请对此 issue 进行分类。" \
   --deliver telegram \
   --deliver-chat-id "-100123456789"
 ```
 
-然后在 GitHub 仓库设置中：Settings → Webhooks → Add webhook：
+然后在 GitHub 仓库的 Settings → Webhooks → Add webhook 中：
 - Payload URL: 返回的 webhook_url
 - Content type: application/json
 - Secret: 返回的 secret
@@ -151,7 +152,7 @@ hermes webhook subscribe github-prs \
 ```bash
 hermes webhook subscribe stripe-payments \
   --events "payment_intent.succeeded,payment_intent.payment_failed" \
-  --prompt "支付 {data.object.status}: {data.object.amount} 分，来自 {data.object.receipt_email}" \
+  --prompt "支付 {data.object.status}: {data.object.amount} 美分，来自 {data.object.receipt_email}" \
   --deliver telegram \
   --deliver-chat-id "-100123456789"
 ```
@@ -179,7 +180,7 @@ hermes webhook subscribe alerts \
 用于：
 - 外部服务推送通知（Supabase/Firebase webhooks → Telegram）
 - 应原样转发的监控告警
-- Agent 间通信，其中一个 Agent 告诉另一个 Agent 的用户某些事情
+- Agent 间通信，其中一个 Agent 告诉另一个 Agent 的用户某事
 - 任何 LLM 往返将是浪费精力的 Webhook
 
 ```bash
@@ -191,9 +192,9 @@ hermes webhook subscribe antenna-matches \
   --description "Antenna 匹配通知"
 ```
 
-POST 在成功投递时返回 `200 OK`，在目标失败时返回 `502`——因此上游服务可以智能地重试。HMAC 认证、速率限制和幂等性仍然适用。
+POST 在成功投递时返回 `200 OK`，在目标失败时返回 `502`——因此上游服务可以智能重试。HMAC 认证、速率限制和幂等性仍然适用。
 
-要求 `--deliver` 是一个真实的目标（telegram、discord、slack、github_comment 等）——`--deliver log` 会被拒绝，因为仅记录的直接投递没有意义。
+要求 `--deliver` 是一个真实的目标（telegram, discord, slack, github_comment 等）——`--deliver log` 会被拒绝，因为仅记录的直接投递没有意义。
 
 ## 安全性
 
@@ -206,7 +207,7 @@ POST 在成功投递时返回 `200 OK`，在目标失败时返回 `502`——因
 
 1. `hermes webhook subscribe` 写入 `~/.hermes/webhook_subscriptions.json`
 2. Webhook 适配器在每次传入请求时热重载此文件（基于修改时间门控，开销可忽略）
-3. 当 POST 请求到达并匹配路由时，适配器格式化提示词并触发 Agent 运行
+3. 当 POST 到达匹配路由时，适配器格式化提示词并触发 Agent 运行
 4. Agent 的响应被投递到配置的目标（Telegram、Discord、GitHub 评论等）
 
 ## 故障排除
@@ -217,5 +218,5 @@ POST 在成功投递时返回 `200 OK`，在目标失败时返回 `502`——因
 2. **Webhook 服务器在监听吗？** `curl http://localhost:8644/health` 应返回 `{"status": "ok"}`
 3. **检查消息网关日志：** `grep webhook ~/.hermes/logs/gateway.log | tail -20`
 4. **签名不匹配？** 验证你服务中的密钥是否与 `hermes webhook list` 返回的密钥匹配。GitHub 发送 `X-Hub-Signature-256`，GitLab 发送 `X-Gitlab-Token`。
-5. **防火墙/NAT？** Webhook URL 必须能从服务访问。对于本地开发，请使用隧道（ngrok、cloudflared）。
-6. **事件类型错误？** 检查 `--events` 过滤器是否匹配服务发送的内容。使用 `hermes webhook test <name>` 验证路由是否有效。
+5. **防火墙/NAT？** Webhook URL 必须能从服务访问。对于本地开发，请使用隧道（ngrok, cloudflared）。
+6. **事件类型错误？** 检查 `--events` 过滤器是否匹配服务发送的内容。使用 `hermes webhook test <name>` 验证路由是否工作。

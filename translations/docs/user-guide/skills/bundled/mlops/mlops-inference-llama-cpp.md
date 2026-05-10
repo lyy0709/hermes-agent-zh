@@ -20,6 +20,7 @@ llama.cpp 本地 GGUF 推理 + Hugging Face Hub 模型发现。
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `llama-cpp-python>=0.2.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `llama.cpp`, `GGUF`, `Quantization`, `Hugging Face Hub`, `CPU Inference`, `Apple Silicon`, `Edge Deployment`, `AMD GPUs`, `Intel GPUs`, `NVIDIA`, `URL-first` |
 
 ## 参考：完整的 SKILL.md
@@ -32,42 +33,42 @@ llama.cpp 本地 GGUF 推理 + Hugging Face Hub 模型发现。
 
 使用此技能进行本地 GGUF 推理、量化选择或为 llama.cpp 发现 Hugging Face 仓库。
 
-## 何时使用
+## 使用时机
 
 - 在 CPU、Apple Silicon、CUDA、ROCm 或 Intel GPU 上运行本地模型
 - 为特定的 Hugging Face 仓库找到合适的 GGUF 文件
-- 根据 Hub 构建 `llama-server` 或 `llama-cli` 命令
+- 根据 Hub 仓库构建 `llama-server` 或 `llama-cli` 命令
 - 在 Hub 上搜索已支持 llama.cpp 的模型
 - 枚举仓库中可用的 `.gguf` 文件及其大小
 - 根据用户的 RAM 或 VRAM 在 Q4/Q5/Q6/IQ 变体之间做出选择
 
 ## 模型发现工作流
 
-优先使用 URL 工作流，然后再询问 `hf`、Python 或自定义脚本。
+优先使用 URL 工作流，再询问 `hf`、Python 或自定义脚本。
 
 1.  在 Hub 上搜索候选仓库：
     - 基础：`https://huggingface.co/models?apps=llama.cpp&sort=trending`
-    - 添加 `search=<term>` 来搜索模型系列
+    - 添加 `search=<term>` 来搜索特定模型系列
     - 当用户有大小限制时，添加 `num_parameters=min:0,max:24B` 或类似参数
 2.  使用 llama.cpp 本地应用视图打开仓库：
     - `https://huggingface.co/<repo>?local-app=llama.cpp`
-3.  当本地应用代码片段可见时，将其视为事实来源：
+3.  当本地应用代码片段可见时，将其视为唯一真相来源：
     - 复制确切的 `llama-server` 或 `llama-cli` 命令
     - 完全按照 HF 显示的方式报告推荐的量化版本
 4.  将相同的 `?local-app=llama.cpp` URL 作为页面文本或 HTML 读取，并提取 `Hardware compatibility` 下的部分：
     - 优先使用其确切的量化标签和大小，而非通用表格
     - 保留仓库特定的标签，如 `UD-Q4_K_M` 或 `IQ4_NL_XL`
-    - 如果获取的页面源代码中未显示该部分，请说明并回退到树 API 加上通用的量化指导
+    - 如果获取的页面源码中该部分不可见，请说明并回退到树 API 加上通用的量化指导
 5.  查询树 API 以确认实际存在的内容：
     - `https://huggingface.co/api/models/<repo>/tree/main?recursive=true`
     - 保留 `type` 为 `file` 且 `path` 以 `.gguf` 结尾的条目
-    - 使用 `path` 和 `size` 作为文件名和字节大小的真实来源
+    - 使用 `path` 和 `size` 作为文件名和字节大小的真相来源
     - 将量化检查点与 `mmproj-*.gguf` 投影器文件和 `BF16/` 分片文件分开
     - 仅将 `https://huggingface.co/<repo>/tree/main` 作为人工备用方案
-6.  如果本地应用代码片段在文本中不可见，则根据仓库和选定的量化版本重构命令：
+6.  如果本地应用代码片段在文本中不可见，则根据仓库和选择的量化版本重构命令：
     - 简写量化选择：`llama-server -hf <repo>:<QUANT>`
     - 精确文件备用方案：`llama-server --hf-repo <repo> --hf-file <filename.gguf>`
-7.  仅当仓库尚未公开 GGUF 文件时，才建议从 Transformers 权重进行转换。
+7.  仅当仓库尚未提供 GGUF 文件时，才建议从 Transformers 权重进行转换。
 
 ## 快速开始
 
@@ -124,7 +125,7 @@ curl http://localhost:8080/v1/chat/completions \
 
 ## Python 绑定 (llama-cpp-python)
 
-`pip install llama-cpp-python` (CUDA: `CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall --no-cache-dir`; Metal: `CMAKE_ARGS="-DGGML_METAL=on" ...`).
+`pip install llama-cpp-python` (CUDA: `CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall --no-cache-dir`; Metal: `CMAKE_ARGS="-DGGML_METAL=on" ...`)。
 
 ### 基本生成
 
@@ -188,7 +189,7 @@ llm = Llama.from_pretrained(
 
 优先使用 Hub 页面，其次使用通用启发式方法。
 
-- 优先使用 HF 标记为与用户硬件配置文件兼容的确切量化版本。
+- 优先使用 HF 标记为用户硬件配置文件兼容的确切量化版本。
 - 对于一般聊天，从 `Q4_K_M` 开始。
 - 对于代码或技术工作，如果内存允许，优先选择 `Q5_K_M` 或 `Q6_K`。
 - 对于非常紧张的 RAM 预算，仅在用户明确优先考虑适配性而非质量时，才考虑 `Q3_K_M`、`IQ` 变体或 `Q2` 变体。
@@ -208,13 +209,13 @@ llm = Llama.from_pretrained(
 
 - README
 - BF16 分片文件
-- imatrix 数据块或校准工件
+- imatrix 二进制大对象或校准工件
 
 使用树 API 进行此步骤：
 
 - `https://huggingface.co/api/models/<repo>/tree/main?recursive=true`
 
-对于像 `unsloth/Qwen3.6-35B-A3B-GGUF` 这样的仓库，本地应用页面可以显示量化芯片，如 `UD-Q4_K_M`、`UD-Q5_K_M`、`UD-Q6_K` 和 `Q8_0`，而树 API 则公开确切的文件路径，如 `Qwen3.6-35B-A3B-UD-Q4_K_M.gguf` 和 `Qwen3.6-35B-A3B-Q8_0.gguf` 及其字节大小。使用树 API 将量化标签转换为确切的文件名。
+对于像 `unsloth/Qwen3.6-35B-A3B-GGUF` 这样的仓库，本地应用页面可以显示量化芯片，如 `UD-Q4_K_M`、`UD-Q5_K_M`、`UD-Q6_K` 和 `Q8_0`，而树 API 则暴露确切的文件路径，如 `Qwen3.6-35B-A3B-UD-Q4_K_M.gguf` 和 `Qwen3.6-35B-A3B-Q8_0.gguf` 及其字节大小。使用树 API 将量化标签转换为确切的文件名。
 
 ## 搜索模式
 
@@ -240,7 +241,7 @@ llama-server: <command>
 其他 GGUF:
 - <filename> - <size>
 - <filename> - <size>
-源 URL:
+来源 URL:
 - <local-app URL>
 - <tree API URL>
 ```

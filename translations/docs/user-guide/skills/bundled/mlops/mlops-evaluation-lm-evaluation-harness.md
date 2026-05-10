@@ -1,14 +1,14 @@
 ---
-title: "评估 Llms Harness — lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）"
+title: "评估 Llms Harness — lm-eval-harness：基准测试 LLMs (MMLU, GSM8K 等)"
 sidebar_label: "评估 Llms Harness"
-description: "lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）"
+description: "lm-eval-harness：基准测试 LLMs (MMLU, GSM8K 等)"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 评估 Llms Harness
 
-lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）。
+lm-eval-harness：基准测试 LLMs (MMLU, GSM8K 等)。
 
 ## 技能元数据
 
@@ -20,6 +20,7 @@ lm-eval-harness：基准测试 LLMs（MMLU、GSM8K 等）。
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `lm-eval`, `transformers`, `vllm` |
+| 平台 | linux, macos |
 | 标签 | `Evaluation`, `LM Evaluation Harness`, `Benchmarking`, `MMLU`, `HumanEval`, `GSM8K`, `EleutherAI`, `Model Quality`, `Academic Benchmarks`, `Industry Standard` |
 
 ## 参考：完整的 SKILL.md
@@ -84,9 +85,9 @@ lm_eval --tasks list
 
 **代码基准测试**：
 - **HumanEval** - Python 代码生成（164 个问题）
-- **MBPP**（大多数基础 Python 问题）- Python 编码
+- **MBPP**（基本 Python 问题）- Python 编码
 
-**标准套件**（推荐用于模型发布）：
+**标准套件**（建议用于模型发布）：
 ```bash
 --tasks mmlu,gsm8k,hellaswag,truthfulqa,arc_challenge
 ```
@@ -99,10 +100,10 @@ lm_eval --model hf \
   --model_args pretrained=meta-llama/Llama-2-7b-hf,dtype=bfloat16 \
   --tasks mmlu \
   --device cuda:0 \
-  --batch_size auto  # 自动检测最佳批次大小
+  --batch_size auto  # 自动检测最佳批量大小
 ```
 
-**量化模型（4-bit/8-bit）**：
+**量化模型（4位/8位）**：
 ```bash
 lm_eval --model hf \
   --model_args pretrained=meta-llama/Llama-2-7b-hf,load_in_4bit=True \
@@ -402,13 +403,13 @@ lm_eval --model vllm \
 - 在标准任务上比较模型质量
 - 跟踪训练进度
 - 报告标准化指标（每个人都使用相同的提示词）
-- 需要可复现的评估
+- 需要可重复的评估
 
 **改用替代方案：**
-- **HELM**（斯坦福大学）：更广泛的评估（公平性、效率、校准）
+- **HELM**（斯坦福）：更广泛的评估（公平性、效率、校准）
 - **AlpacaEval**：使用 LLM 评判器进行指令遵循评估
 - **MT-Bench**：对话式多轮评估
-- **自定义脚本**：领域特定的评估
+- **自定义脚本**：特定领域的评估
 
 ## 常见问题
 
@@ -483,7 +484,7 @@ lm_eval --model hf \
 
 **基准测试描述**：查看 [references/benchmark-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/benchmark-guide.md) 获取所有 60 多个任务的详细描述、它们衡量什么以及如何解释。
 
-**自定义任务**：查看 [references/custom-tasks.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/custom-tasks.md) 了解如何创建领域特定的评估任务。
+**自定义任务**：查看 [references/custom-tasks.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/custom-tasks.md) 了解如何创建特定领域的评估任务。
 
 **API 评估**：查看 [references/api-evaluation.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/api-evaluation.md) 了解如何评估 OpenAI、Anthropic 和其他 API 模型。
 **多 GPU 策略**：关于数据并行和张量并行评估，请参阅 [references/distributed-eval.md](https://github.com/NousResearch/hermes-agent/blob/main/skills/mlops/evaluation/lm-evaluation-harness/references/distributed-eval.md)。

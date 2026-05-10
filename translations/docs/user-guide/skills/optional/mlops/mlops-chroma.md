@@ -20,7 +20,8 @@ description: "面向 AI 应用的开源嵌入数据库"
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `chromadb`, `sentence-transformers` |
-| 标签 | `RAG`, `Chroma`, `向量数据库`, `嵌入`, `语义搜索`, `开源`, `自托管`, `文档检索`, `元数据过滤` |
+| 平台 | linux, macos, windows |
+| 标签 | `RAG`, `Chroma`, `Vector Database`, `Embeddings`, `Semantic Search`, `Open Source`, `Self-Hosted`, `Document Retrieval`, `Metadata Filtering` |
 
 ## 参考：完整的 SKILL.md
 
@@ -48,8 +49,8 @@ description: "面向 AI 应用的开源嵌入数据库"
 - **v1.3.3**（稳定版，每周发布）
 - **Apache 2.0 许可证**
 
-**改用替代方案的情况**：
-- **Pinecone**：托管云服务，自动扩缩容
+**改用替代方案**：
+- **Pinecone**：托管云服务，自动扩展
 - **FAISS**：纯相似性搜索，无元数据
 - **Weaviate**：生产级 ML 原生数据库
 - **Qdrant**：高性能，基于 Rust
@@ -159,7 +160,7 @@ results = collection.query(
     where={"source": "web"}
 )
 
-# 带元数据过滤器的查询
+# 使用元数据过滤器查询
 results = collection.query(
     query_texts=["advanced topics"],
     where={
@@ -397,7 +398,7 @@ collection = client.get_or_create_collection("my_docs")
 ## 最佳实践
 
 1. **使用持久化客户端** - 重启时不会丢失数据
-2. **添加元数据** - 支持过滤和追踪
+2. **添加元数据** - 支持过滤和跟踪
 3. **批量操作** - 一次添加多个文档
 4. **选择合适的嵌入模型** - 平衡速度和质量
 5. **使用过滤器** - 缩小搜索空间

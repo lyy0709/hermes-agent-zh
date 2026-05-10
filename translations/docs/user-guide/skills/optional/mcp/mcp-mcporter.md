@@ -19,6 +19,7 @@ description: "使用 mcporter CLI 直接列出、配置、授权和调用 MCP �
 | 版本 | `1.0.0` |
 | 作者 | community |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `MCP`, `Tools`, `API`, `Integrations`, `Interop` |
 
 ## 参考：完整的 SKILL.md
@@ -57,7 +58,7 @@ mcporter call <server.tool> key=value
 
 ## 发现 MCP 服务器
 
-mcporter 会自动发现机器上由其他 MCP 客户端（Claude Desktop、Cursor 等）配置的服务器。要查找新的服务器使用，可以浏览像 [mcpfinder.dev](https://mcpfinder.dev) 或 [mcp.so](https://mcp.so) 这样的注册表，然后临时连接：
+mcporter 会自动发现机器上由其他 MCP 客户端（Claude Desktop、Cursor 等）配置的服务器。要查找新的服务器使用，可以浏览注册中心如 [mcpfinder.dev](https://mcpfinder.dev) 或 [mcp.so](https://mcp.so)，然后临时连接：
 
 ```bash
 # 通过 URL 连接到任何 MCP 服务器（无需配置）

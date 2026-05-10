@@ -8,23 +8,24 @@ description: "通过 inference 运行 150+ AI 应用"
 
 # Inference Sh Cli
 
-通过 inference.sh CLI (infsh) 运行 150+ AI 应用 — 图像生成、视频创作、LLM、搜索、3D、社交自动化。使用终端工具。触发词：inference.sh, infsh, ai apps, flux, veo, image generation, video generation, seedream, seedance, tavily
+通过 inference.sh CLI (infsh) 运行 150+ AI 应用 — 图像生成、视频创作、LLM、搜索、3D、社交媒体自动化。使用终端工具。触发词：inference.sh, infsh, ai apps, flux, veo, image generation, video generation, seedream, seedance, tavily
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/devops/cli` 安装 |
+| 来源 | 可选 — 通过 `hermes skills install official/devops/cli` 安装 |
 | 路径 | `optional-skills/devops/cli` |
 | 版本 | `1.0.0` |
 | 作者 | okaris |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `AI`, `image-generation`, `video`, `LLM`, `search`, `inference`, `FLUX`, `Veo`, `Claude` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 加载此技能时读取的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # inference.sh CLI
@@ -81,7 +82,7 @@ infsh app run <app-id> --input '{"prompt": "your prompt here"}' --json
 
 ### 3. 解析输出
 
-JSON 输出包含生成媒体的 URL。使用 `MEDIA:<url>` 格式向用户展示这些 URL 以便内联显示。
+JSON 输出包含生成媒体的 URL。使用 `MEDIA:<url>` 将这些 URL 呈现给用户以进行内联显示。
 
 ## 常用命令
 

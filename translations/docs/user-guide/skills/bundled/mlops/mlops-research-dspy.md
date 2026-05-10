@@ -20,6 +20,7 @@ DSPy：声明式语言模型编程，自动优化提示词，RAG。
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `dspy`, `openai`, `anthropic` |
+| 平台 | linux, macos, windows |
 | 标签 | `Prompt Engineering`, `DSPy`, `Declarative Programming`, `RAG`, `Agents`, `Prompt Optimization`, `LM Programming`, `Stanford NLP`, `Automatic Optimization`, `Modular AI` |
 
 ## 参考：完整的 SKILL.md
@@ -34,11 +35,11 @@ DSPy：声明式语言模型编程，自动优化提示词，RAG。
 
 在以下情况下使用 DSPy：
 - **构建复杂的 AI 系统**，包含多个组件和工作流
-- **以声明式方式编程语言模型**，而非手动进行提示词工程
-- **使用数据驱动方法自动优化提示词**
-- **创建模块化、可维护且可移植的 AI 流水线**
+- **以声明式方式编程语言模型**，而非手动进行提示工程
+- **使用数据驱动的方法自动优化提示词**
+- **创建模块化的 AI 流水线**，易于维护和移植
 - **通过优化器系统性地改进模型输出**
-- **构建更可靠的 RAG 系统、Agent 或分类器**
+- **构建 RAG 系统、Agent 或分类器**，并提高可靠性
 
 **GitHub Stars**: 22,000+ | **创建者**: Stanford NLP
 
@@ -48,10 +49,10 @@ DSPy：声明式语言模型编程，自动优化提示词，RAG。
 # 稳定版本
 pip install dspy
 
-# 最新开发版本
+# 最新的开发版本
 pip install git+https://github.com/stanfordnlp/dspy.git
 
-# 安装特定 LM 提供商支持
+# 使用特定的 LM 提供商
 pip install dspy[openai]        # OpenAI
 pip install dspy[anthropic]     # Anthropic Claude
 pip install dspy[all]           # 所有提供商
@@ -123,13 +124,13 @@ class Summarize(dspy.Signature):
 summarizer = dspy.ChainOfThought(Summarize)
 ```
 
-**何时使用：**
+**何时使用每种方式：**
 - **内联**：快速原型设计，简单任务
 - **类**：复杂任务，类型提示，更好的文档
 
 ### 2. 模块
 
-模块是将输入转换为输出的可复用组件：
+模块是可重用的组件，将输入转换为输出：
 
 #### dspy.Predict
 基础预测模块：
@@ -162,7 +163,7 @@ class SearchQA(dspy.Signature):
     answer = dspy.OutputField()
 
 def search_tool(query: str) -> str:
-    """搜索 Wikipedia。"""
+    """搜索维基百科。"""
     # 你的搜索实现
     return results
 
@@ -195,7 +196,7 @@ trainset = [
     dspy.Example(question="What is 3+5?", answer="8").with_inputs("question"),
 ]
 
-# 定义评估指标
+# 定义指标
 def validate_answer(example, pred, trace=None):
     return example.answer == pred.answer
 
@@ -206,7 +207,7 @@ optimized_qa = optimizer.compile(qa, trainset=trainset)
 # 现在 optimized_qa 表现更好了！
 ```
 
-#### MIPRO（最重要的提示词优化）
+#### MIPRO（最重要的提示优化）
 迭代改进提示词：
 
 ```python
@@ -436,7 +437,7 @@ class RerankedRAG(dspy.Module):
         # 检索候选
         passages = self.retrieve(question).passages
 
-        # 重排段落
+        # 对段落进行重排
         scored = []
         for passage in passages:
             score = float(self.rerank(question=question, passage=passage).relevance_score)
@@ -509,19 +510,19 @@ qa = dspy.Predict("question -> answer")
 # 如果需要，添加推理步骤
 qa = dspy.ChainOfThought("question -> answer")
 
-# 当有数据时进行优化
+# 当你有数据时，进行优化
 optimized_qa = optimizer.compile(qa, trainset=data)
 ```
 
 ### 2. 使用描述性的签名
 
 ```python
-# ❌ 不好：模糊不清
+# ❌ 不好：模糊
 class Task(dspy.Signature):
     input = dspy.InputField()
     output = dspy.OutputField()
 
-# ✅ 好：描述清晰
+# ✅ 好：描述性的
 class SummarizeArticle(dspy.Signature):
     """将新闻文章总结为 3-5 个要点。"""
     article = dspy.InputField(desc="完整的文章文本")
@@ -538,7 +539,7 @@ trainset = [
     dspy.Example(question="calculation", answer="...").with_inputs("question"),
 ]
 
-# 使用验证集进行评估
+# 使用验证集进行指标评估
 def metric(example, pred, trace=None):
     return example.answer in pred.answer
 ```
@@ -575,10 +576,10 @@ for call in dspy.settings.trace:
 |---------|-----------------|-----------|------|
 | 提示工程 | 手动 | 手动 | 自动 |
 | 优化 | 试错 | 无 | 数据驱动 |
-| 模块化 | 低 | 中等 | 高 |
+| 模块化 | 低 | 中 | 高 |
 | 类型安全 | 否 | 有限 | 是（通过签名） |
-| 可移植性 | 低 | 中等 | 高 |
-| 学习曲线 | 低 | 中等 | 中高 |
+| 可移植性 | 低 | 中 | 高 |
+| 学习曲线 | 低 | 中 | 中高 |
 
 **何时选择 DSPy：**
 - 你拥有训练数据或可以生成数据
@@ -601,6 +602,6 @@ for call in dspy.settings.trace:
 
 ## 另请参阅
 
-- `references/modules.md` - 详细模块指南（Predict, ChainOfThought, ReAct, ProgramOfThought）
-- `references/optimizers.md` - 优化算法（BootstrapFewShot, MIPRO, BootstrapFinetune）
-- `references/examples.md` - 真实世界示例（RAG, agents, classifiers）
+- `references/modules.md` - 详细模块指南（Predict、ChainOfThought、ReAct、ProgramOfThought）
+- `references/optimizers.md` - 优化算法（BootstrapFewShot、MIPRO、BootstrapFinetune）
+- `references/examples.md` - 真实世界示例（RAG、Agent、分类器）

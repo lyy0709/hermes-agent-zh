@@ -1,14 +1,14 @@
 ---
-title: "Excalidraw — 手绘风格的 Excalidraw JSON 图表（架构图、流程图、序列图）"
+title: "Excalidraw — 手绘风格的 Excalidraw JSON 图表（架构、流程、时序）"
 sidebar_label: "Excalidraw"
-description: "手绘风格的 Excalidraw JSON 图表（架构图、流程图、序列图）"
+description: "手绘风格的 Excalidraw JSON 图表（架构、流程、时序）"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Excalidraw
 
-手绘风格的 Excalidraw JSON 图表（架构图、流程图、序列图）。
+手绘风格的 Excalidraw JSON 图表（架构、流程、时序）。
 
 ## 技能元数据
 
@@ -19,6 +19,7 @@ description: "手绘风格的 Excalidraw JSON 图表（架构图、流程图、�
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Excalidraw`, `Diagrams`, `Flowcharts`, `Architecture`, `Visualization`, `JSON` |
 
 ## 参考：完整的 SKILL.md
@@ -33,7 +34,7 @@ description: "手绘风格的 Excalidraw JSON 图表（架构图、流程图、�
 
 ## 何时使用
 
-为架构图、流程图、序列图、概念图等生成 `.excalidraw` 文件。文件可以在 excalidraw.com 上打开或上传以获得可分享的链接。
+为架构图、流程图、时序图、概念图等生成 `.excalidraw` 文件。文件可以在 excalidraw.com 上打开或上传以获得可分享的链接。
 
 ## 工作流程
 
@@ -77,7 +78,7 @@ python skills/diagramming/excalidraw/scripts/upload.py ~/diagrams/my_diagram.exc
 ### 必填字段（所有元素）
 `type`, `id`（唯一字符串）, `x`, `y`, `width`, `height`
 
-### 默认值（可省略——它们会自动应用）
+### 默认值（可跳过——它们会自动应用）
 - `strokeColor`: `"#1e1e1e"`
 - `backgroundColor`: `"transparent"`
 - `fillStyle`: `"solid"`
@@ -121,7 +122,7 @@ python skills/diagramming/excalidraw/scripts/upload.py ~/diagrams/my_diagram.exc
   "containerId": "r1", "originalText": "Hello", "autoResize": true }
 ```
 - 适用于矩形、椭圆、菱形
-- 设置 `containerId` 后，文本由 Excalidraw 自动居中
+- 当设置 `containerId` 时，文本由 Excalidraw 自动居中
 - 文本的 `x`/`y`/`width`/`height` 是近似值——Excalidraw 在加载时会重新计算它们
 - `originalText` 应与 `text` 匹配
 - 始终包含 `fontFamily: 1`（Virgil/手绘字体）
@@ -182,7 +183,7 @@ python skills/diagramming/excalidraw/scripts/upload.py ~/diagrams/my_diagram.exc
 - 次要注释的最小 `fontSize`：**14**（谨慎使用）
 - **绝不**使用低于 14 的 `fontSize`
 
-**元素大小：**
+**元素尺寸：**
 - 带标签的矩形/椭圆的最小尺寸：120x60
 - 元素之间至少留出 20-30px 的间隙
 - 倾向于使用更少、更大的元素，而不是许多微小的元素
@@ -196,7 +197,7 @@ python skills/diagramming/excalidraw/scripts/upload.py ~/diagrams/my_diagram.exc
 | 主要 / 输入 | 浅蓝色 | `#a5d8ff` |
 | 成功 / 输出 | 浅绿色 | `#b2f2bb` |
 | 警告 / 外部 | 浅橙色 | `#ffd8a8` |
-| 处理中 / 特殊 | 浅紫色 | `#d0bfff` |
+| 处理 / 特殊 | 浅紫色 | `#d0bfff` |
 | 错误 / 关键 | 浅红色 | `#ffc9c9` |
 | 注释 / 决策 | 浅黄色 | `#fff3bf` |
 | 存储 / 数据 | 浅青色 | `#c3fae8` |

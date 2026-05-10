@@ -19,23 +19,24 @@ description: "使用 GitNexus 索引代码库，并通过 Web UI + Cloudflare �
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent + Teknium |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `gitnexus`, `code-intelligence`, `knowledge-graph`, `visualization` |
 | 相关技能 | [`native-mcp`](/docs/user-guide/skills/bundled/mcp/mcp-native-mcp), [`codebase-inspection`](/docs/user-guide/skills/bundled/github/github-codebase-inspection) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # GitNexus Explorer
 
-将任何代码库索引为知识图谱，并提供交互式 Web UI 用于探索符号、调用链、集群和执行流。通过 Cloudflare 隧道实现远程访问。
+将任何代码库索引为知识图谱，并提供交互式 Web UI 以探索符号、调用链、集群和执行流。通过 Cloudflare 隧道实现远程访问。
 
 ## 使用时机
 
 - 用户希望可视化探索代码库架构
-- 用户要求获取仓库的知识图谱/依赖图
+- 用户请求获取仓库的知识图谱/依赖图
 - 用户希望与他人共享交互式代码库探索器
 
 ## 先决条件
@@ -98,13 +99,13 @@ npx gitnexus analyze --skip-agents-md
 rm -rf .claude/    # 移除 Claude Code 特定的产物
 ```
 
-添加 `--embeddings` 以启用语义搜索（较慢 — 分钟级而非秒级）。
+添加 `--embeddings` 以启用语义搜索（速度较慢 — 分钟级而非秒级）。
 
 索引位于仓库内的 `.gitnexus/` 目录中（自动被 gitignore 忽略）。
 
 ### 4. 创建代理脚本
 
-将此内容写入文件（例如，`$GITNEXUS_DIR/proxy.mjs`）。它提供生产 Web UI 并将 `/api/*` 代理到 GitNexus 后端 — 同源，无 CORS 问题，无需 sudo，无需 nginx。
+将此内容写入文件（例如，`$GITNEXUS_DIR/proxy.mjs`）。它提供生产版 Web UI 并将 `/api/*` 代理到 GitNexus 后端 — 同源，无 CORS 问题，无需 sudo，无需 nginx。
 
 ```javascript
 import http from 'node:http';
@@ -159,7 +160,7 @@ http.createServer((req, res) => {
 # 终端 1: GitNexus 后端 API
 npx gitnexus serve &
 
-# 终端 2: 代理服务器（Web UI + API 在同一端口）
+# 终端 2: 代理（Web UI + API 在同一端口）
 node "$GITNEXUS_DIR/proxy.mjs" "$GITNEXUS_DIR/gitnexus-web/dist" 8888 &
 ```
 
@@ -198,16 +199,16 @@ npx gitnexus clean
 rm -rf .claude/
 ```
 
-## 注意事项
+## 常见问题
 
 - **`--config /dev/null` 对于 cloudflared 是必需的**，如果用户在 `~/.cloudflared/config.yml` 已有现有的命名隧道配置。没有它，配置中的通配入口规则会为所有快速隧道请求返回 404。
 
 - **生产构建对于隧道是强制性的。** Vite 开发服务器默认阻止非 localhost 主机（`allowedHosts`）。生产构建 + Node 代理完全避免了这个问题。
 
-- **Web UI 不会创建 `.claude/` 或 `CLAUDE.md`。** 这些是由 `npx gitnexus analyze` 创建的。使用 `--skip-agents-md` 来抑制 markdown 文件的生成，然后 `rm -rf .claude/` 移除其余部分。这些是 Claude Code 集成，hermes-agent 用户不需要。
+- **Web UI 不会创建 `.claude/` 或 `CLAUDE.md`。** 这些是由 `npx gitnexus analyze` 创建的。使用 `--skip-agents-md` 来抑制 markdown 文件，然后 `rm -rf .claude/` 来移除其余部分。这些是 hermes-agent 用户不需要的 Claude Code 集成。
 
 - **浏览器内存限制。** Web UI 将整个图谱加载到浏览器内存中。5k+ 文件的仓库可能会卡顿。30k+ 文件很可能会导致标签页崩溃。
 
-- **嵌入是可选的。** `--embeddings` 启用语义搜索，但在大型仓库上需要数分钟。快速探索时跳过它；如果希望通过 AI 聊天面板进行自然语言查询，则添加它。
+- **嵌入是可选的。** `--embeddings` 启用语义搜索，但在大型仓库上需要数分钟。快速探索时跳过它；如果需要通过 AI 聊天面板进行自然语言查询，则添加它。
 
 - **多个仓库。** `gitnexus serve` 提供所有已索引的仓库。索引多个仓库，启动一次 serve，Web UI 允许你在它们之间切换。

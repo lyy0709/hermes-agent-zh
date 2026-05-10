@@ -1,7 +1,7 @@
 ---
-title: "Meme Generation — 通过选择模板并使用 Pillow 叠加文本生成真实的梗图"
+title: "Meme Generation — 通过选择模板并使用 Pillow 叠加文本来生成真实的梗图"
 sidebar_label: "Meme Generation"
-description: "通过选择模板并使用 Pillow 叠加文本生成真实的梗图"
+description: "通过选择模板并使用 Pillow 叠加文本来生成真实的梗图"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
@@ -14,11 +14,12 @@ description: "通过选择模板并使用 Pillow 叠加文本生成真实的梗�
 
 | | |
 |---|---|
-| 来源 | Optional — 使用 `hermes skills install official/creative/meme-generation` 安装 |
+| 来源 | 可选 — 使用 `hermes skills install official/creative/meme-generation` 安装 |
 | 路径 | `optional-skills/creative/meme-generation` |
 | 版本 | `2.0.0` |
 | 作者 | adanaleycio |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `creative`, `memes`, `humor`, `images` |
 | 相关技能 | [`ascii-art`](/docs/user-guide/skills/bundled/creative/creative-ascii-art), `generative-widgets` |
 
@@ -30,7 +31,7 @@ description: "通过选择模板并使用 Pillow 叠加文本生成真实的梗�
 
 # Meme Generation
 
-根据主题生成实际的梗图。选择模板、编写标题，并使用文本叠加渲染出真实的 .png 文件。
+根据主题生成实际的梗图。选择模板、编写标题，并通过文本叠加渲染出真实的 .png 文件。
 
 ## 使用时机
 
@@ -40,7 +41,7 @@ description: "通过选择模板并使用 Pillow 叠加文本生成真实的梗�
 
 ## 可用模板
 
-该脚本支持 **imgflip 上约 100 个流行模板中的任何一个**（通过名称或 ID），外加 10 个经过手动调整文本位置的精选模板。
+该脚本支持 **imgflip 上约 100 个流行模板**中的任何一个（通过名称或 ID），外加 10 个经过手动调整文本位置的精选模板。
 
 ### 精选模板（自定义文本位置）
 
@@ -59,7 +60,7 @@ description: "通过选择模板并使用 Pillow 叠加文本生成真实的梗�
 
 ### 动态模板（来自 imgflip API）
 
-任何不在精选列表中的模板都可以通过名称或 imgflip ID 使用。这些模板会获得智能的默认文本定位（2个字段用顶部/底部，3个及以上字段则均匀分布）。使用以下命令搜索：
+任何不在精选列表中的模板都可以通过名称或 imgflip ID 使用。这些模板会获得智能的默认文本定位（2个字段用顶部/底部，3个及以上字段则均匀分布）。搜索方法：
 ```bash
 python "$SKILL_DIR/scripts/generate_meme.py" --search "disaster"
 ```
@@ -83,12 +84,12 @@ python "$SKILL_DIR/scripts/generate_meme.py" --search "disaster"
 
 ### 模式 2：自定义 AI 图像（当 `image_generate` 可用时）
 
-当没有经典模板合适，或者用户想要原创内容时使用此模式。
+当没有合适的经典模板，或用户想要原创内容时使用此模式。
 
 1.  首先编写标题。
 2.  使用 `image_generate` 创建与梗图概念匹配的场景。**不要**在图像提示词中包含任何文本——文本将由脚本添加。仅描述视觉场景。
 3.  从 `image_generate` 结果的 URL 中找到生成的图像路径。如果需要，将其下载到本地路径。
-4.  使用 `--image` 运行脚本以叠加文本，选择一种模式：
+4.  运行脚本并使用 `--image` 参数叠加文本，选择一种模式：
     - **叠加**（文本直接覆盖在图像上，白色带黑色描边）：
       ```bash
       python "$SKILL_DIR/scripts/generate_meme.py" --image /path/to/scene.png /tmp/meme.png "top text" "bottom text"
@@ -98,7 +99,7 @@ python "$SKILL_DIR/scripts/generate_meme.py" --search "disaster"
       python "$SKILL_DIR/scripts/generate_meme.py" --image /path/to/scene.png --bars /tmp/meme.png "top text" "bottom text"
       ```
     当图像内容繁杂/细节丰富，直接叠加文本难以阅读时，使用 `--bars`。
-5.  **使用视觉模型验证**（如果 `vision_analyze` 可用）：检查结果是否良好：
+5.  **使用视觉验证**（如果 `vision_analyze` 可用）：检查结果是否良好：
     ```
     vision_analyze(image_url="/tmp/meme.png", question="Is the text legible and well-positioned? Does the meme work visually?")
     ```
@@ -107,24 +108,24 @@ python "$SKILL_DIR/scripts/generate_meme.py" --search "disaster"
 
 ## 示例
 
-**"凌晨两点调试生产环境"：**
+**"debugging production at 2 AM":**
 ```bash
 python generate_meme.py this-is-fine /tmp/meme.png "SERVERS ARE ON FIRE" "This is fine"
 ```
 
-**"在睡觉和再看一集之间选择"：**
+**"choosing between sleep and one more episode":**
 ```bash
 python generate_meme.py drake /tmp/meme.png "Getting 8 hours of sleep" "One more episode at 3 AM"
 ```
 
-**"周一早晨的各个阶段"：**
+**"the stages of a Monday morning":**
 ```bash
 python generate_meme.py expanding-brain /tmp/meme.png "Setting an alarm" "Setting 5 alarms" "Sleeping through all alarms" "Working from bed"
 ```
 
 ## 列出模板
 
-要查看所有可用模板：
+查看所有可用模板：
 ```bash
 python generate_meme.py --list
 ```
@@ -135,11 +136,11 @@ python generate_meme.py --list
 -   确保文本参数的数量与模板的字段数量匹配。
 -   选择符合笑话结构的模板，而不仅仅是主题。
 -   不要生成仇恨、辱骂或针对个人的内容。
--   脚本在首次下载后会将模板图像缓存到 `scripts/.cache/` 目录。
+-   脚本会在首次下载后将模板图像缓存到 `scripts/.cache/` 目录。
 
 ## 验证
 
-输出正确的条件是：
+如果满足以下条件，则输出正确：
 -   在输出路径创建了 .png 文件
 -   文本在模板上清晰可读（白色带黑色描边）
 -   笑话成立——标题符合模板的预期结构

@@ -1,14 +1,14 @@
 ---
-title: "药物发现 — 用于药物发现工作流的药物研究助手"
+title: "药物发现 — 用于药物发现工作流程的医药研究助手"
 sidebar_label: "药物发现"
-description: "用于药物发现工作流的药物研究助手"
+description: "用于药物发现工作流程的医药研究助手"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 药物发现
 
-用于药物发现工作流的药物研究助手。在 ChEMBL 上搜索生物活性化合物、计算类药性（Lipinski 五规则、QED、TPSA、合成可及性）、通过 OpenFDA 查找药物相互作用、解读 ADMET 谱、并协助先导化合物优化。用于药物化学问题、分子性质分析、临床药理学和开放科学药物研究。
+用于药物发现工作流程的医药研究助手。在 ChEMBL 上搜索生物活性化合物、计算类药性（Lipinski 五规则、QED、TPSA、合成可及性）、通过 OpenFDA 查找药物相互作用、解读 ADMET 谱、并协助先导化合物优化。用于药物化学问题、分子性质分析、临床药理学和开放科学药物研究。
 
 ## 技能元数据
 
@@ -19,26 +19,27 @@ description: "用于药物发现工作流的药物研究助手"
 | 版本 | `1.0.0` |
 | 作者 | bennytimz |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `science`, `chemistry`, `pharmacology`, `research`, `health` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
-# 药物发现与药物研究
+# 药物发现与医药研究
 
-你是一位专业的药物科学家和药物化学家，在药物发现、化学信息学和临床药理学方面拥有深厚的知识。对所有制药/化学研究任务使用此技能。
+你是一位专业的药物科学家和药物化学家，在药物发现、化学信息学和临床药理学方面拥有深厚的知识。所有制药/化学研究任务都请使用此技能。
 
-## 核心工作流
+## 核心工作流程
 
 ### 1 — 生物活性化合物搜索 (ChEMBL)
 
-在 ChEMBL（世界上最大的开放生物活性数据库）中按靶点、活性或分子名称搜索化合物。无需 API 密钥。
+在 ChEMBL（全球最大的开放生物活性数据库）中按靶点、活性或分子名称搜索化合物。无需 API 密钥。
 
 ```bash
-# 按靶点名称搜索化合物（例如 "EGFR", "COX-2", "ACE"）
+# 按靶点名称搜索化合物（例如 "EGFR"、"COX-2"、"ACE"）
 TARGET="$1"
 ENCODED=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$TARGET")
 curl -s "https://www.ebi.ac.uk/chembl/api/data/target/search?q=${ENCODED}&format=json" \
@@ -88,9 +89,9 @@ print(f\"QED        : {props.get('qed_weighted','N/A')}\")
 "
 ```
 
-### 2 — 类药性计算 (Lipinski Ro5 + Veber)
+### 2 — 类药性计算 (Lipinski 五规则 + Veber)
 
-使用 PubChem 的免费性质 API 根据既定的口服生物利用度规则评估任何分子 — 无需安装 RDKit。
+使用 PubChem 的免费性质 API 评估任何分子是否符合既定的口服生物利用度规则 — 无需安装 RDKit。
 
 ```bash
 COMPOUND="$1"
@@ -203,20 +204,20 @@ for row in assoc.get('rows',[]):
 
 ## 推理指南
 
-在分析类药性或分子性质时，始终：
+在分析类药性或分子性质时，始终遵循以下步骤：
 
-1.  **首先陈述原始值** — MW、LogP、HBD、HBA、TPSA、RotBonds
-2.  **应用规则集** — Ro5 (Lipinski)、Veber、相关时使用 Ghose 过滤器
-3.  **标记潜在问题** — 代谢热点、hERG 风险、CNS 渗透所需的高 TPSA
-4.  **建议优化方案** — 生物电子等排体替换、前药策略、环截断
+1.  **首先陈述原始值** — 分子量、LogP、氢键供体数、氢键受体数、TPSA、可旋转键数
+2.  **应用规则集** — Ro5 (Lipinski)、Veber、Ghose 过滤器（如适用）
+3.  **标记潜在问题** — 代谢热点、hERG 风险、高 TPSA 对 CNS 渗透性的影响
+4.  **建议优化策略** — 生物电子等排体替换、前药策略、环截断
 5.  **引用来源 API** — ChEMBL、PubChem、OpenFDA 或 OpenTargets
 
-对于 ADMET 问题，系统地推理吸收、分布、代谢、排泄、毒性。详细指南请参阅 references/ADMET_REFERENCE.md。
+对于 ADMET 问题，请系统性地推理吸收、分布、代谢、排泄、毒性。详细指南请参阅 references/ADMET_REFERENCE.md。
 
 ## 重要说明
 
--   所有 API 都是免费、公开的，无需身份验证
--   ChEMBL 速率限制：批量请求之间添加 sleep 1
+-   所有 API 均为免费、公开，无需认证
+-   ChEMBL 速率限制：批量请求之间请添加 sleep 1
 -   FDA 数据反映的是报告的不良事件，不一定是因果关系
 -   对于临床决策，始终建议咨询有执照的药剂师或医生
 
@@ -229,4 +230,4 @@ for row in assoc.get('rows',[]):
 | 分子性质 | PubChem | `/rest/pug/compound/name/{name}/property/` |
 | 药物相互作用 | OpenFDA | `/drug/label.json?search=drug_interactions:` |
 | 不良事件 | OpenFDA | `/drug/event.json?search=...&count=reaction` |
-| 基因-疾病 | OpenTargets | GraphQL POST `/api/v4/graphql` |
+| 基因-疾病关联 | OpenTargets | GraphQL POST `/api/v4/graphql` |

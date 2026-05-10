@@ -8,7 +8,7 @@ description: "通过 CLI 生成音频频谱图/特征（梅尔、色度、MFCC�
 
 # Songsee
 
-通过 CLI 生成音频频谱图和音频特征多面板可视化。
+通过 CLI 生成音频频谱图/特征（梅尔、色度、MFCC）。
 
 ## 技能元数据
 
@@ -19,6 +19,7 @@ description: "通过 CLI 生成音频频谱图/特征（梅尔、色度、MFCC�
 | 版本 | `1.0.0` |
 | 作者 | community |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Audio`, `Visualization`, `Spectrogram`, `Music`, `Analysis` |
 
 ## 参考：完整的 SKILL.md
@@ -29,16 +30,16 @@ description: "通过 CLI 生成音频频谱图/特征（梅尔、色度、MFCC�
 
 # songsee
 
-从音频文件生成频谱图和音频特征多面板可视化。
+从音频文件生成频谱图和多面板音频特征可视化。
 
 ## 先决条件
 
-需要安装 [Go](https://go.dev/doc/install)：
+需要 [Go](https://go.dev/doc/install)：
 ```bash
 go install github.com/steipete/songsee/cmd/songsee@latest
 ```
 
-可选：`ffmpeg`（用于处理 WAV/MP3 以外的格式）。
+可选：`ffmpeg`，用于处理 WAV/MP3 以外的格式。
 
 ## 快速开始
 
@@ -55,7 +56,7 @@ songsee track.mp3 --viz spectrogram,mel,chroma,hpss,selfsim,loudness,tempogram,m
 # 时间切片（从 12.5 秒开始，持续 8 秒）
 songsee track.mp3 --start 12.5 --duration 8 -o slice.jpg
 
-# 从标准输入读取
+# 从 stdin 读取
 cat track.mp3 | songsee - --format png -o out.png
 ```
 
@@ -67,7 +68,7 @@ cat track.mp3 | songsee - --format png -o out.png
 |------|-------------|
 | `spectrogram` | 标准频率频谱图 |
 | `mel` | 梅尔标度频谱图 |
-| `chroma` | 音级分布（色度） |
+| `chroma` | 音高类别分布 |
 | `hpss` | 谐波/打击乐分离 |
 | `selfsim` | 自相似矩阵 |
 | `loudness` | 随时间变化的响度 |
@@ -75,7 +76,7 @@ cat track.mp3 | songsee - --format png -o out.png
 | `mfcc` | 梅尔频率倒谱系数 |
 | `flux` | 频谱通量（起始点检测） |
 
-多个 `--viz` 类型将在一个图像中渲染为网格。
+多个 `--viz` 类型将渲染为单个图像中的网格。
 
 ## 常用标志
 
@@ -90,8 +91,8 @@ cat track.mp3 | songsee - --format png -o out.png
 | `--format` | 输出格式：`jpg` 或 `png` |
 | `-o` | 输出文件路径 |
 
-## 备注
+## 注意事项
 
 - WAV 和 MP3 格式原生解码；其他格式需要 `ffmpeg`
-- 输出图像可通过 `vision_analyze` 进行检查，用于自动化音频分析
+- 输出图像可使用 `vision_analyze` 进行检查，以进行自动化音频分析
 - 适用于比较音频输出、调试合成或记录音频处理流水线

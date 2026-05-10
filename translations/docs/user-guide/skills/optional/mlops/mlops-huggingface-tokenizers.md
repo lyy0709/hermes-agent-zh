@@ -8,7 +8,7 @@ description: "为研究和生产优化的快速分词器"
 
 # Huggingface Tokenizers
 
-为研究和生产优化的快速分词器。基于 Rust 的实现可在 &lt;20 秒内对 1GB 文本进行分词。支持 BPE、WordPiece 和 Unigram 算法。可训练自定义词汇表、跟踪对齐关系、处理填充/截断。与 transformers 无缝集成。当您需要高性能分词或自定义分词器训练时使用。
+为研究和生产优化的快速分词器。基于 Rust 的实现，可在 &lt;20 秒内对 1GB 文本进行分词。支持 BPE、WordPiece 和 Unigram 算法。可训练自定义词汇表、跟踪对齐关系、处理填充/截断。与 transformers 无缝集成。适用于需要高性能分词或自定义分词器训练的场景。
 
 ## 技能元数据
 
@@ -20,15 +20,16 @@ description: "为研究和生产优化的快速分词器"
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `tokenizers`, `transformers`, `datasets` |
+| 平台 | linux, macos, windows |
 | 标签 | `Tokenization`, `HuggingFace`, `BPE`, `WordPiece`, `Unigram`, `Fast Tokenization`, `Rust`, `Custom Tokenizer`, `Alignment Tracking`, `Production` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
-# HuggingFace Tokenizers - NLP 快速分词
+# HuggingFace Tokenizers - 用于 NLP 的快速分词
 
 快速、生产就绪的分词器，兼具 Rust 性能和 Python 易用性。
 
@@ -39,16 +40,16 @@ description: "为研究和生产优化的快速分词器"
 - 从头开始训练自定义分词器
 - 需要对齐跟踪（Token → 原始文本位置）
 - 构建生产级 NLP 流水线
-- 需要高效处理大型语料库
+- 需要高效地对大型语料库进行分词
 
 **性能**：
-- **速度**：在 CPU 上处理 1GB 文本耗时 &lt;20 秒
+- **速度**：在 CPU 上对 1GB 文本分词 &lt;20 秒
 - **实现**：Rust 核心，提供 Python/Node.js 绑定
 - **效率**：比纯 Python 实现快 10-100 倍
 
-**改用其他方案的情况**：
+**改用替代方案的情况**：
 - **SentencePiece**：语言无关，被 T5/ALBERT 使用
-- **tiktoken**：OpenAI 为 GPT 模型开发的 BPE 分词器
+- **tiktoken**：OpenAI 用于 GPT 模型的 BPE 分词器
 - **transformers AutoTokenizer**：仅加载预训练模型（内部使用此库）
 
 ## 快速开始
@@ -108,7 +109,7 @@ tokenizer.train(files, trainer)
 tokenizer.save("my-tokenizer.json")
 ```
 
-**训练时间**：约 1-2 分钟处理 100MB 语料库，约 10-20 分钟处理 1GB
+**训练时间**：约 1-2 分钟处理 100MB 语料，约 10-20 分钟处理 1GB
 
 ### 带填充的批量编码
 
@@ -136,7 +137,7 @@ for encoding in encodings:
 3. 合并为新 Token 并添加到词汇表
 4. 重复直到达到词汇表大小
 
-**使用模型**：GPT-2、GPT-3、RoBERTa、BART、DeBERTa
+**使用模型**：GPT-2, GPT-3, RoBERTa, BART, DeBERTa
 
 ```python
 from tokenizers import Tokenizer
@@ -157,7 +158,7 @@ tokenizer.train(files=["data.txt"], trainer=trainer)
 ```
 
 **优点**：
-- 能很好地处理 OOV 词（分解为子词）
+- 能很好地处理 OOV 词（拆分为子词）
 - 词汇表大小灵活
 - 适用于形态丰富的语言
 
@@ -173,7 +174,7 @@ tokenizer.train(files=["data.txt"], trainer=trainer)
 3. 合并得分最高的对
 4. 重复直到达到词汇表大小
 
-**使用模型**：BERT、DistilBERT、MobileBERT
+**使用模型**：BERT, DistilBERT, MobileBERT
 
 ```python
 from tokenizers import Tokenizer
@@ -197,7 +198,7 @@ tokenizer.train(files=["corpus.txt"], trainer=trainer)
 
 **优点**：
 - 优先考虑有意义的合并（高分 = 语义相关）
-- 在 BERT 中成功使用（取得最先进的结果）
+- 在 BERT 中成功使用（达到最先进的结果）
 
 **权衡**：
 - 如果没有子词匹配，未知词会变成 `[UNK]`
@@ -205,8 +206,8 @@ tokenizer.train(files=["corpus.txt"], trainer=trainer)
 ### Unigram
 
 **工作原理**：
-1. 从大型词汇表（所有子字符串）开始
-2. 使用当前词汇表计算语料库的损失
+1. 从大词汇表（所有子字符串）开始
+2. 计算当前词汇表在语料库上的损失
 3. 移除对损失影响最小的 Token
 4. 重复直到达到目标词汇表大小
 
@@ -230,7 +231,7 @@ tokenizer.train(files=["data.txt"], trainer=trainer)
 
 **优点**：
 - 基于概率（寻找最可能的 Token 化方案）
-- 适用于没有明确词边界的语言
+- 对没有词边界的语言效果良好
 - 能处理多样化的语言上下文
 
 **权衡**：
@@ -285,9 +286,9 @@ tokenizer.pre_tokenizer = Sequence([
 **常用预 Token 化器**：
 - `Whitespace()` - 按空格、制表符、换行符分割
 - `ByteLevel()` - GPT-2 风格的字节级分割
-- `Punctuation()` - 分离标点符号
-- `Digits(individual_digits=True)` - 将数字单独分割
-- `Metaspace()` - 将空格替换为 ▁（SentencePiece 风格）
+- `Punctuation()` - 隔离标点符号
+- `Digits(individual_digits=True)` - 单独分割数字
+- `Metaspace()` - 用 ▁ 替换空格（SentencePiece 风格）
 
 ### 后处理
 
@@ -323,9 +324,9 @@ TemplateProcessing(
 )
 ```
 
-## 对齐追踪
+## 对齐跟踪
 
-追踪 Token 在原始文本中的位置：
+跟踪 Token 在原始文本中的位置：
 
 ```python
 output = tokenizer.encode("Hello, world!")
@@ -386,7 +387,7 @@ transformers_tokenizer = PreTrainedTokenizerFast(
     mask_token="[MASK]"
 )
 
-# 像使用任何 transformers Token 化器一样使用
+# 像任何 transformers Token 化器一样使用
 outputs = transformers_tokenizer(
     "Hello world",
     padding=True,
@@ -431,7 +432,7 @@ tokenizer.enable_truncation(max_length=512)
 tokenizer.enable_padding(
     pad_id=tokenizer.token_to_id("[PAD]"),
     pad_token="[PAD]",
-    length=512  # 固定长度，或 None 表示使用批次最大长度
+    length=512  # 固定长度，或 None 表示批次最大长度
 )
 
 # 同时使用两者进行编码

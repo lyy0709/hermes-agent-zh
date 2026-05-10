@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: "在 Hermes 中使用 MCP"
-description: "连接 MCP 服务器到 Hermes Agent 的实用指南，包括过滤其工具以及在真实工作流中安全使用它们"
+description: "连接 MCP 服务器到 Hermes Agent、过滤其工具并在实际工作流中安全使用的实用指南"
 ---
 
 # 在 Hermes 中使用 MCP
@@ -37,7 +37,7 @@ description: "连接 MCP 服务器到 Hermes Agent 的实用指南，包括过�
 
 ## 步骤 1：安装 MCP 支持
 
-如果你使用标准安装脚本安装了 Hermes，MCP 支持已经包含在内（安装程序会运行 `uv pip install -e ".[all]"`）。
+如果你使用标准安装脚本安装了 Hermes，那么 MCP 支持已经包含在内（安装程序会运行 `uv pip install -e ".[all]"`）。
 
 如果你安装时没有包含额外功能，需要单独添加 MCP：
 
@@ -87,7 +87,7 @@ hermes chat
 一个实用的测试提示词：
 
 ```text
-告诉我现在有哪些基于 MCP 的工具可用。
+告诉我目前有哪些基于 MCP 的工具可用。
 ```
 
 ## 步骤 4：立即开始过滤
@@ -121,7 +121,7 @@ mcp_servers:
 
 - Hermes 在 WSL 中运行
 - Hermes 启动一个本地 stdio MCP 服务器
-- 该 MCP 服务器通过 Windows 互操作（`cmd.exe` 或 `powershell.exe`）启动
+- 该 MCP 服务器通过 Windows 互操作性（`cmd.exe` 或 `powershell.exe`）启动
 - MCP 服务器附加到你实时的 Windows Chrome 会话
 
 心智模型：
@@ -140,10 +140,10 @@ Hermes (WSL) -> MCP stdio 桥接 -> Windows Chrome
 
 使用 `chrome-devtools-mcp`。
 
-如果你的 Windows Chrome 已经通过 `chrome://inspect/#remote-debugging` 启用了实时远程调试，可以从 WSL 这样添加它：
+如果你的 Windows Chrome 已经通过 `chrome://inspect/#remote-debugging` 启用了实时远程调试，可以从 WSL 像这样添加它：
 
 ```bash
-hermes mcp add chrome-devtools-win --command cmd.exe --args /c "npx -y chrome-devtools-mcp@latest --autoConnect --no-usage-statistics"
+hermes mcp add chrome-devtools-win --command cmd.exe --args /c npx -y chrome-devtools-mcp@latest --autoConnect --no-usage-statistics
 ```
 
 保存服务器后：
@@ -160,7 +160,7 @@ hermes mcp test chrome-devtools-win
 
 ### 典型提示词
 
-加载后，Hermes 可以直接使用带 MCP 前缀的浏览器工具。例如：
+加载后，Hermes 可以直接使用带有 MCP 前缀的浏览器工具。例如：
 
 ```text
 调用 MCP 工具 mcp_chrome_devtools_win_list_pages，列出当前浏览器标签页。
@@ -172,15 +172,15 @@ hermes mcp test chrome-devtools-win
 
 常见原因：
 
-- WSL 无法访问 Chrome 向 Windows 工具暴露的同一主机本地端点
+- WSL 无法访问 Chrome 暴露给 Windows 工具的同一主机本地端点
 - 较新的 Chrome 实时调试流程与经典的 `ws://localhost:9222` 不同
 - 从 Windows 端的辅助工具（如 `chrome-devtools-mcp`）更容易附加到浏览器
 
 在这些情况下，对于相同环境的设置使用 `/browser connect`，对于 WSL 到 Windows 的浏览器桥接使用 MCP。
 
-### 已知陷阱
+### 已知的陷阱
 
-- 当通过 MCP 使用 Windows stdio 可执行文件时，从 Windows 挂载的路径（如 `/mnt/c/Users/<你>` 或 `/mnt/c/workspace/...`）启动 Hermes。
+- 当通过 MCP 使用 Windows stdio 可执行文件时，从 Windows 挂载的路径（如 `/mnt/c/Users/<you>` 或 `/mnt/c/workspace/...`）启动 Hermes。
 - 如果你从 `/root` 或 `/home/...` 启动 Hermes，Windows 可能会在 MCP 服务器启动前发出 `UNC` 当前目录警告。
 - 如果 `chrome-devtools-mcp --autoConnect` 在枚举页面时超时，请减少 Chrome 中的后台/冻结标签页并重试。
 
@@ -211,16 +211,16 @@ mcp_servers:
 
 在 Hermes 中，MCP 暴露的功能分为两类：
 1. 服务器原生 MCP 工具
-- 通过以下配置过滤：
+- 通过以下配置进行过滤：
   - `tools.include`
   - `tools.exclude`
 
-2. Hermes 添加的实用工具包装器
-- 通过以下配置过滤：
+2. Hermes 添加的实用程序包装器
+- 通过以下配置进行过滤：
   - `tools.resources`
   - `tools.prompts`
 
-### 您可能看到的实用工具包装器
+### 您可能看到的实用程序包装器
 
 资源：
 - `list_resources`
@@ -240,7 +240,7 @@ mcp_servers:
 
 ### 模式 1：本地项目助手
 
-当您希望 Hermes 在一个有界的工作空间上进行推理时，使用 MCP 连接仓库本地的文件系统或 git 服务器。
+当您希望 Hermes 在一个有界的工作空间上进行推理时，使用 MCP 作为仓库本地的文件系统或 git 服务器。
 
 ```yaml
 mcp_servers:
@@ -263,7 +263,7 @@ mcp_servers:
 检查本地 git 状态并总结最近的变化。
 ```
 
-### 模式 2：GitHub 分类助手
+### 模式 2：GitHub 问题分类助手
 
 ```yaml
 mcp_servers:
@@ -281,7 +281,7 @@ mcp_servers:
 好的提示词：
 
 ```text
-列出关于 MCP 的未解决问题，按主题聚类，并为最常见的错误草拟一个高质量的问题。
+列出关于 MCP 的未解决问题，按主题进行聚类，并为最常见的错误起草一个高质量的问题报告。
 ```
 
 ```text
@@ -308,7 +308,7 @@ mcp_servers:
 查找客户 ACME Corp 并总结最近的发票活动。
 ```
 
-在这种情况下，严格的白名单远比排除列表要好。
+在这种情况下，严格的白名单比排除列表要好得多。
 
 ### 模式 4：文档 / 知识服务器
 
@@ -337,7 +337,7 @@ mcp_servers:
 
 这是一个实用的步骤。
 
-### 阶段 1：使用严格的白名单添加 GitHub MCP
+### 阶段 1：添加 GitHub MCP 并使用严格的白名单
 
 ```yaml
 mcp_servers:
@@ -395,20 +395,20 @@ mcp_servers:
 现在 Hermes 可以组合使用它们：
 
 ```text
-检查本地项目文件，然后在 GitHub 上创建一个问题来总结您发现的错误。
+检查本地项目文件，然后在 GitHub 上创建一个问题来总结你发现的错误。
 ```
 
 这就是 MCP 的强大之处：无需更改 Hermes 核心即可实现多系统工作流。
 
 ## 安全使用建议
 
-### 对于危险系统，优先使用允许列表
+### 对于危险系统，优先使用白名单
 
 对于任何涉及财务、面向客户或具有破坏性的系统：
 - 使用 `tools.include`
 - 从尽可能小的集合开始
 
-### 禁用未使用的实用工具
+### 禁用未使用的实用程序
 
 如果您不希望模型浏览服务器提供的资源/提示词，请将其关闭：
 
@@ -418,10 +418,10 @@ tools:
   prompts: false
 ```
 
-### 保持服务器范围狭窄
+### 保持服务器的范围狭窄
 
 示例：
-- 文件系统服务器根目录指向一个项目目录，而不是整个主目录
+- 文件系统服务器根目录设置为一个项目目录，而不是整个主目录
 - git 服务器指向一个仓库
 - 默认情况下暴露以读取为主工具的的内部 API 服务器
 
@@ -444,7 +444,7 @@ tools:
 可能的原因：
 - 被 `tools.include` 过滤
 - 被 `tools.exclude` 排除
-- 通过 `resources: false` 或 `prompts: false` 禁用了实用工具包装器
+- 通过 `resources: false` 或 `prompts: false` 禁用了实用程序包装器
 - 服务器实际上不支持资源/提示词
 
 ### "服务器已配置，但没有任何内容加载"
@@ -457,7 +457,7 @@ tools:
 
 ### "为什么我看到的工具比 MCP 服务器宣传的少？"
 
-因为 Hermes 现在尊重您的每服务器策略和基于功能的注册。这是预期的，通常也是可取的。
+因为 Hermes 现在尊重您的每服务器策略和基于功能的注册。这是预期的，并且通常是可取的。
 
 ### "如何在不删除配置的情况下移除 MCP 服务器？"
 
@@ -471,16 +471,16 @@ enabled: false
 
 ## 推荐的首次 MCP 设置
 
-适合大多数用户的优秀初始服务器：
+适合大多数用户的第一个服务器：
 - 文件系统
 - git
 - GitHub
 - fetch / 文档 MCP 服务器
 - 一个范围狭窄的内部 API
 
-不适合的初始服务器：
+不适合作为第一个服务器：
 - 具有大量破坏性操作且没有过滤功能的大型业务系统
-- 任何您不够了解而无法约束的系统
+- 任何您不够了解以至于无法约束的系统
 
 ## 相关文档
 - [MCP（模型上下文协议）](/docs/user-guide/features/mcp)

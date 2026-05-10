@@ -1,12 +1,12 @@
 ---
 sidebar_position: 14
 title: "API 服务器"
-description: "将 hermes-agent 作为 OpenAI 兼容的 API 暴露，供任何前端使用"
+description: "将 hermes-agent 作为 OpenAI 兼容的 API 暴露给任何前端使用"
 ---
 
 # API 服务器
 
-API 服务器将 hermes-agent 暴露为一个 OpenAI 兼容的 HTTP 端点。任何支持 OpenAI 格式的前端 —— Open WebUI、LobeChat、LibreChat、NextChat、ChatBox 以及数百个其他前端 —— 都可以连接到 hermes-agent 并将其用作后端。
+API 服务器将 hermes-agent 暴露为一个 OpenAI 兼容的 HTTP 端点。任何支持 OpenAI 格式的前端 —— Open WebUI、LobeChat、LibreChat、NextChat、ChatBox 以及数百个其他应用 —— 都可以连接到 hermes-agent 并将其用作后端。
 
 你的 Agent 会使用其完整的工具集（终端、文件操作、网络搜索、记忆、技能）处理请求并返回最终响应。在流式传输时，工具进度指示器会内联显示，以便前端可以展示 Agent 正在执行的操作。
 
@@ -106,11 +106,11 @@ curl http://localhost:8642/v1/chat/completions \
 
 **流中的工具进度：**
 - **Chat Completions**：Hermes 发出 `event: hermes.tool.progress` 事件，用于工具启动的可见性，而不会污染持久化的助手文本。
-- **Responses**：Hermes 在 SSE 流期间发出符合规范原生的 `function_call` 和 `function_call_output` 输出项，因此客户端可以实时渲染结构化的工具 UI。
+- **Responses**：Hermes 在 SSE 流期间发出符合规范的 `function_call` 和 `function_call_output` 输出项，因此客户端可以实时渲染结构化的工具 UI。
 
 ### POST /v1/responses
 
-OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务器端会话状态 —— 服务器存储完整的对话历史记录（包括工具调用和结果），因此多轮上下文得以保留，无需客户端管理。
+OpenAI Responses API 格式。通过 `previous_response_id` 支持服务器端会话状态 —— 服务器存储完整的对话历史（包括工具调用和结果），因此多轮上下文得以保留，无需客户端管理。
 
 **请求：**
 ```json
@@ -159,7 +159,7 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 #### 使用 previous_response_id 进行多轮对话
 
-链接响应以在多个回合中保持完整上下文（包括工具调用）：
+链接响应以在多轮对话中保持完整上下文（包括工具调用）：
 
 ```json
 {
@@ -168,7 +168,7 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 }
 ```
 
-服务器从存储的响应链重建完整的对话 —— 所有之前的工具调用和结果都被保留。链式请求也共享同一个会话，因此多轮对话在仪表板和会话历史记录中显示为单个条目。
+服务器从存储的响应链重建完整对话 —— 所有之前的工具调用和结果都得以保留。链式请求也共享同一个会话，因此多轮对话在仪表板和会话历史中显示为单个条目。
 
 #### 命名对话
 
@@ -183,11 +183,11 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 服务器会自动链接到该对话中的最新响应。类似于消息网关会话的 `/title` 命令。
 ### GET /v1/responses/\{id\}
 
-根据 ID 检索先前存储的响应。
+通过 ID 检索先前存储的响应。
 
 ### DELETE /v1/responses/\{id\}
 
-删除一个已存储的响应。
+删除存储的响应。
 
 ### GET /v1/models
 
@@ -195,7 +195,7 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 ### GET /v1/capabilities
 
-返回 API 服务器稳定接口的机器可读描述，供外部 UI、编排器和插件桥接器使用。
+返回 API 服务器稳定接口的机器可读描述，供外部 UI、编排器和插件桥接使用。
 
 ```json
 {
@@ -224,9 +224,9 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 扩展健康检查，同时报告活跃会话、运行中的 Agent 和资源使用情况。对监控/可观测性工具很有用。
 
-## 运行 API（支持流式传输的替代方案）
+## 运行 API（流式友好替代方案）
 
-除了 `/v1/chat/completions` 和 `/v1/responses`，服务器还暴露了一个**运行** API，用于长会话场景，客户端可以订阅进度事件，而无需自行管理流式传输。
+除了 `/v1/chat/completions` 和 `/v1/responses`，服务器还暴露了一个**运行** API，用于长会话场景，客户端希望订阅进度事件，而不是自行管理流式传输。
 
 ### POST /v1/runs
 
@@ -243,7 +243,7 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 ### GET /v1/runs/\{run_id\}
 
-轮询当前的运行状态。这对于需要状态但不想保持 SSE 连接打开的仪表板，或者在导航后重新连接的 UI 很有用。
+轮询当前的运行状态。这对于需要状态但无需保持 SSE 连接打开的仪表板，或者在导航后重新连接的 UI 很有用。
 
 ```json
 {
@@ -261,15 +261,15 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 ### GET /v1/runs/\{run_id\}/events
 
-服务器发送事件流，包含运行的工具调用进度、Token 增量以及生命周期事件。专为希望在不丢失状态的情况下连接/断开的仪表板和富客户端设计。
+服务器发送事件流，包含运行的工具调用进度、Token 增量和生命周期事件。专为希望在不丢失状态的情况下连接/断开连接的仪表板和富客户端设计。
 
 ### POST /v1/runs/\{run_id\}/stop
 
-中断正在运行的 Agent 轮次。该端点会立即返回 `{"status": "stopping"}`，同时 Hermes 会要求活跃的 Agent 在下一个安全的中断点停止。
+中断正在运行的 Agent 轮次。该端点立即返回 `{"status": "stopping"}`，同时 Hermes 会要求活跃的 Agent 在下一个安全的中断点停止。
 
 ## 任务 API（后台调度工作）
 
-服务器暴露了一个轻量级的任务 CRUD 接口，用于从远程客户端管理调度/后台 Agent 运行。所有端点都受相同的 Bearer 认证保护。
+服务器暴露了一个轻量级的任务 CRUD 接口，用于从远程客户端管理调度的/后台的 Agent 运行。所有端点都受相同的 Bearer 认证保护。
 
 ### GET /api/jobs
 
@@ -277,7 +277,7 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 ### POST /api/jobs
 
-创建一个新的调度任务。请求体接受与 `hermes cron` 相同的格式 —— 提示词、调度计划、技能、提供商覆盖、交付目标。
+创建一个新的调度任务。请求体接受与 `hermes cron` 相同的格式——提示词、调度计划、技能、提供商覆盖、交付目标。
 
 ### GET /api/jobs/\{job_id\}
 
@@ -301,15 +301,15 @@ OpenAI Responses API 格式。支持通过 `previous_response_id` 实现服务�
 
 ### POST /api/jobs/\{job_id\}/run
 
-立即触发任务运行，不受调度计划限制。
+立即触发任务运行，不按计划。
 
 ## 系统提示词处理
 
-当前端发送 `system` 消息（Chat Completions）或 `instructions` 字段（Responses API）时，hermes-agent 会**将其叠加在**其核心系统提示词之上。你的 Agent 将保留其所有工具、记忆和技能 —— 前端的系统提示词会添加额外的指令。
+当前端发送 `system` 消息（Chat Completions）或 `instructions` 字段（Responses API）时，hermes-agent 会**将其叠加在**其核心系统提示词之上。你的 Agent 保留其所有工具、记忆和技能——前端的系统提示词会添加额外的指令。
 
-这意味着你可以针对每个前端定制行为，而不会丢失功能：
+这意味着你可以按前端定制行为，而不会丢失功能：
 - Open WebUI 系统提示词："你是一个 Python 专家。始终包含类型提示。"
-- Agent 仍然拥有终端、文件工具、网络搜索、记忆等功能。
+- Agent 仍然拥有终端、文件工具、网络搜索、记忆等。
 
 ## 认证
 
@@ -322,9 +322,9 @@ Authorization: Bearer ***
 通过 `API_SERVER_KEY` 环境变量配置密钥。如果你需要浏览器直接调用 Hermes，还需将 `API_SERVER_CORS_ORIGINS` 设置为明确的允许来源列表。
 
 :::warning 安全
-API 服务器授予对 hermes-agent 工具集的完全访问权限，**包括终端命令**。当绑定到非环回地址（如 `0.0.0.0`）时，**必须**设置 `API_SERVER_KEY`。同时，保持 `API_SERVER_CORS_ORIGINS` 范围狭窄以控制浏览器访问。
+API 服务器授予对 hermes-agent 工具集的完全访问权限，**包括终端命令**。当绑定到非回环地址（如 `0.0.0.0`）时，`API_SERVER_KEY` 是**必需的**。同时，保持 `API_SERVER_CORS_ORIGINS` 范围狭窄以控制浏览器访问。
 
-默认的绑定地址（`127.0.0.1`）仅用于本地使用。默认情况下禁用浏览器访问；仅对明确信任的来源启用。
+默认绑定地址（`127.0.0.1`）仅用于本地使用。默认情况下禁用浏览器访问；仅对明确信任的来源启用。
 :::
 
 ## 配置
@@ -343,14 +343,14 @@ API 服务器授予对 hermes-agent 工具集的完全访问权限，**包括终
 ### config.yaml
 
 ```yaml
-# 暂不支持 —— 请使用环境变量。
-# 对 config.yaml 的支持将在未来版本中提供。
+# 暂不支持 — 请使用环境变量。
+# 未来版本将支持 config.yaml。
 ```
 ## 安全头部
 
 所有响应都包含安全头部：
 - `X-Content-Type-Options: nosniff` — 防止 MIME 类型嗅探
-- `Referrer-Policy: no-referrer` — 防止来源信息泄漏
+- `Referrer-Policy: no-referrer` — 防止来源泄漏
 
 ## CORS
 
@@ -362,10 +362,10 @@ API 服务器默认**不**启用浏览器 CORS。
 API_SERVER_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 
-启用 CORS 后：
+启用 CORS 时：
 - **预检响应**包含 `Access-Control-Max-Age: 600`（10 分钟缓存）
 - **SSE 流式响应**包含 CORS 头部，以便浏览器 EventSource 客户端正常工作
-- **`Idempotency-Key`** 是允许的请求头部 — 客户端可以发送它以实现去重（响应会按键缓存 5 分钟）
+- **`Idempotency-Key`** 是允许的请求头部 — 客户端可以发送它以实现去重（响应会按密钥缓存 5 分钟）
 
 大多数已记录的前端（如 Open WebUI）采用服务器到服务器连接，完全不需要 CORS。
 
@@ -377,7 +377,7 @@ API_SERVER_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 |----------|-------|------------|
 | [Open WebUI](/docs/user-guide/messaging/open-webui) | 126k | 提供完整指南 |
 | LobeChat | 73k | 自定义提供商端点 |
-| LibreChat | 34k | 在 librechat.yaml 中设置自定义端点 |
+| LibreChat | 34k | 在 librechat.yaml 中自定义端点 |
 | AnythingLLM | 56k | 通用 OpenAI 提供商 |
 | NextChat | 87k | BASE_URL 环境变量 |
 | ChatBox | 39k | API 主机设置 |
@@ -389,21 +389,26 @@ API_SERVER_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 
 ## 使用配置文件的多人设置
 
-要为多个用户提供各自隔离的 Hermes 实例（独立的配置、记忆、技能），请使用[配置文件](/docs/user-guide/profiles)：
+要为多个用户提供各自独立的 Hermes 实例（独立的配置、记忆、技能），请使用[配置文件](/docs/user-guide/profiles)：
 
 ```bash
-# 为每个用户创建配置文件
+# 为每个用户创建一个配置文件
 hermes profile create alice
 hermes profile create bob
 
-# 在每个配置文件的不同端口上配置 API 服务器
-hermes -p alice config set API_SERVER_ENABLED true
-hermes -p alice config set API_SERVER_PORT 8643
-hermes -p alice config set API_SERVER_KEY alice-secret
+# 在每个不同的端口上配置每个配置文件的 API 服务器。API_SERVER_* 是环境
+# 变量（不是 config.yaml 中的键），因此将它们写入每个配置文件的 .env：
+cat >> ~/.hermes/profiles/alice/.env <<EOF
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8643
+API_SERVER_KEY=alice-secret
+EOF
 
-hermes -p bob config set API_SERVER_ENABLED true
-hermes -p bob config set API_SERVER_PORT 8644
-hermes -p bob config set API_SERVER_KEY bob-secret
+cat >> ~/.hermes/profiles/bob/.env <<EOF
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8644
+API_SERVER_KEY=bob-secret
+EOF
 
 # 启动每个配置文件的消息网关
 hermes -p alice gateway &
@@ -415,12 +420,12 @@ hermes -p bob gateway &
 - `http://localhost:8643/v1/models` → 模型 `alice`
 - `http://localhost:8644/v1/models` → 模型 `bob`
 
-在 Open WebUI 中，将每个添加为单独的连接。模型下拉菜单会显示 `alice` 和 `bob` 作为不同的模型，每个都由一个完全隔离的 Hermes 实例支持。详情请参阅 [Open WebUI 指南](/docs/user-guide/messaging/open-webui#multi-user-setup-with-profiles)。
+在 Open WebUI 中，将每个添加为单独的连接。模型下拉菜单会显示 `alice` 和 `bob` 作为不同的模型，每个都由一个完全独立的 Hermes 实例支持。详情请参阅 [Open WebUI 指南](/docs/user-guide/messaging/open-webui#multi-user-setup-with-profiles)。
 
 ## 限制
 
 - **响应存储** — 存储的响应（用于 `previous_response_id`）保存在 SQLite 中，并在消息网关重启后保留。最多存储 100 个响应（LRU 淘汰）。
-- **不支持文件上传** — 在 `/v1/chat/completions` 和 `/v1/responses` 上都支持内联图像，但不支持通过 API 上传文件（`file`、`input_file`、`file_id`）和非图像文档输入。
+- **不支持文件上传** — `/v1/chat/completions` 和 `/v1/responses` 都支持内联图像，但上传的文件（`file`、`input_file`、`file_id`）和非图像文档输入不支持通过 API 上传。
 - **模型字段是装饰性的** — 请求中的 `model` 字段会被接受，但实际使用的 LLM 模型是在服务器端的 config.yaml 中配置的。
 
 ## 代理模式

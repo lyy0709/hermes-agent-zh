@@ -20,7 +20,8 @@ description: "使用 NVIDIA TensorRT 优化 LLM 推理，实现最大吞吐量�
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `tensorrt-llm`, `torch` |
-| 标签 | `推理服务`, `TensorRT-LLM`, `NVIDIA`, `推理优化`, `高吞吐量`, `低延迟`, `生产环境`, `FP8`, `INT4`, `动态批处理`, `多GPU` |
+| 平台 | linux, macos |
+| 标签 | `Inference Serving`, `TensorRT-LLM`, `NVIDIA`, `Inference Optimization`, `High Throughput`, `Low Latency`, `Production`, `FP8`, `INT4`, `In-Flight Batching`, `Multi-GPU` |
 
 ## 参考：完整的 SKILL.md
 
@@ -48,7 +49,7 @@ NVIDIA 的开源库，用于优化 LLM 推理，在 NVIDIA GPU 上提供最先�
 
 **在以下情况下改用 llama.cpp：**
 - 在 CPU 或 Apple Silicon 上部署
-- 需要无 NVIDIA GPU 的边缘部署
+- 需要在没有 NVIDIA GPU 的边缘设备上部署
 - 想要更简单的 GGUF 量化格式
 
 ## 快速开始
@@ -62,10 +63,10 @@ docker pull nvidia/tensorrt_llm:latest
 # pip 安装
 pip install tensorrt_llm==1.2.0rc3
 
-# 需要 CUDA 13.0.0、TensorRT 10.13.2、Python 3.10-3.12
+# 需要 CUDA 13.0.0, TensorRT 10.13.2, Python 3.10-3.12
 ```
 
-### 基础推理
+### 基本推理
 
 ```python
 from tensorrt_llm import LLM, SamplingParams
@@ -126,7 +127,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 ### 高级特性
 - **推测解码**：使用草稿模型实现更快生成
 - **LoRA 服务**：高效的多适配器部署
-- **分离式服务**：分离预填充和生成阶段
+- **解耦服务**：分离预填充和生成阶段
 
 ## 常见模式
 
@@ -189,10 +190,10 @@ outputs = llm.generate(
 - **Qwen**：Qwen、Qwen2、QwQ
 - **DeepSeek**：DeepSeek-V2、DeepSeek-V3
 - **Mixtral**：Mixtral-8x7B、Mixtral-8x22B
-- **视觉模型**：LLaVA、Phi-3-vision
+- **视觉**：LLaVA、Phi-3-vision
 - **HuggingFace 上的 100+ 模型**
 
-## 参考资料
+## 参考文档
 
 - **[优化指南](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/tensorrt-llm/references/optimization.md)** - 量化、批处理、KV 缓存调优
 - **[多 GPU 设置](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/tensorrt-llm/references/multi-gpu.md)** - 张量/流水线并行、多节点

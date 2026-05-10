@@ -1,14 +1,14 @@
 ---
-title: "Weights And Biases — W&B：记录机器学习实验、超参数扫描、模型注册表和仪表板"
+title: "Weights And Biases — W&B：记录 ML 实验、超参数扫描、模型注册表、仪表板"
 sidebar_label: "Weights And Biases"
-description: "W&B：记录机器学习实验、超参数扫描、模型注册表和仪表板"
+description: "W&B：记录 ML 实验、超参数扫描、模型注册表、仪表板"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Weights And Biases
 
-W&B：记录机器学习实验、超参数扫描、模型注册表和仪表板。
+W&B：记录 ML 实验、超参数扫描、模型注册表、仪表板。
 
 ## 技能元数据
 
@@ -20,7 +20,8 @@ W&B：记录机器学习实验、超参数扫描、模型注册表和仪表板�
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `wandb` |
-| 标签 | `MLOps`, `Weights And Biases`, `WandB`, `实验跟踪`, `超参数调优`, `模型注册表`, `协作`, `实时可视化`, `PyTorch`, `TensorFlow`, `HuggingFace` |
+| 平台 | linux, macos, windows |
+| 标签 | `MLOps`, `Weights And Biases`, `WandB`, `Experiment Tracking`, `Hyperparameter Tuning`, `Model Registry`, `Collaboration`, `Real-Time Visualization`, `PyTorch`, `TensorFlow`, `HuggingFace` |
 
 ## 参考：完整的 SKILL.md
 
@@ -28,20 +29,20 @@ W&B：记录机器学习实验、超参数扫描、模型注册表和仪表板�
 以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
-# Weights & Biases：机器学习实验跟踪与 MLOps
+# Weights & Biases：ML 实验跟踪与 MLOps
 
 ## 何时使用此技能
 
-当您需要以下功能时，请使用 Weights & Biases (W&B)：
-- **跟踪机器学习实验**，自动记录指标
-- **实时可视化训练**过程仪表板
-- **比较不同超参数和配置的运行**
-- **通过自动扫描优化超参数**
-- **管理具有版本控制和谱系的模型注册表**
-- **在团队工作空间上协作机器学习项目**
-- **跟踪具有谱系的工件**（数据集、模型、代码）
+当你需要以下功能时，请使用 Weights & Biases (W&B)：
+- **跟踪 ML 实验**，并自动记录指标
+- **实时可视化**训练过程的仪表板
+- **比较不同**超参数和配置的运行
+- **通过自动扫描优化**超参数
+- **管理模型注册表**，包含版本控制和谱系
+- **在团队工作区中协作** ML 项目
+- **跟踪工件**（数据集、模型、代码）及其谱系
 
-**用户**：200,000+ 机器学习从业者 | **GitHub Stars**：10.5k+ | **集成**：100+
+**用户**：200,000+ ML 从业者 | **GitHub Stars**：10.5k+ | **集成**：100+
 
 ## 安装
 
@@ -76,7 +77,7 @@ run = wandb.init(
 
 # 训练循环
 for epoch in range(run.config.epochs):
-    # 您的训练代码
+    # 你的训练代码
     train_loss = train_epoch()
     val_loss = validate()
 
@@ -339,7 +340,7 @@ sweep_config = {
 
 ## 工件
 
-跟踪数据集、模型和其他具有谱系关系的文件。
+跟踪具有沿袭关系的数据集、模型和其他文件。
 
 ### 记录工件
 
@@ -348,7 +349,7 @@ sweep_config = {
 artifact = wandb.Artifact(
     name='training-dataset',
     type='dataset',
-    description='ImageNet 训练集',
+    description='ImageNet 训练集划分',
     metadata={'size': '1.2M 张图像', 'split': 'train'}
 )
 
@@ -405,7 +406,7 @@ wandb.init(project="hf-transformers")
 # 包含 W&B 的训练参数
 training_args = TrainingArguments(
     output_dir="./results",
-    report_to="wandb",  # 启用 W&B 记录
+    report_to="wandb",  # 启用 W&B 日志记录
     run_name="bert-finetuning",
     logging_steps=100,
     save_steps=500
@@ -429,7 +430,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 import wandb
 
-# 创建 W&B 记录器
+# 创建 W&B 日志记录器
 wandb_logger = WandbLogger(
     project="lightning-demo",
     log_model=True  # 记录模型检查点
@@ -499,7 +500,7 @@ wandb.log({"conf_mat": wandb.plot.confusion_matrix(
 wandb.init(
     project="my-project",
     tags=["baseline", "resnet50", "imagenet"],
-    group="resnet-experiments",  # 分组相关运行
+    group="resnet-experiments",  # 对相关运行进行分组
     job_type="train"             # 任务类型
 )
 ```
@@ -545,7 +546,7 @@ artifact = wandb.Artifact('final-model', type='model')
 artifact.add_file('model.pth')
 wandb.log_artifact(artifact)
 
-# 保存预测结果用于分析
+# 保存预测结果以供分析
 predictions_table = wandb.Table(
     columns=["id", "input", "prediction", "ground_truth"],
     data=predictions_data
@@ -553,7 +554,7 @@ predictions_table = wandb.Table(
 wandb.log({"predictions": predictions_table})
 ```
 
-### 5. 在不稳定连接时使用离线模式
+### 5. 网络不稳定时使用离线模式
 
 ```python
 import os
@@ -603,4 +604,4 @@ print(f"共享此 URL: {run.url}")
 
 - `references/sweeps.md` - 全面的超参数优化指南
 - `references/artifacts.md` - 数据和模型版本控制模式
-- `references/integrations.md` - 特定框架的示例
+- `references/integrations.md` - 特定框架示例

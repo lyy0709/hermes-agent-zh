@@ -1,14 +1,14 @@
 ---
 title: "Guidance"
 sidebar_label: "Guidance"
-description: "通过正则表达式和语法控制 LLM 输出，保证有效的 JSON/XML/代码生成，强制结构化格式，并使用 Guidance（微软研究院的约束生成框架）构建多步骤工作流..."
+description: "使用正则表达式和语法控制 LLM 输出，保证有效的 JSON/XML/代码生成，强制执行结构化格式，并使用 Guidance（微软研究院的约束生成框架）构建多步骤工作流..."
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Guidance
 
-通过正则表达式和语法控制 LLM 输出，保证有效的 JSON/XML/代码生成，强制结构化格式，并使用 Guidance（微软研究院的约束生成框架）构建多步骤工作流。
+使用正则表达式和语法控制 LLM 输出，保证有效的 JSON/XML/代码生成，强制执行结构化格式，并使用 Guidance（微软研究院的约束生成框架）构建多步骤工作流。
 
 ## 技能元数据
 
@@ -20,27 +20,28 @@ description: "通过正则表达式和语法控制 LLM 输出，保证有效的 
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `guidance`, `transformers` |
+| 平台 | linux, macos, windows |
 | 标签 | `Prompt Engineering`, `Guidance`, `Constrained Generation`, `Structured Output`, `JSON Validation`, `Grammar`, `Microsoft Research`, `Format Enforcement`, `Multi-Step Workflows` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Guidance：约束式 LLM 生成
 
 ## 何时使用此技能
 
-在以下情况下使用 Guidance：
+在以下情况使用 Guidance：
 - 需要使用正则表达式或语法**控制 LLM 输出语法**
-- 需要**保证生成有效的 JSON/XML/代码**
-- 与传统提示方法相比需要**降低延迟**
-- 需要**强制结构化格式**（日期、电子邮件、ID 等）
-- 需要使用 Pythonic 控制流**构建多步骤工作流**
+- 需要**保证有效的 JSON/XML/代码**生成
+- 需要**降低延迟**（与传统提示方法相比）
+- 需要**强制执行结构化格式**（日期、电子邮件、ID 等）
+- 需要使用 Python 风格的控制流**构建多步骤工作流**
 - 需要通过语法约束**防止无效输出**
 
-**GitHub Stars**: 18,000+ | **来自**: 微软研究院
+**GitHub Stars**: 18,000+ | **来源**: Microsoft Research
 
 ## 安装
 
@@ -92,7 +93,7 @@ with assistant():
 
 ### 1. 上下文管理器
 
-Guidance 使用 Pythonic 的上下文管理器进行聊天式交互。
+Guidance 使用 Python 风格的上下文管理器进行聊天式交互。
 
 ```python
 from guidance import system, user, assistant, gen
@@ -139,8 +140,8 @@ lm += "Date: " + gen("date", regex=r"\d{4}-\d{2}-\d{2}")
 # 约束为电话号码
 lm += "Phone: " + gen("phone", regex=r"\d{3}-\d{3}-\d{4}")
 
-print(lm["email"])  # 保证有效的电子邮件
-print(lm["date"])   # 保证 YYYY-MM-DD 格式
+print(lm["email"])  # 保证是有效的电子邮件
+print(lm["date"])   # 保证是 YYYY-MM-DD 格式
 ```
 
 **工作原理：**
@@ -177,9 +178,9 @@ Guidance 自动“修复”提示词和生成内容之间的 Token 边界。
 ```python
 # 无 Token 修复
 prompt = "The capital of France is "
-# 最后一个 Token: " is "
+# 最后一个 Token：" is "
 # 第一个生成的 Token 可能是 " Par"（带前导空格）
-# 结果: "The capital of France is  Paris"（双空格！）
+# 结果："The capital of France is  Paris"（双空格！）
 ```
 
 **解决方案：** Guidance 回退一个 Token 并重新生成。
@@ -191,7 +192,7 @@ lm = models.Anthropic("claude-sonnet-4-5-20250929")
 
 # 默认启用 Token 修复
 lm += "The capital of France is " + gen("capital", max_tokens=5)
-# 结果: "The capital of France is Paris"（正确的间距）
+# 结果："The capital of France is Paris"（正确的间距）
 ```
 
 **优点：**
@@ -220,14 +221,14 @@ json_grammar = """
 # 生成有效的 JSON
 lm += gen("person", grammar=json_grammar)
 
-print(lm["person"])  # 保证有效的 JSON 结构
+print(lm["person"])  # 保证是有效的 JSON 结构
 ```
-
 **使用场景：**
-- 复杂的结构化输出
+- 复杂结构化输出
 - 嵌套数据结构
 - 编程语言语法
 - 领域特定语言
+
 ### 5. 指导函数
 
 使用 `@guidance` 装饰器创建可复用的生成模式。
@@ -324,7 +325,7 @@ lm = LlamaCpp(
 )
 ```
 
-## 常用模式
+## 常见模式
 
 ### 模式 1: JSON 生成
 
@@ -373,7 +374,7 @@ from guidance import models, gen, guidance
 
 @guidance
 def chain_of_thought(lm, question):
-    """通过逐步推理生成答案。"""
+    """生成带有逐步推理的答案。"""
     lm += f"Question: {question}\n\n"
 
     # 生成多个推理步骤
@@ -475,14 +476,14 @@ print(f"Location: {lm['location']}")
 # ✅ 好：正则表达式确保格式有效
 lm += "Email: " + gen("email", regex=r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
-# ❌ 坏：自由生成可能产生无效的电子邮件
+# ❌ 不好：自由生成可能产生无效的电子邮件
 lm += "Email: " + gen("email", max_tokens=50)
 ```
+### 2. 使用 select() 处理固定类别
 
-### 2. 对固定类别使用 select()
 ```python
-# ✅ 良好：保证有效的分类
-lm += "状态：" + select(["待处理", "已批准", "已拒绝"], name="status")
+# ✅ 良好：确保类别有效
+lm += "状态：" + select(["pending", "approved", "rejected"], name="status")
 
 # ❌ 不佳：可能产生拼写错误或无效值
 lm += "状态：" + gen("status", max_tokens=20)
@@ -492,7 +493,7 @@ lm += "状态：" + gen("status", max_tokens=20)
 
 ```python
 # Token 修复默认启用
-# 无需特殊操作 - 只需自然地拼接
+# 无需特殊操作 - 只需自然拼接
 lm += "首都是 " + gen("capital")  # 自动修复
 ```
 
@@ -540,14 +541,14 @@ lm += gen("name", regex=r"^(John|Jane)$", max_tokens=10)
 | 语法支持 | ✅ CFG | ❌ 不支持 | ✅ CFG | ✅ CFG |
 | Pydantic 验证 | ❌ 不支持 | ✅ 支持 | ✅ 支持 | ❌ 不支持 |
 | Token 修复 | ✅ 支持 | ❌ 不支持 | ✅ 支持 | ❌ 不支持 |
-| 本地模型 | ✅ 支持 | ⚠️ 有限 | ✅ 支持 | ✅ 支持 |
-| API 模型 | ✅ 支持 | ✅ 支持 | ⚠️ 有限 | ✅ 支持 |
-| Python 风格语法 | ✅ 支持 | ✅ 支持 | ✅ 支持 | ❌ 类 SQL 语法 |
+| 本地模型 | ✅ 支持 | ⚠️ 有限支持 | ✅ 支持 | ✅ 支持 |
+| API 模型 | ✅ 支持 | ✅ 支持 | ⚠️ 有限支持 | ✅ 支持 |
+| Python 风格语法 | ✅ 支持 | ✅ 支持 | ✅ 支持 | ❌ SQL 风格 |
 | 学习曲线 | 低 | 低 | 中等 | 高 |
 
 **何时选择 Guidance：**
 - 需要正则表达式/语法约束
-- 想要 Token 修复功能
+- 需要 Token 修复
 - 使用控制流构建复杂工作流
 - 使用本地模型（Transformers, llama.cpp）
 - 偏好 Python 风格语法
@@ -562,7 +563,7 @@ lm += gen("name", regex=r"^(John|Jane)$", max_tokens=10)
 **延迟降低：**
 - 对于约束输出，比传统提示方法快 30-50%
 - Token 修复减少了不必要的重新生成
-- 语法约束防止生成无效的 Token
+- 语法约束防止生成无效 Token
 
 **内存使用：**
 - 与无约束生成相比，开销极小

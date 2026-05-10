@@ -19,6 +19,7 @@ description: "审查 PR：通过 gh 或 REST 查看差异和行内评论"
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Code-Review`, `Pull-Requests`, `Git`, `Quality` |
 | 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow) |
 
@@ -30,7 +31,7 @@ description: "审查 PR：通过 gh 或 REST 查看差异和行内评论"
 
 # GitHub Code Review
 
-在推送前审查本地更改，或审查 GitHub 上开放的 PR。此技能大部分使用纯 `git` — `gh`/`curl` 的分工仅对 PR 级别的交互有影响。
+在推送前审查本地更改，或审查 GitHub 上开放的 PR。此技能大部分使用纯 `git` — `gh`/`curl` 的分工仅影响 PR 级别的交互。
 
 ## 先决条件
 
@@ -105,7 +106,7 @@ git diff main...HEAD | grep -n "print(\|console\.log\|TODO\|FIXME\|HACK\|XXX\|de
 # 意外暂存的大文件
 git diff main...HEAD --stat | sort -t'|' -k2 -rn | head -10
 
-# 密钥或凭据模式
+# 密钥或凭证模式
 git diff main...HEAD | grep -in "password\|secret\|api_key\|token.*=\|private_key"
 
 # 合并冲突标记
@@ -127,15 +128,15 @@ git diff main...HEAD | grep -n "<<<<<<\|>>>>>>\|======="
 
 ### 警告
 - **src/models/user.py:23** — 密码以明文存储。请使用 bcrypt 或 argon2。
-- **src/api/routes.py:112** — 登录端点无限流控。
+- **src/api/routes.py:112** — 登录端点无限流限制。
 
 ### 建议
 - **src/utils/helpers.py:8** — 与 `src/core/utils.py:34` 的逻辑重复。建议合并。
-- **tests/test_auth.py** — 缺少边界情况：过期 Token 测试。
+- **tests/test_auth.py** — 缺少边界情况测试：过期 Token 测试。
 
 ### 良好之处
-- 中间件层的关注点分离清晰
-- 主流程的测试覆盖良好
+- 中间件层关注点分离清晰
+- 主流程测试覆盖良好
 ```
 
 ---
@@ -180,7 +181,7 @@ for f in json.load(sys.stdin):
     print(f\"{f['status']:10} +{f['additions']:-4} -{f['deletions']:-4}  {f['filename']}\")"
 ```
 
-### 在本地检出 PR 以进行全面审查
+### 检出 PR 到本地进行完整审查
 
 这使用纯 `git` 即可 — 无需 `gh`：
 
@@ -220,14 +221,14 @@ curl -s -X POST \
 
 ### 留下行内审查评论
 
-**单个行内评论 — 使用 gh（通过 API）：**
+**单行内评论 — 使用 gh（通过 API）：**
 
 ```bash
 HEAD_SHA=$(gh pr view 123 --json headRefOid --jq '.headRefOid')
 
 gh api repos/$OWNER/$REPO/pulls/123/comments \
   --method POST \
-  -f body="这可以通过列表推导式简化。" \
+  -f body="这可以用列表推导式简化。" \
   -f path="src/auth/login.py" \
   -f commit_id="$HEAD_SHA" \
   -f line=45 \
@@ -246,7 +247,7 @@ curl -s -X POST \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$OWNER/$REPO/pulls/$PR_NUMBER/comments \
   -d "{
-    \"body\": \"这可以用列表推导式来简化。\",
+    \"body\": \"这可以通过列表推导式来简化。\",
     \"path\": \"src/auth/login.py\",
     \"commit_id\": \"$HEAD_SHA\",
     \"line\": 45,
@@ -259,7 +260,7 @@ curl -s -X POST \
 **使用 gh：**
 
 ```bash
-gh pr review 123 --approve --body "LGTM！"
+gh pr review 123 --approve --body "LGTM!"
 gh pr review 123 --request-changes --body "请查看行内评论。"
 gh pr review 123 --comment --body "一些建议，没有阻塞性问题。"
 ```
@@ -295,7 +296,7 @@ curl -s -X POST \
 
 ## 3. 评审清单
 
-执行代码评审（本地或 PR）时，系统性地检查：
+在执行代码评审（本地或 PR）时，系统地检查：
 
 ### 正确性
 - 代码是否实现了其声称的功能？
@@ -304,14 +305,14 @@ curl -s -X POST \
 
 ### 安全性
 - 没有硬编码的密钥、凭据或 API 密钥
-- 对用户输入进行验证
+- 对面向用户的输入进行验证
 - 没有 SQL 注入、XSS 或路径遍历漏洞
 - 在需要的地方进行身份验证/授权检查
 
 ### 代码质量
 - 命名清晰（变量、函数、类）
 - 没有不必要的复杂性或过早的抽象
-- DRY — 没有应该提取的重复逻辑
+- DRY — 没有应该被提取的重复逻辑
 - 函数职责单一
 
 ### 测试
@@ -321,7 +322,7 @@ curl -s -X POST \
 
 ### 性能
 - 没有 N+1 查询或不必要的循环
-- 在有益处的地方进行适当的缓存
+- 在有益的地方进行适当的缓存
 - 在异步代码路径中没有阻塞操作
 
 ### 文档
@@ -333,13 +334,13 @@ curl -s -X POST \
 
 ## 4. 推送前评审工作流
 
-当用户要求你“评审代码”或“推送前检查”时：
+当用户要求你“评审代码”或“在推送前检查”时：
 
 1. `git diff main...HEAD --stat` — 查看变更范围
 2. `git diff main...HEAD` — 阅读完整的差异
 3. 对于每个更改的文件，如果需要更多上下文，请使用 `read_file`
 4. 应用上述清单
-5. 以结构化格式呈现发现（关键问题 / 警告 / 建议 / 良好）
+5. 以结构化格式呈现发现的问题（关键问题 / 警告 / 建议 / 良好）
 6. 如果发现关键问题，在用户推送前提供修复建议
 
 ---
@@ -357,7 +358,7 @@ source "${HERMES_HOME:-$HOME/.hermes}/skills/github/github-auth/scripts/gh-env.s
 
 ### 步骤 2：收集 PR 上下文
 
-在深入代码之前，获取 PR 元数据、描述和更改文件列表以了解范围。
+在深入研究代码之前，获取 PR 元数据、描述和更改文件列表以了解范围。
 
 **使用 gh：**
 ```bash
@@ -374,7 +375,7 @@ PR_NUMBER=123
 curl -s -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$GH_OWNER/$GH_REPO/pulls/$PR_NUMBER
 
-# 更改的文件及行数统计
+# 更改的文件及其行数统计
 curl -s -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$GH_OWNER/$GH_REPO/pulls/$PR_NUMBER/files
 ```
@@ -405,11 +406,11 @@ git diff main...HEAD -- path/to/file.py
 ### 步骤 5：在本地运行自动化检查（如果适用）
 
 ```bash
-# 如果有测试套件，则运行测试
+# 如果有测试套件，运行测试
 python -m pytest 2>&1 | tail -20
 # 或者：npm test, cargo test, go test ./... 等
 
-# 如果配置了 linter，则运行
+# 如果配置了 linter，运行它
 ruff check . 2>&1 | head -30
 # 或者：eslint, clippy 等
 ```
@@ -437,7 +438,7 @@ HEAD_SHA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$GH_OWNER/$GH_REPO/pulls/$PR_NUMBER \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['head']['sha'])")
 
-# 构建评审 JSON — event 是 APPROVE、REQUEST_CHANGES 或 COMMENT
+# 构建评审 JSON — 事件是 APPROVE、REQUEST_CHANGES 或 COMMENT
 curl -s -X POST \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$GH_OWNER/$GH_REPO/pulls/$PR_NUMBER/reviews \
@@ -454,7 +455,7 @@ curl -s -X POST \
 ```
 ### 步骤 8：同时发布一个总结性评论
 
-除了行内评论外，还要留下一个顶层的总结，以便 PR 作者能一目了然地了解全貌。使用 `references/review-output-template.md` 中的审查输出格式。
+除了行内评论外，留下一个顶层的总结，以便 PR 作者能一目了然地了解全貌。使用 `references/review-output-template.md` 中的审查输出格式。
 
 **使用 gh：**
 ```bash
@@ -492,5 +493,5 @@ git branch -D pr-$PR_NUMBER
 ### 决定：批准 vs 请求修改 vs 评论
 
 - **批准** — 没有关键或警告级别的问题，只有次要建议或全部通过
-- **请求修改** — 存在任何关键或警告级别的问题，应在合并前修复
-- **评论** — 观察和建议，但无阻塞性问题（当你不确定或 PR 是草稿时使用）
+- **请求修改** — 存在任何应在合并前修复的关键或警告级别问题
+- **评论** — 观察和建议，但没有阻塞性问题（当你不确定或 PR 是草稿时使用）

@@ -19,6 +19,7 @@ description: "克隆/创建/分叉仓库；管理远程仓库、发布"
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Repositories`, `Git`, `Releases`, `Secrets`, `Configuration` |
 | 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-issues`](/docs/user-guide/skills/bundled/github/github-github-issues) |
 
@@ -60,7 +61,7 @@ else
 fi
 ```
 
-如果你已经在某个仓库内：
+如果你已在一个仓库内：
 
 ```bash
 REMOTE_URL=$(git remote get-url origin)
@@ -73,7 +74,7 @@ REPO=$(echo "$OWNER_REPO" | cut -d/ -f2)
 
 ## 1. 克隆仓库
 
-克隆是纯 `git` 操作 — 两种方式效果相同：
+克隆是纯粹的 `git` 操作——两种方式效果相同：
 
 ```bash
 # 通过 HTTPS 克隆（适用于凭证助手或嵌入 Token 的 URL）
@@ -88,7 +89,7 @@ git clone --depth 1 https://github.com/owner/repo-name.git
 # 克隆特定分支
 git clone --branch develop https://github.com/owner/repo-name.git
 
-# 通过 SSH 克隆（如果配置了 SSH）
+# 通过 SSH 克隆（如果已配置 SSH）
 git clone git@github.com:owner/repo-name.git
 ```
 
@@ -200,7 +201,7 @@ git remote add upstream https://github.com/owner/repo-name.git
 ### 保持分叉同步
 
 ```bash
-# 纯 git — 适用于所有情况
+# 纯 git 操作——适用于所有情况
 git fetch upstream
 git checkout main
 git merge upstream/main
@@ -259,7 +260,7 @@ for r in json.load(sys.stdin)['items']:
 ```
 ## 5. 仓库设置
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh repo edit --description "Updated description" --visibility public
@@ -269,7 +270,7 @@ gh repo edit --add-topic "machine-learning,python"
 gh repo edit --enable-auto-merge
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 curl -s -X PATCH \
@@ -317,7 +318,7 @@ curl -s -X PUT \
 
 ## 7. 密钥管理 (GitHub Actions)
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh secret set API_KEY --body "your-secret-value"
@@ -326,9 +327,9 @@ gh secret list
 gh secret delete API_KEY
 ```
 
-**使用 curl：**
+**使用 curl:**
 
-通过 API 设置密钥需要使用仓库的公钥进行加密，过程更复杂：
+密钥需要通过仓库的公钥进行加密——通过 API 操作更复杂：
 
 ```bash
 # 获取仓库的公钥用于加密密钥
@@ -371,11 +372,11 @@ for s in json.load(sys.stdin)['secrets']:
     print(f\"  {s['name']:30}  updated: {s['updated_at']}\")"
 ```
 
-注意：对于密钥管理，`gh secret set` 要简单得多。如果需要设置密钥且 `gh` 不可用，建议仅为该操作安装它。
+注意：对于密钥管理，`gh secret set` 要简单得多。如果需要设置密钥且 `gh` 不可用，建议仅为此操作安装它。
 
 ## 8. 发布
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh release create v1.0.0 --title "v1.0.0" --generate-notes
@@ -385,7 +386,7 @@ gh release list
 gh release download v1.0.0 --dir ./downloads
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 # 创建发布
@@ -422,7 +423,7 @@ curl -s -X POST \
 
 ## 9. GitHub Actions 工作流
 
-**使用 gh：**
+**使用 gh:**
 
 ```bash
 gh workflow list
@@ -435,7 +436,7 @@ gh workflow run ci.yml --ref main
 gh workflow run deploy.yml -f environment=staging
 ```
 
-**使用 curl：**
+**使用 curl:**
 
 ```bash
 # 列出工作流

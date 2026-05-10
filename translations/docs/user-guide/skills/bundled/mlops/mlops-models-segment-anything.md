@@ -20,12 +20,13 @@ SAM：通过点、框、掩码实现零样本图像分割。
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `segment-anything`, `transformers>=4.30.0`, `torch>=1.7.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `Multimodal`, `Image Segmentation`, `Computer Vision`, `SAM`, `Zero-Shot` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Segment Anything Model (SAM)
@@ -46,7 +47,7 @@ SAM：通过点、框、掩码实现零样本图像分割。
 - **零样本分割**：无需微调即可在任何图像领域工作
 - **灵活的提示**：点、边界框或先前的掩码
 - **自动分割**：自动生成所有对象掩码
-- **高质量**：在来自 1100 万张图像的 11 亿个掩码上训练
+- **高质量**：在 1100 万张图像的 11 亿个掩码上训练
 - **多种模型尺寸**：ViT-B（最快）、ViT-L、ViT-H（最准确）
 - **ONNX 导出**：可在浏览器和边缘设备中部署
 
@@ -205,7 +206,7 @@ input_labels = np.array([1, 1, 0])  # 2 个前景，1 个背景
 masks, scores, logits = predictor.predict(
     point_coords=input_points,
     point_labels=input_labels,
-    multimask_output=False  # 当提示清晰时输出单个掩码
+    multimask_output=False  # 当提示明确时返回单个掩码
 )
 ```
 ### 框提示
@@ -242,7 +243,7 @@ masks, scores, logits = predictor.predict(
     multimask_output=True
 )
 
-# 使用之前的掩码和额外的点进行优化
+# 使用前一个掩码和额外的点进行优化
 masks, scores, logits = predictor.predict(
     point_coords=np.array([[500, 375], [550, 400]]),
     point_labels=np.array([1, 0]),  # 添加背景点
@@ -265,7 +266,7 @@ mask_generator = SamAutomaticMaskGenerator(sam)
 masks = mask_generator.generate(image)
 
 # 每个掩码包含：
-# - segmentation: 二进制掩码
+# - segmentation: 二值掩码
 # - bbox: [x, y, w, h]
 # - area: 像素计数
 # - predicted_iou: 质量分数
@@ -324,7 +325,7 @@ for image in images:
 ### 每张图像多个提示
 
 ```python
-# 高效处理多个提示（单次图像编码）
+# 高效处理多个提示（一次图像编码）
 predictor.set_image(image)
 
 # 点提示批次
@@ -447,7 +448,7 @@ masks, scores, _ = predictor.predict(
 ```python
 # SamAutomaticMaskGenerator 输出
 {
-    "segmentation": np.ndarray,  # H×W 二进制掩码
+    "segmentation": np.ndarray,  # H×W 二值掩码
     "bbox": [x, y, w, h],        # 边界框
     "area": int,                 # 像素计数
     "predicted_iou": float,      # 0-1 质量分数
@@ -504,9 +505,9 @@ mask_generator = SamAutomaticMaskGenerator(
 |-------|----------|
 | 内存不足 | 使用 ViT-B 模型，减小图像尺寸 |
 | 推理速度慢 | 使用 ViT-B 模型，减少 `points_per_side` |
-| 掩码质量差 | 尝试不同的提示词，使用框 + 点 |
+| 掩码质量差 | 尝试不同的提示词，结合使用框和点 |
 | 边缘伪影 | 使用 `stability_score` 过滤 |
-| 小物体被遗漏 | 增加 `points_per_side` |
+| 漏掉小物体 | 增加 `points_per_side` |
 
 ## 参考文档
 

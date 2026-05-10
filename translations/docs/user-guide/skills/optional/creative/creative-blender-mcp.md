@@ -18,6 +18,7 @@ description: "通过 socket 连接 blender-mcp 插件，直接从 Hermes 控制 
 | 路径 | `optional-skills/creative/blender-mcp` |
 | 版本 | `1.0.0` |
 | 作者 | alireza78a |
+| 平台 | linux, macos, windows |
 
 ## 参考：完整的 SKILL.md
 
@@ -42,7 +43,7 @@ description: "通过 socket 连接 blender-mcp 插件，直接从 Hermes 控制 
 ### 2. 在 Blender 中启动 socket 服务器
 
 在 Blender 视口中按 N 键打开侧边栏。
-找到 "BlenderMCP" 标签页并点击 "Start Server"。
+找到 "BlenderMCP" 选项卡并点击 "Start Server"。
 
 ### 3. 验证连接
 
@@ -67,7 +68,7 @@ description: "通过 socket 连接 blender-mcp 插件，直接从 Hermes 控制 
 
 ## Python 辅助函数
 
-在 execute_code 工具调用内部使用此函数：
+在 execute_code 工具调用内部使用：
 
     import socket, json
 
@@ -94,7 +95,7 @@ description: "通过 socket 连接 blender-mcp 插件，直接从 Hermes 控制 
         s.close()
         return json.loads(buf.decode("utf-8"))
 
-## 常见 bpy 模式
+## 常用 bpy 模式
 
 ### 清空场景
     bpy.ops.object.select_all(action='SELECT')
@@ -125,10 +126,10 @@ description: "通过 socket 连接 blender-mcp 插件，直接从 Hermes 控制 
     bpy.context.scene.render.engine = 'CYCLES'
     bpy.ops.render.render(write_still=True)
 
-## 注意事项
+## 常见问题
 
 - 运行前必须检查 socket 是否已打开 (nc -z localhost 9876)
-- 插件服务器必须在每个 Blender 会话中启动 (N 面板 > BlenderMCP > Connect)
+- 插件服务器必须在每个 Blender 会话中启动 (N-panel > BlenderMCP > Connect)
 - 将复杂场景分解为多个较小的 execute_code 调用以避免超时
 - 渲染输出路径必须是绝对路径 (/tmp/...)，不能是相对路径
 - shade_smooth() 要求对象被选中且处于对象模式

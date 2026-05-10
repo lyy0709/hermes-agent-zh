@@ -19,6 +19,7 @@ Canvas LMS 集成 — 使用 API Token 认证获取已注册课程和作业。
 | 版本 | `1.0.0` |
 | 作者 | community |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Canvas`, `LMS`, `Education`, `Courses`, `Assignments` |
 
 ## 参考：完整的 SKILL.md
@@ -48,7 +49,7 @@ CANVAS_API_TOKEN=your_token_here
 CANVAS_BASE_URL=https://yourschool.instructure.com
 ```
 
-基础 URL 是您登录 Canvas 时浏览器中显示的地址（不带尾部斜杠）。
+基本 URL 是您登录 Canvas 时浏览器中显示的地址（不带尾部斜杠）。
 
 ## 用法
 
@@ -99,7 +100,7 @@ Canvas 使用 `Link` 头进行分页。Python 脚本会自动处理分页。
 ## 规则
 
 -   此技能为**只读** — 仅获取数据，从不修改课程或作业
--   首次使用时，通过运行 `$CANVAS list_courses` 验证身份验证 — 如果失败并返回 401，请引导用户完成设置
+-   首次使用时，通过运行 `$CANVAS list_courses` 验证身份验证 — 如果失败并显示 401，请引导用户完成设置
 -   Canvas 限制为每 10 分钟约 700 个请求；如果达到限制，请检查 `X-Rate-Limit-Remaining` 头
 
 ## 故障排除

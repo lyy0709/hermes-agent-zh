@@ -1,14 +1,14 @@
 ---
 title: "Whisper — OpenAI 通用语音识别模型"
 sidebar_label: "Whisper"
-description: "OpenAI 通用语音识别模型"
+description: "OpenAI 的通用语音识别模型"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Whisper
 
-OpenAI 通用语音识别模型。支持 99 种语言、转录、翻译为英语以及语言识别。提供从 tiny（3900 万参数）到 large（15.5 亿参数）六种模型尺寸。可用于语音转文本、播客转录或多语言音频处理。最适合稳健的多语言自动语音识别。
+OpenAI 的通用语音识别模型。支持 99 种语言，包括转录、翻译成英语和语言识别。提供从 tiny（3900 万参数）到 large（15.5 亿参数）的六种模型尺寸。可用于语音转文本、播客转录或多语言音频处理。最适合稳健的多语言自动语音识别。
 
 ## 技能元数据
 
@@ -20,6 +20,7 @@ OpenAI 通用语音识别模型。支持 99 种语言、转录、翻译为英语
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `openai-whisper`, `transformers`, `torch` |
+| 平台 | linux, macos |
 | 标签 | `Whisper`, `Speech Recognition`, `ASR`, `Multimodal`, `Multilingual`, `OpenAI`, `Speech-To-Text`, `Transcription`, `Translation`, `Audio Processing` |
 
 ## 参考：完整的 SKILL.md
@@ -37,21 +38,21 @@ OpenAI 的多语言语音识别模型。
 **在以下情况使用：**
 - 语音转文本转录（99 种语言）
 - 播客/视频转录
-- 会议纪要自动化
-- 翻译为英语
+- 会议记录自动化
+- 翻译成英语
 - 嘈杂音频转录
 - 多语言音频处理
 
 **指标**：
-- **72,900+ GitHub stars**
+- **GitHub 星标数超过 72,900+**
 - 支持 99 种语言
 - 基于 680,000 小时音频训练
 - MIT 许可证
 
-**改用替代方案**：
-- **AssemblyAI**: 托管 API，说话人分离
-- **Deepgram**: 实时流式 ASR
-- **Google Speech-to-Text**: 基于云的服务
+**改用替代方案的情况**：
+- **AssemblyAI**：托管 API，说话人分离
+- **Deepgram**：实时流式 ASR
+- **Google Speech-to-Text**：基于云的服务
 
 ## 快速开始
 
@@ -127,7 +128,7 @@ result = model.transcribe("audio.mp3", language="en")
 # 转录（默认）
 result = model.transcribe("audio.mp3", task="transcribe")
 
-# 翻译为英语
+# 翻译成英语
 result = model.transcribe("spanish.mp3", task="translate")
 # 输入：西班牙语音频 → 输出：英语文本
 ```
@@ -267,7 +268,7 @@ from langchain_openai import OpenAIEmbeddings
 vectorstore = Chroma.from_documents(docs, OpenAIEmbeddings())
 ```
 
-### 从视频提取音频
+### 从视频中提取音频
 
 ```bash
 # 使用 ffmpeg 提取音频
@@ -281,14 +282,14 @@ whisper audio.wav
 
 1.  **使用 turbo 模型** - 英语最佳速度/质量
 2.  **指定语言** - 比自动检测更快
-3.  **添加初始提示词** - 改善技术术语
+3.  **添加初始提示词** - 提高技术术语准确性
 4.  **使用 GPU** - 快 10-20 倍
 5.  **批量处理** - 更高效
 6.  **转换为 WAV** - 更好的兼容性
-7.  **分割长音频** - &lt;30 分钟片段
+7.  **分割长音频** - &lt;30 分钟的片段
 8.  **检查语言支持** - 质量因语言而异
 9.  **使用 faster-whisper** - 比 openai-whisper 快 4 倍
-10. **监控显存** - 根据硬件调整模型大小
+10. **监控显存** - 根据硬件调整模型尺寸
 
 ## 性能
 
@@ -315,14 +316,14 @@ whisper audio.wav
 - 韩语 (ko)
 - 中文 (zh)
 
-完整列表：总计 99 种语言
+完整列表：总共 99 种语言
 
 ## 局限性
 
 1.  **幻觉** - 可能重复或编造文本
-2.  **长音频准确性** - 在 >30 分钟音频上性能下降
+2.  **长音频准确性** - 超过 30 分钟的音频质量下降
 3.  **说话人识别** - 无说话人分离
-4.  **口音** - 质量不一
+4.  **口音** - 质量因口音而异
 5.  **背景噪音** - 可能影响准确性
 6.  **实时延迟** - 不适合实时字幕
 

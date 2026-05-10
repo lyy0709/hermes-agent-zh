@@ -1,14 +1,14 @@
 ---
-title: "Github Pr Workflow — GitHub PR 生命周期：分支、提交、开启、CI、合并"
+title: "Github Pr Workflow — GitHub PR 生命周期：分支、提交、打开、CI、合并"
 sidebar_label: "Github Pr Workflow"
-description: "GitHub PR 生命周期：分支、提交、开启、CI、合并"
+description: "GitHub PR 生命周期：分支、提交、打开、CI、合并"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Github Pr Workflow
 
-GitHub PR 生命周期：分支、提交、开启、CI、合并。
+GitHub PR 生命周期：分支、提交、打开、CI、合并。
 
 ## 技能元数据
 
@@ -19,6 +19,7 @@ GitHub PR 生命周期：分支、提交、开启、CI、合并。
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Pull-Requests`, `CI/CD`, `Git`, `Automation`, `Merge` |
 | 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-code-review`](/docs/user-guide/skills/bundled/github/github-github-code-review) |
 
@@ -30,7 +31,7 @@ GitHub PR 生命周期：分支、提交、开启、CI、合并。
 
 # GitHub Pull Request 工作流
 
-管理 PR 生命周期的完整指南。每个部分首先展示 `gh` 方式，然后是针对没有 `gh` 的机器的 `git` + `curl` 备用方案。
+管理 PR 生命周期的完整指南。每个部分首先展示 `gh` 方式，然后是为没有 `gh` 的机器准备的 `git` + `curl` 备用方案。
 
 ## 先决条件
 
@@ -74,10 +75,10 @@ echo "Owner: $OWNER, Repo: $REPO"
 
 ## 1. 分支创建
 
-这部分是纯 `git` 操作——两种方式相同：
+这部分是纯 `git` 操作 — 两种方式相同：
 
 ```bash
-# 确保你已更新到最新
+# 确保是最新状态
 git fetch origin
 git checkout main && git pull origin main
 
@@ -162,7 +163,7 @@ curl -s -X POST \
   }"
 ```
 
-响应 JSON 包含 PR `number` —— 保存它以供后续命令使用。
+响应 JSON 包含 PR `number` — 保存它以供后续命令使用。
 
 要创建为草稿，请在 JSON 主体中添加 `"draft": true`。
 
@@ -211,7 +212,7 @@ for cr in data.get('check_runs', []):
 ### 轮询直到完成（git + curl）
 
 ```bash
-# 简单的轮询循环 —— 每 30 秒检查一次，最多 10 分钟
+# 简单的轮询循环 — 每 30 秒检查一次，最多 10 分钟
 SHA=$(git rev-parse HEAD)
 for i in $(seq 1 20); do
   STATUS=$(curl -s \
@@ -268,7 +269,7 @@ cd /tmp && unzip -o ci-logs.zip -d ci-logs && cat ci-logs/*.txt
 
 ### 步骤 2：修复并推送
 
-识别问题后，使用文件工具（`patch`, `write_file`）修复它：
+确定问题后，使用文件工具（`patch`, `write_file`）修复它：
 
 ```bash
 git add <fixed_files>

@@ -20,6 +20,7 @@ description: "最简单的分布式训练 API"
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `accelerate`, `torch`, `transformers` |
+| 平台 | linux, macos, windows |
 | 标签 | `分布式训练`, `HuggingFace`, `Accelerate`, `DeepSpeed`, `FSDP`, `混合精度`, `PyTorch`, `DDP`, `统一 API`, `简单` |
 
 ## 参考：完整的 SKILL.md
@@ -39,7 +40,7 @@ Accelerate 将分布式训练简化为 4 行代码。
 pip install accelerate
 ```
 
-**转换 PyTorch 脚本** (4 行):
+**转换 PyTorch 脚本**（4 行）:
 ```python
 import torch
 + from accelerate import Accelerator
@@ -60,7 +61,7 @@ import torch
       optimizer.step()
 ```
 
-**运行** (单一命令):
+**运行**（单一命令）:
 ```bash
 accelerate launch train.py
 ```
@@ -87,7 +88,7 @@ for epoch in range(10):
         optimizer.step()
 ```
 
-**使用 Accelerate** (添加 4 行):
+**使用 Accelerate**（添加 4 行）:
 ```python
 # train.py
 import torch
@@ -110,23 +111,23 @@ for epoch in range(10):
         optimizer.step()
 ```
 
-**配置** (交互式):
+**配置**（交互式）:
 ```bash
 accelerate config
 ```
 
 **问题**:
-- 使用哪种机器？ (单/多 GPU/TPU/CPU)
-- 多少台机器？ (1)
-- 混合精度？ (否/fp16/bf16/fp8)
-- DeepSpeed？ (否/是)
+- 使用哪种机器？（单/多 GPU/TPU/CPU）
+- 多少台机器？（1）
+- 混合精度？（否/fp16/bf16/fp8）
+- DeepSpeed？（否/是）
 
-**启动** (适用于任何设置):
+**启动**（适用于任何设置）:
 ```bash
 # 单 GPU
 accelerate launch train.py
 
-# 多 GPU (8 个 GPU)
+# 多 GPU（8 个 GPU）
 accelerate launch --multi_gpu --num_processes 8 train.py
 
 # 多节点
@@ -142,13 +143,13 @@ accelerate launch --multi_gpu --num_processes 16 \
 ```python
 from accelerate import Accelerator
 
-# FP16 (带梯度缩放)
+# FP16（带梯度缩放）
 accelerator = Accelerator(mixed_precision='fp16')
 
-# BF16 (无需缩放，更稳定)
+# BF16（无缩放，更稳定）
 accelerator = Accelerator(mixed_precision='bf16')
 
-# FP8 (H100+)
+# FP8（H100+）
 accelerator = Accelerator(mixed_precision='fp8')
 
 model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
@@ -182,7 +183,7 @@ model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
 **或通过配置**:
 ```bash
 accelerate config
-# 选择: DeepSpeed → ZeRO-2
+# 选择：DeepSpeed → ZeRO-2
 ```
 
 **deepspeed_config.json**:
@@ -204,7 +205,7 @@ accelerate config
 accelerate launch --config_file deepspeed_config.json train.py
 ```
 
-### 工作流 4：FSDP (全分片数据并行)
+### 工作流 4：FSDP（全分片数据并行）
 
 **启用 FSDP**:
 ```python
@@ -227,7 +228,7 @@ model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
 **或通过配置**:
 ```bash
 accelerate config
-# 选择: FSDP → Full Shard → No CPU Offload
+# 选择：FSDP → Full Shard → No CPU Offload
 ```
 
 ### 工作流 5：梯度累积
@@ -256,11 +257,11 @@ for batch in dataloader:
 - 想要最简单的分布式训练
 - 需要单一脚本适用于任何硬件
 - 使用 HuggingFace 生态系统
-- 需要灵活性 (DDP/DeepSpeed/FSDP/Megatron)
+- 需要灵活性（DDP/DeepSpeed/FSDP/Megatron）
 - 需要快速原型设计
 
 **关键优势**:
-- **4 行代码**: 最小的代码改动
+- **4 行代码**: 最小的代码更改
 - **统一 API**: 相同的代码适用于 DDP、DeepSpeed、FSDP、Megatron
 - **自动**: 设备放置、混合精度、分片
 - **交互式配置**: 无需手动设置启动器
@@ -276,7 +277,7 @@ for batch in dataloader:
 
 **问题：设备放置错误**
 
-不要手动移动到设备:
+不要手动移动到设备：
 ```python
 # 错误
 batch = batch.to('cuda')
@@ -287,7 +288,7 @@ batch = batch.to('cuda')
 
 **问题：梯度累积不工作**
 
-使用上下文管理器:
+使用上下文管理器：
 ```python
 # 正确
 with accelerator.accumulate(model):
@@ -296,21 +297,21 @@ with accelerator.accumulate(model):
     optimizer.step()
 ```
 
-**问题：分布式环境下的检查点保存**
+**问题：分布式中的检查点保存**
 
-使用 accelerator 方法:
+使用 accelerator 方法：
 ```python
-# 仅在主进程保存
+# 仅在主进程上保存
 if accelerator.is_main_process:
     accelerator.save_state('checkpoint/')
 
-# 在所有进程加载
+# 在所有进程上加载
 accelerator.load_state('checkpoint/')
 ```
 
 **问题：使用 FSDP 时结果不同**
 
-确保随机种子相同:
+确保相同的随机种子：
 ```python
 from accelerate.utils import set_seed
 set_seed(42)
@@ -326,17 +327,17 @@ set_seed(42)
 
 ## 硬件要求
 
-- **CPU**: 可用 (慢)
+- **CPU**: 可用（慢）
 - **单 GPU**: 可用
-- **多 GPU**: DDP (默认)、DeepSpeed 或 FSDP
+- **多 GPU**: DDP（默认）、DeepSpeed 或 FSDP
 - **多节点**: DDP、DeepSpeed、FSDP、Megatron
 - **TPU**: 支持
 - **Apple MPS**: 支持
 
 **启动器要求**:
-- **DDP**: `torch.distributed.run` (内置)
-- **DeepSpeed**: `deepspeed` (pip install deepspeed)
-- **FSDP**: PyTorch 1.12+ (内置)
+- **DDP**: `torch.distributed.run`（内置）
+- **DeepSpeed**: `deepspeed`（pip install deepspeed）
+- **FSDP**: PyTorch 1.12+（内置）
 - **Megatron**: 自定义设置
 
 ## 资源

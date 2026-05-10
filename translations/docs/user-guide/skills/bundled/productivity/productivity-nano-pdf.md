@@ -19,6 +19,7 @@ description: "通过 nano-pdf CLI 编辑 PDF 文本/拼写错误/标题（自然
 | 版本 | `1.0.0` |
 | 作者 | community |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `PDF`, `Documents`, `Editing`, `NLP`, `Productivity` |
 
 ## 参考：完整的 SKILL.md
@@ -62,7 +63,7 @@ nano-pdf edit contract.pdf 2 "将客户名称从 'Acme Corp' 改为 'Acme Indust
 
 ## 注意事项
 
-- 页码可能基于 0 或基于 1，具体取决于版本 — 如果编辑了错误的页面，请尝试页码 ±1 后重试
+- 页码可能基于 0 或基于 1，具体取决于版本 — 如果编辑了错误的页面，请尝试将页码 ±1 后重试
 - 编辑后务必验证输出 PDF（使用 `read_file` 检查文件大小，或直接打开）
 - 该工具底层使用了 LLM — 需要 API 密钥（查看 `nano-pdf --help` 了解配置）
 - 适用于文本更改；复杂的布局修改可能需要不同的方法

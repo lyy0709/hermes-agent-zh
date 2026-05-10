@@ -1,6 +1,6 @@
 ---
 title: 备用提供商
-description: 在主模型不可用时配置自动故障转移至备用 LLM 提供商。
+description: 在主模型不可用时，配置自动故障转移至备用 LLM 提供商。
 sidebar_label: 备用提供商
 sidebar_position: 8
 ---
@@ -9,15 +9,15 @@ sidebar_position: 8
 
 Hermes Agent 拥有三层弹性机制，可在提供商遇到问题时保持您的会话运行：
 
-1. **[凭证池](./credential-pools.md)** — 在*同一*提供商的多个 API 密钥之间轮换（首先尝试）
+1. **[凭证池](./credential-pools.md)** — 在*同一*提供商的多个 API 密钥间轮换（首先尝试）
 2. **主模型备用** — 当您的主模型失败时，自动切换到*不同*的提供商:模型
 3. **辅助任务备用** — 为视觉、压缩和网页提取等辅助任务提供独立的提供商解析
 
-凭证池处理同一提供商的轮换（例如，多个 OpenRouter 密钥）。本页涵盖跨提供商备用。两者都是可选的，并且独立工作。
+凭证池处理同一提供商内的轮换（例如，多个 OpenRouter 密钥）。本页涵盖跨提供商的备用机制。两者都是可选的，并且独立工作。
 
 ## 主模型备用
 
-当您的主要 LLM 提供商遇到错误时 — 速率限制、服务器过载、认证失败、连接中断 — Hermes 可以在会话中自动切换到备用提供商:模型对，而不会丢失您的对话。
+当您的主要 LLM 提供商遇到错误时 — 速率限制、服务器过载、认证失败、连接中断 — Hermes 可以在会话中自动切换到备用提供商:模型组合，而不会丢失您的对话。
 
 ### 配置
 
@@ -27,7 +27,7 @@ Hermes Agent 拥有三层弹性机制，可在提供商遇到问题时保持您�
 hermes fallback
 ```
 
-`hermes fallback` 复用 `hermes model` 中的提供商选择器 — 相同的提供商列表、相同的凭证提示、相同的验证。按 `a` 添加备用，`↑`/`↓` 重新排序，`d` 删除，`q` 保存并退出。更改将持久保存在 `config.yaml` 中的 `model.fallback_providers` 下。
+`hermes fallback` 复用 `hermes model` 中的提供商选择器 — 相同的提供商列表、相同的凭证提示、相同的验证。使用子命令 `add`、`list`（别名 `ls`）、`remove`（别名 `rm`）和 `clear` 来管理备用链。更改会持久保存在 `config.yaml` 顶层的 `fallback_providers:` 列表中。
 
 如果您更愿意直接编辑 YAML，请在 `~/.hermes/config.yaml` 中添加一个 `fallback_model` 部分：
 
@@ -40,7 +40,7 @@ fallback_model:
 `provider` 和 `model` 都是**必需的**。如果缺少任何一个，备用功能将被禁用。
 
 :::note `fallback_model` 与 `fallback_providers`
-`fallback_model`（单数）是旧版单备用键 — Hermes 为了向后兼容仍然支持它。`fallback_providers`（复数，列表）支持按顺序尝试多个备用；`hermes fallback` 写入此键。当两者都设置时，Hermes 会合并它们，`fallback_providers` 优先。
+`fallback_model`（单数）是旧版单备用键 — Hermes 为了向后兼容仍然支持它。`fallback_providers`（复数，列表）支持按顺序尝试多个备用；`hermes fallback` 写入此键。当两者都设置时，Hermes 会合并它们，并优先使用 `fallback_providers`。
 :::
 
 ### 支持的提供商
@@ -59,15 +59,15 @@ fallback_model:
 | MiniMax | `minimax` | `MINIMAX_API_KEY` |
 | MiniMax (中国) | `minimax-cn` | `MINIMAX_CN_API_KEY` |
 | DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` |
-| NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY`（可选：`NVIDIA_BASE_URL`） |
-| GMI Cloud | `gmi` | `GMI_API_KEY`（可选：`GMI_BASE_URL`） |
-| StepFun | `stepfun` | `STEPFUN_API_KEY`（可选：`STEPFUN_BASE_URL`） |
+| NVIDIA NIM | `nvidia` | `NVIDIA_API_KEY` (可选: `NVIDIA_BASE_URL`) |
+| GMI Cloud | `gmi` | `GMI_API_KEY` (可选: `GMI_BASE_URL`) |
+| StepFun | `stepfun` | `STEPFUN_API_KEY` (可选: `STEPFUN_BASE_URL`) |
 | Ollama Cloud | `ollama-cloud` | `OLLAMA_API_KEY` |
-| Google Gemini (OAuth) | `google-gemini-cli` | `hermes model` (Google OAuth；可选：`HERMES_GEMINI_PROJECT_ID`) |
-| Google AI Studio | `gemini` | `GOOGLE_API_KEY`（别名：`GEMINI_API_KEY`） |
-| xAI (Grok) | `xai` (别名 `grok`) | `XAI_API_KEY`（可选：`XAI_BASE_URL`） |
+| Google Gemini (OAuth) | `google-gemini-cli` | `hermes model` (Google OAuth; 可选: `HERMES_GEMINI_PROJECT_ID`) |
+| Google AI Studio | `gemini` | `GOOGLE_API_KEY` (别名: `GEMINI_API_KEY`) |
+| xAI (Grok) | `xai` (别名 `grok`) | `XAI_API_KEY` (可选: `XAI_BASE_URL`) |
 | AWS Bedrock | `bedrock` | 标准 boto3 认证 (`AWS_REGION` + `AWS_PROFILE` 或 `AWS_ACCESS_KEY_ID`) |
-| Qwen Portal (OAuth) | `qwen-oauth` | `hermes model` (Qwen Portal OAuth；可选：`HERMES_QWEN_BASE_URL`) |
+| Qwen Portal (OAuth) | `qwen-oauth` | `hermes model` (Qwen Portal OAuth; 可选: `HERMES_QWEN_BASE_URL`) |
 | MiniMax (OAuth) | `minimax-oauth` | `hermes model` (MiniMax portal OAuth) |
 | OpenCode Zen | `opencode-zen` | `OPENCODE_ZEN_API_KEY` |
 | OpenCode Go | `opencode-go` | `OPENCODE_GO_API_KEY` |
@@ -76,14 +76,14 @@ fallback_model:
 | Arcee AI | `arcee` | `ARCEEAI_API_KEY` |
 | GMI Cloud | `gmi` | `GMI_API_KEY` |
 | Alibaba / DashScope | `alibaba` | `DASHSCOPE_API_KEY` |
-| Alibaba Coding Plan | `alibaba-coding-plan` | `ALIBABA_CODING_PLAN_API_KEY`（回退到 `DASHSCOPE_API_KEY`） |
+| Alibaba Coding Plan | `alibaba-coding-plan` | `ALIBABA_CODING_PLAN_API_KEY` (回退到 `DASHSCOPE_API_KEY`) |
 | Kimi / Moonshot (中国) | `kimi-coding-cn` | `KIMI_CN_API_KEY` |
 | StepFun | `stepfun` | `STEPFUN_API_KEY` |
 | Tencent TokenHub | `tencent-tokenhub` | `TOKENHUB_API_KEY` |
 | Azure AI Foundry | `azure-foundry` | `AZURE_FOUNDRY_API_KEY` + `AZURE_FOUNDRY_BASE_URL` |
-| LM Studio (本地) | `lmstudio` | `LM_API_KEY`（或本地无需） + `LM_BASE_URL` |
+| LM Studio (本地) | `lmstudio` | `LM_API_KEY` (或本地无需) + `LM_BASE_URL` |
 | Hugging Face | `huggingface` | `HF_TOKEN` |
-| 自定义端点 | `custom` | `base_url` + `key_env`（见下文） |
+| 自定义端点 | `custom` | `base_url` + `key_env` (见下文) |
 
 ### 自定义端点备用
 
@@ -111,17 +111,17 @@ fallback_model:
 
 1. 解析备用提供商的凭证
 2. 构建新的 API 客户端
-3. 原地交换模型、提供商和客户端
+3. 原地替换模型、提供商和客户端
 4. 重置重试计数器并继续对话
 
-切换是无缝的 — 您的对话历史、工具调用和上下文都得以保留。Agent 会从它中断的地方继续，只是使用不同的模型。
+切换是无缝的 — 您的对话历史、工具调用和上下文都会被保留。Agent 会从它中断的地方继续，只是使用不同的模型。
 
 :::info 按轮次，非按会话
-备用是**轮次作用域**的：每个新的用户消息都以恢复的主模型开始。如果主模型在轮次中途失败，备用仅在该轮次激活。在下一条消息时，Hermes 会再次尝试主模型。在单个轮次内，备用最多激活一次 — 如果备用也失败，则正常的错误处理接管（重试，然后是错误消息）。这可以防止在轮次内发生级联故障转移循环，同时给主模型每轮次一个新的机会。
+备用是**轮次作用域**的：每个新的用户消息开始时都会恢复使用主模型。如果主模型在轮次中途失败，备用仅在该轮次激活。在下一条消息时，Hermes 会再次尝试主模型。在单个轮次内，备用最多激活一次 — 如果备用也失败，则正常的错误处理接管（重试，然后显示错误消息）。这可以防止在单个轮次内发生级联故障转移循环，同时给主模型每个轮次都有新的机会。
 :::
 ### 示例
 
-**将 OpenRouter 作为 Anthropic 原生模型的备用方案：**
+**将 OpenRouter 作为 Anthropic 原生模型的备用：**
 ```yaml
 model:
   provider: anthropic
@@ -132,7 +132,7 @@ fallback_model:
   model: anthropic/claude-sonnet-4
 ```
 
-**将 Nous Portal 作为 OpenRouter 的备用方案：**
+**将 Nous Portal 作为 OpenRouter 的备用：**
 ```yaml
 model:
   provider: openrouter
@@ -143,7 +143,7 @@ fallback_model:
   model: nous-hermes-3
 ```
 
-**将本地模型作为云端模型的备用方案：**
+**将本地模型作为云端模型的备用：**
 ```yaml
 fallback_model:
   provider: custom
@@ -152,16 +152,16 @@ fallback_model:
   key_env: LOCAL_API_KEY
 ```
 
-**将 Codex OAuth 作为备用方案：**
+**将 Codex OAuth 作为备用：**
 ```yaml
 fallback_model:
   provider: openai-codex
   model: gpt-5.3-codex
 ```
 
-### 备用方案生效的场景
+### 备用模型生效的场景
 
-| 场景 | 是否支持备用方案 |
+| 场景 | 是否支持备用模型 |
 |---------|-------------------|
 | CLI 会话 | ✔ |
 | 消息网关（Telegram、Discord 等） | ✔ |
@@ -175,7 +175,7 @@ fallback_model:
 
 ---
 
-## 辅助任务的备用方案
+## 辅助任务的备用机制
 
 Hermes 为辅助任务使用独立的轻量级模型。每个任务都有自己的提供商解析链，这相当于一个内置的备用系统。
 
@@ -191,11 +191,11 @@ Hermes 为辅助任务使用独立的轻量级模型。每个任务都有自己�
 | MCP | MCP 辅助操作 | `auxiliary.mcp` |
 | 审批 | 智能命令审批分类 | `auxiliary.approval` |
 | 标题生成 | 会话标题摘要 | `auxiliary.title_generation` |
-| 分类任务细化器 | `hermes kanban specify` / 仪表板 ✨ 按钮 — 将一行分类任务描述扩展为完整的规格说明 | `auxiliary.triage_specifier` |
+| 分类指定器 | `hermes kanban specify` / 仪表板 ✨ 按钮 — 将一行分类任务扩展为完整的规格说明 | `auxiliary.triage_specifier` |
 
 ### 自动检测链
 
-当任务的提供商设置为 `"auto"`（默认值）时，Hermes 会按顺序尝试提供商，直到一个可用：
+当任务的提供商设置为 `"auto"`（默认值）时，Hermes 会按顺序尝试提供商，直到一个可用为止：
 
 **对于文本任务（压缩、网页提取等）：**
 
@@ -328,17 +328,17 @@ auxiliary:
     model: "google/gemini-3-flash-preview"
 ```
 
-:::info 旧配置迁移
-带有 `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` 的旧配置在首次加载时（配置版本 17）会自动迁移到 `auxiliary.compression.*`。
+:::info 旧版迁移
+带有 `compression.summary_model` / `compression.summary_provider` / `compression.summary_base_url` 的旧配置会在首次加载时（配置版本 17）自动迁移到 `auxiliary.compression.*`。
 :::
 
-如果没有可用的提供商进行压缩，Hermes 会丢弃中间对话轮次而不生成摘要，而不是使会话失败。
+如果没有可用的提供商进行压缩，Hermes 会丢弃中间对话轮次而不生成摘要，而不是让会话失败。
 
 ---
 
 ## 委派提供商覆盖
 
-由 `delegate_task` 生成的子 Agent **不**使用主回退模型。但是，为了优化成本，可以将它们路由到不同的提供商:模型组合：
+由 `delegate_task` 生成的子 Agent **不**使用主回退模型。但是，为了优化成本，可以将它们路由到不同的提供商:模型对：
 
 ```yaml
 delegation:
@@ -348,7 +348,7 @@ delegation:
   # api_key: "local-key"
 ```
 
-完整配置细节请参阅[子 Agent 委派](/docs/user-guide/features/delegation)。
+完整配置详情请参阅[子 Agent 委派](/docs/user-guide/features/delegation)。
 
 ---
 
@@ -366,7 +366,7 @@ cronjob(
 )
 ```
 
-完整配置细节请参阅[定时任务](/docs/user-guide/features/cron)。
+完整配置详情请参阅[定时任务](/docs/user-guide/features/cron)。
 
 ---
 

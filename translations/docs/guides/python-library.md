@@ -6,7 +6,7 @@ description: "将 AIAgent 嵌入到您自己的 Python 脚本、Web 应用或自
 
 # 将 Hermes 用作 Python 库
 
-Hermes 不仅仅是一个 CLI 工具。您可以直接导入 `AIAgent`，并在您自己的 Python 脚本、Web 应用程序或自动化流水线中以编程方式使用它。本指南将向您展示具体方法。
+Hermes 不仅仅是一个 CLI 工具。您可以直接导入 `AIAgent` 并以编程方式在您自己的 Python 脚本、Web 应用程序或自动化流水线中使用它。本指南将向您展示具体方法。
 
 ---
 
@@ -81,7 +81,8 @@ print(f"Messages exchanged: {len(result['messages'])}")
 返回的字典包含：
 - **`final_response`** — Agent 的最终文本回复
 - **`messages`** — 完整的消息历史记录（系统、用户、助手、工具调用）
-- **`task_id`** — 用于 VM 隔离的任务标识符
+
+（您传入的 `task_id` 存储在 Agent 实例上用于 VM 隔离，但不会在返回的字典中回显。）
 
 您还可以传递一个自定义系统消息，以覆盖该次调用的临时系统提示词：
 
@@ -96,7 +97,7 @@ result = agent.run_conversation(
 
 ## 配置工具
 
-使用 `enabled_toolsets` 或 `disabled_toolsets` 来控制 Agent 可以访问哪些工具集：
+使用 `enabled_toolsets` 或 `disabled_toolsets` 控制 Agent 可以访问哪些工具集：
 
 ```python
 # 仅启用 Web 工具（浏览、搜索）
@@ -106,8 +107,8 @@ agent = AIAgent(
     quiet_mode=True,
 )
 
-# 启用除终端访问之外的所有功能
-agent = AIgent(
+# 启用除终端访问外的所有功能
+agent = AIAgent(
     model="anthropic/claude-sonnet-4",
     disabled_toolsets=["terminal"],
     quiet_mode=True,
@@ -115,14 +116,14 @@ agent = AIgent(
 ```
 
 :::tip
-当您想要一个最小化、受限制的 Agent 时（例如，研究机器人仅使用网络搜索），请使用 `enabled_toolsets`。当您需要大部分功能但需要限制特定功能时（例如，在共享环境中禁止终端访问），请使用 `disabled_toolsets`。
+当您想要一个最小化、锁定的 Agent 时（例如，研究机器人仅使用网络搜索），请使用 `enabled_toolsets`。当您需要大部分功能但需要限制特定功能时（例如，在共享环境中禁止终端访问），请使用 `disabled_toolsets`。
 :::
 
 ---
 
 ## 多轮对话
 
-通过将消息历史记录传回，可以在多轮对话中保持对话状态：
+通过将消息历史记录传回，在多个轮次中维护对话状态：
 
 ```python
 agent = AIAgent(
@@ -142,13 +143,13 @@ result2 = agent.run_conversation(
 print(result2["final_response"])  # "Your name is Alice."
 ```
 
-`conversation_history` 参数接受先前结果中的 `messages` 列表。Agent 会在内部复制它，因此您的原始列表永远不会被修改。
+`conversation_history` 参数接受先前结果中的 `messages` 列表。Agent 在内部复制它，因此您的原始列表永远不会被修改。
 
 ---
 
 ## 保存轨迹
 
-启用轨迹保存功能，以 ShareGPT 格式捕获对话——这对于生成训练数据或调试非常有用：
+启用轨迹保存，以 ShareGPT 格式捕获对话——对于生成训练数据或调试非常有用：
 
 ```python
 agent = AIAgent(
@@ -167,7 +168,7 @@ agent.chat("Write a Python function to sort a list")
 
 ## 自定义系统提示词
 
-使用 `ephemeral_system_prompt` 设置自定义系统提示词，以指导 Agent 的行为，但**不会**保存到轨迹文件中（保持训练数据干净）：
+使用 `ephemeral_system_prompt` 设置自定义系统提示词，以指导 Agent 的行为，但**不会**保存到轨迹文件中（保持您的训练数据干净）：
 
 ```python
 agent = AIAgent(
@@ -221,7 +222,7 @@ for prompt, result in zip(prompts, results):
 ```
 
 :::warning
-始终为每个线程或任务创建**一个新的 `AIAgent` 实例**。Agent 维护的内部状态（对话历史、工具会话、迭代计数器）不是线程安全的，不能共享。
+始终为每个线程或任务创建**一个新的 `AIAgent` 实例**。Agent 维护内部状态（对话历史、工具会话、迭代计数器），这些状态在共享时不是线程安全的。
 :::
 
 ---
@@ -336,5 +337,5 @@ print(review)
 :::warning
 - **线程安全**：为每个线程或任务创建一个 `AIAgent`。切勿在并发调用之间共享实例。
 - **资源清理**：当对话结束时，Agent 会自动清理资源（终端会话、浏览器实例）。如果您在长时间运行的进程中运行，请确保每次对话正常完成。
-- **迭代限制**：默认的 `max_iterations=90` 很宽松。对于简单的问答用例，请考虑降低它（例如 `max_iterations=10`），以防止失控的工具调用循环并控制成本。
+- **迭代限制**：默认的 `max_iterations=90` 很宽松。对于简单的问答用例，考虑降低它（例如 `max_iterations=10`），以防止失控的工具调用循环并控制成本。
 :::

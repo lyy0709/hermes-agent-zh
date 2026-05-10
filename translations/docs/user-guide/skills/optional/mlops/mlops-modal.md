@@ -14,12 +14,13 @@ description: "用于运行 ML 工作负载的无服务器 GPU 云平台"
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/mlops/modal` 安装 |
+| 来源 | Optional — 使用 `hermes skills install official/mlops/modal` 安装 |
 | 路径 | `optional-skills/mlops/modal` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `modal>=0.64.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `Infrastructure`, `Serverless`, `GPU`, `Cloud`, `Deployment`, `Modal` |
 
 ## 参考：完整的 SKILL.md
@@ -34,7 +35,7 @@ description: "用于运行 ML 工作负载的无服务器 GPU 云平台"
 
 ## 何时使用 Modal
 
-**在以下情况使用 Modal：**
+**在以下情况下使用 Modal：**
 - 运行 GPU 密集型 ML 工作负载而无需管理基础设施
 - 将 ML 模型部署为自动扩缩的 API
 - 运行批量处理作业（训练、推理、数据处理）
@@ -51,10 +52,10 @@ description: "用于运行 ML 工作负载的无服务器 GPU 云平台"
 - **Web 端点**：将函数部署为 REST API，支持零停机更新
 
 **改用替代方案的情况：**
-- **RunPod**：用于具有持久状态的长时运行 Pod
-- **Lambda Labs**：用于预留 GPU 实例
-- **SkyPilot**：用于多云编排和成本优化
-- **Kubernetes**：用于复杂的多服务架构
+- **RunPod**：适用于具有持久状态的长时运行 Pod
+- **Lambda Labs**：适用于预留 GPU 实例
+- **SkyPilot**：适用于多云编排和成本优化
+- **Kubernetes**：适用于复杂的多服务架构
 
 ## 快速开始
 
@@ -151,7 +152,7 @@ def main():
 # 单 GPU
 @app.function(gpu="A100")
 
-# 特定内存变体
+# 特定显存变体
 @app.function(gpu="A100-80GB")
 
 # 多 GPU（最多 8 个）
@@ -227,7 +228,7 @@ def fastapi_app():
 
 ### Web 端点类型
 
-| 装饰器 | 使用场景 |
+| 装饰器 | 用例 |
 |-----------|----------|
 | `@modal.fastapi_endpoint()` | 简单函数 → API |
 | `@modal.asgi_app()` | 完整的 FastAPI/Starlette 应用 |
@@ -272,7 +273,7 @@ def hourly_job():
 
 ## 性能优化
 
-### 缓解冷启动
+### 冷启动缓解
 
 ```python
 @app.function(

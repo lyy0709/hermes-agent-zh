@@ -8,24 +8,25 @@ description: "用于 LLM 训练的 GPU 加速数据整理"
 
 # Nemo Curator
 
-用于 LLM 训练的 GPU 加速数据整理。支持文本/图像/视频/音频。特性包括模糊去重（快 16 倍）、质量过滤（30+ 种启发式方法）、语义去重、PII 脱敏、NSFW 检测。通过 RAPIDS 在多个 GPU 上扩展。用于准备高质量训练数据集、清理网络数据或对大型语料库进行去重。
+用于 LLM 训练的 GPU 加速数据整理。支持文本/图像/视频/音频。特性包括模糊去重（快 16 倍）、质量过滤（30+ 种启发式方法）、语义去重、PII 脱敏、NSFW 检测。通过 RAPIDS 实现跨 GPU 扩展。用于准备高质量训练数据集、清理网络数据或对大型语料库进行去重。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | Optional — 使用 `hermes skills install official/mlops/nemo-curator` 安装 |
+| 来源 | 可选 — 使用 `hermes skills install official/mlops/nemo-curator` 安装 |
 | 路径 | `optional-skills/mlops/nemo-curator` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `nemo-curator`, `cudf`, `dask`, `rapids` |
+| 平台 | linux, macos |
 | 标签 | `Data Processing`, `NeMo Curator`, `Data Curation`, `GPU Acceleration`, `Deduplication`, `Quality Filtering`, `NVIDIA`, `RAPIDS`, `PII Redaction`, `Multimodal`, `LLM Training Data` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # NeMo Curator - GPU 加速数据整理
@@ -44,12 +45,12 @@ NVIDIA 用于为 LLM 准备高质量训练数据的工具包。
 **性能**：
 - **模糊去重快 16 倍**（8TB RedPajama v2）
 - 与 CPU 替代方案相比**总拥有成本降低 40%**
-- 在 GPU 节点间**接近线性扩展**
+- 跨 GPU 节点**接近线性扩展**
 
 **改用替代方案的情况**：
 - **datatrove**：基于 CPU 的开源数据处理
 - **dolma**：Allen AI 的数据工具包
-- **Ray Data**：通用 ML 数据处理（无整理重点）
+- **Ray Data**：通用 ML 数据处理（无数据整理重点）
 
 ## 快速开始
 
@@ -163,7 +164,7 @@ deduped = semantic_dedup(dataset)
 from nemo_curator.modules import Modify
 from nemo_curator.modifiers import PIIRedactor
 
-# 脱敏个人可识别信息
+# 脱敏个人身份信息
 pii_redactor = PIIRedactor(
     supported_entities=["EMAIL_ADDRESS", "PHONE_NUMBER", "PERSON", "LOCATION"],
     anonymize_action="replace"  # 或 "redact"

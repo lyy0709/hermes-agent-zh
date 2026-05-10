@@ -6,7 +6,7 @@ sidebar_position: 1
 
 # AI 提供商
 
-本页面介绍如何为 Hermes Agent 设置推理提供商——从 OpenRouter 和 Anthropic 等云 API，到 Ollama 和 vLLM 等自托管端点，再到高级路由和故障转移配置。您需要至少配置一个提供商才能使用 Hermes。
+本页介绍如何为 Hermes Agent 设置推理提供商——从 OpenRouter 和 Anthropic 等云 API，到 Ollama 和 vLLM 等自托管端点，再到高级路由和故障转移配置。您需要至少配置一个提供商才能使用 Hermes。
 
 ## 推理提供商
 
@@ -17,7 +17,7 @@ sidebar_position: 1
 | **Nous Portal** | `hermes model` (OAuth，基于订阅) |
 | **OpenAI Codex** | `hermes model` (ChatGPT OAuth，使用 Codex 模型) |
 | **GitHub Copilot** | `hermes model` (OAuth 设备代码流，`COPILOT_GITHUB_TOKEN`、`GH_TOKEN` 或 `gh auth token`) |
-| **GitHub Copilot ACP** | `hermes model` (生成本地 `copilot --acp --stdio`) |
+| **GitHub Copilot ACP** | `hermes model` (启动本地 `copilot --acp --stdio`) |
 | **Anthropic** | `hermes model` (Claude Max + 通过 OAuth 获得的额外使用额度；也支持 Anthropic API 密钥或手动设置令牌——请参阅下面的说明) |
 | **OpenRouter** | 在 `~/.hermes/.env` 中设置 `OPENROUTER_API_KEY` |
 | **AI Gateway** | 在 `~/.hermes/.env` 中设置 `AI_GATEWAY_API_KEY` (提供商：`ai-gateway`) |
@@ -38,7 +38,7 @@ sidebar_position: 1
 | **DeepSeek** | 在 `~/.hermes/.env` 中设置 `DEEPSEEK_API_KEY` (提供商：`deepseek`) |
 | **Hugging Face** | 在 `~/.hermes/.env` 中设置 `HF_TOKEN` (提供商：`huggingface`，别名：`hf`) |
 | **Google / Gemini** | 在 `~/.hermes/.env` 中设置 `GOOGLE_API_KEY` (或 `GEMINI_API_KEY`) (提供商：`gemini`) |
-| **Google Gemini (OAuth)** | `hermes model` → "Google Gemini (OAuth)" (提供商：`google-gemini-cli`，支持免费层级，浏览器 PKCE 登录) |
+| **Google Gemini (OAuth)** | `hermes model` → "Google Gemini (OAuth)" (提供商：`google-gemini-cli`，支持免费层，浏览器 PKCE 登录) |
 | **LM Studio** | `hermes model` → "LM Studio" (提供商：`lmstudio`，可选 `LM_API_KEY`) |
 | **Custom Endpoint** | `hermes model` → 选择 "Custom endpoint" (保存在 `config.yaml` 中) |
 
@@ -51,7 +51,7 @@ sidebar_position: 1
 
 ### 通过 OAuth 使用 Google Gemini (`google-gemini-cli`)
 
-`google-gemini-cli` 提供商使用 Google 的 Cloud Code Assist 后端——与 Google 自家的 `gemini-cli` 工具使用的 API 相同。这同时支持**免费层级**（个人账户有慷慨的每日配额）和**付费层级**（通过 GCP 项目的标准版/企业版）。
+`google-gemini-cli` 提供商使用 Google 的 Cloud Code Assist 后端——与 Google 自家的 `gemini-cli` 工具使用的 API 相同。这同时支持**免费层**（个人账户有慷慨的每日配额）和**付费层**（通过 GCP 项目的标准版/企业版）。
 
 **快速开始：**
 
@@ -60,14 +60,14 @@ hermes model
 # → 选择 "Google Gemini (OAuth)"
 # → 查看策略警告，确认
 # → 浏览器打开 accounts.google.com，登录
-# → 完成 —— Hermes 会在首次请求时自动为您配置免费层级
+# → 完成 —— Hermes 会在首次请求时自动为您配置免费层
 ```
 
-Hermes 默认附带 Google 的**公开** `gemini-cli` 桌面 OAuth 客户端——与 Google 在其开源 `gemini-cli` 中包含的凭据相同。桌面 OAuth 客户端不是机密的（PKCE 提供安全性）。您无需安装 `gemini-cli` 或注册自己的 GCP OAuth 客户端。
+Hermes 默认附带 Google 的**公共** `gemini-cli` 桌面 OAuth 客户端——与 Google 在其开源 `gemini-cli` 中包含的凭据相同。桌面 OAuth 客户端不是机密的（PKCE 提供安全性）。您无需安装 `gemini-cli` 或注册自己的 GCP OAuth 客户端。
 
 **认证工作原理：**
 - 针对 `accounts.google.com` 的 PKCE 授权码流程
-- 浏览器回调地址为 `http://127.0.0.1:8085/oauth2callback`（如果端口忙，则使用临时端口回退）
+- 浏览器回调地址为 `http://127.0.0.1:8085/oauth2callback` (如果端口繁忙，则使用临时端口回退)
 - 令牌存储在 `~/.hermes/auth/google_oauth.json` (chmod 0600，原子写入，跨进程 `fcntl` 锁)
 - 在过期前 60 秒自动刷新
 - 无头环境 (SSH, `HERMES_HEADLESS=1`) → 回退到粘贴模式
@@ -86,18 +86,18 @@ Hermes 默认附带 Google 的**公开** `gemini-cli` 桌面 OAuth 客户端—�
 
 | 您的情况 | 操作 |
 |---|---|
-| 个人 Google 账户，想要免费层级 | 无需操作 —— 登录，开始聊天 |
+| 个人 Google 账户，想要免费层 | 无需操作 —— 登录，开始聊天 |
 | Workspace / 标准版 / 企业版账户 | 设置 `HERMES_GEMINI_PROJECT_ID` 或 `GOOGLE_CLOUD_PROJECT` 为您的 GCP 项目 ID |
-| 受 VPC-SC 保护的组织 | Hermes 检测到 `SECURITY_POLICY_VIOLATED` 并自动强制使用 `standard-tier` |
+| VPC-SC 保护的组织 | Hermes 检测到 `SECURITY_POLICY_VIOLATED` 并自动强制使用 `standard-tier` |
 
-免费层级在首次使用时自动配置一个 Google 管理的项目。无需 GCP 设置。
+免费层在首次使用时自动配置一个 Google 托管的项目。无需 GCP 设置。
 
 **配额监控：**
 ```
 /gquota
 ```
 
-显示每个模型的剩余 Code Assist 配额及进度条：
+显示每个模型的剩余 Code Assist 配额，并带有进度条：
 
 ```
 Gemini Code Assist 配额  (项目: 123-abc)
@@ -107,7 +107,7 @@ Gemini Code Assist 配额  (项目: 123-abc)
 ```
 
 :::warning 政策风险
-Google 认为将 Gemini CLI OAuth 客户端与第三方软件一起使用违反了其政策。一些用户报告了账户受限的情况。为了获得风险最低的体验，请通过 `gemini` 提供商使用您自己的 API 密钥。Hermes 会在 OAuth 开始前显示明确警告并要求您明确确认。
+Google 认为将 Gemini CLI OAuth 客户端与第三方软件一起使用违反了其政策。一些用户报告了账户受限的情况。为了获得风险最低的体验，请通过 `gemini` 提供商使用您自己的 API 密钥。Hermes 会在 OAuth 开始前显示明确警告并要求明确确认。
 :::
 
 **自定义 OAuth 客户端（可选）：**
@@ -116,21 +116,21 @@ Google 认为将 Gemini CLI OAuth 客户端与第三方软件一起使用违反�
 
 ```bash
 HERMES_GEMINI_CLIENT_ID=your-client.apps.googleusercontent.com
-HERMES_GEMINI_CLIENT_SECRET=...   # 对于桌面客户端是可选的
+HERMES_GEMINI_CLIENT_SECRET=...   # 对于桌面客户端可选
 ```
 
-在 [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) 注册一个**桌面应用** OAuth 客户端，并确保启用了 Generative Language API。
+在 [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) 注册一个 **桌面应用** OAuth 客户端，并确保启用了 Generative Language API。
 
 :::info Codex 说明
-OpenAI Codex 提供商通过设备码进行身份验证（打开一个 URL，输入一个代码）。Hermes 将生成的凭据存储在其自己的身份验证存储中，位于 `~/.hermes/auth.json`，并且可以导入 `~/.codex/auth.json` 中现有的 Codex CLI 凭据（如果存在）。无需安装 Codex CLI。
+OpenAI Codex 提供商通过设备码进行身份验证（打开一个 URL，输入一个代码）。Hermes 将生成的凭据存储在其自己的身份验证存储中，位于 `~/.hermes/auth.json`，并且当存在时可以从 `~/.codex/auth.json` 导入现有的 Codex CLI 凭据。无需安装 Codex CLI。
 :::
 
 :::warning
-即使使用 Nous Portal、Codex 或自定义端点，某些工具（视觉、网页摘要、MoA）也会使用单独的“辅助”模型。默认情况下（`auxiliary.*.provider: "auto"`），Hermes 将这些任务路由到您的**主聊天模型**——即您在 `hermes model` 中选择的同一模型。您可以单独覆盖每个任务，将其路由到更便宜/更快的模型（例如 OpenRouter 上的 Gemini Flash）——请参阅[辅助模型](/docs/user-guide/configuration#auxiliary-models)。
+即使使用 Nous Portal、Codex 或自定义端点，一些工具（视觉、网页摘要、MoA）也会使用单独的“辅助”模型。默认情况下（`auxiliary.*.provider: "auto"`），Hermes 将这些任务路由到您的**主聊天模型**——即您在 `hermes model` 中选择的同一模型。您可以单独覆盖每个任务，将其路由到更便宜/更快的模型（例如，OpenRouter 上的 Gemini Flash）——请参阅 [辅助模型](/docs/user-guide/configuration#auxiliary-models)。
 :::
 
 :::tip Nous 工具网关
-付费的 Nous Portal 订阅者还可以访问**[工具网关](/docs/user-guide/features/tool-gateway)**——通过网络搜索、图像生成、TTS 和浏览器自动化，这些功能都通过您的订阅路由。无需额外的 API 密钥。在 `hermes model` 设置过程中会自动提供，或者稍后通过 `hermes tools` 启用。
+付费的 Nous Portal 订阅者还可以访问 **[工具网关](/docs/user-guide/features/tool-gateway)**——通过网络搜索、图像生成、TTS 和浏览器自动化，这些功能都通过您的订阅进行路由。无需额外的 API 密钥。在 `hermes model` 设置过程中会自动提供，或者稍后通过 `hermes tools` 启用。
 :::
 
 ### 两个用于模型管理的命令
@@ -149,13 +149,13 @@ Hermes 有**两个**模型命令，用途不同：
 直接通过 Anthropic API 使用 Claude 模型——无需 OpenRouter 代理。支持三种身份验证方法：
 
 :::caution 需要 Claude Max “额外使用”额度
-当您通过 `hermes model` → Anthropic OAuth（或通过 `hermes auth add anthropic --type oauth`）进行身份验证时，Hermes 会作为 Claude Code 路由到您的 Anthropic 账户。**这仅在您拥有 Claude Max 计划并购买了额外使用额度时才有效。** 基础 Max 计划额度（Claude Code 默认包含的使用量）不会被 Hermes 消耗——只有您额外添加的额度/超量额度才会被消耗。Claude Pro 订阅者无法使用此路径。
+当您通过 `hermes model` → Anthropic OAuth（或通过 `hermes auth add anthropic --type oauth`）进行身份验证时，Hermes 会以 Claude Code 的身份路由到您的 Anthropic 账户。**这仅在您拥有 Claude Max 计划并购买了额外使用额度时才有效。** 基础 Max 计划额度（Claude Code 默认包含的使用量）不会被 Hermes 消耗——只有您额外添加的超额额度才会被消耗。Claude Pro 订阅者无法使用此路径。
 
 如果您没有 Max + 额外额度，请改用 `ANTHROPIC_API_KEY`——请求将按 Token 计费，费用计入该密钥所属的组织（标准 API 定价，独立于任何 Claude 订阅）。
 :::
 
 ```bash
-# 使用 API 密钥（按 Token 计费）
+# 使用 API 密钥（按 Token 付费）
 export ANTHROPIC_API_KEY=***
 hermes chat --provider anthropic --model claude-sonnet-4-6
 
@@ -163,15 +163,15 @@ hermes chat --provider anthropic --model claude-sonnet-4-6
 # 当可用时，Hermes 将直接使用 Claude Code 的凭据存储
 hermes model
 
-# 使用设置令牌进行手动覆盖（备用/旧方法）
-export ANTHROPIC_TOKEN=***  # setup-token 或手动 OAuth 令牌
+# 使用设置令牌手动覆盖（备用 / 旧方法）
+export ANTHROPIC_TOKEN=***  # 设置令牌或手动 OAuth 令牌
 hermes chat --provider anthropic
 
 # 自动检测 Claude Code 凭据（如果您已使用 Claude Code）
 hermes chat --provider anthropic  # 自动读取 Claude Code 凭据文件
 ```
 
-当您通过 `hermes model` 选择 Anthropic OAuth 时，Hermes 会优先使用 Claude Code 自身的凭据存储，而不是将令牌复制到 `~/.hermes/.env`。这可以保持可刷新的 Claude 凭据的可刷新性。
+当您通过 `hermes model` 选择 Anthropic OAuth 时，Hermes 优先使用 Claude Code 自身的凭据存储，而不是将令牌复制到 `~/.hermes/.env`。这使可刷新的 Claude 凭据保持可刷新状态。
 
 或者永久设置：
 ```yaml
@@ -199,9 +199,9 @@ hermes chat --provider copilot --model gpt-5.4
 1. `COPILOT_GITHUB_TOKEN` 环境变量
 2. `GH_TOKEN` 环境变量
 3. `GITHUB_TOKEN` 环境变量
-4. `gh auth token` CLI 回退
+4. `gh auth token` CLI 备用方案
 
-如果未找到令牌，`hermes model` 会提供**OAuth 设备码登录**——与 Copilot CLI 和 opencode 使用的流程相同。
+如果未找到令牌，`hermes model` 会提供 **OAuth 设备码登录**——与 Copilot CLI 和 opencode 使用的流程相同。
 
 :::warning 令牌类型
 Copilot API **不**支持经典的个人访问令牌（`ghp_*`）。支持的令牌类型：
@@ -209,30 +209,30 @@ Copilot API **不**支持经典的个人访问令牌（`ghp_*`）。支持的令
 | 类型 | 前缀 | 如何获取 |
 |------|--------|------------|
 | OAuth 令牌 | `gho_` | `hermes model` → GitHub Copilot → 使用 GitHub 登录 |
-| 细粒度 PAT | `github_pat_` | GitHub 设置 → 开发者设置 → 细粒度令牌（需要 **Copilot 请求**权限） |
+| 细粒度 PAT | `github_pat_` | GitHub 设置 → 开发者设置 → 细粒度令牌（需要 **Copilot 请求** 权限） |
 | GitHub App 令牌 | `ghu_` | 通过 GitHub App 安装 |
-如果您的 `gh auth token` 返回一个 `ghp_*` 令牌，请改用 `hermes model` 通过 OAuth 进行身份验证。
+如果您的 `gh auth token` 返回一个 `ghp_*` Token，请改用 `hermes model` 通过 OAuth 进行身份验证。
 :::
 
 :::info Copilot 在 Hermes 中的身份验证行为
-Hermes 将受支持的 GitHub 令牌（`gho_*`、`github_pat_*` 或 `ghu_*`）直接发送到 `api.githubcopilot.com`，并包含 Copilot 特定的请求头（`Editor-Version`、`Copilot-Integration-Id`、`Openai-Intent`、`x-initiator`）。
+Hermes 将受支持的 GitHub Token（`gho_*`、`github_pat_*` 或 `ghu_*`）直接发送到 `api.githubcopilot.com`，并包含 Copilot 特定的请求头（`Editor-Version`、`Copilot-Integration-Id`、`Openai-Intent`、`x-initiator`）。
 
-在收到 HTTP 401 响应时，Hermes 现在会在回退之前执行一次凭证恢复：
+在收到 HTTP 401 响应时，Hermes 现在会在回退前执行一次凭证恢复：
 
-1.  通过正常的优先级链重新解析令牌（`COPILOT_GITHUB_TOKEN` → `GH_TOKEN` → `GITHUB_TOKEN` → `gh auth token`）
+1.  通过正常的优先级链重新解析 Token（`COPILOT_GITHUB_TOKEN` → `GH_TOKEN` → `GITHUB_TOKEN` → `gh auth token`）
 2.  使用刷新的请求头重建共享的 OpenAI 客户端
 3.  重试请求一次
 
-一些较旧的社区代理使用 `api.github.com/copilot_internal/v2/token` 交换流程。该端点可能对某些账户类型不可用（返回 404）。因此，Hermes 将直接令牌身份验证作为主要路径，并依赖运行时凭证刷新 + 重试机制来确保鲁棒性。
+一些较旧的社区代理使用 `api.github.com/copilot_internal/v2/token` 交换流程。该端点可能对某些账户类型不可用（返回 404）。因此，Hermes 将直接使用 Token 的身份验证作为主要路径，并依赖运行时的凭证刷新和重试机制来确保鲁棒性。
 :::
 
-**API 路由**：GPT-5+ 模型（除了 `gpt-5-mini`）自动使用 Responses API。所有其他模型（GPT-4o、Claude、Gemini 等）使用 Chat Completions。模型从实时 Copilot 目录中自动检测。
+**API 路由**：GPT-5+ 模型（除了 `gpt-5-mini`）自动使用 Responses API。所有其他模型（GPT-4o、Claude、Gemini 等）使用 Chat Completions。模型会根据实时的 Copilot 目录自动检测。
 
 **`copilot-acp` — Copilot ACP Agent 后端**。将本地 Copilot CLI 作为子进程启动：
 
 ```bash
 hermes chat --provider copilot-acp --model copilot-acp
-# 需要 GitHub Copilot CLI 在 PATH 中，并且存在现有的 `copilot login` 会话
+# 需要在 PATH 中找到 GitHub Copilot CLI 并存在现有的 `copilot login` 会话
 ```
 
 **永久配置：**
@@ -244,7 +244,7 @@ model:
 
 | 环境变量 | 描述 |
 |---------------------|-------------|
-| `COPILOT_GITHUB_TOKEN` | 用于 Copilot API 的 GitHub 令牌（最高优先级） |
+| `COPILOT_GITHUB_TOKEN` | 用于 Copilot API 的 GitHub Token（最高优先级） |
 | `HERMES_COPILOT_ACP_COMMAND` | 覆盖 Copilot CLI 二进制文件路径（默认：`copilot`） |
 | `HERMES_COPILOT_ACP_ARGS` | 覆盖 ACP 参数（默认：`--acp --stdio`） |
 
@@ -302,17 +302,17 @@ model:
   default: "zai-org/GLM-5.1-FP8"
 ```
 
-基础 URL 可以通过环境变量 `GLM_BASE_URL`、`KIMI_BASE_URL`、`MINIMAX_BASE_URL`、`MINIMAX_CN_BASE_URL`、`DASHSCOPE_BASE_URL`、`XIAOMI_BASE_URL`、`GMI_BASE_URL` 或 `TOKENHUB_BASE_URL` 进行覆盖。
+基础 URL 可以通过 `GLM_BASE_URL`、`KIMI_BASE_URL`、`MINIMAX_BASE_URL`、`MINIMAX_CN_BASE_URL`、`DASHSCOPE_BASE_URL`、`XIAOMI_BASE_URL`、`GMI_BASE_URL` 或 `TOKENHUB_BASE_URL` 环境变量覆盖。
 
 :::note Z.AI 端点自动检测
-当使用 Z.AI / GLM 提供商时，Hermes 会自动探测多个端点（全球版、中国版、编程变体）以找到接受您 API 密钥的端点。您无需手动设置 `GLM_BASE_URL` —— 可用的端点会被自动检测并缓存。
+当使用 Z.AI / GLM 提供商时，Hermes 会自动探测多个端点（全球版、中国版、编程专用版）以找到接受您 API 密钥的端点。您无需手动设置 `GLM_BASE_URL` —— 可用的端点会被自动检测并缓存。
 :::
 
 ### xAI (Grok) — Responses API + 提示词缓存
 
-xAI 通过 Responses API（`codex_responses` 传输）连接，以在 Grok 4 模型上自动支持推理 —— 无需 `reasoning_effort` 参数，服务器默认进行推理。在 `~/.hermes/.env` 中设置 `XAI_API_KEY`，并在 `hermes model` 中选择 xAI，或者使用 `grok` 作为快捷方式输入 `/model grok-4-1-fast-reasoning`。
+xAI 通过 Responses API（`codex_responses` 传输）连接，以在 Grok 4 模型上自动获得推理支持 —— 无需 `reasoning_effort` 参数，服务器默认进行推理。在 `~/.hermes/.env` 中设置 `XAI_API_KEY`，并在 `hermes model` 中选择 xAI，或者使用 `grok` 作为快捷方式输入 `/model grok-4-1-fast-reasoning`。
 
-当使用 xAI 作为提供商时（任何包含 `x.ai` 的基础 URL），Hermes 会自动启用提示词缓存，方法是在每个 API 请求中发送 `x-grok-conv-id` 请求头。这会将请求路由到同一会话中的同一台服务器，允许 xAI 的基础设施重用缓存的系统提示词和对话历史记录。
+当使用 xAI 作为提供商时（任何包含 `x.ai` 的基础 URL），Hermes 会自动启用提示词缓存，方法是在每个 API 请求中发送 `x-grok-conv-id` 请求头。这会将请求路由到同一会话内的同一台服务器，使 xAI 的基础设施能够重用缓存的系统提示词和对话历史。
 
 无需配置 —— 当检测到 xAI 端点且会话 ID 可用时，缓存会自动激活。这减少了多轮对话的延迟和成本。
 
@@ -320,7 +320,7 @@ xAI 还提供了一个专用的 TTS 端点（`/v1/tts`）。在 `hermes tools` �
 
 ### Ollama Cloud — 托管的 Ollama 模型，OAuth + API 密钥
 
-[Ollama Cloud](https://ollama.com/cloud) 托管与本地 Ollama 相同的开源权重模型目录，但无需 GPU 要求。在 `hermes model` 中将其选为 **Ollama Cloud**，从 [ollama.com/settings/keys](https://ollama.com/settings/keys) 粘贴您的 API 密钥，Hermes 会自动发现可用模型。
+[Ollama Cloud](https://ollama.com/cloud) 托管与本地 Ollama 相同的开放权重模型目录，但无需 GPU。在 `hermes model` 中选择 **Ollama Cloud**，从 [ollama.com/settings/keys](https://ollama.com/settings/keys) 粘贴您的 API 密钥，Hermes 会自动发现可用模型。
 
 ```bash
 hermes model
@@ -336,14 +336,14 @@ model:
   default: "gpt-oss:120b"
 ```
 
-模型目录从 `ollama.com/v1/models` 动态获取，并缓存一小时。`model:tag` 表示法（例如 `qwen3-coder:480b-cloud`）通过规范化得以保留 —— 不要使用连字符。
+模型目录从 `ollama.com/v1/models` 动态获取并缓存一小时。`model:tag` 表示法（例如 `qwen3-coder:480b-cloud`）通过规范化得以保留 —— 不要使用连字符。
 
 :::tip Ollama Cloud 与本地 Ollama
 两者都使用相同的 OpenAI 兼容 API。Cloud 是原生提供商（`--provider ollama-cloud`，`OLLAMA_API_KEY`）；本地 Ollama 通过自定义端点流程访问（基础 URL `http://localhost:11434/v1`，无需密钥）。对于无法在本地运行的大型模型，请使用 Cloud；对于隐私或离线工作，请使用本地。
 :::
 ### AWS Bedrock
 
-通过 AWS Bedrock 使用 Anthropic Claude、Amazon Nova、DeepSeek v3.2、Meta Llama 4 及其他模型。使用 AWS SDK (`boto3`) 凭证链——无需 API 密钥，只需标准的 AWS 认证。
+通过 AWS Bedrock 使用 Anthropic Claude、Amazon Nova、DeepSeek v3.2、Meta Llama 4 及其他模型。使用 AWS SDK (`boto3`) 凭证链 —— 无需 API 密钥，只需标准的 AWS 认证。
 
 ```bash
 # 最简单的方式 —— 使用 ~/.aws/credentials 中的命名配置文件
@@ -353,7 +353,7 @@ hermes chat --provider bedrock --model us.anthropic.claude-sonnet-4-6
 AWS_PROFILE=myprofile AWS_REGION=us-east-1 hermes chat --provider bedrock --model us.anthropic.claude-sonnet-4-6
 ```
 
-或者在 `config.yaml` 中永久配置：
+或者在 `config.yaml` 中永久设置：
 ```yaml
 model:
   provider: "bedrock"
@@ -363,24 +363,24 @@ bedrock:
   # profile: "myprofile"       # 或者设置 AWS_PROFILE
   # discovery: true            # 从 IAM 自动发现区域
   # guardrail:                 # 可选的 Bedrock Guardrails
-  #   id: "your-guardrail-id"
-  #   version: "DRAFT"
+  #   guardrail_identifier: "your-guardrail-id"
+  #   guardrail_version: "DRAFT"
 ```
 
-认证使用标准的 boto3 链：明确的 `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`、来自 `~/.aws/credentials` 的 `AWS_PROFILE`、EC2/ECS/Lambda 上的 IAM 角色、IMDS 或 SSO。如果你已经通过 AWS CLI 认证，则不需要环境变量。
+认证使用标准的 boto3 链：明确的 `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`、来自 `~/.aws/credentials` 的 `AWS_PROFILE`、EC2/ECS/Lambda 上的 IAM 角色、IMDS 或 SSO。如果您已经通过 AWS CLI 认证，则不需要环境变量。
 
-Bedrock 底层使用 **Converse API**——请求被转换为 Bedrock 的模型无关格式，因此相同的配置适用于 Claude、Nova、DeepSeek 和 Llama 模型。仅当调用非默认区域端点时才设置 `BEDROCK_BASE_URL`。
+Bedrock 底层使用 **Converse API** —— 请求被转换为 Bedrock 的模型无关格式，因此相同的配置适用于 Claude、Nova、DeepSeek 和 Llama 模型。仅当您调用非默认的区域端点时才需要设置 `BEDROCK_BASE_URL`。
 
 有关 IAM 设置、区域选择和跨区域推理的详细说明，请参阅 [AWS Bedrock 指南](/docs/guides/aws-bedrock)。
 
 ### Qwen Portal (OAuth)
 
-阿里巴巴的 Qwen Portal，支持基于浏览器的 OAuth 登录。在 `hermes model` 中选择 **Qwen OAuth (Portal)**，通过浏览器登录，Hermes 将持久化刷新 Token。
+阿里巴巴的 Qwen Portal，支持基于浏览器的 OAuth 登录。在 `hermes model` 中选择 **Qwen OAuth (Portal)**，通过浏览器登录，Hermes 将持久化刷新令牌。
 
 ```bash
 hermes model
 # → 选择 "Qwen OAuth (Portal)"
-# → 浏览器打开；使用你的阿里巴巴账户登录
+# → 浏览器打开；使用您的阿里巴巴账户登录
 # → 确认 —— 凭证保存到 ~/.hermes/auth.json
 
 hermes chat   # 使用 portal.qwen.ai/v1 端点
@@ -393,15 +393,15 @@ model:
   default: "qwen3-coder-plus"
 ```
 
-仅当门户端点变更时才设置 `HERMES_QWEN_BASE_URL`（默认值：`https://portal.qwen.ai/v1`）。
+仅当门户端点变更时才需要设置 `HERMES_QWEN_BASE_URL`（默认值：`https://portal.qwen.ai/v1`）。
 
 :::tip Qwen OAuth 与 DashScope (Alibaba)
-`qwen-oauth` 使用面向消费者的 Qwen Portal 进行 OAuth 登录——适合个人用户。`alibaba` 提供商使用 DashScope 的企业 API 和 `DASHSCOPE_API_KEY`——适合程序化/生产工作负载。两者都路由到 Qwen 系列模型，但位于不同的端点。
+`qwen-oauth` 使用面向消费者的 Qwen Portal 进行 OAuth 登录 —— 适合个人用户。`alibaba` 提供商使用 DashScope 的企业 API，需要 `DASHSCOPE_API_KEY` —— 适合程序化/生产工作负载。两者都路由到 Qwen 系列模型，但位于不同的端点。
 :::
 
 ### Alibaba Coding Plan
 
-如果你订阅了阿里巴巴的 **Coding Plan**（一个独立于标准 DashScope API 访问的定价 SKU），Hermes 将其作为一个独立的一级提供商暴露：`alibaba-coding-plan`。端点：`https://coding-intl.dashscope.aliyuncs.com/v1`。它与常规的 `alibaba` 提供商一样是 OpenAI 兼容的，但具有不同的基础 URL 和计费面。
+如果您订阅了阿里巴巴的 **Coding Plan**（一个独立于标准 DashScope API 访问的定价 SKU），Hermes 将其作为一个独立的一级提供商公开：`alibaba-coding-plan`。端点：`https://coding-intl.dashscope.aliyuncs.com/v1`。它与常规的 `alibaba` 提供商一样是 OpenAI 兼容的，但具有不同的基础 URL 和计费表面。
 
 ```yaml
 model:
@@ -409,22 +409,22 @@ model:
   model: qwen3-coder-plus
 ```
 
-或者通过 CLI：
+或者从 CLI 使用：
 
 ```bash
 hermes chat --provider alibaba_coding --model qwen3-coder-plus
 ```
 
-`alibaba_coding` 使用与你的 `alibaba` 条目相同的 `DASHSCOPE_API_KEY`——无需单独的密钥，只需不同的路由目标。在此提供商注册之前，在 `config.yaml` 中设置 `provider: alibaba_coding` 的用户会静默地回退到 OpenRouter 路由。
+`alibaba_coding` 使用与您的 `alibaba` 条目相同的 `DASHSCOPE_API_KEY` —— 无需单独的密钥，只需不同的路由目标。在此提供商注册之前，在 `config.yaml` 中设置 `provider: alibaba_coding` 的用户会静默地回退到 OpenRouter 路由。
 
 ### MiniMax (OAuth)
 
-通过浏览器 OAuth 登录使用 MiniMax-M2.7——无需 API 密钥。在 `hermes model` 中选择 **MiniMax (OAuth)**，通过浏览器登录，Hermes 将持久化访问和刷新 Token。底层使用 Anthropic Messages 兼容的端点 (`/anthropic`)。
+通过浏览器 OAuth 登录使用 MiniMax-M2.7 —— 无需 API 密钥。在 `hermes model` 中选择 **MiniMax (OAuth)**，通过浏览器登录，Hermes 将持久化访问令牌和刷新令牌。底层使用 Anthropic Messages 兼容的端点 (`/anthropic`)。
 
 ```bash
 hermes model
 # → 选择 "MiniMax (OAuth)"
-# → 浏览器打开；使用你的 MiniMax 账户登录（全球或中国区）
+# → 浏览器打开；使用您的 MiniMax 账户登录（全球或中国区域）
 # → 确认 —— 凭证保存到 ~/.hermes/auth.json
 
 hermes chat   # 使用 api.minimax.io/anthropic 端点
@@ -440,7 +440,7 @@ model:
 支持的模型：`MiniMax-M2.7`（主模型）和 `MiniMax-M2.7-highspeed`（配置为默认辅助模型）。OAuth 路径忽略 `MINIMAX_API_KEY` / `MINIMAX_BASE_URL`。
 
 :::tip MiniMax OAuth 与 API 密钥
-`minimax-oauth` 使用 MiniMax 面向消费者的门户进行 OAuth 登录——无需设置计费。`minimax` 和 `minimax-cn` 提供商使用 `MINIMAX_API_KEY` / `MINIMAX_CN_API_KEY`——用于程序化访问。完整指南请参阅 [MiniMax OAuth 指南](/docs/guides/minimax-oauth)。
+`minimax-oauth` 使用 MiniMax 面向消费者的门户进行 OAuth 登录 —— 无需设置计费。`minimax` 和 `minimax-cn` 提供商使用 `MINIMAX_API_KEY` / `MINIMAX_CN_API_KEY` —— 用于程序化访问。完整指南请参阅 [MiniMax OAuth 指南](/docs/guides/minimax-oauth)。
 :::
 
 ### NVIDIA NIM
@@ -469,7 +469,7 @@ model:
 
 ### GMI Cloud
 
-通过 [GMI Cloud](https://inference.gmi.ai) 使用开源和推理模型——OpenAI 兼容的 API，API 密钥认证。
+通过 [GMI Cloud](https://www.gmicloud.ai/) 使用开源和推理模型 —— OpenAI 兼容的 API，API 密钥认证。
 
 ```bash
 # GMI Cloud
@@ -484,11 +484,11 @@ model:
   default: "deepseek-ai/DeepSeek-R1"
 ```
 
-基础 URL 可以通过 `GMI_BASE_URL` 覆盖（默认值：`https://api.gmi.ai/v1`）。
+基础 URL 可以通过 `GMI_BASE_URL` 覆盖（默认值：`https://api.gmi-serving.com/v1`）。
 
 ### StepFun
 
-通过 [StepFun](https://platform.stepfun.com) 使用 Step 系列模型——OpenAI 兼容的 API，API 密钥认证。
+通过 [StepFun](https://platform.stepfun.com) 使用 Step 系列模型 —— OpenAI 兼容的 API，API 密钥认证。
 
 ```bash
 # StepFun
@@ -506,7 +506,7 @@ model:
 
 ### Hugging Face Inference Providers
 
-[Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) 通过统一的 OpenAI 兼容端点（`router.huggingface.co/v1`）路由到 20 多个开源模型。请求会自动路由到最快的可用后端（Groq、Together、SambaNova 等），并支持自动故障转移。
+[Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers) 通过统一的 OpenAI 兼容端点（`router.huggingface.co/v1`）路由到 20 多个开源模型。请求会自动路由到最快的可用后端（Groq、Together、SambaNova 等），并具备自动故障转移功能。
 
 ```bash
 # 使用任何可用模型
@@ -524,7 +524,7 @@ model:
   default: "Qwen/Qwen3-235B-A22B-Thinking-2507"
 ```
 
-在 [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) 获取你的 Token — 请确保启用 "Make calls to Inference Providers" 权限。包含免费套餐（每月 $0.10 额度，提供商费率无加价）。
+在 [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) 获取你的 Token — 请确保启用 "Make calls to Inference Providers" 权限。包含免费层级（每月 $0.10 额度，提供商费率无加价）。
 
 你可以在模型名称后附加路由后缀：`:fastest`（默认）、`:cheapest` 或 `:provider_name` 以强制使用特定后端。
 
@@ -559,7 +559,7 @@ model:
 `.env` 中的 `OPENAI_BASE_URL` 和 `LLM_MODEL` 已**移除**。Hermes 的任何部分都不会读取它们 — `config.yaml` 是模型和端点配置的唯一真实来源。如果你的 `.env` 中有过时的条目，它们会在下一次运行 `hermes setup` 或配置迁移时自动清除。请使用 `hermes model` 或直接编辑 `config.yaml`。
 :::
 
-两种方法都会将配置持久化到 `config.yaml`，该文件是模型、提供商和基础 URL 的真实来源。
+两种方法都会持久化到 `config.yaml`，这是模型、提供商和基础 URL 的真实来源。
 
 ### 使用 `/model` 切换模型
 
@@ -652,7 +652,7 @@ sudo systemctl edit ollama.service
 echo -e "FROM qwen2.5-coder:32b\nPARAMETER num_ctx 32768" > Modelfile
 ollama create qwen2.5-coder-32k -f Modelfile
 ```
-**无法通过 OpenAI 兼容 API** (`/v1/chat/completions`) **设置上下文长度**。必须在服务器端或通过 Modelfile 进行配置。这是将 Ollama 与 Hermes 等工具集成时最常见的困惑来源。
+**无法通过 OpenAI 兼容 API** (`/v1/chat/completions`) 设置上下文长度。必须在服务器端或通过 Modelfile 进行配置。这是将 Ollama 与 Hermes 等工具集成时最常见的困惑来源。
 :::
 
 **验证您的上下文设置是否正确：**
@@ -670,7 +670,7 @@ ollama ps
 
 ### vLLM — 高性能 GPU 推理
 
-[vLLM](https://docs.vllm.ai/) 是生产级 LLM 服务的标准。最适合：在 GPU 硬件上实现最大吞吐量、服务大型模型、连续批处理。
+[vLLM](https://docs.vllm.ai/) 是生产级 LLM 服务的标准。最适合：GPU 硬件上的最大吞吐量、服务大型模型、连续批处理。
 
 ```bash
 pip install vllm
@@ -692,7 +692,7 @@ hermes model
 # 输入模型名称: meta-llama/Llama-3.1-70B-Instruct
 ```
 
-**上下文长度：** vLLM 默认读取模型的 `max_position_embeddings`。如果该值超出您的 GPU 内存，它会报错并要求您将 `--max-model-len` 设置得更低。您也可以使用 `--max-model-len auto` 来自动寻找适合的最大值。设置 `--gpu-memory-utilization 0.95`（默认为 0.9）以将更多上下文挤入 VRAM。
+**上下文长度：** vLLM 默认读取模型的 `max_position_embeddings`。如果该值超出您的 GPU 内存，它会报错并要求您将 `--max-model-len` 设置得更低。您也可以使用 `--max-model-len auto` 自动找到适合的最大值。设置 `--gpu-memory-utilization 0.95`（默认为 0.9）以将更多上下文挤入 VRAM。
 
 **工具调用需要显式标志：**
 
@@ -734,7 +734,7 @@ hermes model
 
 **上下文长度：** SGLang 默认从模型的配置中读取。使用 `--context-length` 来覆盖。如果需要超过模型声明的最大值，请设置 `SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN=1`。
 
-**工具调用：** 使用 `--tool-call-parser` 并为您模型系列指定适当的解析器：`qwen` (Qwen 2.5), `llama3`, `llama4`, `deepseekv3`, `mistral`, `glm`。没有此标志，工具调用将以纯文本形式返回。
+**工具调用：** 使用 `--tool-call-parser` 并为您模型系列选择合适的解析器：`qwen` (Qwen 2.5), `llama3`, `llama4`, `deepseekv3`, `mistral`, `glm`。没有此标志，工具调用将以纯文本形式返回。
 
 :::caution SGLang 默认最大输出 Token 数为 128
 如果响应似乎被截断，请在请求中添加 `max_tokens` 或在服务器上设置 `--default-max-tokens`。如果请求中未指定，SGLang 的默认值仅为每个响应 128 个 Token。
@@ -757,7 +757,7 @@ cmake -B build && cmake --build build --config Release
   --port 8080 --host 0.0.0.0
 ```
 
-**上下文长度 (`-c`):** 最近的构建默认值为 `0`，这会从 GGUF 元数据中读取模型的训练上下文。对于具有 128k+ 训练上下文的模型，尝试分配完整的 KV 缓存可能会导致内存不足 (OOM)。请将 `-c` 显式设置为您需要的值（对于 Agent 使用，32k–64k 是一个不错的范围）。如果使用并行槽 (`-np`)，总上下文将在槽之间分配 — 使用 `-c 32768 -np 4` 时，每个槽仅获得 8k。
+**上下文长度 (`-c`):** 最近的构建默认值为 `0`，这会从 GGUF 元数据中读取模型的训练上下文。对于具有 128k+ 训练上下文的模型，尝试分配完整的 KV 缓存可能会导致 OOM。将 `-c` 显式设置为您需要的值（对于 Agent 使用，32k–64k 是一个不错的范围）。如果使用并行槽位 (`-np`)，总上下文将在槽位之间分配 — 使用 `-c 32768 -np 4` 时，每个槽位仅获得 8k。
 
 然后配置 Hermes 指向它：
 
@@ -772,9 +772,9 @@ hermes model
 这会将端点保存到 `config.yaml`，以便在会话之间持久化。
 
 :::caution 工具调用需要 `--jinja`
-没有 `--jinja`，llama-server 会完全忽略 `tools` 参数。模型将尝试通过在响应文本中写入 JSON 来调用工具，但 Hermes 不会将其识别为工具调用 — 您会看到像 `{"name": "web_search", ...}` 这样的原始 JSON 作为消息打印出来，而不是实际的搜索。
+没有 `--jinja`，llama-server 会完全忽略 `tools` 参数。模型将尝试通过在响应文本中编写 JSON 来调用工具，但 Hermes 不会将其识别为工具调用 — 您会看到像 `{"name": "web_search", ...}` 这样的原始 JSON 作为消息打印出来，而不是实际的搜索。
 
-原生工具调用支持（最佳性能）：Llama 3.x, Qwen 2.5 (包括 Coder), Hermes 2/3, Mistral, DeepSeek, Functionary。所有其他模型使用通用处理程序，可以工作但效率可能较低。完整列表请参阅 [llama.cpp 函数调用文档](https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md)。
+原生工具调用支持（最佳性能）：Llama 3.x, Qwen 2.5 (包括 Coder), Hermes 2/3, Mistral, DeepSeek, Functionary。所有其他模型使用一个通用的处理程序，可以工作但效率可能较低。完整列表请参阅 [llama.cpp 函数调用文档](https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md)。
 
 您可以通过检查 `http://localhost:8080/props` 来验证工具支持是否激活 — `chat_template` 字段应该存在。
 :::
@@ -805,7 +805,7 @@ hermes model
 # 如果启用了 LM Studio 服务器身份验证，请在提示时输入 LM_API_KEY
 ```
 
-Hermes 将自动加载一个具有 64K 上下文长度的 LM Studio 模型
+Hermes 将自动加载一个具有 64K 上下文长度的 LM Studio 模型。
 
 要在 LM Studio 中更改上下文长度：
 
@@ -827,10 +827,10 @@ Hermes 将自动加载一个具有 64K 上下文长度的 LM Studio 模型
 
 ### WSL2 网络（Windows 用户）
 
-由于 Hermes Agent 需要 Unix 环境，Windows 用户在 WSL2 内运行它。如果你的模型服务器（Ollama、LM Studio 等）运行在 **Windows 主机**上，你需要弥合网络鸿沟 —— WSL2 使用具有自己子网的虚拟网络适配器，因此 WSL2 内的 `localhost` 指的是 Linux 虚拟机，**而不是** Windows 主机。
+由于 Hermes Agent 需要 Unix 环境，Windows 用户在 WSL2 内运行它。如果你的模型服务器（Ollama、LM Studio 等）运行在 **Windows 主机** 上，你需要桥接网络间隙 —— WSL2 使用具有自己子网的虚拟网络适配器，因此 WSL2 内的 `localhost` 指的是 Linux 虚拟机，**而不是** Windows 主机。
 
 :::tip 两者都在 WSL2 中？没问题。
-如果你的模型服务器也运行在 WSL2 内（vLLM、SGLang 和 llama-server 常见），`localhost` 会按预期工作 —— 它们共享相同的网络命名空间。跳过本节。
+如果你的模型服务器也运行在 WSL2 内（对于 vLLM、SGLang 和 llama-server 很常见），`localhost` 会按预期工作 —— 它们共享相同的网络命名空间。跳过本节。
 :::
 
 #### 选项 1：镜像网络模式（推荐）
@@ -901,7 +901,7 @@ curl http://$(hostname).local:11434/v1/models
 | 服务器 | 默认绑定 | 如何修复 |
 |--------|-------------|------------|
 | **Ollama** | `127.0.0.1` | 在启动 Ollama 之前设置 `OLLAMA_HOST=0.0.0.0` 环境变量（系统设置 → Windows 上的环境变量，或编辑 Ollama 服务） |
-| **LM Studio** | `127.0.0.1` | 在开发者选项卡 → 服务器设置中启用 **"在网络上提供"** |
+| **LM Studio** | `127.0.0.1` | 在开发者选项卡 → 服务器设置中启用 **"在网络上服务"** |
 | **llama-server** | `127.0.0.1` | 在启动命令中添加 `--host 0.0.0.0` |
 | **vLLM** | `0.0.0.0` | 默认已绑定到所有接口 |
 | **SGLang** | `127.0.0.1` | 在启动命令中添加 `--host 0.0.0.0` |
@@ -932,7 +932,9 @@ curl http://localhost:11434/v1/models          # 镜像模式
 curl http://172.29.192.1:11434/v1/models       # NAT 模式（使用你实际的主机 IP）
 ```
 
-如果你收到一个列出模型的 JSON 响应，那就没问题。在 Hermes 配置中使用相同的 URL 作为 `base_url`。
+如果你收到列出模型的 JSON 响应，那就没问题。在 Hermes 配置中使用相同的 URL 作为 `base_url`。
+
+---
 ### 本地模型故障排除
 
 这些问题在使用 Hermes 时会影响**所有**本地推理服务器。
@@ -971,7 +973,7 @@ curl http://172.29.192.1:11434/v1/models       # NAT 模式（使用你实际的
 # vLLM: 检查启动参数中的 --max-model-len
 ```
 
-**修复：** 对于 Agent 使用，将上下文设置为至少 **32,768 个 Token**。请参阅上文每个服务器部分的具体标志。
+**修复：** 对于 Agent 使用，将上下文设置为至少 **32,768 个 Token**。请参阅上文每个服务器的部分以获取具体的标志。
 
 #### 启动时显示“Context limit: 2048 tokens”
 
@@ -987,17 +989,17 @@ model:
   context_length: 32768
 ```
 
-#### 响应在句子中间被截断
+#### 响应在句子中途被截断
 
-**可能原因：**
-1.  **服务器上的输出上限 (`max_tokens`) 过低** —— SGLang 默认每个响应 128 个 Token。在服务器上设置 `--default-max-tokens` 或在 config.yaml 中配置 Hermes 的 `model.max_tokens`。注意：`max_tokens` 仅控制响应长度 —— 它与你的对话历史可以有多长（即 `context_length`）无关。
+**可能的原因：**
+1.  **服务器上的输出上限（`max_tokens`）过低** —— SGLang 默认每个响应为 128 个 Token。在服务器上设置 `--default-max-tokens` 或在 config.yaml 中配置 Hermes 的 `model.max_tokens`。注意：`max_tokens` 仅控制响应长度 —— 它与你的对话历史记录能有多长（即 `context_length`）无关。
 2.  **上下文耗尽** —— 模型填满了其上下文窗口。增加 `model.context_length` 或在 Hermes 中启用[上下文压缩](/docs/user-guide/configuration#context-compression)。
 
 ---
 
-### LiteLLM 代理 —— 多提供商网关
+### LiteLLM 代理 —— 多提供商消息网关
 
-[LiteLLM](https://docs.litellm.ai/) 是一个 OpenAI 兼容的代理，将 100 多个 LLM 提供商统一在一个 API 后面。最适合：无需更改配置即可在提供商之间切换、负载均衡、故障转移链、预算控制。
+[LiteLLM](https://docs.litellm.ai/) 是一个 OpenAI 兼容的代理，它将 100 多个 LLM 提供商统一在一个 API 后面。最适合：无需更改配置即可在提供商之间切换、负载均衡、故障转移链、预算控制。
 
 ```bash
 # 安装并启动
@@ -1008,9 +1010,9 @@ litellm --model anthropic/claude-sonnet-4 --port 4000
 litellm --config litellm_config.yaml --port 4000
 ```
 
-然后配置 Hermes：`hermes model` → 自定义端点 → `http://localhost:4000/v1`。
+然后使用 `hermes model` → 自定义端点 → `http://localhost:4000/v1` 配置 Hermes。
 
-带故障转移的 `litellm_config.yaml` 示例：
+带有故障转移功能的 `litellm_config.yaml` 示例：
 ```yaml
 model_list:
   - model_name: "best"
@@ -1029,14 +1031,14 @@ router_settings:
 
 ### ClawRouter —— 成本优化路由
 
-BlockRunAI 出品的 [ClawRouter](https://github.com/BlockRunAI/ClawRouter) 是一个本地路由代理，可根据查询复杂度自动选择模型。它根据 14 个维度对请求进行分类，并路由到能够处理任务的最便宜模型。支付通过 USDC 加密货币进行（无需 API 密钥）。
+BlockRunAI 的 [ClawRouter](https://github.com/BlockRunAI/ClawRouter) 是一个本地路由代理，它根据查询复杂度自动选择模型。它根据 14 个维度对请求进行分类，并将其路由到能够处理任务的最便宜的模型。支付通过 USDC 加密货币进行（无需 API 密钥）。
 
 ```bash
 # 安装并启动
-npx @blockrun/clawrouter    # 在端口 8402 启动
+npx @blockrun/clawrouter    # 在端口 8402 上启动
 ```
 
-然后配置 Hermes：`hermes model` → 自定义端点 → `http://localhost:8402/v1` → 模型名称 `blockrun/auto`。
+然后使用 `hermes model` → 自定义端点 → `http://localhost:8402/v1` → 模型名称 `blockrun/auto` 配置 Hermes。
 
 路由配置文件：
 | 配置文件 | 策略 | 节省 |
@@ -1044,11 +1046,11 @@ npx @blockrun/clawrouter    # 在端口 8402 启动
 | `blockrun/auto` | 平衡质量/成本 | 74-100% |
 | `blockrun/eco` | 尽可能便宜 | 95-100% |
 | `blockrun/premium` | 最佳质量模型 | 0% |
-| `blockrun/free` | 仅免费模型 | 100% |
+| `blockrun/free` | 仅限免费模型 | 100% |
 | `blockrun/agentic` | 针对工具使用优化 | 不定 |
 
 :::note
-ClawRouter 需要在 Base 或 Solana 上有一个 USDC 资金的钱包用于支付。所有请求都通过 BlockRun 的后端 API 路由。运行 `npx @blockrun/clawrouter doctor` 检查钱包状态。
+ClawRouter 需要在 Base 或 Solana 上有一个 USDC 资金的钱包用于支付。所有请求都通过 BlockRun 的后端 API 路由。运行 `npx @blockrun/clawrouter doctor` 以检查钱包状态。
 :::
 
 ---
@@ -1070,7 +1072,7 @@ ClawRouter 需要在 Base 或 Solana 上有一个 USDC 资金的钱包用于支�
 | [Azure OpenAI](https://azure.microsoft.com) | `https://YOUR.openai.azure.com/` | 企业级 OpenAI |
 | [LocalAI](https://localai.io) | `http://localhost:8080/v1` | 自托管，多模型 |
 | [Jan](https://jan.ai) | `http://localhost:1337/v1` | 带有本地模型的桌面应用 |
-可通过 `hermes model` 或 `config.yaml` 配置以下任意一项：
+可以通过 `hermes model` 或 `config.yaml` 配置以下任意一项：
 
 ```yaml
 model:
@@ -1085,29 +1087,29 @@ model:
 ### 上下文长度检测
 
 :::note 两个容易混淆的设置
-**`context_length`** 是**总上下文窗口**——输入和输出 Token 的共享预算（例如 Claude Opus 4.6 为 200,000）。Hermes 使用此值来决定何时压缩历史记录以及验证 API 请求。
+**`context_length`** 是**总上下文窗口**——输入和输出 Token 的合计预算（例如，Claude Opus 4.6 为 200,000）。Hermes 使用此值来决定何时压缩历史记录以及验证 API 请求。
 
-**`model.max_tokens`** 是**输出上限**——模型在*单次响应*中可生成的最大 Token 数。它与您的对话历史记录能有多长无关。行业标准名称 `max_tokens` 是常见的混淆来源；Anthropic 的原生 API 后来为了清晰起见将其重命名为 `max_output_tokens`。
+**`model.max_tokens`** 是**输出上限**——模型在*单次响应*中可以生成的最大 Token 数。它与你的对话历史记录能有多长无关。行业标准名称 `max_tokens` 是常见的混淆来源；Anthropic 的原生 API 后来为了清晰起见将其重命名为 `max_output_tokens`。
 
-当自动检测的窗口大小出错时，设置 `context_length`。
-仅在需要限制单个响应的长度时，才设置 `model.max_tokens`。
+当自动检测得到的窗口大小错误时，设置 `context_length`。
+仅当你需要限制单个响应的长度时，才设置 `model.max_tokens`。
 :::
 
-Hermes 使用多源解析链来检测您的模型和提供商的正确上下文窗口：
+Hermes 使用多源解析链来检测你的模型和提供商的正确上下文窗口：
 
 1.  **配置覆盖** — `config.yaml` 中的 `model.context_length`（最高优先级）
-2.  **自定义提供商按模型设置** — `custom_providers[].models.<id>.context_length`
+2.  **自定义提供商的每个模型** — `custom_providers[].models.<id>.context_length`
 3.  **持久化缓存** — 先前发现的值（重启后保留）
-4.  **端点 `/models`** — 查询您服务器的 API（本地/自定义端点）
-5.  **Anthropic `/v1/models`** — 为 `max_input_tokens` 查询 Anthropic 的 API（仅限 API 密钥用户）
+4.  **端点 `/models`** — 查询你的服务器 API（本地/自定义端点）
+5.  **Anthropic `/v1/models`** — 查询 Anthropic 的 API 以获取 `max_input_tokens`（仅限 API 密钥用户）
 6.  **OpenRouter API** — 来自 OpenRouter 的实时模型元数据
 7.  **Nous Portal** — 将 Nous 模型 ID 后缀与 OpenRouter 元数据进行匹配
 8.  **[models.dev](https://models.dev)** — 社区维护的注册表，包含 100 多个提供商中 3800 多个模型的提供商特定上下文长度
 9.  **后备默认值** — 广泛的模型系列模式（默认 128K）
 
-对于大多数设置，这可以开箱即用。该系统具有提供商感知能力——同一模型根据服务提供商的不同可能具有不同的上下文限制（例如，`claude-opus-4.6` 在 Anthropic 直接服务时为 1M，但在 GitHub Copilot 上为 128K）。
+对于大多数设置，这可以开箱即用。该系统是提供商感知的——同一个模型根据服务提供商的不同可能有不同的上下文限制（例如，`claude-opus-4.6` 在 Anthropic 直接服务时为 1M，但在 GitHub Copilot 上为 128K）。
 
-要显式设置上下文长度，请将 `context_length` 添加到您的模型配置中：
+要显式设置上下文长度，请将 `context_length` 添加到你的模型配置中：
 
 ```yaml
 model:
@@ -1116,7 +1118,7 @@ model:
   context_length: 131072  # tokens
 ```
 
-对于自定义端点，您还可以按模型设置上下文长度：
+对于自定义端点，你还可以为每个模型设置上下文长度：
 
 ```yaml
 custom_providers:
@@ -1129,25 +1131,25 @@ custom_providers:
         context_length: 65536
 ```
 
-配置自定义端点时，`hermes model` 将提示输入上下文长度。留空以进行自动检测。
+`hermes model` 在配置自定义端点时会提示输入上下文长度。留空则进行自动检测。
 
 :::tip 何时手动设置
-- 您正在使用 Ollama 并设置了低于模型最大值的自定义 `num_ctx`
-- 您希望将上下文限制在模型最大值以下（例如，在 128k 模型上限制为 8k 以节省 VRAM）
-- 您运行在未暴露 `/v1/models` 的代理之后
+- 你正在使用 Ollama 并且自定义的 `num_ctx` 低于模型的最大值
+- 你想将上下文限制在模型最大值以下（例如，在 128k 模型上限制为 8k 以节省 VRAM）
+- 你运行在未暴露 `/v1/models` 的代理之后
 :::
 
 ---
 
 ### 命名的自定义提供商
 
-如果您使用多个自定义端点（例如，本地开发服务器和远程 GPU 服务器），可以在 `config.yaml` 中将它们定义为命名的自定义提供商：
+如果你使用多个自定义端点（例如，本地开发服务器和远程 GPU 服务器），可以将它们定义为 `config.yaml` 中的命名自定义提供商：
 
 ```yaml
 custom_providers:
   - name: local
     base_url: http://localhost:8080/v1
-    # 省略 api_key — Hermes 对无需密钥的本地服务器使用 "no-key-required"
+    # api_key 省略 — Hermes 对无需密钥的本地服务器使用 "no-key-required"
   - name: work
     base_url: https://gpu-server.internal.corp/v1
     key_env: CORP_API_KEY
@@ -1161,12 +1163,12 @@ custom_providers:
 在会话中使用三重语法在它们之间切换：
 
 ```
-/model custom:local:qwen-2.5       # 使用 "local" 端点和 qwen-2.5 模型
-/model custom:work:llama3-70b      # 使用 "work" 端点和 llama3-70b 模型
+/model custom:local:qwen-2.5       # 使用 "local" 端点和 qwen-2.5
+/model custom:work:llama3-70b      # 使用 "work" 端点和 llama3-70b
 /model custom:anthropic-proxy:claude-sonnet-4  # 使用代理
 ```
 
-您也可以从交互式 `hermes model` 菜单中选择命名的自定义提供商。
+你也可以从交互式 `hermes model` 菜单中选择命名的自定义提供商。
 
 ---
 
@@ -1176,7 +1178,7 @@ custom_providers:
 
 #### Together AI
 
-托管开源模型（Llama、MiniMax、Gemma、DeepSeek、Qwen），价格显著低于第一方 API。是多模型集群的良好默认选择。
+托管开源模型（Llama、MiniMax、Gemma、DeepSeek、Qwen），价格显著低于第一方 API。是多模型舰队的不错默认选择。
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -1184,7 +1186,7 @@ custom_providers:
   - name: together
     base_url: https://api.together.xyz/v1
     key_env: TOGETHER_API_KEY
-    # api_mode: chat_completions  # 默认值 — 无需设置
+    # api_mode: chat_completions  # 默认 — 无需设置
 
 model:
   default: MiniMaxAI/MiniMax-M2.7   # 或来自 together.ai/models 的任何模型
@@ -1208,7 +1210,7 @@ Together 的 `/v1/models` 端点有效，因此 `hermes model` 可以自动发�
 
 #### Groq
 
-超快速推理（Llama-3.3-70B 上约 500 tok/s）。目录较小，但对于延迟敏感的交互式使用非常强大。
+超快速推理（Llama-3.3-70B 上约 500 tok/s）。目录虽小，但对于延迟敏感的交互式使用非常强大。
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -1229,7 +1231,7 @@ GROQ_API_KEY=your-groq-key
 
 #### Perplexity
 
-当您需要一个能自动进行实时网络搜索和引用的模型时很有用。对可用模型有严格限制——请查看 [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api) 获取当前列表。
+当你想要一个能自动进行实时网络搜索和引用的模型时很有用。对可用模型有严格限制——请查看 [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api) 获取当前列表。
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -1247,9 +1249,9 @@ model:
 PERPLEXITY_API_KEY=your-perplexity-key
 ```
 
-#### 一个配置中包含多个提供商
+#### 在单个配置中使用多个提供商
 
-这三种配置方式可以组合使用——将它们全部放在一起，并通过 `/model custom:<name>:<model>` 在每次对话轮次中切换：
+这三种配置方案可以组合使用——将它们全部放在一起，并通过 `/model custom:<name>:<model>` 在每次对话中切换：
 
 ```yaml
 custom_providers:
@@ -1270,7 +1272,7 @@ model:
 
 :::tip 故障排除
 - 在 CLI 验证器修复 #15083 后，`hermes doctor` 不应为这些名称中的任何一个打印 `Unknown provider` 警告。
-- 如果某个提供商的 `/v1/models` 端点无法访问（常见的是 Perplexity），`hermes model` 将保留该模型并发出警告，而不是硬性拒绝——参见 #15136。
+- 如果某个提供商的 `/v1/models` 端点无法访问（常见的是 Perplexity），`hermes model` 会以警告方式保留该模型，而不是硬性拒绝——参见 #15136。
 - 要完全跳过 `custom_providers:` 并使用裸 `provider: custom` 配合 `CUSTOM_BASE_URL` 环境变量，请参见 #15103。
 :::
 
@@ -1286,12 +1288,12 @@ model:
 | **Mac / 无 GPU** | Ollama 或 llama.cpp |
 | **多提供商路由** | LiteLLM Proxy 或 OpenRouter |
 | **成本优化** | ClawRouter 或带 `sort: "price"` 的 OpenRouter |
-| **最大隐私性** | Ollama、vLLM 或 llama.cpp（完全本地） |
+| **最大隐私保护** | Ollama、vLLM 或 llama.cpp（完全本地） |
 | **企业 / Azure** | 带自定义端点的 Azure OpenAI |
 | **中文 AI 模型** | z.ai (GLM)、Kimi/Moonshot (`kimi-coding` 或 `kimi-coding-cn`)、MiniMax、小米 MiMo 或腾讯 TokenHub（一等提供商） |
 
 :::tip
-你可以随时使用 `hermes model` 在提供商之间切换——无需重启。无论你使用哪个提供商，你的对话历史、记忆和技能都会保留。
+你可以随时使用 `hermes model` 在提供商之间切换——无需重启。无论使用哪个提供商，你的对话历史、记忆和技能都会保留。
 :::
 
 ## 可选的 API 密钥
@@ -1312,13 +1314,13 @@ model:
 
 默认情况下，Hermes 使用 [Firecrawl 云 API](https://firecrawl.dev/) 进行网络搜索和抓取。如果你更喜欢在本地运行 Firecrawl，可以将 Hermes 指向自托管的实例。完整的设置说明请参见 Firecrawl 的 [SELF_HOST.md](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md)。
 
-**你能得到什么：** 无需 API 密钥，无速率限制，无按页计费，完全的数据主权。
+**你将获得：** 无需 API 密钥，无速率限制，无每页成本，完全的数据主权。
 
-**你会失去什么：** 云版本使用 Firecrawl 专有的 "Fire-engine" 进行高级反机器人绕过（Cloudflare、验证码、IP 轮换）。自托管版本使用基本的 fetch + Playwright，因此一些受保护的网站可能会失败。搜索使用 DuckDuckGo 而不是 Google。
+**你将失去：** 云版本使用 Firecrawl 专有的 "Fire-engine" 进行高级反机器人绕过（Cloudflare、CAPTCHA、IP 轮换）。自托管版本使用基本的 fetch + Playwright，因此一些受保护的网站可能会失败。搜索使用 DuckDuckGo 而不是 Google。
 
 **设置步骤：**
 
-1. 克隆并启动 Firecrawl Docker 堆栈（5 个容器：API、Playwright、Redis、RabbitMQ、PostgreSQL —— 需要约 4-8 GB 内存）：
+1. 克隆并启动 Firecrawl Docker 堆栈（5 个容器：API、Playwright、Redis、RabbitMQ、PostgreSQL——需要约 4-8 GB RAM）：
    ```bash
    git clone https://github.com/firecrawl/firecrawl
    cd firecrawl
@@ -1347,30 +1349,61 @@ provider_routing:
   # data_collection: "deny"   # 排除可能存储/训练数据的提供商
 ```
 
-**快捷方式：** 在任何模型名称后附加 `:nitro` 表示按吞吐量排序（例如，`anthropic/claude-sonnet-4:nitro`），或附加 `:floor` 表示按价格排序。
+**快捷方式：** 在任何模型名称后附加 `:nitro` 以进行吞吐量排序（例如，`anthropic/claude-sonnet-4:nitro`），或附加 `:floor` 进行价格排序。
 
-## 备用模型
+## OpenRouter Pareto 代码路由器
 
-配置一个备份的 provider:model，当你的主模型失败时（速率限制、服务器错误、认证失败），Hermes 会自动切换到它：
+OpenRouter 提供了一个实验性的编码模型路由器 `openrouter/pareto-code`，它会自动将请求路由到满足编码质量门槛的最便宜模型（由 [Artificial Analysis](https://artificialanalysis.ai/) 排名）。选择此模型并在 `~/.hermes/config.yaml` 中调整 `min_coding_score` 旋钮：
+
+```yaml
+model:
+  provider: openrouter
+  model: openrouter/pareto-code
+
+openrouter:
+  min_coding_score: 0.65   # 0.0–1.0；值越高 = 越强（越贵）的编码器。默认 0.65。
+```
+
+注意事项：
+
+- `min_coding_score` **仅**在 `model.model` 为 `openrouter/pareto-code` 时发送。在任何其他模型上，该值无效。
+- 设置为空字符串（或删除该行）以让 OpenRouter 选择可用的最强编码器——这是省略插件块时的文档化行为。
+- 在给定的一天内，选择对于每个分数是确定性的，但实际选择的模型可能会随着帕累托前沿的移动（新模型、基准更新）而变化。
+- 完整的路由器行为请参见 OpenRouter 的 [Pareto Router 文档](https://openrouter.ai/docs/guides/routing/routers/pareto-router)。
+- 要将 Pareto 代码路由器用于特定的**辅助任务**（压缩、视觉等）而不是主 Agent，请在该任务下设置 `extra_body.plugins`——参见[辅助模型 → OpenRouter 路由和 Pareto 代码用于辅助任务](/docs/user-guide/configuration#openrouter-routing--pareto-code-for-auxiliary-tasks)。
+## 备用提供商
+
+配置一个备用提供商链，当主模型失败时（如遇到速率限制、服务器错误、认证失败），Hermes 会按顺序尝试这些备用提供商。规范的格式是一个顶层的 `fallback_providers:` 列表：
+
+```yaml
+fallback_providers:
+  - provider: openrouter
+    model: anthropic/claude-sonnet-4
+  - provider: anthropic
+    model: claude-sonnet-4
+    # base_url: http://localhost:8000/v1    # 可选，用于自定义端点
+    # api_mode: chat_completions           # 可选覆盖项
+```
+
+为了向后兼容，旧的单对 `fallback_model:` 字典格式仍然被接受：
 
 ```yaml
 fallback_model:
-  provider: openrouter                    # 必需
-  model: anthropic/claude-sonnet-4        # 必需
-  # base_url: http://localhost:8000/v1    # 可选，用于自定义端点
-  # key_env: MY_CUSTOM_KEY               # 可选，自定义端点 API 密钥的环境变量名
+  provider: openrouter
+  model: anthropic/claude-sonnet-4
 ```
 
-激活后，备用模型会在会话中途切换模型和提供商，而不会丢失你的对话。每个会话**最多触发一次**。
+当备用机制被激活时，会在不丢失会话对话的情况下，在会话中途切换模型和提供商。备用链会按条目逐一尝试；每个会话的激活是一次性的。
 
-支持的提供商：`openrouter`, `nous`, `openai-codex`, `copilot`, `copilot-acp`, `anthropic`, `gemini`, `google-gemini-cli`, `qwen-oauth`, `huggingface`, `zai`, `kimi-coding`, `kimi-coding-cn`, `minimax`, `minimax-cn`, `minimax-oauth`, `deepseek`, `nvidia`, `xai`, `ollama-cloud`, `bedrock`, `ai-gateway`, `opencode-zen`, `opencode-go`, `kilocode`, `xiaomi`, `arcee`, `gmi`, `stepfun`, `alibaba`, `tencent-tokenhub`, `custom`。
-:::提示
-回退机制仅通过 `config.yaml` 配置——没有对应的环境变量。关于其触发时机、支持的提供商，以及它如何与辅助任务和委派交互的完整细节，请参阅[回退提供商](/docs/user-guide/features/fallback-providers)。
+支持的提供商：`openrouter`、`nous`、`openai-codex`、`copilot`、`copilot-acp`、`anthropic`、`gemini`、`google-gemini-cli`、`qwen-oauth`、`huggingface`、`zai`、`kimi-coding`、`kimi-coding-cn`、`minimax`、`minimax-cn`、`minimax-oauth`、`deepseek`、`nvidia`、`xai`、`ollama-cloud`、`bedrock`、`ai-gateway`、`azure-foundry`、`opencode-zen`、`opencode-go`、`kilocode`、`xiaomi`、`arcee`、`gmi`、`stepfun`、`lmstudio`、`alibaba`、`alibaba-coding-plan`、`tencent-tokenhub`、`custom`。
+
+:::tip
+备用机制只能通过 `config.yaml` 配置，或者通过 `hermes fallback` 命令交互式配置。关于备用机制何时触发、备用链如何推进以及它如何与辅助任务和委派交互的完整细节，请参阅 [备用提供商](/docs/user-guide/features/fallback-providers)。
 :::
 
 ---
 
 ## 另请参阅
 
-- [配置](/docs/user-guide/configuration) —— 通用配置（目录结构、配置优先级、终端后端、记忆、压缩等）
-- [环境变量](/docs/reference/environment-variables) —— 所有环境变量的完整参考
+- [配置](/docs/user-guide/configuration) — 通用配置（目录结构、配置优先级、终端后端、记忆、压缩等）
+- [环境变量](/docs/reference/environment-variables) — 所有环境变量的完整参考

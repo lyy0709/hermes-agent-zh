@@ -1,14 +1,14 @@
 ---
 title: "思源笔记"
 sidebar_label: "思源笔记"
-description: "通过 curl 在自托管知识库中搜索、阅读、创建和管理块与文档的思源笔记 API"
+description: "通过 curl 在自托管知识库中搜索、读取、创建和管理块与文档的思源笔记 API"
 ---
 
-{/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 思源笔记
 
-通过 curl 在自托管知识库中搜索、阅读、创建和管理块与文档的思源笔记 API。
+通过 curl 在自托管知识库中搜索、读取、创建和管理块与文档的思源笔记 API。
 
 ## 技能元数据
 
@@ -19,22 +19,23 @@ description: "通过 curl 在自托管知识库中搜索、阅读、创建和管
 | 版本 | `1.0.0` |
 | 作者 | FEUAZUR |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `SiYuan`, `Notes`, `Knowledge Base`, `PKM`, `API` |
 | 相关技能 | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian), [`notion`](/docs/user-guide/skills/bundled/productivity/productivity-notion) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # 思源笔记 API
 
-通过 curl 使用 [思源笔记](https://github.com/siyuan-note/siyuan) 内核 API，在自托管知识库中搜索、阅读、创建、更新和删除块与文档。无需额外工具——只需 curl 和一个 API Token。
+通过 curl 使用 [思源笔记](https://github.com/siyuan-note/siyuan) 内核 API，在自托管知识库中搜索、读取、创建、更新和删除块与文档。无需额外工具——只需 curl 和一个 API Token。
 
 ## 先决条件
 
-1.  安装并运行思源笔记（桌面版或 Docker 版）
+1.  安装并运行思源笔记（桌面版或 Docker）
 2.  获取你的 API Token：**设置 > 关于 > API Token**
 3.  将其存储在 `~/.hermes/.env` 中：
     ```
@@ -110,7 +111,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/query/sql" \
 
 ### 读取块内容
 
-以 Kramdown（类似 Markdown）格式返回块内容。
+以 Kramdown（类 Markdown）格式返回块内容。
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/getBlockKramdown" \
@@ -283,14 +284,14 @@ SQL 查询中常见的 `type` 值：
 
 -   **所有端点都是 POST** —— 即使是只读操作。不要使用 GET。
 -   **SQL 安全性**：仅使用 SELECT 查询。INSERT/UPDATE/DELETE/DROP 是危险的，绝不应发送。
--   **ID 验证**：ID 匹配模式 `YYYYMMDDHHmmss-xxxxxxx`。拒绝任何其他格式。
+-   **ID 验证**：ID 需匹配模式 `YYYYMMDDHHmmss-xxxxxxx`。拒绝任何其他格式。
 -   **错误响应**：在处理 `data` 之前，始终检查响应中的 `code != 0`。
 -   **大型文档**：块内容和导出结果可能非常大。在 SQL 中使用 `LIMIT`，并通过 `jq` 管道仅提取所需内容。
--   **笔记本 ID**：处理特定笔记本时，首先通过 `lsNotebooks` 获取其 ID。
+-   **笔记本 ID**：在处理特定笔记本时，首先通过 `lsNotebooks` 获取其 ID。
 
-## 替代方案：MCP Server
+## 替代方案：MCP 服务器
 
-如果你更喜欢原生集成而不是 curl，请安装思源笔记 MCP Server：
+如果你更喜欢原生集成而不是 curl，请安装思源笔记 MCP 服务器：
 
 ```yaml
 # 在 ~/.hermes/config.yaml 的 mcp_servers 下：

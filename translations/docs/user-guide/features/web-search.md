@@ -1,19 +1,18 @@
 ---
 title: 网页搜索与内容提取
-description: 使用多个后端提供商（包括免费自托管的 SearXNG）搜索网页、提取页面内容以及爬取网站。
+description: 通过多个后端提供商进行网页搜索、提取页面内容以及爬取网站——包括免费自托管的 SearXNG。
 sidebar_label: 网页搜索
 sidebar_position: 6
 ---
 
 # 网页搜索与内容提取
 
-Hermes Agent 包含三个由多个提供商支持的网页工具：
+Hermes Agent 包含两个可由模型调用的网页工具，由多个提供商支持：
 
 - **`web_search`** — 搜索网页并返回排序后的结果
-- **`web_extract`** — 从一个或多个 URL 获取并提取可读内容
-- **`web_crawl`** — 递归爬取网站并返回结构化内容
+- **`web_extract`** — 从一个或多个 URL 获取并提取可读内容（当后端支持时，内置深度爬取功能）
 
-这三者都通过单一的后端选择进行配置。提供商通过 `hermes tools` 选择或直接在 `config.yaml` 中设置。
+两者都通过单一的后端选择进行配置。提供商通过 `hermes tools` 选择或直接在 `config.yaml` 中设置。递归爬取功能（Firecrawl/Tavily）通过 `web_extract` 暴露，而不是作为一个单独的 `web_crawl` 工具。
 
 ## 后端
 
@@ -28,7 +27,7 @@ Hermes Agent 包含三个由多个提供商支持的网页工具：
 **按能力拆分：** 你可以为搜索和提取独立使用不同的提供商——例如，使用 SearXNG（免费）进行搜索，使用 Firecrawl 进行提取。请参阅下面的[按能力配置](#per-capability-configuration)。
 
 :::tip Nous 订阅用户
-如果你拥有付费的 [Nous Portal](https://portal.nousresearch.com) 订阅，网页搜索和提取可通过 **[工具网关](tool-gateway.md)** 通过托管的 Firecrawl 获得——无需 API 密钥。运行 `hermes tools` 来启用它。
+如果你拥有付费的 [Nous Portal](https://portal.nousresearch.com) 订阅，网页搜索和提取可通过 **[Tool Gateway](tool-gateway.md)** 通过托管的 Firecrawl 获得——无需 API 密钥。运行 `hermes tools` 来启用它。
 :::
 
 ---
@@ -54,7 +53,7 @@ hermes tools
 FIRECRAWL_API_KEY=fc-your-key-here
 ```
 
-在 [firecrawl.dev](https://firecrawl.dev) 获取密钥。免费额度包括每月 500 积分。
+在 [firecrawl.dev](https://firecrawl.dev) 获取密钥。免费层包括每月 500 积分。
 
 **自托管 Firecrawl：** 指向你自己的实例而不是云 API：
 
@@ -63,7 +62,7 @@ FIRECRAWL_API_KEY=fc-your-key-here
 FIRECRAWL_API_URL=http://localhost:3002
 ```
 
-当设置了 `FIRECRAWL_API_URL` 时，API 密钥是可选的（通过 `USE_DB_AUTHENTICATION=false` 禁用服务器认证）。
+当设置了 `FIRECRAWL_API_URL` 时，API 密钥是可选的（通过 `USE_DB_AUTHENTICATION=false` 禁用服务器身份验证）。
 
 ---
 
@@ -71,11 +70,11 @@ FIRECRAWL_API_URL=http://localhost:3002
 
 SearXNG 是一个尊重隐私的开源元搜索引擎，聚合了来自 70 多个搜索引擎的结果。**无需 API 密钥**——只需将 Hermes 指向一个正在运行的 SearXNG 实例。
 
-SearXNG **仅支持搜索**——`web_extract` 和 `web_crawl` 需要单独的提取提供商。
+SearXNG **仅支持搜索**——`web_extract`（包括其爬取模式）需要一个单独的提取提供商。
 
 #### 选项 A — 使用 Docker 自托管 (推荐)
 
-这将为你提供一个没有速率限制的私有实例。
+这为你提供了一个没有速率限制的私有实例。
 
 **1. 创建工作目录：**
 
@@ -136,14 +135,14 @@ docker cp ~/searxng/searxng/settings.yml searxng:/etc/searxng/settings.yml
 docker restart searxng
 ```
 
-**6. 验证是否工作：**
+**6. 验证其是否工作：**
 
 ```bash
 curl -s "http://localhost:8888/search?q=test&format=json" | python3 -c \
   "import sys,json; d=json.load(sys.stdin); print(f'{len(d[\"results\"])} results')"
 ```
 
-你应该会看到类似 `10 results` 的内容。如果收到 `403 Forbidden`，JSON 格式仍然被禁用——请重新检查第 4 步。
+你应该会看到类似 `10 results` 的内容。如果你得到 `403 Forbidden`，JSON 格式仍然被禁用——请重新检查步骤 4。
 
 **7. 配置 Hermes：**
 
@@ -173,14 +172,14 @@ SEARXNG_URL=https://searx.example.com
 ```
 
 :::caution 公共实例
-公共实例有速率限制，可用性不稳定，并且可能随时禁用 JSON 格式。对于生产用途，强烈建议自托管。
+公共实例有速率限制，正常运行时间不稳定，并且可能随时禁用 JSON 格式。对于生产用途，强烈建议自托管。
 :::
 
 ---
 
 #### 将 SearXNG 与提取提供商配对
 
-SearXNG 处理搜索；你需要一个单独的提供商来处理 `web_extract` 和 `web_crawl`。使用按能力配置的键：
+SearXNG 处理搜索；你需要一个单独的提供商来处理 `web_extract`（包括任何深度爬取模式）。使用按能力配置的键：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -202,7 +201,7 @@ AI 优化的搜索、提取和爬取，提供慷慨的免费额度。
 TAVILY_API_KEY=tvly-your-key-here
 ```
 
-在 [app.tavily.com](https://app.tavily.com/home) 获取密钥。免费额度包括每月 1 000 次搜索。
+在 [app.tavily.com](https://app.tavily.com/home) 获取密钥。免费层包括每月 1 000 次搜索。
 
 ---
 
@@ -215,7 +214,7 @@ TAVILY_API_KEY=tvly-your-key-here
 EXA_API_KEY=your-exa-key-here
 ```
 
-在 [exa.ai](https://exa.ai) 获取密钥。免费额度包括每月 1 000 次搜索。
+在 [exa.ai](https://exa.ai) 获取密钥。免费层包括每月 1 000 次搜索。
 
 ---
 
@@ -236,7 +235,7 @@ PARALLEL_API_KEY=your-parallel-key-here
 
 ### 单一后端
 
-为所有网页能力设置一个提供商：
+为所有网页功能设置一个提供商：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -246,16 +245,16 @@ web:
 
 ### 按能力配置
 
-为搜索和提取使用不同的提供商。这让你可以结合免费搜索 (SearXNG) 和付费提取提供商，反之亦然：
+为搜索和提取使用不同的提供商。这让你可以结合免费搜索（SearXNG）和付费提取提供商，反之亦然：
 
 ```yaml
 # ~/.hermes/config.yaml
 web:
   search_backend: "searxng"     # 由 web_search 使用
-  extract_backend: "firecrawl"  # 由 web_extract 和 web_crawl 使用
+  extract_backend: "firecrawl"  # 由 web_extract 使用 (及其深度爬取模式)
 ```
 
-当按能力配置的键为空时，两者都会回退到 `web.backend`。当 `web.backend` 也为空时，后端会根据存在的任何 API 密钥/URL 自动检测。
+当按能力配置的键为空时，两者都会回退到 `web.backend`。当 `web.backend` 也为空时，后端会根据存在的 API 密钥/URL 自动检测。
 
 **优先级顺序 (按能力)：**
 1. `web.search_backend` / `web.extract_backend` (显式按能力配置)
@@ -306,10 +305,10 @@ python -m tools.web_tools
 ### `web_search` 返回 `{"success": false}`
 
 - 检查 `SEARXNG_URL` 是否可达：`curl -s "http://localhost:8888/search?q=test&format=json"`
-- 如果收到 HTTP 403，JSON 格式被禁用——在 `settings.yml` 的 `formats` 列表中添加 `json` 并重启
-- 如果收到连接错误，容器可能没有运行：`docker ps | grep searxng`
+- 如果得到 HTTP 403，JSON 格式被禁用——将 `json` 添加到 `settings.yml` 中的 `formats` 列表并重启
+- 如果得到连接错误，容器可能没有运行：`docker ps | grep searxng`
 
-### `web_extract` 提示 "search-only backend"
+### `web_extract` 显示 "search-only backend"
 
 SearXNG 无法提取 URL 内容。将 `web.extract_backend` 设置为支持提取的提供商：
 
@@ -324,9 +323,9 @@ web:
 一些公共实例禁用了某些搜索引擎或类别。尝试：
 - 不同的查询
 - 来自 [searx.space](https://searx.space/) 的不同公共实例
-- 自托管你自己的实例以获得可靠结果
+- 自托管你自己的实例以获得可靠的结果
 
-### 在公共实例上被限速
+### 在公共实例上被限制速率
 
 切换到自托管实例（参见上面的[选项 A](#option-a--self-host-with-docker-recommended)）。使用 Docker，你自己的实例没有速率限制。
 
@@ -334,13 +333,13 @@ web:
 
 ## 可选技能：`searxng-search`
 
-对于需要直接通过 `curl` 使用 SearXNG 的 Agent（例如，当网页工具集不可用时作为备用方案），安装 `searxng-search` 可选技能：
+对于需要直接通过 `curl` 使用 SearXNG 的 Agent（例如，当网页工具集不可用时作为备用），安装 `searxng-search` 可选技能：
 
 ```bash
 hermes skills install official/research/searxng-search
 ```
 
-这添加了一个技能，教导 Agent 如何：
+这增加了一个技能，教会 Agent 如何：
 - 通过 `curl` 或 Python 调用 SearXNG JSON API
 - 按类别筛选 (`general`, `news`, `science` 等)
 - 处理分页和错误情况

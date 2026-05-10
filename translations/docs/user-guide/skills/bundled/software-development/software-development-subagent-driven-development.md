@@ -4,7 +4,7 @@ sidebar_label: "子代理驱动开发"
 description: "通过 delegate_task 子代理执行计划（两阶段评审）"
 ---
 
-{/* 此页面由技能目录中的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 子代理驱动开发
 
@@ -19,6 +19,7 @@ description: "通过 delegate_task 子代理执行计划（两阶段评审）"
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent (adapted from obra/superpowers) |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `delegation`, `subagent`, `implementation`, `workflow`, `parallel` |
 | 相关技能 | [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
 
@@ -38,16 +39,16 @@ description: "通过 delegate_task 子代理执行计划（两阶段评审）"
 
 ## 何时使用
 
-在以下情况使用此技能：
+在以下情况下使用此技能：
 - 你有一个实施计划（来自 writing-plans 技能或用户需求）
-- 任务基本独立
+- 任务大多是独立的
 - 质量和规范符合性很重要
 - 你希望在任务之间进行自动化评审
 
-**与手动执行对比：**
+**与手动执行相比：**
 - 每个任务都有新的上下文（不会因累积状态而产生混淆）
 - 自动化评审流程能及早发现问题
-- 所有任务都进行一致的质量检查
+- 所有任务都有一致的质量检查
 - 子代理可以在开始工作前提出问题
 
 ## 流程
@@ -76,7 +77,7 @@ todo([
 
 #### 步骤 1：分派实施者子代理
 
-使用 `delegate_task` 并提供完整上下文：
+使用 `delegate_task` 并提供完整的上下文：
 
 ```python
 delegate_task(
@@ -167,7 +168,7 @@ delegate_task(
 
 **如果发现质量问题：** 修复问题，重新评审。只有在批准后才继续。
 
-#### 步骤 4：标记为完成
+#### 步骤 4：标记完成
 
 ```python
 todo([{"id": "task-1", "content": "Create User model with email field", "status": "completed"}], merge=True)
@@ -175,7 +176,7 @@ todo([{"id": "task-1", "content": "Create User model with email field", "status"
 
 ### 3. 最终评审
 
-在**所有**任务完成后，分派一个最终的集成评审员：
+**所有**任务完成后，分派一个最终的集成评审员：
 
 ```python
 delegate_task(
@@ -197,7 +198,7 @@ delegate_task(
 # 运行完整的测试套件
 pytest tests/ -q
 
-# 查看所有更改
+# 审查所有更改
 git diff --stat
 
 # 如有需要，进行最终提交
@@ -212,7 +213,7 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 - "实现用户认证系统"
 
 **大小合适：**
-- "创建包含邮箱和密码字段的 User 模型"
+- "创建包含电子邮件和密码字段的 User 模型"
 - "添加密码哈希函数"
 - "创建登录端点"
 - "添加 JWT Token 生成"
@@ -224,14 +225,14 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 - 跳过评审（规范符合性或代码质量）
 - 在未修复关键/重要问题的情况下继续
 - 为涉及相同文件的任务分派多个实施者子代理
-- 让子代理读取计划文件（应在上下文中提供完整文本）
+- 让子代理读取计划文件（改为在上下文中提供完整文本）
 - 忽略场景设置上下文（子代理需要理解任务所处的位置）
 - 忽略子代理的问题（在让他们继续之前回答）
 - 在规范符合性上接受"差不多就行"
 - 跳过评审循环（评审员发现问题 → 实施者修复 → 再次评审）
 - 让实施者自我评审代替实际评审（两者都需要）
-- **在规范符合性通过之前开始代码质量评审**（顺序错误）
-- 在任一评审存在未解决问题时进入下一个任务
+- **在规范符合性为 PASS 之前开始代码质量评审**（顺序错误）
+- 在任一评审仍有未解决问题时，就移动到下一个任务
 
 ## 处理问题
 
@@ -243,7 +244,7 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 ### 如果评审员发现问题
 
-- 实施者子代理（或一个新的子代理）修复它们
+- 实施者子代理（或一个新的）修复它们
 - 评审员再次评审
 - 重复直到批准
 - 不要跳过重新评审
@@ -251,23 +252,23 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 ### 如果子代理任务失败
 
 - 分派一个新的修复子代理，并附上关于出错原因的具体说明
-- 不要尝试在控制器会话中手动修复（会造成上下文污染）
+- 不要尝试在控制器会话中手动修复（避免上下文污染）
 
 ## 效率说明
 
 **为什么每个任务使用新的子代理：**
-- 防止因累积状态造成的上下文污染
+- 防止因累积状态导致的上下文污染
 - 每个子代理获得干净、专注的上下文
 - 不会因先前任务的代码或推理而产生混淆
 
 **为什么需要两阶段评审：**
 - 规范评审能及早发现构建不足或过度构建
-- 质量评审确保实现是精心构建的
-- 在问题在任务间累积之前发现它们
+- 质量评审确保实现是构建良好的
+- 在问题跨任务复合之前发现问题
 
 **成本权衡：**
 - 更多的子代理调用（每个任务：实施者 + 2 个评审员）
-- 但能及早发现问题（比后期调试复合问题更便宜）
+- 但能及早发现问题（比以后调试复合问题更便宜）
 
 ## 与其他技能的集成
 
@@ -275,7 +276,7 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 此技能**执行**由 writing-plans 技能创建的计划：
 1. 用户需求 → writing-plans → 实施计划
-2. 实施计划 → subagent-driven-development → 可工作的代码
+2. 实施计划 → 子代理驱动开发 → 可工作的代码
 
 ### 与 test-driven-development
 
@@ -293,7 +294,7 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 ### 与 systematic-debugging
 
-如果子代理在实施过程中遇到 Bug：
+如果子代理在实施过程中遇到错误：
 1. 遵循 systematic-debugging 流程
 2. 在修复前找到根本原因
 3. 编写回归测试
@@ -307,21 +308,21 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 --- 任务 1：创建 User 模型 ---
 [分派实施者子代理]
-  实施者："邮箱需要唯一吗？"
-  你："是的，邮箱必须唯一"
+  实施者："电子邮件是否应该唯一？"
+  你："是的，电子邮件必须唯一"
   实施者：已实施，3/3 测试通过，已提交。
 
 [分派规范评审员]
-  规范评审员：✅ 通过 — 所有要求均已满足
+  规范评审员：✅ PASS — 所有要求均已满足
 
 [分派质量评审员]
-  质量评审员：✅ 批准 — 代码清晰，测试良好
+  质量评审员：✅ APPROVED — 代码清晰，测试良好
 
 [标记任务 1 完成]
 
 --- 任务 2：密码哈希 ---
 [分派实施者子代理]
-  实施者：无问题，已实施，5/5 测试通过。
+  实施者：没有问题，已实施，5/5 测试通过。
 
 [分派规范评审员]
   规范评审员：❌ 缺失：密码强度验证（规范要求"最少 8 个字符"）
@@ -330,12 +331,12 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
   实施者：添加了验证，7/7 测试通过。
 
 [再次分派规范评审员]
-  规范评审员：✅ 通过
+  规范评审员：✅ PASS
 
 [分派质量评审员]
   质量评审员：重要：魔法数字 8，提取为常量
   实施者：提取了 MIN_PASSWORD_LENGTH 常量
-  质量评审员：✅ 批准
+  质量评审员：✅ APPROVED
 
 [标记任务 2 完成]
 
@@ -357,13 +358,13 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 及早发现问题
 ```
 
-**质量不是偶然的。它是系统性流程的结果。**
+**质量不是偶然的。它是系统化流程的结果。**
 
 ## 延伸阅读（相关时加载）
 
-当编排涉及大量上下文使用、长评审循环或复杂的验证检查点时，加载这些参考资料以获取特定规程：
+当编排涉及大量上下文使用、长评审循环或复杂的验证检查点时，为特定规程加载这些参考资料：
 
-- **`references/context-budget-discipline.md`** — 四层上下文退化模型（PEAK / GOOD / DEGRADING / POOR）、随上下文窗口大小扩展的读取深度规则，以及无声退化的早期预警信号。当运行显然会消耗大量上下文时加载（多阶段计划、许多子代理、大型工件）。
-- **`references/gates-taxonomy.md`** — 四种规范门类型（Pre-flight, Revision, Escalation, Abort）及其行为、恢复和示例。在设计或评审任何包含验证检查点的工作流时加载——明确使用该词汇，以便每个门都有定义的进入条件、失败行为和恢复规则。
+- **`references/context-budget-discipline.md`** — 四级上下文退化模型（PEAK / GOOD / DEGRADING / POOR）、随上下文窗口大小扩展的阅读深度规则，以及无声退化的早期预警信号。当运行显然会消耗大量上下文时加载（多阶段计划、许多子代理、大型工件）。
+- **`references/gates-taxonomy.md`** — 四种规范的门类型（Pre-flight, Revision, Escalation, Abort），包含行为、恢复和示例。在设计或评审任何具有验证检查点的工作流时加载——明确使用该词汇表，以便每个门都有定义的进入条件、失败行为和恢复规则。
 
-以上参考资料改编自 gsd-build/get-shit-done (MIT © 2025 Lex Christopherson)。
+两份参考资料均改编自 gsd-build/get-shit-done (MIT © 2025 Lex Christopherson)。

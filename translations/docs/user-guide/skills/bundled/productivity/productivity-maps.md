@@ -19,17 +19,18 @@ description: "通过 OpenStreetMap/OSRM 实现地理编码、兴趣点、路线�
 | 版本 | `1.2.0` |
 | 作者 | Mibayy |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `maps`, `geocoding`, `places`, `routing`, `distance`, `directions`, `nearby`, `location`, `openstreetmap`, `nominatim`, `overpass`, `osrm` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # 地图技能
 
-使用免费、开放的数据源进行位置智能分析。8 个命令，44 个兴趣点类别，零依赖（仅使用 Python 标准库），无需 API 密钥。
+使用免费、开放数据源的位置智能。8 个命令，44 个兴趣点类别，零依赖（仅使用 Python 标准库），无需 API 密钥。
 
 数据源：OpenStreetMap/Nominatim、Overpass API、OSRM、TimeAPI.io。
 
@@ -41,10 +42,10 @@ description: "通过 OpenStreetMap/OSRM 实现地理编码、兴趣点、路线�
 - 用户想要某个地名的坐标 → `search`
 - 用户有坐标并想要地址 → `reverse`
 - 用户询问附近的餐厅、医院、药店、酒店等 → `nearby`
-- 用户想要驾驶/步行/骑行的距离或旅行时间 → `distance`
+- 用户想要驾驶/步行/骑行距离或旅行时间 → `distance`
 - 用户想要两个地点之间的逐向导航 → `directions`
 - 用户想要某个位置的时区信息 → `timezone`
-- 用户想要搜索地理区域内的兴趣点 → `area` + `bbox`
+- 用户想要在地理区域内搜索兴趣点 → `area` + `bbox`
 
 ## 先决条件
 
@@ -137,7 +138,7 @@ python3 $MAPS area "Manhattan, New York"
 python3 $MAPS area "London"
 ```
 
-返回边界框坐标、宽度/高度（公里）和近似面积。用作 bbox 命令的输入。
+返回边界框坐标、宽度/高度（公里）和近似面积。用作 `bbox` 命令的输入。
 
 ### bbox — 在边界框内搜索
 
@@ -145,18 +146,18 @@ python3 $MAPS area "London"
 python3 $MAPS bbox 40.75 -74.00 40.77 -73.98 restaurant --limit 20
 ```
 
-查找地理矩形内的兴趣点。首先使用 `area` 获取命名地点的边界框坐标。
+在地理矩形内查找兴趣点。首先使用 `area` 获取命名地点的边界框坐标。
 
 ## 处理 Telegram 位置标记
 
 当用户发送位置标记时，消息包含 `latitude:` 和 `longitude:` 字段。提取这些字段并直接传递给 `nearby`：
 
 ```bash
-# 用户在 36.17, -115.14 发送了一个标记并询问“查找附近的咖啡馆”
+# 用户在 36.17, -115.14 发送了一个标记，并询问“查找附近的咖啡馆”
 python3 $MAPS nearby 36.17 -115.14 cafe --radius 1500
 ```
 
-将结果呈现为带编号的列表，包含名称、距离和 `maps_url` 字段，以便用户在聊天中获得可点击打开的链接。对于“现在开门吗？”这类问题，检查 `hours` 字段；如果缺失或不明确，请使用 `web_search` 验证，因为 OSM 的营业时间由社区维护，不一定是最新的。
+将结果呈现为带编号的列表，包含名称、距离和 `maps_url` 字段，以便用户在聊天中获得可点击打开的链接。对于“现在开门吗？”这类问题，检查 `hours` 字段；如果缺失或不明确，请使用 `web_search` 验证，因为 OSM 的营业时间由社区维护，并不总是最新的。
 
 ## 工作流示例
 
@@ -178,8 +179,8 @@ python3 $MAPS nearby 36.17 -115.14 cafe --radius 1500
 ## 注意事项
 
 - Nominatim 服务条款：最大 1 次请求/秒（脚本自动处理）
-- `nearby` 需要纬度/经度 或 `--near "<address>"` — 两者之一必须提供
-- OSRM 路线覆盖范围在欧洲和北美最佳
+- `nearby` 需要纬度/经度 或 `--near "<address>"` — 两者之一为必需
+- OSRM 路线覆盖在欧洲和北美最佳
 - Overpass API 在高峰时段可能较慢；脚本会自动在镜像之间回退（overpass-api.de → overpass.kumi.systems）
 - `distance` 和 `directions` 使用 `--to` 标志指定目的地（非位置参数）
 - 如果仅邮政编码在全球范围内产生歧义结果，请包含国家/州信息

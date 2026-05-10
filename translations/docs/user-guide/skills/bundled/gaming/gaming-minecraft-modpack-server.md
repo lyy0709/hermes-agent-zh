@@ -1,14 +1,14 @@
 ---
-title: "Minecraft Modpack Server — 托管模组化 Minecraft 服务器（CurseForge、Modrinth）"
-sidebar_label: "Minecraft Modpack Server"
-description: "托管模组化 Minecraft 服务器（CurseForge、Modrinth）"
+title: "Minecraft Mod包服务器 — 托管模组化 Minecraft 服务器（CurseForge, Modrinth）"
+sidebar_label: "Minecraft Mod包服务器"
+description: "托管模组化 Minecraft 服务器（CurseForge, Modrinth）"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# Minecraft Modpack Server
+# Minecraft Mod包服务器
 
-托管模组化 Minecraft 服务器（CurseForge、Modrinth）。
+托管模组化 Minecraft 服务器（CurseForge, Modrinth）。
 
 ## 技能元数据
 
@@ -16,19 +16,20 @@ description: "托管模组化 Minecraft 服务器（CurseForge、Modrinth）"
 |---|---|
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/gaming/minecraft-modpack-server` |
+| 平台 | linux, macos |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
-# Minecraft Modpack Server 设置
+# Minecraft Mod包服务器设置
 
 ## 使用时机
 - 用户想要从服务器包 zip 文件设置模组化 Minecraft 服务器
 - 用户需要 NeoForge/Forge 服务器配置方面的帮助
-- 用户询问有关 Minecraft 服务器性能调优或备份的问题
+- 用户询问关于 Minecraft 服务器性能调优或备份的问题
 
 ## 首先收集用户偏好
 在开始设置之前，询问用户：
@@ -44,7 +45,7 @@ description: "托管模组化 Minecraft 服务器（CurseForge、Modrinth）"
 - **白名单** — 开放服务器还是仅限白名单？
 - **备份** — 需要自动备份吗？频率如何？
 
-如果用户不在意，请使用合理的默认值，但在生成配置之前务必询问。
+如果用户不在意，请使用合理的默认值，但在生成配置前务必询问。
 
 ## 步骤
 
@@ -56,13 +57,13 @@ wget -O serverpack.zip "<URL>"
 unzip -o serverpack.zip -d server
 ls server/
 ```
-查找：`startserver.sh`、安装程序 jar（neoforge/forge）、`user_jvm_args.txt`、`mods/` 文件夹。
+查找：`startserver.sh`、安装器 jar（neoforge/forge）、`user_jvm_args.txt`、`mods/` 文件夹。
 检查脚本以确定：模组加载器类型、版本和所需的 Java 版本。
 
 ### 2. 安装 Java
-- Minecraft 1.21+ → Java 21：`sudo apt install openjdk-21-jre-headless`
-- Minecraft 1.18-1.20 → Java 17：`sudo apt install openjdk-17-jre-headless`
-- Minecraft 1.16 及以下 → Java 8：`sudo apt install openjdk-8-jre-headless`
+- Minecraft 1.21+ → Java 21: `sudo apt install openjdk-21-jre-headless`
+- Minecraft 1.18-1.20 → Java 17: `sudo apt install openjdk-17-jre-headless`
+- Minecraft 1.16 及以下 → Java 8: `sudo apt install openjdk-8-jre-headless`
 - 验证：`java -version`
 
 ### 3. 安装模组加载器
@@ -85,7 +86,7 @@ echo "eula=true" > ~/minecraft-server/server/eula.txt
 ```properties
 motd=\u00a7b\u00a7lServer Name \u00a7r\u00a78| \u00a7aModpack Name
 server-port=25565
-online-mode=true          # 对于无需 Mojang 认证的局域网，设置为 false
+online-mode=true          # false 用于无需 Mojang 认证的局域网
 enforce-secure-profile=true  # 与 online-mode 匹配
 difficulty=hard            # 大多数模组包围绕困难难度平衡
 allow-flight=true          # 模组化必需（飞行坐骑/物品）
@@ -109,7 +110,7 @@ view-distance=8
 simulation-distance=4
 ```
 
-### 6. 调优 JVM 参数（user_jvm_args.txt）
+### 6. 调优 JVM 参数 (user_jvm_args.txt)
 根据玩家数量和模组数量调整 RAM。模组化的经验法则：
 - 100-200 个模组：6-12GB
 - 200-350+ 个模组：12-24GB
@@ -153,7 +154,7 @@ java @user_jvm_args.txt @libraries/net/neoforged/neoforge/<VERSION>/unix_args.tx
 EOF
 chmod +x ~/start-minecraft.sh
 ```
-注意：对于 Forge（非 NeoForge），参数文件路径不同。检查 `startserver.sh` 以获取确切路径。
+注意：对于 Forge（非 NeoForge），参数文件路径不同。检查 `startserver.sh` 获取确切路径。
 
 ### 9. 设置自动备份
 创建备份脚本：
@@ -188,15 +189,15 @@ chmod +x ~/minecraft-server/backup.sh
 (crontab -l 2>/dev/null | grep -v "minecraft/backup.sh"; echo "0 * * * * $HOME/minecraft-server/backup.sh >> $HOME/minecraft-server/backups/backup.log 2>&1") | crontab -
 ```
 
-## 常见问题
-- 对于模组化，**务必**设置 `allow-flight=true` — 否则带有喷气背包/飞行功能的模组会踢出玩家
+## 常见陷阱
+- 对于模组化服务器，**务必**设置 `allow-flight=true` — 否则带有喷气背包/飞行功能的模组会踢出玩家
 - `max-tick-time=180000` 或更高 — 模组化服务器在世界生成期间通常有较长的 tick
 - 首次启动**很慢**（大型包可能需要几分钟）— 不要惊慌
 - 首次启动时的 "Can't keep up!" 警告是正常的，初始区块生成后会稳定下来
 - 如果 online-mode=false，也要设置 enforce-secure-profile=false，否则客户端会被拒绝
 - 包的 startserver.sh 通常有自动重启循环 — 创建一个没有它的干净启动脚本
-- 删除 world/ 文件夹以使用新种子重新生成
-- 一些包有环境变量来控制行为（例如，ATM10 使用 ATM10_JAVA、ATM10_RESTART、ATM10_INSTALL_ONLY）
+- 删除 world/ 文件夹以使用新种子重新生成世界
+- 一些包有环境变量来控制行为（例如，ATM10 使用 ATM10_JAVA, ATM10_RESTART, ATM10_INSTALL_ONLY）
 
 ## 验证
 - `pgrep -fa neoforge` 或 `pgrep -fa minecraft` 检查是否在运行

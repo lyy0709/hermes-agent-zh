@@ -40,15 +40,15 @@ Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 
 职责：
 
-- 初始化 / 认证
-- 新建/加载/恢复/分支/列出/取消会话方法
+- 初始化 / 身份验证
+- 新建/加载/恢复/分叉/列出/取消会话方法
 - 提示词执行
 - 会话模型切换
 - 将同步 AIAgent 回调连接到 ACP 异步通知
 
 ### `SessionManager`
 
-`acp_adapter/session.py` 跟踪活跃的 ACP 会话。
+`acp_adapter/session.py` 跟踪活动的 ACP 会话。
 
 每个会话存储：
 
@@ -64,7 +64,7 @@ Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 - 创建
 - 获取
 - 移除
-- 分支
+- 分叉
 - 列出
 - 清理
 - cwd 更新
@@ -76,9 +76,8 @@ Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 桥接的回调：
 
 - `tool_progress_callback`
-- `thinking_callback`
+- `thinking_callback`（目前在 ACP 桥接中设置为 `None` —— 推理通过 `step_callback` 转发）
 - `step_callback`
-- `message_callback`
 
 因为 `AIAgent` 在工作线程中运行，而 ACP I/O 位于主事件循环上，所以桥接使用：
 
@@ -98,9 +97,9 @@ asyncio.run_coroutine_threadsafe(...)
 
 超时和桥接失败默认拒绝。
 
-### 工具渲染辅助函数
+### 工具渲染助手
 
-`acp_adapter/tools.py` 将 Hermes 工具映射到 ACP 工具种类，并构建面向编辑器的内容。
+`acp_adapter/tools.py` 将 Hermes 工具映射到 ACP 工具类型，并构建面向编辑器的内容。
 
 示例：
 
@@ -134,26 +133,26 @@ prompt(..., session_id)
 - 在可用时调用 `agent.interrupt()`
 - 导致提示词响应返回 `stop_reason="cancelled"`
 
-### 分支
+### 分叉
 
-`fork_session()` 将消息历史深度复制到一个新的活跃会话中，保留对话状态，同时为分支提供自己的会话 ID 和 cwd。
+`fork_session()` 将消息历史记录深拷贝到一个新的活动会话中，保留对话状态，同时为分叉会话提供自己的会话 ID 和 cwd。
 
-## 提供商/认证行为
+## 提供商/身份验证行为
 
-ACP 不实现自己的认证存储。
+ACP 不实现自己的身份验证存储。
 
-相反，它复用 Hermes 的运行时解析器：
+相反，它重用 Hermes 的运行时解析器：
 
 - `acp_adapter/auth.py`
 - `hermes_cli/runtime_provider.py`
 
-因此 ACP 会通告并使用当前配置的 Hermes 提供商/凭证。
+因此 ACP 会通告并使用当前配置的 Hermes 提供商/凭据。
 
 ## 工作目录绑定
 
 ACP 会话携带一个编辑器 cwd。
 
-会话管理器通过任务作用域的终端/文件覆盖，将该 cwd 绑定到 ACP 会话 ID，因此文件和终端工具相对于编辑器工作空间进行操作。
+会话管理器通过任务作用域的终端/文件覆盖，将该 cwd 绑定到 ACP 会话 ID，因此文件和终端工具相对于编辑器工作区进行操作。
 
 ## 重复的同名工具调用
 
@@ -166,12 +165,12 @@ ACP 会话携带一个编辑器 cwd。
 
 ## 审批回调恢复
 
-ACP 在提示词执行期间临时在终端工具上安装一个审批回调，然后在之后恢复之前的回调。这避免了将 ACP 会话特定的审批处理程序永久地全局安装。
+ACP 在提示词执行期间，会在终端工具上临时安装一个审批回调，然后在之后恢复之前的回调。这避免了将 ACP 会话特定的审批处理程序永久地全局安装。
 
 ## 当前限制
 
 - ACP 会话持久化到共享的 `~/.hermes/state.db` (SessionDB) 中，并在进程重启时透明地恢复；它们会出现在 `session_search` 中
-- 非文本提示词块当前在请求文本提取时被忽略
+- 非文本提示词块目前被忽略，不用于请求文本提取
 - 编辑器特定的 UX 因 ACP 客户端实现而异
 
 ## 相关文件

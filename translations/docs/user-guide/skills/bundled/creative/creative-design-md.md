@@ -19,33 +19,34 @@ description: "编写/验证/导出 Google 的 DESIGN"
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `design`, `design-system`, `tokens`, `ui`, `accessibility`, `wcag`, `tailwind`, `dtcg`, `google` |
 | 相关技能 | [`popular-web-designs`](/docs/user-guide/skills/bundled/creative/creative-popular-web-designs), [`claude-design`](/docs/user-guide/skills/bundled/creative/creative-claude-design), [`excalidraw`](/docs/user-guide/skills/bundled/creative/creative-excalidraw), [`architecture-diagram`](/docs/user-guide/skills/bundled/creative/creative-architecture-diagram) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # DESIGN.md 技能
 
 DESIGN.md 是 Google 用于向编码 Agent 描述视觉识别的开放规范（Apache-2.0，`google-labs-code/design.md`）。一个文件结合了：
 
-- **YAML 前言** — 机器可读的设计令牌（规范性值）
+- **YAML front matter** — 机器可读的设计令牌（规范性值）
 - **Markdown 正文** — 人类可读的原理说明，按规范章节组织
 
-令牌提供精确值。正文告诉 Agent *为什么* 存在这些值以及如何应用它们。CLI（`npx @google/design.md`）可以检查结构 + WCAG 对比度，比较版本以发现退化，并导出为 Tailwind 或 W3C DTCG JSON。
+令牌提供精确值。正文告诉 Agent 这些值*为何*存在以及如何应用它们。CLI（`npx @google/design.md`）可以检查结构 + WCAG 对比度，对比版本以发现回归问题，并导出为 Tailwind 或 W3C DTCG JSON。
 
 ## 何时使用此技能
 
-- 用户要求一个 DESIGN.md 文件、设计令牌或设计系统规范
+- 用户要求提供 DESIGN.md 文件、设计令牌或设计系统规范
 - 用户希望在多个项目或工具中保持一致的 UI/品牌
-- 用户粘贴了一个现有的 DESIGN.md 并要求检查、比较、导出或扩展它
-- 用户要求将样式指南转换为 Agent 可以使用的格式
-- 用户希望对其调色板进行对比度 / WCAG 可访问性验证
+- 用户粘贴了一个现有的 DESIGN.md 并要求检查、对比、导出或扩展它
+- 用户要求将风格指南转换为 Agent 可以使用的格式
+- 用户希望对他们的调色板进行对比度 / WCAG 可访问性验证
 
-对于纯粹的视觉灵感或布局示例，请改用 `popular-web-designs`。对于从头开始设计一次性 HTML 工件（原型、演示文稿、落地页、组件实验室）时的*流程和品味*，请使用 `claude-design`。此技能用于*正式的规范文件*本身。
+对于纯粹的视觉灵感或布局示例，请改用 `popular-web-designs`。对于从头开始设计一次性 HTML 工件（原型、演示文稿、落地页、组件实验室）时的*流程和品味*，请使用 `claude-design`。此技能用于*规范文件本身*。
 
 ## 文件结构
 
@@ -133,13 +134,13 @@ Public Sans for everything except small all-caps labels...
 
 ## 工作流：编写新的 DESIGN.md
 
-1.  **询问用户**（或推断）品牌调性、强调色和排版方向。如果他们提供了网站、图片或氛围描述，请将其转换为上述令牌结构。
-2.  使用 `write_file` 在项目根目录下**编写 `DESIGN.md`**。始终包含 `name:` 和 `colors:`；其他章节可选但鼓励添加。
+1.  **询问用户**（或推断）品牌基调、强调色和排版方向。如果他们提供了网站、图片或氛围描述，请将其转换为上述令牌结构。
+2.  使用 `write_file` 在项目根目录**编写 `DESIGN.md`**。始终包含 `name:` 和 `colors:`；其他部分可选但鼓励添加。
 3.  在 `components:` 部分**使用令牌引用**（`{colors.primary}`），而不是重新输入十六进制值。保持调色板单一来源。
 4.  **检查它**（见下文）。在返回之前修复任何损坏的引用或 WCAG 失败。
 5.  **如果用户有现有项目**，也请在文件旁边写入 Tailwind 或 DTCG 导出（`tailwind.theme.json`, `tokens.json`）。
 
-## 工作流：检查 / 比较 / 导出
+## 工作流：检查 / 对比 / 导出
 
 CLI 是 `@google/design.md`（Node）。使用 `npx` — 无需全局安装。
 
@@ -147,7 +148,7 @@ CLI 是 `@google/design.md`（Node）。使用 `npx` — 无需全局安装。
 # 验证结构 + 令牌引用 + WCAG 对比度
 npx -y @google/design.md lint DESIGN.md
 
-# 比较两个版本，在退化时失败（退出码 1 = 退化）
+# 比较两个版本，在回归时失败（退出码 1 = 回归）
 npx -y @google/design.md diff DESIGN.md DESIGN-v2.md
 
 # 导出为 Tailwind 主题 JSON
@@ -162,7 +163,7 @@ npx -y @google/design.md spec --rules-only --format json
 
 所有命令都接受 `-` 表示标准输入。`lint` 在出错时返回退出码 1。如果需要结构化地报告发现的问题，请使用 `--format json` 标志并解析输出。
 
-### 检查规则参考（7条规则捕获的内容）
+### 检查规则参考（7 条规则捕获的内容）
 
 - `broken-ref`（错误） — `{colors.missing}` 指向不存在的令牌
 - `duplicate-section`（错误） — 相同的 `## Heading` 出现两次
@@ -176,8 +177,8 @@ npx -y @google/design.md spec --rules-only --format json
 
 -   **不要嵌套组件变体。** `button-primary.hover` 是错误的；作为同级键的 `button-primary-hover` 是正确的。
 -   **十六进制颜色必须是带引号的字符串。** 否则 YAML 会因 `#` 而解析失败，或错误地截断像 `#1A1C1E` 这样的值。
--   **负尺寸也需要引号。** `letterSpacing: -0.02em` 会被解析为 YAML 流 — 应写为 `letterSpacing: "-0.02em"`。
--   **章节顺序是强制性的。** 如果用户以随机顺序提供正文，请在保存前将其重新排序以匹配规范列表。
+-   **负尺寸也需要引号。** `letterSpacing: -0.02em` 会被解析为 YAML 流 — 应写作 `letterSpacing: "-0.02em"`。
+-   **章节顺序是强制性的。** 如果用户以随机顺序提供了正文，请在保存前将其重新排序以匹配规范列表。
 -   **`version: alpha` 是当前的规范版本**（截至 2026 年 4 月）。该规范标记为 alpha — 注意破坏性变更。
 -   **令牌引用通过点路径解析。** `{colors.primary}` 有效；`{primary}` 无效。
 

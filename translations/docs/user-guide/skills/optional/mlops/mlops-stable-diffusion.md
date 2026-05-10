@@ -20,6 +20,7 @@ description: "通过 HuggingFace Diffusers 使用 Stable Diffusion 模型进行�
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `diffusers>=0.30.0`, `transformers>=4.41.0`, `accelerate>=0.31.0`, `torch>=2.0.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `图像生成`, `Stable Diffusion`, `Diffusers`, `文生图`, `多模态`, `计算机视觉` |
 
 ## 参考：完整的 SKILL.md
@@ -46,11 +47,11 @@ description: "通过 HuggingFace Diffusers 使用 Stable Diffusion 模型进行�
 - **文生图**：根据自然语言提示词生成图像
 - **图生图**：在文本引导下转换现有图像
 - **图像修复**：用上下文感知的内容填充遮罩区域
-- **ControlNet**：添加空间条件（边缘、姿态、深度）
-- **LoRA 支持**：高效的微调和风格适应
+- **ControlNet**：添加空间条件控制（边缘、姿态、深度）
+- **LoRA 支持**：高效的微调和风格适配
 - **多模型**：支持 SD 1.5、SDXL、SD 3.0、Flux
 
-**改用替代方案的情况：**
+**改用其他方案的情况：**
 - **DALL-E 3**：用于无需 GPU 的基于 API 的生成
 - **Midjourney**：用于艺术化、风格化的输出
 - **Imagen**：用于 Google Cloud 集成
@@ -120,12 +121,12 @@ Diffusers 围绕三个核心组件构建：
 
 <!-- ascii-guard-ignore -->
 ```
-Pipeline (编排)
-├── Model (神经网络)
-│   ├── UNet / Transformer (噪声预测)
-│   ├── VAE (潜在编码/解码)
-│   └── Text Encoder (CLIP/T5)
-└── Scheduler (去噪算法)
+流水线（编排）
+├── 模型（神经网络）
+│   ├── UNet / Transformer（噪声预测）
+│   ├── VAE（潜在编码/解码）
+│   └── 文本编码器（CLIP/T5）
+└── 调度器（去噪算法）
 ```
 <!-- ascii-guard-ignore-end -->
 
@@ -134,7 +135,7 @@ Pipeline (编排)
 ```
 文本提示词 → 文本编码器 → 文本嵌入
                                     ↓
-随机噪声 → [去噪循环] ← Scheduler
+随机噪声 → [去噪循环] ← 调度器
                       ↓
                预测噪声
                       ↓
@@ -149,10 +150,10 @@ Pipeline (编排)
 
 | 流水线 | 用途 |
 |----------|---------|
-| `StableDiffusionPipeline` | 文生图 (SD 1.x/2.x) |
-| `StableDiffusionXLPipeline` | 文生图 (SDXL) |
-| `StableDiffusion3Pipeline` | 文生图 (SD 3.0) |
-| `FluxPipeline` | 文生图 (Flux 模型) |
+| `StableDiffusionPipeline` | 文生图（SD 1.x/2.x） |
+| `StableDiffusionXLPipeline` | 文生图（SDXL） |
+| `StableDiffusion3Pipeline` | 文生图（SD 3.0） |
+| `FluxPipeline` | 文生图（Flux 模型） |
 | `StableDiffusionImg2ImgPipeline` | 图生图 |
 | `StableDiffusionInpaintPipeline` | 图像修复 |
 
@@ -166,7 +167,7 @@ Pipeline (编排)
 | `EulerAncestralDiscreteScheduler` | 20-50 | 良好 | 更多变化 |
 | `DPMSolverMultistepScheduler` | 15-25 | 优秀 | 快速、高质量 |
 | `DDIMScheduler` | 50-100 | 良好 | 确定性 |
-| `LCMScheduler` | 4-8 | 良好 | 非常快 |
+| `LCMScheduler` | 4-8 | 良好 | 非常快速 |
 | `UniPCMultistepScheduler` | 15-25 | 优秀 | 快速收敛 |
 
 ### 切换调度器
@@ -195,7 +196,7 @@ image = pipe(prompt, num_inference_steps=20).images[0]
 | `guidance_scale` | 7.5 | 提示词遵循度（通常 7-12） |
 | `height`, `width` | 512/1024 | 输出尺寸（8 的倍数） |
 | `generator` | None | 用于可重现性的 Torch 生成器 |
-| `num_images_per_prompt` | 1 | 批次大小 |
+| `num_images_per_prompt` | 1 | 批处理大小 |
 ### 可复现生成
 
 ```python
@@ -243,7 +244,7 @@ image = pipe(
 ).images[0]
 ```
 
-## 图像修复
+## 局部重绘
 
 填充遮罩区域：
 
@@ -257,7 +258,7 @@ pipe = AutoPipelineForInpainting.from_pretrained(
 ).to("cuda")
 
 image = Image.open("photo.jpg")
-mask = Image.open("mask.png")  # 白色 = 修复区域
+mask = Image.open("mask.png")  # 白色 = 重绘区域
 
 result = pipe(
     prompt="A red car parked on the street",
@@ -448,7 +449,7 @@ images = pipe(
 from diffusers import StableDiffusionXLPipeline, DPMSolverMultistepScheduler
 import torch
 
-# 1. 加载优化后的 SDXL
+# 1. 加载 SDXL 并进行优化
 pipe = StableDiffusionXLPipeline.from_pretrained(
     "stabilityai/stable-diffusion-xl-base-1.0",
     torch_dtype=torch.float16,
@@ -481,7 +482,7 @@ pipe = AutoPipelineForText2Image.from_pretrained(
     torch_dtype=torch.float16
 ).to("cuda")
 
-# 加载用于快速生成的 LCM LoRA
+# 加载 LCM LoRA 以实现快速生成
 pipe.load_lora_weights("latent-consistency/lcm-lora-sdxl")
 pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
 pipe.fuse_lora()
@@ -526,7 +527,7 @@ pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
 image = pipe(prompt, num_inference_steps=20).images[0]
 ```
 
-## 参考文档
+## 参考
 
 - **[高级用法](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/stable-diffusion/references/advanced-usage.md)** - 自定义流水线、微调、部署
 - **[故障排除](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/stable-diffusion/references/troubleshooting.md)** - 常见问题与解决方案
@@ -534,6 +535,6 @@ image = pipe(prompt, num_inference_steps=20).images[0]
 ## 资源
 
 - **文档**: https://huggingface.co/docs/diffusers
-- **代码仓库**: https://github.com/huggingface/diffusers
+- **仓库**: https://github.com/huggingface/diffusers
 - **模型中心**: https://huggingface.co/models?library=diffusers
 - **Discord**: https://discord.gg/diffusers

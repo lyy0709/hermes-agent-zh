@@ -19,6 +19,7 @@ description: "调试 Node"
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `debugging`, `nodejs`, `node-inspect`, `cdp`, `breakpoints`, `ui-tui` |
 | 相关技能 | [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`python-debugpy`](/docs/user-guide/skills/bundled/software-development/software-development-python-debugpy), [`debugging-hermes-tui-commands`](/docs/user-guide/skills/bundled/software-development/software-development-debugging-hermes-tui-commands) |
 
@@ -41,12 +42,12 @@ description: "调试 Node"
 
 **首选 `node inspect`。** 它始终可用且 REPL 速度快。
 
-## 何时使用
+## 使用时机
 
 - Node 测试失败，你需要查看中间状态
 - ui-tui 崩溃或行为异常，你想在渲染前检查 React/Ink 状态
 - tui_gateway 子进程（`_SlashWorker`、PTY 桥接工作进程）行为异常
-- 你需要检查闭包中的某个值，而 `console.log` 在不打补丁的情况下无法访问
+- 你需要检查闭包中的一个值，而 `console.log` 在不打补丁的情况下无法访问
 - 性能：附加到正在运行的进程以捕获 CPU 性能分析或堆快照
 
 **不要用于：** `console.log` 能在一分钟内解决的问题。断点驱动的调试更重量级；在回报真实存在时使用它。
@@ -69,7 +70,7 @@ node --inspect-brk $(which tsx) path/to/script.ts
 | `n` 或 `next` | 步过 |
 | `s` 或 `step` | 步入 |
 | `o` 或 `out` | 步出 |
-| `pause` | 暂停正在运行的代码 |
+| `pause` | 暂停运行中的代码 |
 | `sb('file.js', 42)` | 在 file.js 第 42 行设置断点 |
 | `sb(42)` | 在当前文件的第 42 行设置断点 |
 | `sb('functionName')` | 在函数被调用时中断 |
@@ -89,7 +90,7 @@ node --inspect-brk $(which tsx) path/to/script.ts
 
 ## 附加到正在运行的进程
 
-当进程已在运行时（例如长期运行的开发服务器或 TUI 消息网关）：
+当进程已在运行时（例如，长期运行的开发服务器或 TUI 消息网关）：
 
 ```bash
 # 1. 向现有进程发送 SIGUSR1 以启用检查器
@@ -105,7 +106,7 @@ node inspect ws://127.0.0.1:9229/<uuid>
 从一开始就启动带检查器的进程：
 
 ```bash
-node --inspect script.js           # 监听 127.0.0.1:9229，继续运行
+node --inspect script.js           # 监听 127.0.0.1:9229，保持运行
 node --inspect-brk script.js       # 监听并在第一行暂停
 node --inspect=0.0.0.0:9230 script.js   # 自定义主机:端口
 ```
@@ -120,7 +121,7 @@ node --inspect-brk -r tsx/cjs script.ts
 
 ## 编程式 CDP（从终端编写脚本）
 
-当你想自动化时——设置多个断点、捕获作用域状态、编写重现脚本——使用 `chrome-remote-interface`：
+当你想要自动化 — 设置多个断点、捕获作用域状态、编写重现脚本 — 使用 `chrome-remote-interface`：
 
 ```bash
 npm i -g chrome-remote-interface        # 或项目本地安装
@@ -128,7 +129,7 @@ npm i -g chrome-remote-interface        # 或项目本地安装
 node --inspect-brk=9229 target.js &
 ```
 
-驱动程序脚本（保存为 `/tmp/cdp-debug.js`）：
+驱动脚本（保存为 `/tmp/cdp-debug.js`）：
 
 ```javascript
 const CDP = require('chrome-remote-interface');
@@ -141,7 +142,7 @@ const CDP = require('chrome-remote-interface');
     const top = callFrames[0];
     console.log(`PAUSED: ${reason} @ ${top.url}:${top.location.lineNumber + 1}`);
 
-    // 遍历作用域以获取局部变量
+    // 遍历作用域获取局部变量
     for (const scope of top.scopeChain) {
       if (scope.type === 'local' || scope.type === 'closure') {
         const { result } = await Runtime.getProperties({
@@ -201,13 +202,13 @@ TUI 使用 Ink + tsx 构建。两种常见场景：
 
 ```bash
 cd /home/bb/hermes-agent/ui-tui
-npm run build    # 生成一次 dist/，这样首次加载时就不需要转译
+npm run build    # 生成一次 dist/，这样第一次加载时就不需要转译
 node --inspect-brk dist/entry.js
-# 在另一个终端中：
+# 在另一个终端：
 node inspect -p <node pid>
 ```
 
-然后在 `debug>` 内部：
+然后在 `debug>` 内：
 
 ```
 sb('dist/app.js', 220)     # 或可疑渲染所在的任何位置
@@ -235,11 +236,11 @@ curl -s http://127.0.0.1:9229/json/list | jq -r '.[0].webSocketDebuggerUrl'
 node inspect ws://127.0.0.1:9229/<uuid>
 ```
 
-与 TUI 交互（在其窗口中输入）会继续推进执行；你的调试器可以在任何 `sb(...)` 断点处暂停它。
+与 TUI 交互（在其窗口中输入）会继续推进执行；你的调试器可以在任何 `sb(...)` 的断点处暂停它。
 
 ### 调试 `_SlashWorker` / PTY 子进程
 
-那些是 Python，不是 Node —— 对它们使用 `python-debugpy` 技能。只有 Node 部分（Ink UI、tui_gateway 客户端、`ui-tui/` 下的 tsx-run 测试）使用此技能。
+那些是 Python，不是 Node — 对它们使用 `python-debugpy` 技能。只有 Node 部分（Ink UI、tui_gateway 客户端、`ui-tui/` 下的 tsx-run 测试）使用此技能。
 
 ## 在调试器下运行 Vitest 测试
 
@@ -251,7 +252,7 @@ node --inspect-brk ./node_modules/vitest/vitest.mjs run --no-file-parallelism sr
 
 在另一个终端中：`node inspect -p <pid>`，然后 `sb('src/app/foo.tsx', 42)`，`cont`。
 
-使用 `--no-file-parallelism` (vitest) 或 `--runInBand` (jest) 以便只存在一个工作进程 —— 调试一个进程池很痛苦。
+使用 `--no-file-parallelism` (vitest) 或 `--runInBand` (jest) 以便只存在一个工作进程 — 调试一个进程池很痛苦。
 
 ## 堆快照和 CPU 性能分析（非交互式）
 
@@ -264,7 +265,7 @@ await client.Profiler.start();
 await new Promise(r => setTimeout(r, 5000));
 const { profile } = await client.Profiler.stop();
 require('fs').writeFileSync('/tmp/cpu.cpuprofile', JSON.stringify(profile));
-// 在 Chrome DevTools → Performance 标签页中打开 /tmp/cpu.cpuprofile
+// 在 Chrome DevTools → 性能标签页中打开 /tmp/cpu.cpuprofile
 ```
 
 ```javascript
@@ -278,9 +279,9 @@ require('fs').writeFileSync('/tmp/heap.heapsnapshot', chunks.join(''));
 
 ## 常见陷阱
 
-1.  **TS 源代码中的行号错误。** 断点命中的是编译后的 JS，而不是 `.ts`。要么 (a) 在构建的 `dist/*.js` 中中断，要么 (b) 启用源映射（`node --enable-source-maps`）并使用 `sb('src/app.tsx', N)` —— 但仅限于遵循源映射的 CDP 客户端。`node inspect` CLI 不遵循。
+1.  **TS 源代码中的行号错误。** 断点命中的是编译后的 JS，而不是 `.ts`。要么 (a) 在构建的 `dist/*.js` 中中断，要么 (b) 启用源映射（`node --enable-source-maps`）并使用 `sb('src/app.tsx', N)` — 但仅限于遵循源映射的 CDP 客户端。`node inspect` CLI 不遵循。
 
-2.  **`--inspect` 与 `--inspect-brk`。** `--inspect` 启动检查器但不暂停；如果你附加得太晚，你的脚本会在你设置第一个断点之前就运行过去了。当需要在任何代码运行之前设置断点时，使用 `--inspect-brk`。
+2.  **`--inspect` 与 `--inspect-brk`。** `--inspect` 启动检查器但不暂停；如果你附加得太晚，你的脚本会在你设置第一个断点之前就运行过去了。当你在任何代码运行之前需要设置断点时，使用 `--inspect-brk`。
 
 3.  **端口冲突。** 默认是 `9229`。如果多个 Node 进程都在检查，传递 `--inspect=0`（随机端口）并从 `/json/list` 读取实际的 URL：
     ```bash
@@ -289,9 +290,9 @@ require('fs').writeFileSync('/tmp/heap.heapsnapshot', chunks.join(''));
 
 4.  **子进程。** 父进程上的 `--inspect` 不会检查其子进程。使用 `NODE_OPTIONS='--inspect-brk' node parent.js` 传播到每个子进程；注意它们都需要唯一的端口（当 `NODE_OPTIONS='--inspect'` 被继承时，Node 会自动递增）。
 
-5.  **后台终止。** 如果你在目标暂停时按 `Ctrl+C` 退出 `node inspect`，目标将保持暂停状态。要么先 `cont`，要么显式 `kill` 目标。
+5.  **后台终止。** 如果你在目标暂停时按 `Ctrl+C` 退出 `node inspect`，目标会保持暂停状态。要么先 `cont`，要么显式 `kill` 目标。
 
-6.  **通过 Agent 终端运行 `node inspect`。** 它是一个支持 PTY 的 REPL。在 Hermes 中，使用 `terminal(pty=true)` 或 `background=true` + `process(action='submit', data='...')` 启动它。非 PTY 前台模式适用于一次性命令，但不适用于交互式单步执行。
+6.  **通过 Agent 终端运行 `node inspect`。** 它是一个 PTY 友好的 REPL。在 Hermes 中，使用 `terminal(pty=true)` 或 `background=true` + `process(action='submit', data='...')` 启动它。非 PTY 前台模式适用于一次性命令，但不适用于交互式单步执行。
 
 7.  **安全性。** `--inspect=0.0.0.0:9229` 暴露了任意代码执行。始终绑定到 `127.0.0.1`（默认值），除非你有一个隔离的网络。
 
@@ -327,7 +328,7 @@ debug> cont
 debug> bt
 ```
 
-**“这个异步链挂起了——在哪里？”**
+**“这个异步链挂起了 — 在哪里？”**
 ```
 # 使用 --inspect（不带 -brk）启动，让它运行到挂起，然后：
 debug> pause

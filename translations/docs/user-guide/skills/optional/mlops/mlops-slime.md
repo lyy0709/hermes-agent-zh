@@ -1,25 +1,26 @@
 ---
-title: "Slime Rl Training — 提供使用 slime（一个 Megatron+SGLang 框架）进行 LLM 强化学习后训练的指导"
+title: "Slime Rl Training — 提供使用 slime（一个 Megatron+SGLang 框架）进行 LLM 强化学习后训练的指南"
 sidebar_label: "Slime Rl Training"
-description: "提供使用 slime（一个 Megatron+SGLang 框架）进行 LLM 强化学习后训练的指导"
+description: "提供使用 slime（一个 Megatron+SGLang 框架）进行 LLM 强化学习后训练的指南"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Slime Rl Training
 
-提供使用 slime（一个 Megatron+SGLang 框架）进行 LLM 强化学习后训练的指导。适用于训练 GLM 模型、实现自定义数据生成工作流，或需要紧密的 Megatron-LM 集成以进行 RL 扩展的场景。
+提供使用 slime（一个 Megatron+SGLang 框架）进行 LLM 强化学习后训练的指南。适用于训练 GLM 模型、实现自定义数据生成工作流，或需要紧密的 Megatron-LM 集成以进行 RL 扩展的场景。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | Optional — 使用 `hermes skills install official/mlops/slime` 安装 |
+| 来源 | 可选 — 使用 `hermes skills install official/mlops/slime` 安装 |
 | 路径 | `optional-skills/mlops/slime` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `sglang-router>=0.2.3`, `ray`, `torch>=2.0.0`, `transformers>=4.40.0` |
+| 平台 | linux, macos |
 | 标签 | `Reinforcement Learning`, `Megatron-LM`, `SGLang`, `GRPO`, `Post-Training`, `GLM` |
 
 ## 参考：完整的 SKILL.md
@@ -34,13 +35,13 @@ slime 是清华大学 THUDM 团队推出的 LLM 后训练框架，为 GLM-4.5、
 
 ## 何时使用 slime
 
-**在以下情况选择 slime：**
+**在以下情况下选择 slime：**
 - 需要原生 Megatron-LM 训练与 SGLang 推理
 - 需要具有灵活数据缓冲区的自定义数据生成工作流
 - 训练 GLM、Qwen3、DeepSeek V3 或 Llama 3 模型
 - 需要研究级框架并具备生产支持（Z.ai）
 
-**在以下情况考虑替代方案：**
+**在以下情况下考虑替代方案：**
 - 需要企业级稳定性功能 → 使用 **miles**
 - 希望灵活切换后端 → 使用 **verl**
 - 需要 PyTorch 原生抽象 → 使用 **torchforge**
@@ -52,7 +53,7 @@ slime 是清华大学 THUDM 团队推出的 LLM 后训练框架，为 GLM-4.5、
 - **数据缓冲区**：灵活的提示词管理和样本存储
 - **模型**：GLM-4.x、Qwen3、DeepSeek V3/R1、Llama 3
 
-## 架构概览
+## 架构概述
 
 <!-- ascii-guard-ignore -->
 ```
@@ -80,7 +81,7 @@ docker pull slimerl/slime:latest
 docker run --rm --gpus all --ipc=host --shm-size=16g \
   -it slimerl/slime:latest /bin/bash
 
-# 容器内
+# 在容器内
 cd /root/slime && pip install -e . --no-deps
 ```
 
@@ -231,7 +232,7 @@ python train_async.py \
 ```python
 # custom_generate.py
 async def custom_generate(args, samples, evaluation=False):
-    """带工具调用的多轮生成。"""
+    """具有工具调用的多轮生成。"""
     for sample in samples:
         conversation = sample.prompt
 
@@ -341,7 +342,7 @@ class RolloutDataSource:
         pass
 ```
 
-### 带缓冲区的数据源（离策略）
+### 缓冲数据源（离策略）
 
 ```python
 class RolloutDataSourceWithBuffer(RolloutDataSource):
@@ -392,7 +393,7 @@ class RolloutDataSourceWithBuffer(RolloutDataSource):
 
 ### 问题：训练期间 OOM
 
-**症状**：反向传播时出现 CUDA OOM
+**症状**：反向传播期间出现 CUDA OOM
 
 **解决方案**：
 ```bash

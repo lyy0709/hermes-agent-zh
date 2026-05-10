@@ -8,7 +8,7 @@ description: "高级 PyTorch 框架，提供 Trainer 类、自动分布式训练
 
 # PyTorch Lightning
 
-高级 PyTorch 框架，提供 Trainer 类、自动分布式训练（DDP/FSDP/DeepSpeed）、回调系统，并最大程度减少样板代码。使用相同的代码，可从笔记本电脑扩展到超级计算机。当您希望使用内置最佳实践构建简洁的训练循环时，请使用此框架。
+高级 PyTorch 框架，提供 Trainer 类、自动分布式训练（DDP/FSDP/DeepSpeed）、回调系统，并最大程度减少样板代码。使用相同代码即可从笔记本电脑扩展到超级计算机。当你希望使用内置最佳实践构建简洁的训练循环时，请使用此框架。
 
 ## 技能元数据
 
@@ -20,12 +20,13 @@ description: "高级 PyTorch 框架，提供 Trainer 类、自动分布式训练
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `lightning`, `torch`, `transformers` |
+| 平台 | linux, macos, windows |
 | 标签 | `PyTorch Lightning`, `Training Framework`, `Distributed Training`, `DDP`, `FSDP`, `DeepSpeed`, `High-Level API`, `Callbacks`, `Best Practices`, `Scalable` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # PyTorch Lightning - 高级训练框架
@@ -34,12 +35,12 @@ description: "高级 PyTorch 框架，提供 Trainer 类、自动分布式训练
 
 PyTorch Lightning 组织 PyTorch 代码，以消除样板代码，同时保持灵活性。
 
-**安装**：
+**安装**:
 ```bash
 pip install lightning
 ```
 
-**将 PyTorch 转换为 Lightning**（3 个步骤）：
+**将 PyTorch 转换为 Lightning**（3 个步骤）:
 
 ```python
 import lightning as L
@@ -47,7 +48,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-# 步骤 1：定义 LightningModule（组织您的 PyTorch 代码）
+# 步骤 1: 定义 LightningModule（组织你的 PyTorch 代码）
 class LitModel(L.LightningModule):
     def __init__(self, hidden_size=128):
         super().__init__()
@@ -67,10 +68,10 @@ class LitModel(L.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=1e-3)
 
-# 步骤 2：创建数据
+# 步骤 2: 创建数据
 train_loader = DataLoader(train_dataset, batch_size=32)
 
-# 步骤 3：使用 Trainer 进行训练（处理其他所有事情！）
+# 步骤 3: 使用 Trainer 进行训练（处理其他所有事情！）
 trainer = L.Trainer(max_epochs=10, accelerator='gpu', devices=2)
 model = LitModel()
 trainer.fit(model, train_loader)
@@ -89,7 +90,7 @@ trainer.fit(model, train_loader)
 
 ### 工作流 1：从 PyTorch 到 Lightning
 
-**原始 PyTorch 代码**：
+**原始 PyTorch 代码**:
 ```python
 model = MyModel()
 optimizer = torch.optim.Adam(model.parameters())
@@ -104,7 +105,7 @@ for epoch in range(max_epochs):
         optimizer.step()
 ```
 
-**Lightning 版本**：
+**Lightning 版本**:
 ```python
 class LitModel(L.LightningModule):
     def __init__(self):
@@ -186,7 +187,7 @@ trainer = L.Trainer(
 trainer.fit(model, train_loader)
 ```
 
-**启动**：
+**启动**:
 ```bash
 # 单条命令，Lightning 处理其余部分
 python train.py
@@ -228,7 +229,7 @@ trainer.fit(model, train_loader, val_loader)
 ```
 
 **结果**：
-- 自动保存最佳 3 个模型
+- 自动保存最好的 3 个模型
 - 如果 5 个 epoch 没有改进则提前停止
 - 将学习率记录到 TensorBoard
 
@@ -262,9 +263,9 @@ trainer = L.Trainer(max_epochs=100)
 trainer.fit(model, train_loader)
 ```
 
-## 何时使用与替代方案
+## 何时使用与替代方案对比
 
-**在以下情况下使用 PyTorch Lightning**：
+**在以下情况使用 PyTorch Lightning**：
 - 希望代码简洁、有组织
 - 需要生产就绪的训练循环
 - 在单 GPU、多 GPU、TPU 之间切换
@@ -274,11 +275,11 @@ trainer.fit(model, train_loader)
 **主要优势**：
 - **有组织**：将研究代码与工程代码分离
 - **自动化**：一行代码实现 DDP、FSDP、DeepSpeed
-- **回调**：模块化训练扩展
-- **可重现**：更少的样板代码 = 更少的错误
-- **经过测试**：每月 100 万+ 下载量，久经考验
+- **回调**：模块化的训练扩展
+- **可复现**：更少的样板代码 = 更少的错误
+- **经过测试**：每月 100 万+ 下载，久经考验
 
-**改用替代方案**：
+**改用替代方案的情况**：
 - **Accelerate**：对现有代码改动最小，更灵活
 - **Ray Train**：多节点编排，超参数调优
 - **原始 PyTorch**：最大控制权，学习目的
@@ -320,20 +321,20 @@ trainer.fit(model, train_loader)
 trainer.fit(model, train_loader, val_loader)
 ```
 
-**问题：DDP 意外生成多个进程**
+**问题：DDP 意外产生多个进程**
 
-Lightning 自动检测 GPU。显式设置设备：
+Lightning 自动检测 GPU。显式设置 devices：
 ```python
 # 首先在 CPU 上测试
 trainer = L.Trainer(accelerator='cpu', devices=1)
 
-# 然后使用 GPU
+# 然后在 GPU 上
 trainer = L.Trainer(accelerator='gpu', devices=1)
 ```
 
 ## 高级主题
 
-**回调**：有关 EarlyStopping、ModelCheckpoint、自定义回调和回调钩子的信息，请参阅 [references/callbacks.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/pytorch-lightning/references/callbacks.md)。
+**回调**：有关 EarlyStopping、ModelCheckpoint、自定义回调以及回调钩子的信息，请参阅 [references/callbacks.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/pytorch-lightning/references/callbacks.md)。
 
 **分布式策略**：有关 DDP、FSDP、DeepSpeed ZeRO 集成、多节点设置的信息，请参阅 [references/distributed.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/pytorch-lightning/references/distributed.md)。
 
@@ -350,7 +351,7 @@ trainer = L.Trainer(accelerator='gpu', devices=1)
 
 **精度选项**：
 - FP32（默认）
-- FP16（V100，旧款 GPU）
+- FP16（V100，旧 GPU）
 - BF16（A100/H100，推荐）
 - FP8（H100）
 

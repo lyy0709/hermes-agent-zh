@@ -1,14 +1,14 @@
 ---
-title: "Openhue — 通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间"
+title: "Openhue — 通过 OpenHue CLI 控制 Philips Hue 灯、场景和房间"
 sidebar_label: "Openhue"
-description: "通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间"
+description: "通过 OpenHue CLI 控制 Philips Hue 灯、场景和房间"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Openhue
 
-通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间。
+通过 OpenHue CLI 控制 Philips Hue 灯、场景和房间。
 
 ## 技能元数据
 
@@ -19,17 +19,18 @@ description: "通过 OpenHue CLI 控制 Philips Hue 灯、场景、房间"
 | 版本 | `1.0.0` |
 | 作者 | community |
 | 许可证 | MIT |
+| 支持平台 | linux, macos, windows |
 | 标签 | `Smart-Home`, `Hue`, `Lights`, `IoT`, `Automation` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # OpenHue CLI
 
-通过终端控制 Hue Bridge 上的 Philips Hue 灯和场景。
+通过终端从 Hue Bridge 控制 Philips Hue 灯和场景。
 
 ## 先决条件
 
@@ -41,7 +42,7 @@ curl -sL https://github.com/openhue/openhue-cli/releases/latest/download/openhue
 brew install openhue/cli/openhue-cli
 ```
 
-首次运行需要按下 Hue Bridge 上的按钮进行配对。Bridge 必须与运行 Hermes 的机器在同一本地网络中。
+首次运行需要按下 Hue Bridge 上的按钮进行配对。Bridge 必须与运行 Hermes 的机器在同一本地网络。
 
 ## 使用场景
 
@@ -116,8 +117,8 @@ openhue set room "Living Room" --off
 
 ## 注意事项
 
-- Bridge 必须与运行 Hermes 的机器在同一本地网络中
+- Bridge 必须与运行 Hermes 的机器在同一本地网络
 - 首次运行需要物理按下 Hue Bridge 上的按钮进行授权
-- 颜色功能仅适用于支持彩色的灯泡（非纯白型号）
+- 颜色功能仅适用于支持彩色的灯泡（不适用于纯白型号）
 - 灯和房间名称区分大小写 — 使用 `openhue get light` 检查确切名称
-- 非常适合与定时任务结合，实现计划照明（例如，睡前调暗，起床时调亮）
+- 非常适合与定时任务（cron jobs）结合使用，实现定时照明（例如，睡前调暗，起床时调亮）

@@ -19,6 +19,7 @@ Linear：通过 GraphQL + curl 管理问题、项目和团队。
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `Linear`, `Project Management`, `Issues`, `GraphQL`, `API`, `Productivity` |
 
 ## 参考：完整的 SKILL.md
@@ -29,18 +30,18 @@ Linear：通过 GraphQL + curl 管理问题、项目和团队。
 
 # Linear — 问题与项目管理
 
-直接通过 GraphQL API 使用 `curl` 管理 Linear 的问题、项目和团队。无需 MCP 服务器，无需 OAuth 流程，无需额外依赖。
+使用 `curl` 通过 GraphQL API 直接管理 Linear 的问题、项目和团队。无需 MCP 服务器，无需 OAuth 流程，无需额外依赖。
 
 ## 设置
 
-1.  从 **Linear 设置 > 账户 > 安全与访问 > 个人 API 密钥**（URL：https://linear.app/settings/account/security）获取个人 API 密钥。注意：组织级别的*设置 > API* 页面仅显示 OAuth 应用和工作区成员密钥，不显示个人密钥。
-2.  在你的环境中设置 `LINEAR_API_KEY`（通过 `hermes setup` 或你的环境配置）
+1.  从 **Linear 设置 > 账户 > 安全与访问 > 个人 API 密钥**（URL：https://linear.app/settings/account/security）获取个人 API 密钥。注意：组织级别的*设置 > API*页面仅显示 OAuth 应用和工作区成员密钥，不显示个人密钥。
+2.  在您的环境中设置 `LINEAR_API_KEY`（通过 `hermes setup` 或您的环境配置）
 
 ## API 基础
 
 -   **端点：** `https://api.linear.app/graphql` (POST)
 -   **认证头：** `Authorization: $LINEAR_API_KEY`（API 密钥无需 "Bearer" 前缀）
--   **所有请求均为 POST**，附带 `Content-Type: application/json`
+-   **所有请求均为 POST**，并附带 `Content-Type: application/json`
 -   **UUID 和短标识符**（例如 `ENG-123`）都适用于 `issue(id:)`
 
 基础 curl 模式：
@@ -53,7 +54,7 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ## Python 辅助脚本（更符合人体工学的替代方案）
 
-对于不需要手写 GraphQL 的快速单行命令，此技能附带了一个位于 `scripts/linear_api.py` 的标准库 Python CLI。零依赖。使用相同的认证（读取 `LINEAR_API_KEY`）。
+为了更快的单行命令，无需手写 GraphQL，此技能附带了一个位于 `scripts/linear_api.py` 的标准库 Python CLI。零依赖。相同的认证（读取 `LINEAR_API_KEY`）。
 
 ```bash
 SCRIPT=$(dirname "$(find ~/.hermes -path '*skills/productivity/linear/scripts/linear_api.py' 2>/dev/null | head -1)")/linear_api.py
@@ -67,7 +68,7 @@ python3 "$SCRIPT" raw 'query { viewer { name } }'
 
 所有子命令：`whoami`, `list-teams`, `list-projects`, `list-states`, `list-issues`, `get-issue`, `search-issues`, `create-issue`, `update-issue`, `update-status`, `add-comment`, `list-documents`, `get-document`, `search-documents`, `raw`。使用 `--help` 查看标志。
 
-何时使用脚本：你想快速获得答案而无需构建 GraphQL。何时使用 curl：你需要脚本未封装的查询，或者你想内联组合过滤器。
+使用脚本的场景：您想要快速获得答案而无需构建 GraphQL。使用 curl 的场景：您需要的查询脚本未封装，或者您想内联组合过滤器。
 
 ## 工作流状态
 
@@ -82,7 +83,7 @@ Linear 使用带有 `type` 字段的 `WorkflowState` 对象。**6 种状态类�
 | `completed` | 已完成 |
 | `canceled` | 不会处理 |
 
-每个团队都有自己的命名状态（例如，"进行中" 的类型是 `started`）。要更改问题的状态，你需要目标状态的 `stateId`（UUID）—— 首先查询工作流状态。
+每个团队都有自己的命名状态（例如，"In Progress" 的类型是 `started`）。要更改问题的状态，您需要目标状态的 `stateId`（UUID）——请先查询工作流状态。
 
 **优先级值：** 0 = 无, 1 = 紧急, 2 = 高, 3 = 中, 4 = 低
 
@@ -290,11 +291,11 @@ https://linear.app/<workspace>/document/<slug>-<hexSlugId>
 
 末尾的十六进制部分是 `slugId`。例如：`https://linear.app/nousresearch/document/rfc-hermes-permission-gateway-discord-38359beef67c` → `slugId` 是 `38359beef67c`。
 
-**重要的模式细节：** Markdown 正文在 `content` 字段中。ProseMirror JSON 在 `contentState` 中（不是 `contentData` —— 该字段不存在，API 会返回 400）。
+**重要的模式细节：** Markdown 正文在 `content` 字段中。ProseMirror JSON 在 `contentState` 中（不是 `contentData` — 该字段不存在，API 会返回 400）。
 
 ### 通过 slugId 获取文档
 
-`document(id:)` 只接受 UUID。要通过 URL 中的十六进制 slug 获取，请过滤集合：
+`document(id:)` 只接受 UUID。要通过 URL 中的十六进制 slug 获取，请筛选集合：
 
 ```bash
 curl -s -X POST https://api.linear.app/graphql \
@@ -304,7 +305,7 @@ curl -s -X POST https://api.linear.app/graphql \
   | python3 -m json.tool
 ```
 
-或者通过 Python 辅助工具：
+或通过 Python 辅助脚本：
 ```bash
 python3 scripts/linear_api.py get-document 38359beef67c
 ```
@@ -342,7 +343,7 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ## 分页
 
-Linear 使用 Relay 风格的光标分页：
+Linear 使用 Relay 风格的游标分页：
 
 ```bash
 # 第一页
@@ -351,7 +352,7 @@ curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ issues(first: 20) { nodes { identifier title } pageInfo { hasNextPage endCursor } } }"}' | python3 -m json.tool
 
-# 下一页 — 使用上一响应的 endCursor
+# 下一页 — 使用上一响应中的 endCursor
 curl -s -X POST https://api.linear.app/graphql \
   -H "Authorization: $LINEAR_API_KEY" \
   -H "Content-Type: application/json" \
@@ -374,7 +375,7 @@ curl -s -X POST https://api.linear.app/graphql \
 4.  **创建事项**，包含团队 ID、标题、描述、优先级
 5.  **更新状态**，将 `stateId` 设置为目标工作流状态
 6.  **添加评论**以跟踪进度
-7.  **标记为完成**，将 `stateId` 设置为团队的“已完成”类型状态
+7.  **标记完成**，将 `stateId` 设置为团队的“已完成”类型状态
 
 ## 速率限制
 
@@ -385,8 +386,8 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ## 重要说明
 
-- 进行 API 调用时，始终使用 `terminal` 工具配合 `curl` — 请**不要**使用 `web_extract` 或 `browser`
+- 进行 API 调用时，始终使用带有 `curl` 的 `terminal` 工具 — 请**不要**使用 `web_extract` 或 `browser`
 - 始终检查 GraphQL 响应中的 `errors` 数组 — HTTP 200 状态码仍可能包含错误
-- 创建事项时如果省略 `stateId`，Linear 将默认为第一个待办状态
+- 如果在创建事项时省略 `stateId`，Linear 将默认为第一个待办状态
 - `description` 字段支持 Markdown
 - 使用 `python3 -m json.tool` 或 `jq` 来格式化 JSON 响应以提高可读性

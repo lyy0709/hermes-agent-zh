@@ -4,7 +4,7 @@ sidebar_label: "1Password"
 description: "设置和使用 1Password CLI (op)"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而不是此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 1Password
 
@@ -19,12 +19,13 @@ description: "设置和使用 1Password CLI (op)"
 | 版本 | `1.0.0` |
 | 作者 | arceus77-7，由 Hermes Agent 增强 |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `security`, `secrets`, `1password`, `op`, `cli` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # 1Password CLI
@@ -50,7 +51,7 @@ description: "设置和使用 1Password CLI (op)"
 
 ### 服务账户（推荐用于 Hermes）
 
-在 `~/.hermes/.env` 中设置 `OP_SERVICE_ACCOUNT_TOKEN`（技能首次加载时会提示输入此项）。
+在 `~/.hermes/.env` 中设置 `OP_SERVICE_ACCOUNT_TOKEN`（技能首次加载时会提示输入此值）。
 无需桌面应用。支持 `op read`、`op inject`、`op run`。
 
 ```bash
@@ -99,7 +100,7 @@ op --version
 Hermes 终端命令默认是非交互式的，并且可能在调用之间丢失认证上下文。
 为了在使用桌面应用集成时可靠地使用 `op`，请在专用的 tmux 会话中运行登录和密钥操作。
 
-注意：使用 `OP_SERVICE_ACCOUNT_TOKEN` 时**不需要**这样做 — 令牌会自动在终端调用之间持久化。
+注意：使用 `OP_SERVICE_ACCOUNT_TOKEN` 时**不需要**此操作 — 令牌会自动在终端调用之间保持有效。
 
 ```bash
 SOCKET_DIR="${TMPDIR:-/tmp}/hermes-tmux-sockets"
@@ -156,12 +157,12 @@ op run -- sh -c '[ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD is set" || echo "DB_
 
 - 除非用户明确请求值，否则切勿将原始密钥打印回给用户。
 - 优先使用 `op run` / `op inject`，而不是将密钥写入文件。
-- 如果命令因“account is not signed in”而失败，请在同一个 tmux 会话中再次运行 `op signin`。
+- 如果命令因“账户未登录”而失败，请在同一个 tmux 会话中再次运行 `op signin`。
 - 如果桌面应用集成不可用（无头/CI 环境），请使用服务账户令牌流程。
 
 ## CI / 无头环境说明
 
-对于非交互式使用，请使用 `OP_SERVICE_ACCOUNT_TOKEN` 进行认证，并避免交互式的 `op signin`。
+对于非交互式使用，请使用 `OP_SERVICE_ACCOUNT_TOKEN` 进行认证，并避免使用交互式 `op signin`。
 服务账户需要 CLI v2.18.0+。
 
 ## 参考

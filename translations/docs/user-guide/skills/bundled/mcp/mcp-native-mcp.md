@@ -19,29 +19,30 @@ MCP 客户端：连接服务器，注册工具（stdio/HTTP）。
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `MCP`, `Tools`, `Integrations` |
 | 相关技能 | [`mcporter`](/docs/user-guide/skills/optional/mcp/mcp-mcporter) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # 原生 MCP 客户端
 
-Hermes Agent 内置了一个 MCP 客户端，它在启动时连接到 MCP 服务器，发现其工具，并将这些工具作为 Agent 可以直接调用的一等工具提供。无需桥接 CLI —— 来自 MCP 服务器的工具会与 `terminal`、`read_file` 等内置工具一同出现。
+Hermes Agent 内置了一个 MCP 客户端，它在启动时连接到 MCP 服务器，发现其工具，并将它们作为 Agent 可以直接调用的一流工具提供。无需桥接 CLI —— MCP 服务器的工具会与内置工具（如 `terminal`、`read_file` 等）一同出现。
 
-## 使用时机
+## 使用场景
 
 在以下情况下使用此技能：
-- 连接到 MCP 服务器并从 Hermes Agent 内部使用其工具
+- 连接到 MCP 服务器并在 Hermes Agent 内部使用其工具
 - 通过 MCP 添加外部能力（文件系统访问、GitHub、数据库、API）
 - 运行基于 stdio 的本地 MCP 服务器（npx、uvx 或任何命令）
 - 连接到远程 HTTP/StreamableHTTP MCP 服务器
 - 让 MCP 工具在每个会话中自动被发现并可用
 
-对于无需配置、从终端进行临时、一次性的 MCP 工具调用，请改用 `mcporter` 技能。
+对于无需配置、从终端进行的临时一次性 MCP 工具调用，请改用 `mcporter` 技能。
 
 ## 先决条件
 
@@ -72,50 +73,50 @@ mcp_servers:
 1. 连接到服务器
 2. 发现可用工具
 3. 以 `mcp_time_*` 为前缀注册它们
-4. 将它们注入到所有平台工具集中
+4. 将它们注入到所有平台的工具集中
 
-然后你就可以自然地使用这些工具 —— 只需让 Agent 获取当前时间。
+然后你就可以自然地使用这些工具了 —— 只需让 Agent 获取当前时间。
 
 ## 配置参考
 
 `mcp_servers` 下的每个条目都是一个服务器名称到其配置的映射。有两种传输类型：**stdio**（基于命令）和 **HTTP**（基于 URL）。
 
-### Stdio 传输（command + args）
+### Stdio 传输（命令 + 参数）
 
 ```yaml
 mcp_servers:
   server_name:
     command: "npx"             # （必需）要运行的可执行文件
-    args: ["-y", "pkg-name"]   # （可选）命令参数，默认值：[]
+    args: ["-y", "pkg-name"]   # （可选）命令参数，默认：[]
     env:                       # （可选）子进程的环境变量
       SOME_API_KEY: "value"
-    timeout: 120               # （可选）每次工具调用的超时时间（秒），默认值：120
-    connect_timeout: 60        # （可选）初始连接超时时间（秒），默认值：60
+    timeout: 120               # （可选）每次工具调用的超时时间（秒），默认：120
+    connect_timeout: 60        # （可选）初始连接超时时间（秒），默认：60
 ```
 
-### HTTP 传输（url）
+### HTTP 传输（URL）
 
 ```yaml
 mcp_servers:
   server_name:
     url: "https://my-server.example.com/mcp"   # （必需）服务器 URL
-    headers:                                     # （可选）HTTP 头
+    headers:                                     # （可选）HTTP 请求头
       Authorization: "Bearer sk-..."
-    timeout: 180               # （可选）每次工具调用的超时时间（秒），默认值：120
-    connect_timeout: 60        # （可选）初始连接超时时间（秒），默认值：60
+    timeout: 180               # （可选）每次工具调用的超时时间（秒），默认：120
+    connect_timeout: 60        # （可选）初始连接超时时间（秒），默认：60
 ```
 
 ### 所有配置选项
 
-| 选项              | 类型   | 默认值 | 描述                                       |
-|-------------------|--------|---------|---------------------------------------------------|
-| `command`         | string | --      | 要运行的可执行文件（stdio 传输，必需）     |
-| `args`            | list   | `[]`    | 传递给命令的参数                   |
-| `env`             | dict   | `{}`    | 子进程的额外环境变量    |
-| `url`             | string | --      | 服务器 URL（HTTP 传输，必需）             |
-| `headers`         | dict   | `{}`    | 随每个请求发送的 HTTP 头              |
-| `timeout`         | int    | `120`   | 每次工具调用的超时时间（秒）                  |
-| `connect_timeout` | int    | `60`    | 初始连接和发现的超时时间（秒）      |
+| 选项               | 类型   | 默认值 | 描述                                       |
+|--------------------|--------|---------|-------------------------------------------|
+| `command`          | string | --      | 要运行的可执行文件（stdio 传输，必需）     |
+| `args`             | list   | `[]`    | 传递给命令的参数                           |
+| `env`              | dict   | `{}`    | 子进程的额外环境变量                       |
+| `url`              | string | --      | 服务器 URL（HTTP 传输，必需）              |
+| `headers`          | dict   | `{}`    | 随每个请求发送的 HTTP 请求头               |
+| `timeout`          | int    | `120`   | 每次工具调用的超时时间（秒）               |
+| `connect_timeout`  | int    | `60`    | 初始连接和发现的超时时间（秒）             |
 
 注意：服务器配置必须包含 `command`（stdio）或 `url`（HTTP）之一，不能同时包含两者。
 
@@ -128,7 +129,7 @@ mcp_servers:
 1. 从 `~/.hermes/config.yaml` 读取 `mcp_servers`
 2. 对于每个服务器，在专用的后台事件循环中生成一个连接
 3. 初始化 MCP 会话并调用 `list_tools()` 来发现可用工具
-4. 将每个工具注册到 Hermes 工具注册表中
+4. 在 Hermes 工具注册表中注册每个工具
 
 ### 工具命名约定
 
@@ -153,11 +154,11 @@ mcp_{server_name}_{tool_name}
 
 - 每个服务器作为一个长期运行的 asyncio Task 在后台守护线程中运行
 - 连接在 Agent 进程的整个生命周期内持续存在
-- 如果连接断开，会自动进行指数退避重连（最多重试 5 次，最大退避时间 60 秒）
+- 如果连接断开，会自动进行指数退避重连（最多 5 次重试，最大退避时间 60 秒）
 - 在 Agent 关闭时，所有连接都会被优雅地关闭
 ### 幂等性
 
-`discover_mcp_tools()` 具有幂等性——多次调用它只会连接到尚未连接的服务器。失败的服务器会在后续调用中重试。
+`discover_mcp_tools()` 是幂等的 —— 多次调用它只会连接到尚未连接的服务器。失败的服务器会在后续调用中重试。
 
 ## 传输类型
 
@@ -197,7 +198,7 @@ mcp_servers:
 - `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `TERM`, `SHELL`, `TMPDIR`
 - 任何 `XDG_*` 变量
 
-所有其他环境变量（API 密钥、Token、密钥）都会被排除，除非你通过 `env` 配置键显式添加它们。这可以防止凭据意外泄露给不受信任的 MCP 服务器。
+所有其他环境变量（API 密钥、Token、密钥）都会被排除，除非你通过 `env` 配置项显式添加它们。这可以防止凭据意外泄露给不受信任的 MCP 服务器。
 
 ```yaml
 mcp_servers:
@@ -211,7 +212,7 @@ mcp_servers:
 
 ### 错误消息中的凭据脱敏
 
-如果 MCP 工具调用失败，错误消息中任何类似凭据的模式在显示给 LLM 之前会自动被脱敏。这包括：
+如果 MCP 工具调用失败，错误消息中任何类似凭据的模式在展示给 LLM 之前会自动被脱敏处理。这包括：
 
 - GitHub PAT (`ghp_...`)
 - OpenAI 风格的密钥 (`sk-...`)
@@ -253,11 +254,11 @@ pip install --upgrade mcp
 - 检查服务器是否列在 `mcp_servers` 下（而不是 `mcp` 或 `servers`）
 - 确保 YAML 缩进正确
 - 查看 Hermes Agent 启动日志中的连接消息
-- 工具名称以 `mcp_{server}_{tool}` 为前缀——寻找该模式
+- 工具名称以 `mcp_{server}_{tool}` 为前缀 —— 查找该模式
 
 ### 连接持续断开
 
-客户端会以指数退避（1秒、2秒、4秒、8秒、16秒，上限为60秒）重试最多5次。如果服务器根本不可达，则在5次尝试后放弃。请检查服务器进程和网络连接。
+客户端会以指数退避（1s, 2s, 4s, 8s, 16s，上限 60s）重试最多 5 次。如果服务器根本不可达，则在 5 次尝试后放弃。请检查服务器进程和网络连接。
 
 ## 示例
 
@@ -336,11 +337,11 @@ mcp_servers:
     timeout: 300
 ```
 
-所有服务器的所有工具都会同时注册并可用。每个服务器的工具都以其名称作为前缀，以避免冲突。
+所有服务器的所有工具都会被注册并同时可用。每个服务器的工具都以其名称作为前缀，以避免冲突。
 
 ## 采样（服务器发起的 LLM 请求）
 
-Hermes 支持 MCP 的 `sampling/createMessage` 功能——MCP 服务器可以在工具执行期间通过 Agent 请求 LLM 补全。这实现了 Agent 在环的工作流（数据分析、内容生成、决策制定）。
+Hermes 支持 MCP 的 `sampling/createMessage` 能力 —— MCP 服务器可以在工具执行期间通过 Agent 请求 LLM 补全。这实现了 Agent 在环的工作流（数据分析、内容生成、决策制定）。
 
 采样**默认启用**。可按服务器配置：
 

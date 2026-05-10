@@ -1,24 +1,25 @@
 ---
-title: "Sherlock — 跨 400+ 社交网络的 OSINT 用户名搜索"
+title: "Sherlock — 在 400 多个社交网络中进行 OSINT 用户名搜索"
 sidebar_label: "Sherlock"
-description: "跨 400+ 社交网络的 OSINT 用户名搜索"
+description: "在 400 多个社交网络中进行 OSINT 用户名搜索"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Sherlock
 
-跨 400+ 社交网络的 OSINT 用户名搜索。通过用户名追踪社交媒体账户。
+在 400 多个社交网络中进行 OSINT 用户名搜索。通过用户名追踪社交媒体账户。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/security/sherlock` 安装 |
+| 来源 | Optional — 使用 `hermes skills install official/security/sherlock` 安装 |
 | 路径 | `optional-skills/security/sherlock` |
 | 版本 | `1.0.0` |
 | 作者 | unmodeled-tyler |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `osint`, `security`, `username`, `social-media`, `reconnaissance` |
 
 ## 参考：完整的 SKILL.md
@@ -29,14 +30,14 @@ description: "跨 400+ 社交网络的 OSINT 用户名搜索"
 
 # Sherlock OSINT 用户名搜索
 
-使用 [Sherlock 项目](https://github.com/sherlock-project/sherlock)，通过用户名在 400+ 社交网络上追踪社交媒体账户。
+使用 [Sherlock 项目](https://github.com/sherlock-project/sherlock) 在 400 多个社交网络中通过用户名追踪社交媒体账户。
 
 ## 使用时机
 
 - 用户要求查找与用户名关联的账户
-- 用户希望检查用户名在各平台的可用性
+- 用户希望检查跨平台的用户名可用性
 - 用户正在进行 OSINT 或侦察研究
-- 用户询问“这个用户名在哪里注册了？”或类似问题
+- 用户询问"这个用户名在哪里注册了？"或类似问题
 
 ## 要求
 
@@ -61,9 +62,9 @@ sherlock --version
 
 ### 2. 提取用户名
 
-**如果用户消息中明确说明，直接从中提取用户名。**
+**如果用户消息中明确说明，则直接从中提取用户名。**
 
-以下示例**不应**使用澄清：
+以下示例中**不应**使用澄清：
 - "查找 nasa 的账户" → 用户名是 `nasa`
 - "搜索 johndoe123" → 用户名是 `johndoe123`
 - "检查 alice 是否存在于社交媒体上" → 用户名是 `alice`
@@ -71,8 +72,8 @@ sherlock --version
 
 **仅在以下情况下使用澄清：**
 - 提到多个潜在用户名（"搜索 alice 或 bob"）
-- 表述模糊（"搜索我的用户名" 但未指定）
-- 完全没有提到用户名（"进行 OSINT 搜索"）
+- 表述模糊（"搜索我的用户名"但未指定）
+- 根本没有提到用户名（"进行 OSINT 搜索"）
 
 提取时，使用**确切**的用户名 — 保留大小写、数字、下划线等。
 
@@ -85,13 +86,13 @@ sherlock --print-found --no-color "<username>" --timeout 90
 
 **可选标志**（仅在用户明确要求时添加）：
 - `--nsfw` — 包含 NSFW 网站（仅在用户要求时）
-- `--tor` — 通过 Tor 路由（仅在用户要求匿名性时）
+- `--tor` — 通过 Tor 路由（仅在用户要求匿名时）
 
 **不要通过澄清询问选项** — 直接运行默认搜索。用户如有需要可以请求特定选项。
 
 ### 4. 执行搜索
 
-通过 `terminal` 工具运行。命令通常需要 30-120 秒，具体取决于网络状况和网站数量。
+通过 `terminal` 工具运行。该命令通常需要 30-120 秒，具体取决于网络状况和网站数量。
 
 **终端调用示例：**
 ```json
@@ -118,24 +119,24 @@ Sherlock 以简单格式输出找到的账户。解析输出并呈现：
 
 尽可能将发现呈现为可点击的链接。
 
-## 常见问题
+## 注意事项
 
 ### 未找到结果
 如果 Sherlock 未找到任何账户，这通常是正确的 — 该用户名可能未在检查的平台上注册。建议：
 - 检查拼写/变体
 - 尝试使用 `?` 通配符的相似用户名：`sherlock "user?name"`
-- 用户可能设置了隐私或已删除账户
+- 用户可能设置了隐私设置或删除了账户
 
 ### 超时问题
 某些网站速度慢或阻止自动请求。使用 `--timeout 120` 增加等待时间，或使用 `--site` 限制范围。
 
 ### Tor 配置
-`--tor` 需要 Tor 守护进程正在运行。如果用户想要匿名性但 Tor 不可用，建议：
+`--tor` 要求 Tor 守护进程正在运行。如果用户想要匿名但 Tor 不可用，建议：
 - 安装 Tor 服务
 - 使用 `--proxy` 配合替代代理
 
 ### 误报
-由于响应结构，某些网站总是返回“找到”。对意外结果进行交叉验证和手动检查。
+由于响应结构，某些网站总是返回"找到"。交叉验证意外结果与手动检查。
 
 ### 速率限制
 激进的搜索可能触发速率限制。对于批量用户名搜索，在调用之间添加延迟或使用 `--local` 配合缓存数据。
@@ -159,7 +160,7 @@ docker run -it --rm sherlock/sherlock <username>
 ```
 
 ### Linux 软件包
-在 Debian 13+、Ubuntu 22.10+、Homebrew、Kali、BlackArch 上可用。
+适用于 Debian 13+、Ubuntu 22.10+、Homebrew、Kali、BlackArch。
 
 ## 道德使用
 

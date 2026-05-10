@@ -1,14 +1,14 @@
 ---
-title: "Fastmcp — 使用 FastMCP 在 Python 中构建、测试、检查、安装和部署 MCP 服务器"
+title: "Fastmcp — 使用 Python 的 FastMCP 构建、测试、检查、安装和部署 MCP 服务器"
 sidebar_label: "Fastmcp"
-description: "使用 FastMCP 在 Python 中构建、测试、检查、安装和部署 MCP 服务器"
+description: "使用 Python 的 FastMCP 构建、测试、检查、安装和部署 MCP 服务器"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Fastmcp
 
-使用 FastMCP 在 Python 中构建、测试、检查、安装和部署 MCP 服务器。适用于创建新的 MCP 服务器、将 API 或数据库包装为 MCP 工具、暴露资源或提示词，或为 Claude Code、Cursor 或 HTTP 部署准备 FastMCP 服务器。
+使用 Python 的 FastMCP 构建、测试、检查、安装和部署 MCP 服务器。适用于创建新的 MCP 服务器、将 API 或数据库包装为 MCP 工具、暴露资源或提示词，或为 Claude Code、Cursor 或 HTTP 部署准备 FastMCP 服务器。
 
 ## 技能元数据
 
@@ -19,7 +19,8 @@ description: "使用 FastMCP 在 Python 中构建、测试、检查、安装和�
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
-| 标签 | `MCP`, `FastMCP`, `Python`, `工具`, `资源`, `提示词`, `部署` |
+| 平台 | linux, macos, windows |
+| 标签 | `MCP`, `FastMCP`, `Python`, `Tools`, `Resources`, `Prompts`, `Deployment` |
 | 相关技能 | [`native-mcp`](/docs/user-guide/skills/bundled/mcp/mcp-native-mcp), [`mcporter`](/docs/user-guide/skills/optional/mcp/mcp-mcporter) |
 
 ## 参考：完整的 SKILL.md
@@ -34,7 +35,7 @@ description: "使用 FastMCP 在 Python 中构建、测试、检查、安装和�
 
 ## 何时使用
 
-当任务涉及以下情况时使用此技能：
+当任务涉及以下情况时，使用此技能：
 
 - 在 Python 中创建新的 MCP 服务器
 - 将 API、数据库、CLI 或文件处理工作流包装为 MCP 工具
@@ -43,7 +44,7 @@ description: "使用 FastMCP 在 Python 中构建、测试、检查、安装和�
 - 将服务器安装到 Claude Code、Claude Desktop、Cursor 或类似的 MCP 客户端中
 - 为 HTTP 部署准备 FastMCP 服务器仓库
 
-当服务器已存在且仅需要连接到 Hermes 时，使用 `native-mcp`。当目标是临时通过 CLI 访问现有 MCP 服务器而非构建一个时，使用 `mcporter`。
+当服务器已存在且只需连接到 Hermes 时，使用 `native-mcp`。当目标是临时通过 CLI 访问现有 MCP 服务器而非构建新服务器时，使用 `mcporter`。
 
 ## 先决条件
 
@@ -70,7 +71,7 @@ pip install httpx
 
 ### 脚本
 
-- `scripts/scaffold_fastmcp.py` - 复制一个启动模板并替换服务器名称占位符
+- `scripts/scaffold_fastmcp.py` - 复制一个入门模板并替换服务器名称占位符
 
 ### 参考资料
 
@@ -78,13 +79,13 @@ pip install httpx
 
 ## 工作流
 
-### 1. 选择最小的可行服务器形态
+### 1. 选择最小可行服务器形态
 
-首先选择最窄的有用范围：
+首先选择最窄的有用表面：
 
 - API 包装器：从 1-3 个高价值端点开始，而不是整个 API
 - 数据库服务器：暴露只读内省和受约束的查询路径
-- 文件处理器：暴露具有明确路径参数的确定性操作
+- 文件处理器：暴露具有显式路径参数的确定性操作
 - 提示词/资源：仅在客户端需要可重用的提示词模板或可发现的文档时添加
 
 优先选择具有良好名称、文档字符串和模式的精简服务器，而不是具有模糊工具的大型服务器。
@@ -114,9 +115,9 @@ python ~/.hermes/skills/mcp/fastmcp/scripts/scaffold_fastmcp.py --list
 
 工具设计规则：
 
-- 为每个工具起一个具体的、基于动词的名称
+- 为每个工具指定一个具体的、基于动词的名称
 - 将文档字符串写成面向用户的工具描述
-- 保持参数明确且类型化
+- 保持参数显式且类型化
 - 尽可能返回结构化的 JSON 安全数据
 - 尽早验证不安全的输入
 - 对于第一个版本，默认优先选择只读行为
@@ -134,7 +135,7 @@ python ~/.hermes/skills/mcp/fastmcp/scripts/scaffold_fastmcp.py --list
 - `process`
 - `do_thing`
 
-### 4. 仅在有助于时才添加资源和提示词
+### 4. 仅在有益时添加资源和提示词
 
 当客户端受益于获取稳定的只读内容（如模式、策略文档或生成的报告）时，添加 `@mcp.resource`。
 
@@ -146,7 +147,7 @@ python ~/.hermes/skills/mcp/fastmcp/scripts/scaffold_fastmcp.py --list
 - 资源用于数据/文档检索
 - 提示词用于可重用的 LLM 指令
 
-### 5. 在集成到任何地方之前测试服务器
+### 5. 在任何地方集成之前测试服务器
 
 使用 FastMCP CLI 进行本地验证：
 
@@ -172,7 +173,7 @@ fastmcp call http://127.0.0.1:8000/mcp search_resources query=router --json
 
 在声称服务器工作之前，始终至少对每个新工具运行一次真实的 `fastmcp call`。
 
-### 6. 在本地验证通过后安装到客户端
+### 6. 本地验证通过后安装到客户端
 
 FastMCP 可以将服务器注册到支持的 MCP 客户端：
 
@@ -189,9 +190,9 @@ fastmcp install cursor acme_server.py -e .
 - 使用 `native-mcp` 技能在 `~/.hermes/config.yaml` 中配置服务器，或者
 - 在开发期间继续使用 FastMCP CLI 命令，直到接口稳定
 
-### 7. 在本地合约稳定后进行部署
+### 7. 本地合约稳定后进行部署
 
-对于托管部署，Prefect Horizon 是 FastMCP 文档最直接记录的路径。在部署之前：
+对于托管部署，Prefect Horizon 是 FastMCP 文档最直接记录的路径。部署前：
 
 ```bash
 fastmcp inspect acme_server.py:mcp
@@ -257,7 +258,7 @@ fastmcp inspect acme_server.py:mcp
 
 实现注意事项：
 
-- 接受明确的文件路径
+- 接受显式的文件路径
 - 检查缺失的文件和编码失败
 - 限制预览和结果数量
 - 除非需要特定的外部工具，否则避免调用 shell
@@ -271,7 +272,7 @@ fastmcp inspect acme_server.py:mcp
 - 服务器可以干净地导入
 - `fastmcp inspect <file.py:mcp>` 成功
 - `fastmcp list <server spec> --json` 成功
-- 每个新工具至少有一个真实的 `fastmcp call`
+- 每个新工具至少有一次真实的 `fastmcp call`
 - 环境变量已记录
 - 工具表面足够小，无需猜测即可理解
 
@@ -294,7 +295,7 @@ fastmcp version
 - FastMCP 实例在 `<file.py:object>` 中命名正确
 - 模板的可选依赖项已安装
 
-### 工具在 Python 中工作，但通过 CLI 不工作
+### 工具在 Python 中工作但通过 CLI 不工作
 
 运行：
 
@@ -307,7 +308,7 @@ fastmcp call server.py your_tool_name --json
 
 ### Hermes 无法看到已部署的服务器
 
-服务器构建部分可能正确，但 Hermes 配置不正确。加载 `native-mcp` 技能并在 `~/.hermes/config.yaml` 中配置服务器，然后重启 Hermes。
+服务器构建部分可能正确，但 Hermes 配置不正确。加载 `native-mcp` 技能并在 `~/.hermes/config.yaml` 中配置服务器，然后重新启动 Hermes。
 
 ## 参考资料
 

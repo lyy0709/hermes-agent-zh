@@ -6,7 +6,7 @@ description: "通过浏览器 OAuth 登录 MiniMax，并在 Hermes Agent 中使�
 
 # MiniMax OAuth
 
-Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 **MiniMax**，使用与 [MiniMax 门户](https://www.minimax.io) 相同的凭据。无需 API 密钥或信用卡 — 登录一次，Hermes 会自动刷新您的会话。
+Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 **MiniMax**，使用与 [MiniMax 门户网站](https://www.minimax.io) 相同的凭据。无需 API 密钥或信用卡 — 登录一次，Hermes 会自动刷新您的会话。
 
 传输层复用了 `anthropic_messages` 适配器（MiniMax 在 `/anthropic` 路径下暴露了一个与 Anthropic Messages 兼容的端点），因此所有现有的工具调用、流式传输和上下文功能无需任何适配器更改即可工作。
 
@@ -28,7 +28,7 @@ Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 **MiniMax**，使
 - Python 3.9+
 - 已安装 Hermes Agent
 - 在 [minimax.io](https://www.minimax.io)（全球）或 [minimaxi.com](https://www.minimaxi.com)（中国）拥有 MiniMax 账户
-- 本地机器上有可用的浏览器（或对于远程会话使用 `--no-browser`）
+- 本地机器上有可用的浏览器（或对远程会话使用 `--no-browser`）
 
 ## 快速开始
 
@@ -54,12 +54,14 @@ hermes
 hermes auth add minimax-oauth
 ```
 
-### 中国区域
+### 中国区
 
-如果您的账户在中国平台 (`minimaxi.com`) 上，请传递 `--region cn`：
+如果您的账户在中国平台 (`minimaxi.com`) 上，请改用中国区 OAuth 提供商 ID `minimax-cn`，或者跳过 OAuth 直接配置 `MINIMAX_CN_API_KEY` / `MINIMAX_CN_BASE_URL`。旧文档中描述的 `--region cn` 标志**未**通过 CLI 的参数解析器连接；请改用 `minimax-cn` 提供商：
 
 ```bash
-hermes auth add minimax-oauth --region cn
+hermes auth add minimax-cn --type oauth   # 如果您的中国区账户支持 OAuth
+# 或者更简单的方式：
+echo 'MINIMAX_CN_API_KEY=your-key' >> ~/.hermes/.env
 ```
 
 ### 远程 / 无头会话
@@ -70,17 +72,17 @@ hermes auth add minimax-oauth --region cn
 hermes auth add minimax-oauth --no-browser
 ```
 
-Hermes 将打印验证 URL 和用户代码 — 在任何设备上打开该 URL，并在提示时输入代码。
+Hermes 将打印验证 URL 和用户代码 — 在任何设备上打开该 URL 并在提示时输入代码。
 
 ## OAuth 流程
 
 Hermes 针对 MiniMax OAuth 端点实现了 PKCE 设备码流程：
 
-1.  Hermes 生成一个 PKCE 验证器 / 挑战对和一个随机状态值。
+1.  Hermes 生成 PKCE 验证器 / 挑战对和一个随机状态值。
 2.  它向 `{base_url}/oauth/code` 发送 POST 请求，附带挑战并接收 `user_code` 和 `verification_uri`。
 3.  您的浏览器打开 `verification_uri`。如果提示，请输入 `user_code`。
 4.  Hermes 轮询 `{base_url}/oauth/token` 直到令牌到达（或截止时间过去）。
-5.  令牌（`access_token`、`refresh_token`、过期时间）被保存到 `~/.hermes/auth.json` 中的 `minimax-oauth` 键下。
+5.  令牌 (`access_token`, `refresh_token`, 过期时间) 被保存到 `~/.hermes/auth.json` 中的 `minimax-oauth` 键下。
 
 令牌刷新（标准的 OAuth `refresh_token` 授权）会在每次会话开始时，当访问令牌距离过期时间在 60 秒内时自动运行。
 
@@ -93,13 +95,13 @@ hermes doctor
 `◆ Auth Providers` 部分将显示：
 
 ```
-✓ MiniMax OAuth  (已登录, region=global)
+✓ MiniMax OAuth  (logged in, region=global)
 ```
 
 或者，如果未登录：
 
 ```
-⚠ MiniMax OAuth  (未登录)
+⚠ MiniMax OAuth  (not logged in)
 ```
 
 ## 切换模型
@@ -128,12 +130,12 @@ model:
   base_url: https://api.minimax.io/anthropic
 ```
 
-### `--region` 标志
+### 区域端点
 
-| 值 | 门户 | 推理端点 |
-|-------|--------|-------------------|
-| `global` (默认) | `https://api.minimax.io` | `https://api.minimax.io/anthropic` |
-| `cn` | `https://api.minimaxi.com` | `https://api.minimaxi.com/anthropic` |
+| 提供商 ID | 门户网站 | 推理端点 |
+|-------------|--------|-------------------|
+| `minimax-oauth` (全球) | `https://api.minimax.io` | `https://api.minimax.io/anthropic` |
+| `minimax-cn` (中国) | `https://api.minimaxi.com` | `https://api.minimaxi.com/anthropic` |
 
 ### 提供商别名
 
@@ -218,7 +220,7 @@ hermes auth remove minimax-oauth
 
 ## 另请参阅
 
--   [AI 提供商参考](../integrations/providers.md)
--   [环境变量](../reference/environment-variables.md)
--   [配置](../user-guide/configuration.md)
--   [hermes doctor](../reference/cli-commands.md)
+- [AI 提供商参考](../integrations/providers.md)
+- [环境变量](../reference/environment-variables.md)
+- [配置](../user-guide/configuration.md)
+- [hermes doctor](../reference/cli-commands.md)

@@ -4,7 +4,7 @@ sidebar_label: "Blogwatcher"
 description: "通过 blogwatcher-cli 工具监控博客和 RSS/Atom 订阅源"
 ---
 
-{/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Blogwatcher
 
@@ -19,6 +19,7 @@ description: "通过 blogwatcher-cli 工具监控博客和 RSS/Atom 订阅源"
 | 版本 | `2.0.0` |
 | 作者 | JulienTant (fork of Hyaxia/blogwatcher) |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `RSS`, `Blogs`, `Feed-Reader`, `Monitoring` |
 
 ## 参考：完整的 SKILL.md
@@ -58,7 +59,7 @@ docker run --rm -v /path/on/host:/data -e BLOGWATCHER_DB=/data/blogwatcher-cli.d
 
 ### 从原始 blogwatcher 迁移
 
-如果从 `Hyaxia/blogwatcher` 升级，请移动您的数据库：
+如果从 `Hyaxia/blogwatcher` 升级，请移动你的数据库：
 
 ```bash
 mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
@@ -71,8 +72,8 @@ mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
 ### 管理博客
 
 - 添加博客：`blogwatcher-cli add "My Blog" https://example.com`
-- 添加并指定订阅源：`blogwatcher-cli add "My Blog" https://example.com --feed-url https://example.com/feed.xml`
-- 添加并使用 HTML 抓取：`blogwatcher-cli add "My Blog" https://example.com --scrape-selector "article h2 a"`
+- 添加时指定订阅源：`blogwatcher-cli add "My Blog" https://example.com --feed-url https://example.com/feed.xml`
+- 添加时使用 HTML 抓取：`blogwatcher-cli add "My Blog" https://example.com --scrape-selector "article h2 a"`
 - 列出跟踪的博客：`blogwatcher-cli blogs`
 - 移除博客：`blogwatcher-cli remove "My Blog" --yes`
 - 从 OPML 导入：`blogwatcher-cli import subscriptions.opml`
@@ -106,42 +107,42 @@ mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
 
 ```
 $ blogwatcher-cli blogs
-跟踪的博客 (1):
+Tracked blogs (1):
 
   xkcd
     URL: https://xkcd.com
     Feed: https://xkcd.com/atom.xml
-    最后扫描时间: 2026-04-03 10:30
+    Last scanned: 2026-04-03 10:30
 ```
 
 ```
 $ blogwatcher-cli scan
-正在扫描 1 个博客...
+Scanning 1 blog(s)...
 
   xkcd
-    来源: RSS | 找到: 4 | 新文章: 4
+    Source: RSS | Found: 4 | New: 4
 
-总共找到 4 篇新文章！
+Found 4 new article(s) total!
 ```
 
 ```
 $ blogwatcher-cli articles
-未读文章 (2):
+Unread articles (2):
 
   [1] [new] Barrel - Part 13
-       博客: xkcd
+       Blog: xkcd
        URL: https://xkcd.com/3095/
-       发布日期: 2026-04-02
-       类别: Comics, Science
+       Published: 2026-04-02
+       Categories: Comics, Science
 
   [2] [new] Volcano Fact
-       博客: xkcd
+       Blog: xkcd
        URL: https://xkcd.com/3094/
-       发布日期: 2026-04-01
-       类别: Comics
+       Published: 2026-04-01
+       Categories: Comics
 ```
 
-## 说明
+## 注意事项
 
 - 当未提供 `--feed-url` 时，会自动从博客主页发现 RSS/Atom 订阅源。
 - 如果 RSS 失败且配置了 `--scrape-selector`，则回退到 HTML 抓取。

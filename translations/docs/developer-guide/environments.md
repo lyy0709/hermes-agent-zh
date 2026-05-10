@@ -1,26 +1,26 @@
 ---
 sidebar_position: 5
 title: "执行环境、基准测试与数据生成"
-description: "通过 Hermes-Agent 与 Atropos 的集成，构建 RL 训练环境、运行评估基准测试以及生成 SFT 数据"
+description: "构建强化学习训练环境、运行评估基准测试，并通过 Hermes-Agent 与 Atropos 集成生成监督微调数据"
 ---
 
 # 执行环境、基准测试与数据生成
 
-Hermes Agent 包含一个完整的环境框架，可将其工具调用能力与 [Atropos](https://github.com/NousResearch/atropos) RL 训练框架连接起来。这实现了三种工作流：
+Hermes Agent 包含一个完整的环境框架，可将其工具调用能力与 [Atropos](https://github.com/NousResearch/atropos) 强化学习训练框架连接起来。这实现了三种工作流：
 
-1.  **RL 训练** — 使用 GRPO 在多轮代理式任务上训练语言模型
+1.  **强化学习训练** — 使用 GRPO 在多轮代理式任务上训练语言模型
 2.  **基准测试** — 在标准化的代理式基准测试上评估模型
-3.  **数据生成** — 从 Agent 轨迹中生成 SFT 训练数据
+3.  **数据生成** — 从 Agent 运行轨迹中生成监督微调训练数据
 
-这三者共享同一个核心：一个定义任务、运行 Agent 循环并对输出进行评分的**环境**类。
+这三者共享同一个核心：一个定义任务、运行 Agent 循环并对输出进行评分的**执行环境**类。
 
-:::info 仓库环境 vs RL 训练工具
-本文档记录的 Python 环境框架位于仓库的 `environments/` 目录下，是 Hermes/Atropos 集成的实现级 API。这与面向用户的 `rl_*` 工具是分开的，后者作为远程 RL 训练工作流的编排界面。
+:::info 仓库环境 vs 强化学习训练工具
+本文档记录的 Python 环境框架位于仓库的 `environments/` 目录下，是 Hermes/Atropos 集成的实现级 API。这与面向用户的 `rl_*` 工具是分开的，后者作为远程强化学习训练工作流的编排界面。
 :::
 
 :::tip 快速链接
 -   **想运行基准测试？** 跳转到 [可用基准测试](#可用基准测试)
--   **想进行 RL 训练？** 查看面向 Agent 驱动界面的 [RL 训练工具](/user-guide/features/rl-training)，或手动执行的 [运行环境](#运行环境)
+-   **想进行强化学习训练？** 查看面向 Agent 驱动界面的 [强化学习训练工具](/user-guide/features/rl-training)，或手动执行的 [运行环境](#运行环境)
 -   **想创建新环境？** 查看 [创建环境](#创建环境)
 :::
 
@@ -76,9 +76,9 @@ classDiagram
 
 来自 `atroposlib` 的基础层。提供：
 -   **服务器管理** — 连接到 OpenAI 兼容的 API（VLLM、SGLang、OpenRouter）
--   **工作进程调度** — 并行轨迹协调
--   **Wandb 集成** — 指标记录和轨迹可视化
--   **CLI 界面** — 三个子命令：`serve`、`process`、`evaluate`
+-   **工作进程调度** — 并行运行轨迹协调
+-   **Wandb 集成** — 指标记录和运行轨迹可视化
+-   **CLI 接口** — 三个子命令：`serve`、`process`、`evaluate`
 -   **评估日志** — `evaluate_log()` 将结果保存到 JSON + JSONL
 
 ### HermesAgentBaseEnv
@@ -87,19 +87,19 @@ hermes-agent 层 (`environments/hermes_base_env.py`)。增加：
 -   **终端后端配置** — 为沙盒执行设置 `TERMINAL_ENV`（本地、Docker、Modal、Daytona、SSH、Singularity）
 -   **工具解析** — `_resolve_tools_for_group()` 调用 hermes-agent 的 `get_tool_definitions()`，根据启用/禁用的工具集获取正确的工具模式
 -   **Agent 循环集成** — `collect_trajectory()` 运行 `HermesAgentLoop` 并对结果评分
--   **两阶段操作** — 阶段 1（OpenAI 服务器）用于评估/SFT，阶段 2（VLLM ManagedServer）用于带 logprobs 的完整 RL
+-   **两阶段操作** — 阶段 1（OpenAI 服务器）用于评估/监督微调，阶段 2（VLLM ManagedServer）用于带对数概率的完整强化学习
 -   **异步安全补丁** — 对 Modal 后端进行猴子补丁，使其能在 Atropos 的事件循环内工作
 
 ### 具体环境
 
-您的环境继承自 `HermesAgentBaseEnv` 并实现五个方法：
+你的环境继承自 `HermesAgentBaseEnv` 并实现五个方法：
 
 | 方法 | 用途 |
 |--------|---------|
 | `setup()` | 加载数据集，初始化状态 |
-| `get_next_item()` | 返回下一个用于轨迹的条目 |
+| `get_next_item()` | 返回下一个用于运行轨迹的条目 |
 | `format_prompt(item)` | 将条目转换为用户消息 |
-| `compute_reward(item, result, ctx)` | 对轨迹评分 (0.0–1.0) |
+| `compute_reward(item, result, ctx)` | 对运行轨迹评分 (0.0–1.0) |
 | `evaluate()` | 周期性评估逻辑 |
 
 ## 核心组件
@@ -108,12 +108,12 @@ hermes-agent 层 (`environments/hermes_base_env.py`)。增加：
 
 `HermesAgentLoop` (`environments/agent_loop.py`) 是可复用的多轮 Agent 引擎。它运行与 hermes-agent 主循环相同的工具调用模式：
 
-1.  通过 `server.chat_completion()` 将消息 + 工具模式发送到 API
+1.  通过 `server.chat_completion()` 将消息和工具模式发送到 API
 2.  如果响应包含 `tool_calls`，则通过 `handle_function_call()` 分发每个调用
 3.  将工具结果附加到对话中，返回步骤 1
 4.  如果没有 `tool_calls`，则 Agent 完成
 
-工具调用在线程池 (`ThreadPoolExecutor(128)`) 中执行，以便异步后端（Modal、Docker）不会在 Atropos 的事件循环内死锁。
+工具调用在线程池 (`ThreadPoolExecutor(128)`) 中执行，这样异步后端（Modal、Docker）就不会在 Atropos 的事件循环内死锁。
 
 返回一个 `AgentResult`：
 
@@ -130,7 +130,7 @@ class AgentResult:
 
 ### 工具上下文
 
-`ToolContext` (`environments/tool_context.py`) 让奖励函数能够直接访问模型在其轨迹期间使用的**同一个沙盒**。`task_id` 作用域意味着所有状态（文件、进程、浏览器标签页）都被保留。
+`ToolContext` (`environments/tool_context.py`) 让奖励函数能够直接访问模型在其运行轨迹期间使用的**同一个沙盒**。`task_id` 作用域意味着所有状态（文件、进程、浏览器标签页）都得以保留。
 
 ```python
 async def compute_reward(self, item, result, ctx: ToolContext):
@@ -171,9 +171,9 @@ parser = get_parser("hermes")  # 或 "mistral", "llama3_json", "qwen", "deepseek
 content, tool_calls = parser.parse(raw_model_output)
 ```
 
-可用的解析器：`hermes`、`mistral`、`llama3_json`、`qwen`、`qwen3_coder`、`deepseek_v3`、`deepseek_v3_1`、`kimi_k2`、`longcat`、`glm45`、`glm47`。
+可用的解析器：`hermes`、`mistral`、`llama3_json`、`llama4_json`、`qwen`、`qwen3_coder`、`deepseek_v3`、`deepseek_v3_1`（别名 `deepseek_v31`）、`kimi_k2`、`longcat`、`glm45`、`glm47`。
 
-在第一阶段（OpenAI 服务器类型），不需要解析器——服务器原生处理工具调用解析。
+在第一阶段（OpenAI 服务器类型），不需要解析器 —— 服务器原生处理工具调用解析。
 
 ## 可用基准测试
 
@@ -209,11 +209,11 @@ python environments/benchmarks/terminalbench_2/terminalbench2_env.py evaluate \
 
 | | |
 |---|---|
-| **测试内容** | 与 TB2 相同（编码/系统管理），按难度等级校准 |
+| **测试内容** | 与 TB2 相同（编码/系统管理），按难度层级校准 |
 | **评分方式** | 二进制通过/失败 |
 | **沙盒** | Modal 云沙盒 |
 | **工具** | `terminal` + `file` |
-| **任务数量** | 100 个任务：简单（40）、中等（26）、困难（26）、极难（8） |
+| **任务数量** | 100 个任务：简单 (40)、中等 (26)、困难 (26)、极难 (8) |
 | **相关性** | 与完整 TB2 的相关系数 r=0.911 |
 | **速度** | 比 TB2 快 2.6–8 倍 |
 
@@ -222,7 +222,7 @@ python environments/benchmarks/tblite/tblite_env.py evaluate \
     --config environments/benchmarks/tblite/default.yaml
 ```
 
-TBLite 是 TerminalBench2 的一个精简子类——仅数据集和超时时间不同。由 OpenThoughts Agent 团队（Snorkel AI + Bespoke Labs）创建。数据集：[NousResearch/openthoughts-tblite](https://huggingface.co/datasets/NousResearch/openthoughts-tblite)。
+TBLite 是 TerminalBench2 的一个精简子类 —— 仅数据集和超时时间不同。由 OpenThoughts Agent 团队（Snorkel AI + Bespoke Labs）创建。数据集：[NousResearch/openthoughts-tblite](https://huggingface.co/datasets/NousResearch/openthoughts-tblite)。
 
 ### YC-Bench
 
@@ -261,7 +261,7 @@ YC-Bench 使用 [collinear-ai/yc-bench](https://github.com/collinear-ai/yc-bench
 
 ### TerminalTestEnv
 
-一个最小的自包含环境，带有内联任务（无需外部数据集）。用于**端到端验证完整技术栈**。每个任务要求模型在已知路径创建文件；验证器检查内容。
+一个最小化的自包含环境，包含内联任务（无外部数据集）。用于**端到端验证完整技术栈**。每个任务要求模型在已知路径创建文件；验证器检查内容。
 
 ```bash
 # 处理模式（将轨迹保存到 JSONL，无需训练服务器）
@@ -285,7 +285,7 @@ python environments/hermes_swe_env/hermes_swe_env.py serve \
 
 ## 运行环境
 
-每个环境都是一个独立的 Python 脚本，具有三个 CLI 子命令：
+每个环境都是一个独立的 Python 脚本，包含三个 CLI 子命令：
 
 ### `evaluate` —— 运行基准测试
 
@@ -309,34 +309,34 @@ python environments/terminal_test_env/terminal_test_env.py process \
     --openai.model_name anthropic/claude-sonnet-4.6
 ```
 
-输出格式：每一行都是一个评分后的轨迹，包含完整的对话历史、奖励和元数据。
+输出格式：每行是一个评分后的轨迹，包含完整的对话历史、奖励和元数据。
 
 ### `serve` —— 连接到 Atropos 进行 RL 训练
 
 将环境连接到正在运行的 Atropos API 服务器（`run-api`）。在实时 RL 训练期间使用。
-
 ```bash
 # 终端 1：启动 Atropos API
 run-api
 
-# 终端 2：启动环境
+# 终端 2：启动执行环境
 python environments/hermes_swe_env/hermes_swe_env.py serve \
     --openai.model_name YourModel
 ```
-执行环境接收来自 Atropos 的条目，运行 Agent 推演，计算奖励，并将评分后的轨迹发送回训练。
+
+执行环境接收来自 Atropos 的任务项，运行 Agent 推演，计算奖励，并将评分后的轨迹发送回训练。
 
 ## 两阶段操作
 
-### 第一阶段：OpenAI 服务器（评估 / SFT）
+### 阶段 1：OpenAI 服务器（评估 / SFT）
 
-使用带有 `tools=` 参数的 `server.chat_completion()`。服务器（VLLM、SGLang、OpenRouter、OpenAI）原生处理工具调用解析。返回带有结构化 `tool_calls` 的 `ChatCompletion` 对象。
+使用带有 `tools=` 参数的 `server.chat_completion()`。服务器（VLLM、SGLang、OpenRouter、OpenAI）原生处理工具调用解析。返回包含结构化 `tool_calls` 的 `ChatCompletion` 对象。
 
 - **用于**：评估、SFT 数据生成、基准测试、测试
 - 为 Atropos 流水线创建**占位符 Token**（因为无法从 OpenAI API 获取真实的 Token ID）
 
-### 第二阶段：VLLM ManagedServer（完整 RL）
+### 阶段 2：VLLM ManagedServer（完整 RL）
 
-使用 ManagedServer 通过 `/generate` 获取精确的 Token ID 和 logprobs。客户端[工具调用解析器](#tool-call-parsers)从原始输出重建结构化 `tool_calls`。
+使用 ManagedServer 通过 `/generate` 获取精确的 Token ID 和 logprobs。客户端侧的[工具调用解析器](#tool-call-parsers)从原始输出重建结构化 `tool_calls`。
 
 - **用于**：使用 GRPO/PPO 进行完整 RL 训练
 - **真实 Token**、掩码和 logprobs 在流水线中流动
@@ -397,14 +397,14 @@ if __name__ == "__main__":
     MyEnv.cli()
 ```
 
-### 仅用于评估的基准测试
+### 仅评估基准测试
 
 对于基准测试，请遵循 TerminalBench2、TBLite 和 YC-Bench 使用的模式：
 
 1.  **在** `environments/benchmarks/your-benchmark/` **下创建**
 2.  **设置仅评估配置**：`eval_handling=STOP_TRAIN`、`steps_per_eval=1`、`total_steps=1`
 3.  **存根训练方法**：`collect_trajectories()` 返回 `(None, [])`，`score()` 返回 `None`
-4.  **实现** `rollout_and_score_eval(eval_item)` —— 每个条目的 Agent 循环 + 评分
+4.  **实现** `rollout_and_score_eval(eval_item)` —— 每个任务项的 Agent 循环 + 评分
 5.  **实现** `evaluate()` —— 编排所有运行，计算聚合指标
 6.  **添加流式 JSONL** 以实现崩溃安全的结果持久化
 7.  **添加清理**：`KeyboardInterrupt` 处理、`cleanup_all_environments()`、`_tool_executor.shutdown()`
@@ -418,7 +418,7 @@ if __name__ == "__main__":
 
 | 字段 | 类型 | 默认值 | 描述 |
 |-------|------|---------|-------------|
-| `enabled_toolsets` | `List[str]` | `None`（全部） | 启用哪些 Hermes 工具集 |
+| `enabled_toolsets` | `List[str]` | `None` (全部) | 启用哪些 Hermes 工具集 |
 | `disabled_toolsets` | `List[str]` | `None` | 要过滤掉的工具集 |
 | `distribution` | `str` | `None` | 概率性工具集分布名称 |
 | `max_agent_turns` | `int` | `30` | 每次推演的最大 LLM 调用次数 |
@@ -429,8 +429,8 @@ if __name__ == "__main__":
 | `terminal_lifetime` | `int` | `3600` | 沙盒最大生命周期 |
 | `dataset_name` | `str` | `None` | HuggingFace 数据集标识符 |
 | `tool_pool_size` | `int` | `128` | 工具执行的线程池大小 |
-| `tool_call_parser` | `str` | `"hermes"` | 用于第二阶段原始输出的解析器 |
-| `extra_body` | `Dict` | `None` | OpenAI API 的额外参数（例如，OpenRouter 提供商偏好） |
+| `tool_call_parser` | `str` | `"hermes"` | 阶段 2 原始输出的解析器 |
+| `extra_body` | `Dict` | `None` | OpenAI API 的额外参数（例如 OpenRouter 提供商偏好） |
 | `eval_handling` | `Enum` | `STOP_TRAIN` | `STOP_TRAIN`、`LIMIT_TRAIN`、`NONE` |
 
 ### YAML 配置
@@ -470,25 +470,25 @@ python my_env.py evaluate \
 ### 对于所有执行环境
 
 - Python >= 3.11
-- `atroposlib`：`pip install git+https://github.com/NousResearch/atropos.git`
-- 一个 LLM API 密钥（OpenRouter、OpenAI 或自托管的 VLLM/SGLang）
+- `atroposlib`: `pip install git+https://github.com/NousResearch/atropos.git`
+- LLM API 密钥（OpenRouter、OpenAI 或自托管的 VLLM/SGLang）
 
 ### 对于 Modal 沙盒基准测试（TB2、TBLite）
 
-- [Modal](https://modal.com) 账户和 CLI：`pip install "hermes-agent[modal]"`
+- [Modal](https://modal.com) 账户和 CLI: `pip install "hermes-agent[modal]"`
 - `MODAL_TOKEN_ID` 和 `MODAL_TOKEN_SECRET` 环境变量
+### 针对 YC-Bench
 
-### 对于 YC-Bench
+- `pip install "hermes-agent[yc-bench]"` (安装 yc-bench CLI + SQLAlchemy)
+- 无需 Modal — 使用本地终端后端运行
 
-- `pip install "hermes-agent[yc-bench]"`（安装 yc-bench CLI + SQLAlchemy）
-- 不需要 Modal —— 使用本地终端后端运行
-### 用于强化学习训练
+### 针对 RL 训练
 
-- `TINKER_API_KEY` — [Tinker](https://tinker.computer) 训练服务的 API 密钥
+- `TINKER_API_KEY` — 用于 [Tinker](https://tinker.computer) 训练服务的 API 密钥
 - `WANDB_API_KEY` — 用于 Weights & Biases 指标跟踪
-- `tinker-atropos` 子模块（位于仓库的 `tinker-atropos/` 目录下）
+- `tinker-atropos` 子模块 (位于仓库的 `tinker-atropos/` 目录下)
 
-关于 Agent 驱动的强化学习工作流，请参阅 [RL Training](/user-guide/features/rl-training)。
+关于 Agent 驱动的 RL 工作流，请参阅 [RL 训练](/user-guide/features/rl-training)。
 
 ## 目录结构
 
@@ -496,7 +496,7 @@ python my_env.py evaluate \
 environments/
 ├── hermes_base_env.py          # 抽象基类 (HermesAgentBaseEnv)
 ├── agent_loop.py               # 多轮 Agent 引擎 (HermesAgentLoop)
-├── tool_context.py             # 用于奖励函数的每次 rollout 工具访问
+├── tool_context.py             # 用于奖励函数的每轮工具访问
 ├── patches.py                  # Modal 后端的异步安全补丁
 │
 ├── tool_call_parsers/          # 阶段 2 客户端解析器
@@ -507,11 +507,11 @@ environments/
 │   ├── deepseek_v3_parser.py   # DeepSeek V3 格式
 │   └── ...                     # + kimi_k2, longcat, glm45/47 等
 │
-├── terminal_test_env/          # 堆栈验证（内联任务）
+├── terminal_test_env/          # 栈验证 (内联任务)
 ├── hermes_swe_env/             # SWE-bench 训练环境
 │
 └── benchmarks/                 # 评估基准
     ├── terminalbench_2/        # 89 个终端任务，Modal 沙盒
-    ├── tblite/                 # 100 个校准任务（快速的 TB2 代理）
+    ├── tblite/                 # 100 个校准任务 (快速的 TB2 代理)
     └── yc_bench/               # 长视野战略基准
 ```

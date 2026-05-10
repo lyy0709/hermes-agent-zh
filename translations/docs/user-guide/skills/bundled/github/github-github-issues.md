@@ -19,6 +19,7 @@ description: "通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues
 | 版本 | `1.1.0` |
 | 作者 | Hermes Agent |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Issues`, `Project-Management`, `Bug-Tracking`, `Triage` |
 | 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow) |
 
@@ -35,7 +36,7 @@ description: "通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues
 ## 先决条件
 
 - 已通过 GitHub 认证（参见 `github-auth` 技能）
-- 位于具有 GitHub 远程仓库的 git 仓库内，或明确指定仓库
+- 在具有 GitHub 远程仓库的 git 仓库内，或明确指定仓库
 
 ### 设置
 
@@ -63,7 +64,7 @@ REPO=$(echo "$OWNER_REPO" | cut -d/ -f2)
 
 ## 1. 查看 Issues
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue list
@@ -73,7 +74,7 @@ gh issue list --search "authentication error" --state all
 gh issue view 42
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 # 列出打开的 issues
@@ -123,7 +124,7 @@ for i in json.load(sys.stdin)['items']:
 
 ## 2. 创建 Issues
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue create \
@@ -143,7 +144,7 @@ Respect the ?next= query parameter." \
   --assignee "username"
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 curl -s -X POST \
@@ -198,14 +199,14 @@ curl -s -X POST \
 
 ### 添加/移除标签
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue edit 42 --add-label "priority:high,bug"
 gh issue edit 42 --remove-label "needs-triage"
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 # 添加标签
@@ -231,14 +232,14 @@ for l in json.load(sys.stdin):
 
 ### 分配
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue edit 42 --add-assignee username
 gh issue edit 42 --add-assignee @me
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 curl -s -X POST \
@@ -249,13 +250,13 @@ curl -s -X POST \
 
 ### 评论
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue comment 42 --body "Investigated — root cause is in auth middleware. Working on a fix."
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 curl -s -X POST \
@@ -266,7 +267,7 @@ curl -s -X POST \
 
 ### 关闭和重新打开
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue close 42
@@ -274,7 +275,7 @@ gh issue close 42 --reason "not planned"
 gh issue reopen 42
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
 # 关闭
@@ -302,13 +303,13 @@ Resolves #42
 
 要从 issue 创建分支：
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
 gh issue develop 42 --checkout
 ```
 
-**使用 git（手动等效）:**
+**使用 git（手动等效）：**
 
 ```bash
 git checkout main && git pull origin main
@@ -319,7 +320,7 @@ git checkout -b fix/issue-42-login-redirect
 
 当被要求分类 issues 时：
 
-1. **列出未分类的 issues:**
+1.  **列出未分类的 issues：**
 
 ```bash
 # 使用 gh
@@ -336,30 +337,27 @@ for i in json.load(sys.stdin):
         print(f\"#{i['number']}  {i['title']}\")"
 ```
 
-2. **阅读并分类** 每个 issue（查看详情，理解 bug/功能）
-
-3. **应用标签和优先级**（参见上面的“管理 Issues”）
-
-4. **分配** 如果负责人明确
-
-5. **如有需要，评论分类说明**
+2.  **阅读并分类**每个 issue（查看详情，理解 bug/功能）
+3.  **应用标签和优先级**（参见上面的“管理 Issues”）
+4.  **分配**如果负责人明确
+5.  **如有需要，评论分类说明**
 
 ## 5. 批量操作
 
 对于批量操作，将 API 调用与 shell 脚本结合：
 
-**使用 gh:**
+**使用 gh：**
 
 ```bash
-# 关闭所有具有特定标签的 issues
+# 关闭所有带有特定标签的 issues
 gh issue list --label "wontfix" --json number --jq '.[].number' | \
   xargs -I {} gh issue close {} --reason "not planned"
 ```
 
-**使用 curl:**
+**使用 curl：**
 
 ```bash
-# 列出具有某个标签的 issue 编号，然后逐个关闭
+# 列出带有标签的 issue 编号，然后逐个关闭
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/repos/$OWNER/$REPO/issues?labels=wontfix&state=open" \

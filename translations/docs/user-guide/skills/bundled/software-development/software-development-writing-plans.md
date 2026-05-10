@@ -1,14 +1,14 @@
 ---
-title: "编写计划 — 编写实现计划：小任务、路径、代码"
+title: "编写计划 — 撰写实现计划：细粒度任务、路径、代码"
 sidebar_label: "编写计划"
-description: "编写实现计划：小任务、路径、代码"
+description: "撰写实现计划：细粒度任务、路径、代码"
 ---
 
 {/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 编写计划
 
-编写实现计划：小任务、路径、代码。
+撰写实现计划：细粒度任务、路径、代码。
 
 ## 技能元数据
 
@@ -17,8 +17,9 @@ description: "编写实现计划：小任务、路径、代码"
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/software-development/writing-plans` |
 | 版本 | `1.1.0` |
-| 作者 | Hermes Agent（改编自 obra/superpowers） |
+| 作者 | Hermes Agent (改编自 obra/superpowers) |
 | 许可证 | MIT |
+| 平台 | linux, macos, windows |
 | 标签 | `planning`, `design`, `implementation`, `workflow`, `documentation` |
 | 相关技能 | [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
 
@@ -32,11 +33,11 @@ description: "编写实现计划：小任务、路径、代码"
 
 ## 概述
 
-编写全面的实现计划，假设实施者对代码库零上下文且品味存疑。记录他们所需的一切：要修改的文件、完整代码、测试命令、要检查的文档、如何验证。给他们小任务。DRY。YAGNI。TDD。频繁提交。
+编写全面的实现计划，假设实施者对代码库零了解且品味存疑。记录他们需要的一切：要修改的文件、完整代码、测试命令、需查阅的文档、验证方法。给他们细粒度的任务。遵循 DRY、YAGNI、TDD。频繁提交。
 
 假设实施者是一名熟练的开发人员，但对工具集或问题领域几乎一无所知。假设他们不太了解良好的测试设计。
 
-**核心原则：** 一个好的计划使实现变得显而易见。如果有人需要猜测，那么计划就是不完整的。
+**核心原则：** 一个好的计划让实现变得显而易见。如果有人需要猜测，那么计划就是不完整的。
 
 ## 何时使用
 
@@ -50,24 +51,24 @@ description: "编写实现计划：小任务、路径、代码"
 - 你计划自己实现（未来的你需要指导）
 - 独自工作（文档很重要）
 
-## 小任务粒度
+## 细粒度任务粒度
 
 **每个任务 = 2-5 分钟的专注工作。**
 
 每个步骤都是一个动作：
 - "编写失败的测试" — 步骤
-- "运行它以确保失败" — 步骤
+- "运行它以确认失败" — 步骤
 - "实现使测试通过的最少代码" — 步骤
-- "运行测试并确保通过" — 步骤
+- "运行测试并确认通过" — 步骤
 - "提交" — 步骤
 
 **太大：**
 ```markdown
-### 任务 1：构建身份验证系统
+### 任务 1：构建认证系统
 [5 个文件中的 50 行代码]
 ```
 
-**合适的大小：**
+**大小合适：**
 ```markdown
 ### 任务 1：创建带有 email 字段的 User 模型
 [10 行，1 个文件]
@@ -90,7 +91,7 @@ description: "编写实现计划：小任务、路径、代码"
 
 > **给 Hermes 的提示：** 使用 subagent-driven-development 技能按任务实现此计划。
 
-**目标：** [一句话描述构建的内容]
+**目标：** [一句话描述要构建什么]
 
 **架构：** [2-3 句话描述方法]
 
@@ -106,7 +107,7 @@ description: "编写实现计划：小任务、路径、代码"
 ````markdown
 ### 任务 N: [描述性名称]
 
-**目标：** 此任务完成什么（一句话）
+**目标：** 此任务要完成什么（一句话）
 
 **文件：**
 - 创建：`exact/path/to/new_file.py`
@@ -126,7 +127,7 @@ def test_specific_behavior():
 运行：`pytest tests/path/test.py::test_specific_behavior -v`
 预期：FAIL — "function not defined"
 
-**步骤 3：编写最少实现**
+**步骤 3：编写最小实现**
 
 ```python
 def function(input):
@@ -146,7 +147,7 @@ git commit -m "feat: add specific feature"
 ```
 ````
 
-## 编写过程
+## 编写流程
 
 ### 步骤 1：理解需求
 
@@ -170,7 +171,7 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 # 检查现有测试
 search_files("*.py", target="files", path="tests/")
 
-# 读取关键文件
+# 阅读关键文件
 read_file("src/app.py")
 ```
 
@@ -179,7 +180,7 @@ read_file("src/app.py")
 决定：
 - 架构模式
 - 文件组织
-- 所需的依赖项
+- 所需依赖
 - 测试策略
 
 ### 步骤 4：编写任务
@@ -194,20 +195,20 @@ read_file("src/app.py")
 ### 步骤 5：添加完整细节
 
 对于每个任务，包括：
-- **确切的文件路径**（不是"配置文件"，而是 `src/config/settings.py`）
-- **完整的代码示例**（不是"添加验证"，而是实际的代码）
+- **确切的文件路径**（不是"配置文件"而是 `src/config/settings.py`）
+- **完整的代码示例**（不是"添加验证"而是实际的代码）
 - **确切的命令**及预期输出
-- **验证步骤**，证明任务有效
+- **验证步骤**以证明任务有效
 
 ### 步骤 6：审查计划
 
 检查：
-- [ ] 任务是顺序且合乎逻辑的
-- [ ] 每个任务都是小型的（2-5 分钟）
+- [ ] 任务顺序合理且逻辑清晰
+- [ ] 每个任务都是细粒度的（2-5 分钟）
 - [ ] 文件路径是确切的
 - [ ] 代码示例是完整的（可复制粘贴）
 - [ ] 命令是确切的，并带有预期输出
-- [ ] 没有缺失的上下文
+- [ ] 没有遗漏上下文
 - [ ] 应用了 DRY、YAGNI、TDD 原则
 
 ### 步骤 7：保存计划
@@ -223,7 +224,7 @@ git commit -m "docs: add implementation plan for [feature]"
 
 ### DRY（不要重复自己）
 
-**不好：** 在 3 个地方复制粘贴验证
+**不好：** 在 3 个地方复制粘贴验证代码
 **好：** 提取验证函数，到处使用
 
 ### YAGNI（你不会需要它）
@@ -240,7 +241,7 @@ class User:
         self.preferences = {}  # 现在还不需要！
         self.metadata = {}     # 现在还不需要！
 
-# 好 — YAGNI
+# 好 — 遵循 YAGNI
 class User:
     def __init__(self, name, email):
         self.name = name
@@ -249,7 +250,7 @@ class User:
 
 ### TDD（测试驱动开发）
 
-每个产生代码的任务都应包含完整的 TDD 周期：
+每个产生代码的任务都应包含完整的 TDD 循环：
 1. 编写失败的测试
 2. 运行以验证失败
 3. 编写最少代码
@@ -269,17 +270,17 @@ git commit -m "type: description"
 
 ### 模糊的任务
 
-**不好：** "添加身份验证"
+**不好：** "添加认证"
 **好：** "创建带有 email 和 password_hash 字段的 User 模型"
 
 ### 不完整的代码
 
 **不好：** "步骤 1：添加验证函数"
-**好：** "步骤 1：添加验证函数"，后跟完整的函数代码
+**好：** "步骤 1：添加验证函数" 后跟完整的函数代码
 
 ### 缺少验证
 
-**不好：** "步骤 3：测试它是否有效"
+**不好：** "步骤 3：测试它是否工作"
 **好：** "步骤 3：运行 `pytest tests/test_auth.py -v`，预期：3 个通过"
 
 ### 缺少文件路径
@@ -291,10 +292,10 @@ git commit -m "type: description"
 
 保存计划后，提供执行方法：
 
-**"计划完成并已保存。准备使用 subagent-driven-development 执行 — 我将为每个任务分派一个新的子 Agent，并进行两阶段审查（规范符合性审查，然后是代码质量审查）。我可以继续吗？"**
+**"计划已完成并保存。准备使用 subagent-driven-development 执行 — 我将为每个任务分派一个新的子 Agent，并进行两阶段审查（规范符合性审查，然后是代码质量审查）。我可以继续吗？"**
 
 执行时，使用 `subagent-driven-development` 技能：
-- 每个任务使用新的 `delegate_task` 并附带完整上下文
+- 每个任务使用全新的 `delegate_task` 并提供完整上下文
 - 每个任务后进行规范符合性审查
 - 规范通过后进行代码质量审查
 - 仅在两次审查都批准后继续
@@ -302,7 +303,7 @@ git commit -m "type: description"
 ## 记住
 
 ```
-小任务（每个 2-5 分钟）
+细粒度任务（每个 2-5 分钟）
 确切的文件路径
 完整的代码（可复制粘贴）
 确切的命令及预期输出
@@ -311,4 +312,4 @@ DRY, YAGNI, TDD
 频繁提交
 ```
 
-**一个好的计划使实现变得显而易见。**
+**一个好的计划让实现变得显而易见。**

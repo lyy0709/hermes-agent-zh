@@ -20,19 +20,20 @@ vLLM：高吞吐量 LLM 服务、OpenAI API、量化。
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `vllm`, `torch`, `transformers` |
-| 标签 | `vLLM`, `推理服务`, `PagedAttention`, `连续批处理`, `高吞吐量`, `生产环境`, `OpenAI API`, `量化`, `张量并行` |
+| 平台 | linux, macos |
+| 标签 | `vLLM`, `Inference Serving`, `PagedAttention`, `Continuous Batching`, `High Throughput`, `Production`, `OpenAI API`, `Quantization`, `Tensor Parallelism` |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # vLLM - 高性能 LLM 服务
 
 ## 使用时机
 
-在部署生产环境 LLM API、优化推理延迟/吞吐量，或在 GPU 内存有限的情况下服务模型时使用。支持 OpenAI 兼容的端点、量化（GPTQ/AWQ/FP8）和张量并行。
+在部署生产级 LLM API、优化推理延迟/吞吐量，或在 GPU 内存有限的情况下服务模型时使用。支持 OpenAI 兼容的端点、量化（GPTQ/AWQ/FP8）和张量并行。
 
 ## 快速开始
 
@@ -71,7 +72,7 @@ print(client.chat.completions.create(
 
 ## 常见工作流
 
-### 工作流 1：生产环境 API 部署
+### 工作流 1：生产 API 部署
 
 复制此清单并跟踪进度：
 
@@ -114,7 +115,7 @@ vllm serve meta-llama/Llama-3-8B-Instruct \
 
 **步骤 2：使用有限流量进行测试**
 
-在生产环境前运行负载测试：
+在生产前运行负载测试：
 
 ```bash
 # 安装负载测试工具
@@ -124,7 +125,7 @@ pip install locust
 # 运行：locust -f test_load.py --host http://localhost:8000
 ```
 
-验证 TTFT（首次 Token 时间）< 500ms 且吞吐量 > 100 请求/秒。
+验证 TTFT（首 Token 时间）< 500ms 且吞吐量 > 100 请求/秒。
 
 **步骤 3：启用监控**
 
@@ -155,14 +156,14 @@ docker run --gpus all -p 8000:8000 \
 **步骤 5：验证性能指标**
 
 检查部署是否达到目标：
-- TTFT < 500ms（针对短提示词）
+- TTFT < 500ms（对于短提示词）
 - 吞吐量 > 目标请求/秒
 - GPU 利用率 > 80%
 - 日志中没有 OOM 错误
 
 ### 工作流 2：离线批量推理
 
-用于处理大型数据集，无需服务器开销。
+用于处理大型数据集而无需服务器开销。
 
 复制此清单：
 
@@ -207,7 +208,7 @@ sampling = SamplingParams(
 
 **步骤 3：运行批量推理**
 
-vLLM 自动批处理请求以提高效率：
+vLLM 自动对请求进行批处理以提高效率：
 
 ```python
 # 在一次调用中处理所有提示词
@@ -291,8 +292,8 @@ vllm serve TheBloke/Llama-2-70B-AWQ \
 ## 使用时机与替代方案对比
 
 **在以下情况下使用 vLLM：**
-- 部署生产环境 LLM API（100+ 请求/秒）
-- 服务 OpenAI 兼容的端点
+- 部署生产级 LLM API（100+ 请求/秒）
+- 提供 OpenAI 兼容的端点
 - GPU 内存有限但需要大型模型
 - 多用户应用程序（聊天机器人、助手）
 - 需要低延迟和高吞吐量
@@ -319,7 +320,7 @@ vllm serve MODEL \
 vllm serve MODEL --quantization awq
 ```
 
-**问题：首次 Token 慢（TTFT > 1 秒）**
+**问题：首 Token 慢（TTFT > 1 秒）**
 
 为重复的提示词启用前缀缓存：
 ```bash
@@ -347,11 +348,11 @@ vllm serve MODEL --max-num-seqs 512
 
 使用 `nvidia-smi` 检查 GPU 利用率 - 应 >80%。
 
-**问题：推理速度比预期慢**
+**问题：推理速度慢于预期**
 
-验证张量并行使用的是 2 的幂次方个 GPU：
+验证张量并行是否使用 2 的幂次方个 GPU：
 ```bash
-vllm serve MODEL --tensor-parallel-size 4  # 不是 3
+vllm serve MODEL --tensor-parallel-size 4  # 不要用 3
 ```
 
 启用推测解码以加速生成：
@@ -371,9 +372,9 @@ vllm serve MODEL --speculative-model DRAFT_MODEL
 
 ## 硬件要求
 
-- **小型模型（7B-13B）**：1x A10 (24GB) 或 A100 (40GB)
-- **中型模型（30B-40B）**：2x A100 (40GB)，使用张量并行
-- **大型模型（70B+）**：4x A100 (40GB) 或 2x A100 (80GB)，使用 AWQ/GPTQ
+- **小型模型（7B-13B）**：1x A10（24GB）或 A100（40GB）
+- **中型模型（30B-40B）**：2x A100（40GB）配合张量并行
+- **大型模型（70B+）**：4x A100（40GB）或 2x A100（80GB），使用 AWQ/GPTQ
 
 支持的平台：NVIDIA（主要）、AMD ROCm、Intel GPU、TPU
 

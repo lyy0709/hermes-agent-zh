@@ -1,25 +1,26 @@
 ---
-title: "Lambda Labs GPU 云 — 用于 ML 训练和推理的预留和按需 GPU 云实例"
+title: "Lambda Labs GPU 云 — 用于 ML 训练和推理的预留与按需 GPU 云实例"
 sidebar_label: "Lambda Labs GPU 云"
-description: "用于 ML 训练和推理的预留和按需 GPU 云实例"
+description: "用于 ML 训练和推理的预留与按需 GPU 云实例"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Lambda Labs GPU 云
 
-用于 ML 训练和推理的预留和按需 GPU 云实例。当您需要具有简单 SSH 访问、持久文件系统或用于大规模训练的高性能多节点集群的专用 GPU 实例时使用。
+用于 ML 训练和推理的预留与按需 GPU 云实例。当您需要具有简单 SSH 访问、持久化文件系统或用于大规模训练的高性能多节点集群的专用 GPU 实例时使用。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | Optional — 使用 `hermes skills install official/mlops/lambda-labs` 安装 |
+| 来源 | 可选 — 使用 `hermes skills install official/mlops/lambda-labs` 安装 |
 | 路径 | `optional-skills/mlops/lambda-labs` |
 | 版本 | `1.0.0` |
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `lambda-cloud-client>=1.0.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `Infrastructure`, `GPU Cloud`, `Training`, `Inference`, `Lambda Labs` |
 
 ## 参考：完整的 SKILL.md
@@ -30,22 +31,22 @@ description: "用于 ML 训练和推理的预留和按需 GPU 云实例"
 
 # Lambda Labs GPU 云
 
-在 Lambda Labs GPU 云上使用按需实例和 1-Click Clusters 运行 ML 工作负载的完整指南。
+关于在 Lambda Labs GPU 云上使用按需实例和 1-Click Clusters 运行 ML 工作负载的完整指南。
 
 ## 何时使用 Lambda Labs
 
 **在以下情况使用 Lambda Labs：**
-- 需要具有完全 SSH 访问权限的专用 GPU 实例
-- 运行长时间训练任务（数小时至数天）
+- 需要具有完整 SSH 访问权限的专用 GPU 实例
+- 运行长时间的训练任务（数小时至数天）
 - 希望获得简单定价且无出口费用
-- 需要跨会话的持久存储
+- 需要跨会话的持久化存储
 - 需要高性能多节点集群（16-512 个 GPU）
 - 希望使用预安装的 ML 堆栈（包含 PyTorch、CUDA、NCCL 的 Lambda Stack）
 
 **主要特性：**
-- **GPU 种类**：B200、H100、GH200、A100、A10、A6000、V100
+- **GPU 多样性**：B200、H100、GH200、A100、A10、A6000、V100
 - **Lambda Stack**：预安装 PyTorch、TensorFlow、CUDA、cuDNN、NCCL
-- **持久文件系统**：在实例重启间保留数据
+- **持久化文件系统**：在实例重启间保留数据
 - **1-Click Clusters**：具有 InfiniBand 的 16-512 GPU Slurm 集群
 - **简单定价**：按分钟付费，无出口费用
 - **全球区域**：全球 12+ 个区域
@@ -61,7 +62,7 @@ description: "用于 ML 训练和推理的预留和按需 GPU 云实例"
 ### 账户设置
 
 1. 在 https://lambda.ai 创建账户
-2. 添加付款方式
+2. 添加支付方式
 3. 从仪表板生成 API 密钥
 4. 添加 SSH 密钥（启动实例前必需）
 
@@ -71,7 +72,7 @@ description: "用于 ML 训练和推理的预留和按需 GPU 云实例"
 2. 点击 "Launch instance"
 3. 选择 GPU 类型和区域
 4. 选择 SSH 密钥
-5. （可选）附加文件系统
+5. 可选地附加文件系统
 6. 启动并等待 3-15 分钟
 
 ### 通过 SSH 连接
@@ -88,7 +89,7 @@ ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 
 ### 可用 GPU
 
-| GPU | VRAM | 价格/GPU/小时 | 最佳用途 |
+| GPU | 显存 | 价格/GPU/小时 | 最佳用途 |
 |-----|------|--------------|----------|
 | B200 SXM6 | 180 GB | $4.99 | 最大模型，最快训练 |
 | H100 SXM | 80 GB | $2.99-3.29 | 大模型训练 |
@@ -97,7 +98,7 @@ ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 | A100 80GB | 80 GB | $1.79 | 生产训练 |
 | A100 40GB | 40 GB | $1.29 | 标准训练 |
 | A10 | 24 GB | $0.75 | 推理，微调 |
-| A6000 | 48 GB | $0.80 | 良好的 VRAM/价格比 |
+| A6000 | 48 GB | $0.80 | 良好的显存/价格比 |
 | V100 | 16 GB | $0.55 | 预算训练 |
 
 ### 实例配置
@@ -232,8 +233,8 @@ keys = api.list_ssh_keys()
 # 删除密钥
 api.delete_ssh_key(key_id)
 ```
-
 ## 使用 curl 的 CLI
+
 ### 列出实例类型
 
 ```bash
@@ -279,8 +280,8 @@ python train.py --checkpoint-dir /lambda/nfs/my-storage/checkpoints
 
 ### 创建文件系统
 
-1.  进入 Lambda 控制台的 Storage 页面
-2.  点击 "Create filesystem"
+1.  进入 Lambda 控制台的存储页面
+2.  点击"创建文件系统"
 3.  选择区域（必须与实例区域匹配）
 4.  命名并创建
 
@@ -350,9 +351,9 @@ ssh -L 8888:localhost:8888 -L 6006:localhost:6006 ubuntu@<IP>
 
 ### 从控制台启动
 
-1.  进入 Instances 页面
-2.  点击 Cloud IDE 列中的 "Launch"
-3.  JupyterLab 将在浏览器中打开
+1.  进入实例页面
+2.  点击 Cloud IDE 列中的"启动"
+3.  JupyterLab 在浏览器中打开
 
 ### 手动访问
 
@@ -486,7 +487,7 @@ ip addr show | grep 'inet '
 ### 工作流 1：微调 LLM
 
 ```bash
-# 1. 启动带文件系统的 8x H100 实例
+# 1. 启动带有文件系统的 8x H100 实例
 
 # 2. SSH 连接并设置
 ssh ubuntu@<IP>
@@ -547,7 +548,7 @@ python inference.py \
 |-------|----------|
 | 实例无法启动 | 检查区域可用性，尝试不同的 GPU |
 | SSH 连接被拒绝 | 等待实例初始化（3-15 分钟） |
-| 终止后数据丢失 | 使用持久化文件系统 |
+| 终止后数据丢失 | 使用持久性文件系统 |
 | 数据传输缓慢 | 使用同一区域内的文件系统 |
 | 未检测到 GPU | 重启实例，检查驱动程序 |
 

@@ -8,7 +8,7 @@ description: "通过 Pydantic 验证从 LLM 响应中提取结构化数据，自
 
 # Instructor
 
-通过 Pydantic 验证从 LLM 响应中提取结构化数据，自动重试失败的提取，以类型安全的方式解析复杂的 JSON，并流式传输部分结果——使用经过实战检验的结构化输出库 Instructor。
+通过 Pydantic 验证从 LLM 响应中提取结构化数据，自动重试失败的提取，以类型安全的方式解析复杂的 JSON，并使用 Instructor 流式传输部分结果——这是一个经过实战检验的结构化输出库。
 
 ## 技能元数据
 
@@ -20,6 +20,7 @@ description: "通过 Pydantic 验证从 LLM 响应中提取结构化数据，自
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `instructor`, `pydantic`, `openai`, `anthropic` |
+| 平台 | linux, macos, windows |
 | 标签 | `Prompt Engineering`, `Instructor`, `Structured Output`, `Pydantic`, `Data Extraction`, `JSON Parsing`, `Type Safety`, `Validation`, `Streaming`, `OpenAI`, `Anthropic` |
 
 ## 参考：完整的 SKILL.md
@@ -32,13 +33,13 @@ description: "通过 Pydantic 验证从 LLM 响应中提取结构化数据，自
 
 ## 何时使用此技能
 
-在以下情况使用 Instructor：
+在以下情况下使用 Instructor：
 - 需要可靠地从 LLM 响应中**提取结构化数据**
 - 需要根据 Pydantic 模式**自动验证输出**
 - 需要**自动重试失败的提取**并处理错误
 - 需要以类型安全和验证的方式**解析复杂的 JSON**
-- 需要**流式传输部分结果**以进行实时处理
-- 需要**支持多个 LLM 提供商**并保持一致的 API
+- 需要为实时处理**流式传输部分结果**
+- 需要以一致的 API**支持多个 LLM 提供商**
 
 **GitHub 星标数**: 15,000+ | **实战检验**: 100,000+ 开发者
 
@@ -205,7 +206,7 @@ print(review.sentiment)  # Sentiment.POSITIVE
 
 ### 2. 验证
 
-Pydantic 自动验证 LLM 输出。如果验证失败，Instructor 会自动重试。
+Pydantic 会自动验证 LLM 输出。如果验证失败，Instructor 会重试。
 
 #### 内置验证器
 
@@ -294,7 +295,7 @@ user = client.messages.create(
 2.  Pydantic 进行验证
 3.  如果无效：错误信息发送回 LLM
 4.  LLM 根据错误反馈再次尝试
-5.  重复此过程，直到达到最大重试次数
+5.  重复此过程，最多重试 `max_retries` 次
 
 ### 4. 流式处理
 
@@ -406,7 +407,7 @@ response = client.chat.completions.create(
 )
 ```
 
-## 常见模式
+## 常用模式
 
 ### 模式 1：从文本中提取数据
 
@@ -556,9 +557,9 @@ class ImageContent(BaseModel):
 
 class Post(BaseModel):
     title: str
-    content: Union[TextContent, ImageContent]  # 任选一种类型
+    content: Union[TextContent, ImageContent]  # Either type
 
-# LLM 根据内容选择适当的类型
+# LLM chooses appropriate type based on content
 ```
 
 ### 动态模型
@@ -566,7 +567,7 @@ class Post(BaseModel):
 ```python
 from pydantic import create_model
 
-# 在运行时创建模型
+# Create model at runtime
 DynamicUser = create_model(
     'User',
     name=(str, ...),
@@ -585,22 +586,22 @@ user = client.messages.create(
 ### 自定义模式
 
 ```python
-# 适用于不支持原生结构化输出的提供商
+# For providers without native structured outputs
 client = instructor.from_anthropic(
     Anthropic(),
-    mode=instructor.Mode.JSON  # JSON 模式
+    mode=instructor.Mode.JSON  # JSON mode
 )
 
-# 可用模式：
-# - Mode.ANTHROPIC_TOOLS (Claude 推荐)
-# - Mode.JSON (备用)
-# - Mode.TOOLS (OpenAI 工具)
+# Available modes:
+# - Mode.ANTHROPIC_TOOLS (recommended for Claude)
+# - Mode.JSON (fallback)
+# - Mode.TOOLS (OpenAI tools)
 ```
 
 ### 上下文管理
 
 ```python
-# 单次使用的客户端
+# Single-use client
 with instructor.from_anthropic(Anthropic()) as client:
     result = client.messages.create(
         model="claude-sonnet-4-5-20250929",
@@ -608,7 +609,7 @@ with instructor.from_anthropic(Anthropic()) as client:
         messages=[...],
         response_model=YourModel
     )
-    # 客户端自动关闭
+    # Client closed automatically
 ```
 
 ## 错误处理
@@ -627,23 +628,23 @@ try:
         max_retries=3
     )
 except ValidationError as e:
-    print(f"重试后失败: {e}")
-    # 优雅地处理
+    print(f"Failed after retries: {e}")
+    # Handle gracefully
 
 except Exception as e:
-    print(f"API 错误: {e}")
+    print(f"API error: {e}")
 ```
 
 ### 自定义错误消息
 
 ```python
 class ValidatedUser(BaseModel):
-    name: str = Field(description="全名，2-100 个字符")
-    age: int = Field(description="年龄在 0 到 120 之间", ge=0, le=120)
-    email: EmailStr = Field(description="有效的电子邮件地址")
+    name: str = Field(description="Full name, 2-100 characters")
+    age: int = Field(description="Age between 0 and 120", ge=0, le=120)
+    email: EmailStr = Field(description="Valid email address")
 
     class Config:
-        # 自定义错误消息
+        # Custom error messages
         json_schema_extra = {
             "examples": [
                 {
@@ -660,15 +661,15 @@ class ValidatedUser(BaseModel):
 ### 1. 清晰的字段描述
 
 ```python
-# ❌ 不好：模糊
+# ❌ 差：模糊
 class Product(BaseModel):
     name: str
     price: float
 
 # ✅ 好：描述性
 class Product(BaseModel):
-    name: str = Field(description="文本中的产品名称")
-    price: float = Field(description="以美元计的价格，不带货币符号")
+    name: str = Field(description="Product name from the text")
+    price: float = Field(description="Price in USD, without currency symbol")
 ```
 
 ### 2. 使用适当的验证
@@ -676,8 +677,8 @@ class Product(BaseModel):
 ```python
 # ✅ 好：约束值
 class Rating(BaseModel):
-    score: int = Field(ge=1, le=5, description="1 到 5 星的评分")
-    review: str = Field(min_length=10, description="评论文本，至少 10 个字符")
+    score: int = Field(ge=1, le=5, description="Rating from 1 to 5 stars")
+    review: str = Field(min_length=10, description="Review text, at least 10 chars")
 ```
 
 ### 3. 在提示词中提供示例
@@ -685,9 +686,9 @@ class Rating(BaseModel):
 ```python
 messages = [{
     "role": "user",
-    "content": """从以下文本提取人员信息："John, 30, engineer"
+    "content": """Extract person info from: "John, 30, engineer"
 
-示例格式：
+Example format:
 {
   "name": "John Doe",
   "age": 30,
@@ -706,7 +707,7 @@ class Status(str, Enum):
     REJECTED = "rejected"
 
 class Application(BaseModel):
-    status: Status  # LLM 必须从枚举中选择
+    status: Status  # LLM must choose from enum
 ```
 
 ### 5. 优雅地处理缺失数据
@@ -717,7 +718,7 @@ class PartialData(BaseModel):
     optional_field: Optional[str] = None
     default_field: str = "default_value"
 
-# LLM 只需要提供 required_field
+# LLM only needs to provide required_field
 ```
 
 ## 与其他方案的比较
@@ -744,10 +745,10 @@ class PartialData(BaseModel):
 
 ## 资源
 
-- **文档**: https://python.useinstructor.com
-- **GitHub**: https://github.com/jxnl/instructor (15k+ stars)
-- **Cookbook**: https://python.useinstructor.com/examples
-- **Discord**: 提供社区支持
+- **文档**：https://python.useinstructor.com
+- **GitHub**：https://github.com/jxnl/instructor (15k+ stars)
+- **Cookbook**：https://python.useinstructor.com/examples
+- **Discord**：提供社区支持
 
 ## 另请参阅
 

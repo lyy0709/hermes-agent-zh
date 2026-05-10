@@ -20,7 +20,8 @@ description: "使用 torchtitan 提供 PyTorch 原生的分布式 LLM 预训练�
 | 作者 | Orchestra Research |
 | 许可证 | MIT |
 | 依赖项 | `torch>=2.6.0`, `torchtitan>=0.2.0`, `torchao>=0.5.0` |
-| 标签 | `模型架构`, `分布式训练`, `TorchTitan`, `FSDP2`, `张量并行`, `流水线并行`, `上下文并行`, `Float8`, `Llama`, `预训练` |
+| 平台 | linux, macos |
+| 标签 | `Model Architecture`, `Distributed Training`, `TorchTitan`, `FSDP2`, `Tensor Parallel`, `Pipeline Parallel`, `Context Parallel`, `Float8`, `Llama`, `Pretraining` |
 
 ## 参考：完整的 SKILL.md
 
@@ -67,7 +68,7 @@ CONFIG_FILE="./torchtitan/models/llama3/train_configs/llama3_8b.toml" ./run_trai
 - [ ] 步骤 1：下载分词器
 - [ ] 步骤 2：配置训练
 - [ ] 步骤 3：启动训练
-- [ ] 步骤 4：监控和检查点
+- [ ] 步骤 4：监控和保存检查点
 ```
 
 **步骤 1：下载分词器**
@@ -81,7 +82,7 @@ python scripts/download_hf_assets.py \
 
 **步骤 2：配置训练**
 
-编辑或创建 TOML 配置文件：
+编辑或创建一个 TOML 配置文件：
 
 ```toml
 # llama3_8b_custom.toml
@@ -127,13 +128,13 @@ interval = 500
 # 单节点 8 个 GPU
 CONFIG_FILE="./llama3_8b_custom.toml" ./run_train.sh
 
-# 或显式使用 torchrun
+# 或者显式使用 torchrun
 torchrun --nproc_per_node=8 \
   -m torchtitan.train \
   --job.config_file ./llama3_8b_custom.toml
 ```
 
-**步骤 4：监控和检查点**
+**步骤 4：监控和保存检查点**
 
 TensorBoard 日志保存到 `./outputs/tb/`：
 ```bash
@@ -144,15 +145,15 @@ tensorboard --logdir ./outputs/tb
 
 ```
 多节点训练：
-- [ ] 步骤 1：为扩展配置并行策略
+- [ ] 步骤 1：为规模配置并行策略
 - [ ] 步骤 2：设置 SLURM 脚本
-- [ ] 步骤 3：提交作业
+- [ ] 步骤 3：提交任务
 - [ ] 步骤 4：从检查点恢复
 ```
 
-**步骤 1：为扩展配置并行策略**
+**步骤 1：为规模配置并行策略**
 
-对于 256 个 GPU（32 个节点）上的 70B 模型：
+对于在 256 个 GPU（32 个节点）上的 70B 模型：
 ```toml
 [parallelism]
 data_parallel_shard_degree = 32  # 跨 32 个 rank 的 FSDP
@@ -179,7 +180,7 @@ srun torchrun \
   --job.config_file ./llama3_70b.toml
 ```
 
-**步骤 3：提交作业**
+**步骤 3：提交任务**
 
 ```bash
 sbatch multinode_trainer.slurm
@@ -191,7 +192,7 @@ sbatch multinode_trainer.slurm
 
 ### 工作流 3：为 H100 启用 Float8 训练
 
-Float8 在 H100 GPU 上可提供 30-50% 的加速。
+Float8 在 H100 GPU 上提供 30-50% 的加速。
 
 ```
 Float8 训练：
@@ -260,7 +261,7 @@ NGPU=1 CONFIG_FILE=./llama3_405b.toml ./run_train.sh \
 data_parallel_shard_degree = 8   # FSDP
 tensor_parallel_degree = 8       # 节点内的 TP
 pipeline_parallel_degree = 8     # 跨节点的 PP
-context_parallel_degree = 1      # 用于长序列的 CP
+context_parallel_degree = 1      # 针对长序列的 CP
 
 [training]
 local_batch_size = 32
@@ -298,13 +299,13 @@ srun torchrun --nnodes=64 --nproc_per_node=8 \
 启用激活检查点并减小批次大小：
 ```toml
 [activation_checkpoint]
-mode = "full"  # 替代 "selective"
+mode = "full"  # 而不是 "selective"
 
 [training]
 local_batch_size = 1
 ```
 
-或使用梯度累积：
+或者使用梯度累积：
 ```toml
 [training]
 local_batch_size = 1
@@ -348,7 +349,7 @@ python -m torch.distributed.checkpoint.format_utils \
 | DeepSeek V3 | 16B, 236B, 671B (MoE) | 实验性 |
 | GPT-OSS | 20B, 120B (MoE) | 实验性 |
 | Qwen 3 | 多种 | 实验性 |
-| Flux | 扩散模型 | 实验性 |
+| Flux | Diffusion | 实验性 |
 
 ## 性能基准（H100）
 
@@ -371,7 +372,7 @@ python -m torch.distributed.checkpoint.format_utils \
 
 ## 资源
 
-- GitHub：https://github.com/pytorch/torchtitan
-- 论文：https://arxiv.org/abs/2410.06511
-- ICLR 2025：https://iclr.cc/virtual/2025/poster/29620
-- PyTorch 论坛：https://discuss.pytorch.org/c/distributed/torchtitan/44
+- GitHub: https://github.com/pytorch/torchtitan
+- 论文: https://arxiv.org/abs/2410.06511
+- ICLR 2025: https://iclr.cc/virtual/2025/poster/29620
+- PyTorch 论坛: https://discuss.pytorch.org/c/distributed/torchtitan/44

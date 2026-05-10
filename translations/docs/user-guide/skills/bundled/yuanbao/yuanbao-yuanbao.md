@@ -1,14 +1,14 @@
 ---
-title: "Yuanbao — Yuanbao（元宝）群组：@提及用户，查询信息/成员"
+title: "Yuanbao — Yuanbao（元宝）群组：@提及用户、查询信息/成员"
 sidebar_label: "Yuanbao"
-description: "Yuanbao（元宝）群组：@提及用户，查询信息/成员"
+description: "Yuanbao（元宝）群组：@提及用户、查询信息/成员"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Yuanbao
 
-Yuanbao（元宝）群组：@提及用户，查询信息/成员。
+Yuanbao（元宝）群组：@提及用户、查询信息/成员。
 
 ## 技能元数据
 
@@ -17,6 +17,7 @@ Yuanbao（元宝）群组：@提及用户，查询信息/成员。
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/yuanbao` |
 | 版本 | `1.0.0` |
+| 平台 | linux, macos, windows |
 | 标签 | `yuanbao`, `mention`, `at`, `group`, `members`, `元宝`, `派`, `艾特` |
 
 ## 参考：完整的 SKILL.md
@@ -41,7 +42,7 @@ Yuanbao（元宝）群组：@提及用户，查询信息/成员。
 |------|------------|
 | `yb_query_group_info` | 查询群组名称、群主、成员数量 |
 | `yb_query_group_members` | 查找用户、列出机器人、列出所有成员，或获取用于 @提及的昵称 |
-| `yb_send_dm` | 向用户发送私信/直接消息（DM / 私信），可选择附带媒体文件 |
+| `yb_send_dm` | 向用户发送私信/直接消息（DM / 私信），可附带媒体文件 |
 
 ## @提及工作流
 
@@ -49,7 +50,7 @@ Yuanbao（元宝）群组：@提及用户，查询信息/成员。
 
 1.  调用 `yb_query_group_members`，参数为 `action="find"`, `name="<目标名称>"`, `mention=true`
 2.  从响应中获取确切的昵称
-3.  在你的回复文本中包含 `@昵称`——消息网关会处理其余部分
+3.  在你的回复文本中包含 `@昵称` —— 消息网关会处理其余部分
 
 示例：用户说“帮我艾特元宝”
 
@@ -58,7 +59,7 @@ Yuanbao（元宝）群组：@提及用户，查询信息/成员。
 { "group_code": "328306697", "action": "find", "name": "元宝", "mention": true }
 ```
 
-步骤 2 — 你的回复（此内容将作为带有有效 @提及的消息发送到群组）：
+步骤 2 — 你的回复（此消息将被发送到群组，并附带有效的 @提及）：
 ```
 @元宝 你好，有人找你！
 ```
@@ -68,7 +69,7 @@ Yuanbao（元宝）群组：@提及用户，查询信息/成员。
 **规则：**
 - 先调用 `yb_query_group_members` 获取确切的昵称——**不要**猜测
 - @提及格式：`@昵称`，@符号前有一个空格
-- 你的回复文本**就是**消息——它**会被发送**，并且 @提及**会生效**
+- 你的回复文本**就是**消息——它**将**被发送，@提及**将**生效
 - 保持简洁。**不要**向用户解释 @提及的工作原理。
 
 ## 发送私信工作流
@@ -85,7 +86,7 @@ Yuanbao（元宝）群组：@提及用户，查询信息/成员。
 yb_send_dm({ "group_code": "535168412", "name": "用户aea3", "message": "hello" })
 ```
 
-带媒体的示例：用户说“给 @用户aea3 私信发一张图片”
+附带媒体的示例：用户说“给 @用户aea3 私信发一张图片”
 
 ```json
 yb_send_dm({
@@ -97,8 +98,8 @@ yb_send_dm({
 ```
 
 **规则：**
-- 从当前 `chat_id` 中提取 `group_code`（例如 `group:535168412` → `535168412`）
-- 如果你已经知道 `user_id`，可以直接通过 `user_id` 参数传递以跳过查找
+- 从当前 chat_id 中提取 `group_code`（例如 `group:535168412` → `535168412`）
+- 如果你已经知道 user_id，可以直接通过 `user_id` 参数传递以跳过查找
 - 如果多个用户匹配该名称，工具会返回候选列表——请用户澄清
 - **不要**使用 `send_message` 工具发送 Yuanbao 私信——请使用 `yb_send_dm`
 - 支持媒体：图片（.jpg/.png/.gif/.webp/.bmp）作为图片消息发送，其他文件作为文档发送
@@ -119,6 +120,6 @@ yb_query_group_info({ "group_code": "328306697" })
 
 ## 注意事项
 
-- `group_code` 来自 `chat_id`：`group:328306697` → `328306697`
+- `group_code` 来自 chat_id：`group:328306697` → `328306697`
 - 在 Yuanbao 应用中，群组被称为“派 (Pai)”
 - 成员角色：`user`, `yuanbao_ai`, `bot`

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 3
 title: "Agent 循环内部机制"
-description: "详细解析 AIAgent 的执行流程、API 模式、工具、回调及回退行为"
+description: "详细解析 AIAgent 的执行过程、API 模式、工具、回调以及回退行为"
 ---
 
 # Agent 循环内部机制
 
-核心编排引擎是 `run_agent.py` 中的 `AIAgent` 类——大约 13,700 行代码，负责处理从提示词组装到工具分发再到提供商故障转移的一切事务。
+核心编排引擎是 `run_agent.py` 中的 `AIAgent` 类——一个庞大的文件（超过 15,000 行），负责处理从提示词组装到工具分发再到提供商故障转移的一切事务。
 
 ## 核心职责
 
@@ -14,11 +14,11 @@ description: "详细解析 AIAgent 的执行流程、API 模式、工具、回�
 
 - 通过 `prompt_builder.py` 组装有效的系统提示词和工具模式
 - 选择正确的提供商/API 模式（`chat_completions`、`codex_responses`、`anthropic_messages`）
-- 发起可中断的模型调用（支持取消操作）
+- 发起可中断的模型调用并支持取消操作
 - 执行工具调用（通过线程池顺序或并发执行）
 - 以 OpenAI 消息格式维护对话历史
 - 处理压缩、重试和回退模型切换
-- 跟踪父 Agent 和子 Agent 的迭代预算
+- 跟踪父 Agent 和子 Agent 之间的迭代预算
 - 在上下文丢失前刷新持久化记忆
 
 ## 两个入口点
@@ -27,7 +27,7 @@ description: "详细解析 AIAgent 的执行流程、API 模式、工具、回�
 # 简单接口 —— 返回最终响应字符串
 response = agent.chat("修复 main.py 中的 bug")
 
-# 完整接口 —— 返回包含消息、元数据、使用统计的字典
+# 完整接口 —— 返回包含消息、元数据、使用统计信息的字典
 result = agent.run_conversation(
     user_message="修复 main.py 中的 bug",
     system_message=None,           # 如果省略则自动构建
@@ -36,7 +36,7 @@ result = agent.run_conversation(
 )
 ```
 
-`chat()` 是 `run_conversation()` 的一个薄包装层，它从结果字典中提取 `final_response` 字段。
+`chat()` 是 `run_conversation()` 的一个薄包装，它从结果字典中提取 `final_response` 字段。
 
 ## API 模式
 
@@ -44,15 +44,15 @@ Hermes 支持三种 API 执行模式，根据提供商选择、显式参数和�
 
 | API 模式 | 用于 | 客户端类型 |
 |----------|----------|-------------|
-| `chat_completions` | OpenAI 兼容端点（OpenRouter、自定义、大多数提供商） | `openai.OpenAI` |
+| `chat_completions` | OpenAI 兼容的端点（OpenRouter、自定义、大多数提供商） | `openai.OpenAI` |
 | `codex_responses` | OpenAI Codex / Responses API | `openai.OpenAI`（使用 Responses 格式） |
-| `anthropic_messages` | 原生 Anthropic Messages API | `anthropic.Anthropic`（通过适配器） |
+| `anthropic_messages` | 原生 Anthropic Messages API | 通过适配器使用 `anthropic.Anthropic` |
 
 模式决定了消息的格式化方式、工具调用的结构、响应的解析方式以及缓存/流式传输的工作方式。在 API 调用前后，所有三种模式都会收敛到相同的内部消息格式（OpenAI 风格的 `role`/`content`/`tool_calls` 字典）。
 
 **模式解析顺序：**
 1. 显式的 `api_mode` 构造函数参数（最高优先级）
-2. 提供商特定检测（例如，`anthropic` 提供商 → `anthropic_messages`）
+2. 特定于提供商的检测（例如，`anthropic` 提供商 → `anthropic_messages`）
 3. 基础 URL 启发式规则（例如，`api.anthropic.com` → `anthropic_messages`）
 4. 默认：`chat_completions`
 
@@ -66,12 +66,12 @@ run_conversation()
   2. 将用户消息追加到对话历史
   3. 构建或重用缓存的系统提示词（prompt_builder.py）
   4. 检查是否需要预检压缩（>50% 上下文）
-  5. 从对话历史构建 API 消息
+  5. 根据对话历史构建 API 消息
      - chat_completions: 直接使用 OpenAI 格式
      - codex_responses: 转换为 Responses API 输入项
      - anthropic_messages: 通过 anthropic_adapter.py 转换
   6. 注入临时提示词层（预算警告、上下文压力）
-  7. 如果在 Anthropic 上，则应用提示词缓存标记
+  7. 如果使用 Anthropic，则应用提示词缓存标记
   8. 发起可中断的 API 调用（_interruptible_api_call）
   9. 解析响应：
      - 如果包含 tool_calls：执行它们，追加结果，循环回到步骤 5
@@ -99,7 +99,7 @@ Agent 循环强制执行严格的消息角色交替：
 - 工具调用期间：`助手（带 tool_calls）→ 工具 → 工具 → ... → 助手`
 - **绝不**连续出现两个助手消息
 - **绝不**连续出现两个用户消息
-- **只有** `tool` 角色可以有连续条目（并行工具结果）
+- **只有** `tool` 角色可以连续出现（并行工具结果）
 
 提供商会验证这些序列，并拒绝格式错误的历史记录。
 
@@ -112,9 +112,9 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 │  主线程                    API 线程                │
 │                                                    │
 │   等待：                     HTTP POST             │
-│     - 响应就绪      ───▶    发送给提供商           │
-│     - 中断事件                                     │
-│     - 超时                                         │
+│     - 响应就绪      ───▶    发送到提供商           │
+│     - 中断事件                                    │
+│     - 超时                                        │
 └────────────────────────────────────────────────────┘
 ```
 
@@ -141,7 +141,7 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
     1. 从 tools/registry.py 解析处理器
     2. 触发 pre_tool_call 插件钩子
     3. 检查是否为危险命令（tools/approval.py）
-       - 如果是危险的：调用 approval_callback，等待用户确认
+       - 如果是危险的：调用 approval_callback，等待用户
     4. 使用 args + task_id 执行处理器
     5. 触发 post_tool_call 插件钩子
     6. 将 {"role": "tool", "content": result} 追加到历史记录
@@ -149,7 +149,7 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 
 ### Agent 级工具
 
-有些工具在到达 `handle_function_call()` 之前，会被 `run_agent.py` **拦截**：
+有些工具在到达 `handle_function_call()` 之前被 `run_agent.py` **拦截**：
 
 | 工具 | 为何被拦截 |
 |------|--------------------|
@@ -162,7 +162,7 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 
 ## 回调接口
 
-`AIAgent` 支持特定于平台的回调，这些回调能够在 CLI、消息网关和 ACP 集成中实现实时进度显示：
+`AIAgent` 支持特定于平台的回调，这些回调能在 CLI、消息网关和 ACP 集成中实现实时进度显示：
 
 | 回调 | 触发时机 | 使用者 |
 |----------|-----------|---------|
@@ -198,7 +198,7 @@ Agent 通过 `IterationBudget` 跟踪迭代次数：
 
 ## 压缩和持久化
 
-### 压缩触发时机
+### 何时触发压缩
 
 - **预检**（API 调用前）：如果对话超过模型上下文窗口的 50%
 - **消息网关自动压缩**：如果对话超过 85%（更激进，在轮次之间运行）
@@ -222,9 +222,9 @@ Agent 通过 `IterationBudget` 跟踪迭代次数：
 
 | 文件 | 用途 |
 |------|---------|
-| `run_agent.py` | AIAgent 类 —— 完整的 Agent 循环（约 13,700 行） |
-| `agent/prompt_builder.py` | 从记忆、技能、上下文文件、灵魂（人格）组装系统提示词 |
-| `agent/context_engine.py` | ContextEngine ABC —— 可插拔的上下文管理 |
+| `run_agent.py` | AIAgent 类 —— 完整的 Agent 循环 |
+| `agent/prompt_builder.py` | 从记忆、技能、上下文文件、人格组装系统提示词 |
+| `agent/context_engine.py` | ContextEngine 抽象基类 —— 可插拔的上下文管理 |
 | `agent/context_compressor.py` | 默认引擎 —— 有损摘要算法 |
 | `agent/prompt_caching.py` | Anthropic 提示词缓存标记和缓存指标 |
 | `agent/auxiliary_client.py` | 用于辅助任务的辅助 LLM 客户端（视觉、摘要） |
