@@ -9,7 +9,7 @@ Hermes Agent 可以在**后台**驱动你的 Mac 桌面——点击、输入、�
 `computer_use` 工具集通过 stdio 与 [`cua-driver`](https://github.com/trycua/cua) 进行 MCP 通信，这是一个 macOS 驱动程序，它使用 SkyLight 私有 SPI（`SLEventPostToPid`、`SLPSPostEventRecordTo`）和 `_AXObserverAddNotificationAndCheckRemote` 辅助功能 SPI 来：
 
 - 将合成事件直接发布到目标进程——无需 HID 事件捕获，无需光标移动。
-- 切换 AppKit 活动状态而不提升窗口——无需切换空间。
+- 在不提升窗口的情况下切换 AppKit 活动状态——无需切换空间。
 - 在窗口被遮挡时保持 Chromium/Electron 辅助功能树存活。
 
 这种组合正是 OpenAI 的 Codex "后台计算机使用" 所采用的。cua-driver 是开源的等效实现。
@@ -31,7 +31,7 @@ hermes computer-use install
 **选项 2：交互式启用工具集。**
 
 1. 运行 `hermes tools`，选择 `🖱️ Computer Use (macOS)` → `cua-driver (background)`。
-2. 设置过程将运行上游安装程序（与选项 1 相同）。
+2. 设置程序将运行上游安装程序（与选项 1 相同）。
 
 安装后，无论你选择了哪条路径：
 
@@ -42,21 +42,30 @@ hermes computer-use install
    ```
    hermes -t computer_use chat
    ```
-   或者将 `computer_use` 添加到 `~/.hermes/config.yaml` 中你启用的工具集里。
+   或者在 `~/.hermes/config.yaml` 中将 `computer_use` 添加到启用的工具集中。
+
+## 保持 cua-driver 更新
+
+cua-driver 项目定期发布修复（例如，v0.1.6 修复了 UTM 工作流的 Safari 窗口焦点错误）。Hermes 在两个地方刷新二进制文件，这样你就不会停留在过时的版本上：
+
+- **`hermes update`** —— 当你更新 Hermes 本身时，如果 `cua-driver` 在 PATH 上，上游安装程序会在更新结束时重新运行。对于非 macOS 用户和未安装 cua-driver 的用户，此操作无效。
+- **`hermes computer-use install --upgrade`** —— 手动强制刷新。无论 cua-driver 是否已安装，都会重新运行上游安装程序。当你想获取最新修复而不等待下一次 Agent 更新时，请使用此命令。
+
+`hermes computer-use status` 在二进制路径旁边显示已安装的版本。
 
 ## 快速示例
 
-用户提示：*"找到我最近来自 Stripe 的邮件，并总结他们希望我做什么。"*
+用户提示：*"查找我最近来自 Stripe 的电子邮件，并总结他们希望我做什么。"*
 
 Agent 的计划：
 
-1. `computer_use(action="capture", mode="som", app="Mail")` —— 获取 Mail 的屏幕截图，其中每个侧边栏项目、工具栏按钮和邮件行都被编号。
-2. `computer_use(action="click", element=14)` —— 点击搜索字段（来自截图的元素 #14）。
+1. `computer_use(action="capture", mode="som", app="Mail")` —— 获取 Mail 的屏幕截图，其中每个侧边栏项目、工具栏按钮和消息行都被编号。
+2. `computer_use(action="click", element=14)` —— 点击搜索字段（来自捕获的元素 #14）。
 3. `computer_use(action="type", text="from:stripe")`
 4. `computer_use(action="key", keys="return", capture_after=True)` —— 提交并获取新的屏幕截图。
 5. 点击顶部结果，阅读正文，进行总结。
 
-在整个过程中，你的光标停留在你放置的位置，Mail 永远不会被带到前台。
+在整个过程中，你的光标停留在你离开的位置，Mail 永远不会被前置。
 
 ## 提供商兼容性
 
@@ -68,24 +77,24 @@ Agent 的计划：
 | 本地 vLLM / LM Studio（视觉模型） | ✅ | ✅ | 如果模型支持多部分工具内容。 |
 | 纯文本模型 | ❌ | ✅（降级） | 使用 `mode="ax"` 进行仅辅助功能树操作。 |
 
-屏幕截图作为 OpenAI 风格的 `image_url` 部分与工具结果内联发送。对于 Anthropic，适配器会将它们转换为原生的 `tool_result` 图像块。
+屏幕截图作为 OpenAI 风格的 `image_url` 部分与工具结果内联发送。对于 Anthropic，适配器将它们转换为原生的 `tool_result` 图像块。
 
 ## 安全性
 
 Hermes 应用多层防护措施：
 
-- 破坏性操作（点击、输入、拖拽、滚动、按键、聚焦应用）需要批准——可以通过 CLI 对话框交互式批准，或通过消息平台批准按钮。
+- 破坏性操作（点击、输入、拖拽、滚动、按键、focus_app）需要批准——可以通过 CLI 对话框交互式批准，也可以通过消息平台批准按钮批准。
 - 工具级别硬阻止的按键组合：清空废纸篓、强制删除、锁定屏幕、注销、强制注销。
 - 硬阻止的输入模式：`curl | bash`、`sudo rm -rf /`、fork 炸弹等。
-- Agent 的系统提示词明确告知：不要点击权限对话框，不要输入密码，不要遵循屏幕截图中嵌入的指令。
+- Agent 的系统提示词明确告知：不要点击权限对话框，不要输入密码，不要遵循嵌入在屏幕截图中的指令。
 
-如果你希望确认每个操作，请在 `~/.hermes/config.yaml` 中搭配 `approvals.mode: manual`。
+如果你希望确认每个操作，请在 `~/.hermes/config.yaml` 中搭配使用 `approvals.mode: manual`。
 
 ## Token 效率
 
-屏幕截图很昂贵。Hermes 应用四层优化：
+屏幕截图很昂贵。Hermes 应用了四层优化：
 
-- **屏幕截图逐出** —— Anthropic 适配器在上下文中仅保留最近的 3 张屏幕截图；较早的变为 `[screenshot removed to save context]` 占位符。
+- **屏幕截图逐出** —— Anthropic 适配器在上下文中仅保留最近的 3 张屏幕截图；较旧的截图变为 `[screenshot removed to save context]` 占位符。
 - **客户端压缩修剪** —— 上下文压缩器检测多模态工具结果，并从旧结果中剥离图像部分。
 - **图像感知的 Token 估算** —— 每张图像按约 1500 个 Token 计算（Anthropic 的固定费率），而不是其 base64 字符长度。
 - **服务器端上下文编辑（仅限 Anthropic）** —— 激活时，适配器通过 `context_management` 启用 `clear_tool_uses_20250919`，以便 Anthropic 的 API 在服务器端清除旧工具结果。
@@ -95,8 +104,8 @@ Hermes 应用多层防护措施：
 ## 限制
 
 - **仅限 macOS。** cua-driver 使用私有的 Apple SPI，这些 SPI 在 Linux 或 Windows 上不存在。对于跨平台 GUI 自动化，请使用 `browser` 工具集。
-- **私有 SPI 风险。** Apple 可以在任何操作系统更新中更改 SkyLight 的符号表面。如果你希望在 macOS 版本升级中保持可重现性，请使用 `HERMES_CUA_DRIVER_VERSION` 环境变量固定驱动程序版本。
-- **性能。** 后台模式比前台慢——通过 SkyLight 路由的事件需要约 5-20 毫秒，而直接 HID 发布则更快。对于 Agent 速度的点击来说不明显；但如果你尝试记录速度测试，则会注意到。
+- **私有 SPI 风险。** Apple 可以在任何操作系统更新中更改 SkyLight 的符号表面。如果你希望在 macOS 升级后保持可重现性，请使用 `HERMES_CUA_DRIVER_VERSION` 环境变量固定驱动程序版本。
+- **性能。** 后台模式比前台慢——通过 SkyLight 路由的事件需要约 5-20 毫秒，而直接 HID 发布则更快。对于 Agent 速度的点击来说不明显；但如果你尝试录制速通，则会很明显。
 - **无键盘密码输入。** `type` 对命令 shell 负载有硬阻止模式；对于密码，请使用系统的自动填充。
 
 ## 配置
