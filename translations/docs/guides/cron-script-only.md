@@ -1,14 +1,14 @@
 ---
 sidebar_position: 13
 title: "纯脚本定时任务（无需 LLM）"
-description: "经典的看门狗定时任务，完全跳过 LLM —— 脚本按计划运行，其标准输出会发送到您的消息平台。内存警报、磁盘警报、CI 通知、定期健康检查。"
+description: "经典的看门狗定时任务，完全跳过 LLM —— 脚本按计划运行，其标准输出会发送到您的消息平台。内存警报、磁盘警报、CI 状态推送、定期健康检查。"
 ---
 
 # 纯脚本定时任务
 
-有时您已经确切知道要发送什么消息。您不需要 Agent 来推理 —— 您只需要一个脚本在定时器上运行，并将其输出（如果有的话）发送到 Telegram / Discord / Slack / Signal。
+有时您已经确切地知道要发送什么消息。您不需要 Agent 来推理 —— 您只需要一个脚本定时运行，并将其输出（如果有的话）发送到 Telegram / Discord / Slack / Signal。
 
-Hermes 将此称为 **无 Agent 模式**。它是去除了 LLM 的定时任务系统。
+Hermes 将此称为 **无 Agent 模式**。这是去除了 LLM 的定时任务系统。
 
 ```
    ┌──────────────────┐          ┌──────────────────┐
@@ -16,18 +16,18 @@ Hermes 将此称为 **无 Agent 模式**。它是去除了 LLM 的定时任务�
    │ （每 N 分钟）    │ ──────▶ │ （bash 或 python）│
    └──────────────────┘          └──────────────────┘
                                           │
-                                          │ 标准输出
+                                          │ stdout
                                           ▼
                                  ┌──────────────────┐
-                                 │ 投递路由器       │
+                                 │ 投递路由器        │
                                  │ (telegram/disc…) │
                                  └──────────────────┘
 ```
 
-- **无需 LLM 调用。** 零 Token，零 Agent 循环，零模型开销。
-- **脚本即任务。** 脚本决定是否发出警报。产生输出 → 消息被发送。无输出 → 静默触发。
+- **无需调用 LLM。** 零 Token，零 Agent 循环，零模型开销。
+- **脚本即任务。** 脚本决定是否发出警报。有输出 → 发送消息。无输出 → 静默触发。
 - **Bash 或 Python。** `.sh` / `.bash` 文件在 `/bin/bash` 下运行；任何其他扩展名的文件在当前 Python 解释器下运行。`~/.hermes/scripts/` 目录下的任何文件都被接受。
-- **相同的调度器。** 与 LLM 任务一起位于 `cronjob` 中 —— 暂停、恢复、列表、日志和投递目标都以相同的方式工作。
+- **相同的调度器。** 与 LLM 任务一起位于 `cronjob` 中 —— 暂停、恢复、列出、日志和投递目标设置的工作方式完全相同。
 
 ## 何时使用
 
@@ -35,11 +35,11 @@ Hermes 将此称为 **无 Agent 模式**。它是去除了 LLM 的定时任务�
 
 - **内存 / 磁盘 / GPU 看门狗。** 每 5 分钟运行一次，仅在超过阈值时发出警报。
 - **CI 钩子。** 部署完成 → 发布提交 SHA。构建失败 → 发送日志的最后 100 行。
-- **定期指标。** "每日 Stripe 收入（上午 9 点）" 作为一个简单的 API 调用 + 美化打印。
+- **定期指标。** "每日 Stripe 收入（上午 9 点）" 作为一个简单的 API 调用 + 美化输出。
 - **外部事件轮询器。** 检查 API，状态变化时发出警报。
 - **心跳。** 每 N 分钟向仪表板发送一次 ping 以证明主机存活。
 
-当您需要 Agent **决定**说什么时 —— 例如总结长文档、从信息流中挑选有趣的项目、起草人性化的消息 —— 请使用普通（LLM 驱动）的定时任务。无 Agent 路径适用于脚本的标准输出本身就是要发送的消息的情况。
+当您需要 Agent **决定**说什么时 —— 例如总结长文档、从信息流中挑选有趣的项目、起草人性化的消息 —— 请使用普通的（LLM 驱动的）定时任务。无 Agent 路径适用于脚本的标准输出本身就是要发送的消息的情况。
 
 ## 通过聊天创建
 
@@ -47,9 +47,9 @@ Hermes 将此称为 **无 Agent 模式**。它是去除了 LLM 的定时任务�
 
 ### 示例对话
 
-> **您：** 如果 RAM 超过 85%，每 5 分钟在 telegram 上 ping 我一次
+> **您：** 如果 RAM 超过 85%，每 5 分钟在 Telegram 上 ping 我一次
 >
-> **Hermes：** *(写入 `~/.hermes/scripts/memory-watchdog.sh`，然后调用 `cronjob(...)` 并设置 `no_agent=true`)*
+> **Hermes：** *（写入 `~/.hermes/scripts/memory-watchdog.sh`，然后调用 `cronjob(...)` 并设置 `no_agent=true`）*
 >
 > 已设置。每 5 分钟运行一次，仅在 RAM 超过 85% 时向 Telegram 发出警报。脚本：`memory-watchdog.sh`。任务 ID：`abc123`。
 
@@ -64,11 +64,11 @@ ram_pct=$(free | awk '/^Mem:/ {printf "%d", $3 * 100 / $2}')
 if [ "$ram_pct" -ge 85 ]; then
   echo "RAM ${ram_pct}% on $(hostname)"
 fi
-# 空标准输出 = 静默触发；不发送消息。
+# Empty stdout = silent tick; no message sent.
 ''',
 )
 
-# 2. 安排计划 —— no_agent=True 在每次触发时跳过 LLM
+# 2. 安排计划 —— no_agent=True 跳过每次触发时的 LLM
 cronjob(
     action="create",
     schedule="every 5m",
@@ -83,7 +83,7 @@ cronjob(
 
 ### Agent 为您决定的内容
 
-当您提出类似 "当 X 发生时提醒我" 或 "每 N 分钟检查 Y 并在 Z 发生时告诉我" 的请求时，Hermes 的 `cronjob` 工具描述会告诉它，只要消息内容完全由脚本决定，就使用 `no_agent=True`。当请求需要推理时（*"总结新问题"*、*"挑选最有趣的头条新闻"*、*"起草友好的提醒"*），它会回退到正常的 LLM 驱动路径。
+当您提出类似 "当 X 发生时提醒我" 或 "每 N 分钟检查 Y 并告诉我是否 Z" 的请求时，Hermes 的 `cronjob` 工具描述会告诉它，只要消息内容完全由脚本决定，就使用 `no_agent=True`。当请求需要推理时（*"总结新问题"*、*"挑选最有趣的头条新闻"*、*"起草友好的提醒"*），它会回退到正常的 LLM 驱动路径。
 
 您不必自己指定 `--no-agent`。只需描述行为即可。
 
@@ -93,22 +93,22 @@ Agent 可以像创建任务一样暂停、恢复、编辑和删除任务：
 
 > **您：** 今晚停止内存看门狗
 >
-> **Hermes：** *(调用 `cronjob(action='pause', job_id='abc123')`)*
+> **Hermes：** *（调用 `cronjob(action='pause', job_id='abc123')`）*
 >
 > 已暂停。使用 "重新打开它" 或通过 `hermes cron resume abc123` 恢复。
 
 > **您：** 将其更改为每 15 分钟一次
 >
-> **Hermes：** *(调用 `cronjob(action='update', job_id='abc123', schedule='every 15m')`)*
+> **Hermes：** *（调用 `cronjob(action='update', job_id='abc123', schedule='every 15m')`）*
 
-完整的生命周期（创建 / 列表 / 更新 / 暂停 / 恢复 / 立即运行 / 删除）对 Agent 可用，而您无需学习任何 CLI 命令。
+完整的生命周期（创建 / 列出 / 更新 / 暂停 / 恢复 / 立即运行 / 删除）对 Agent 都可用，而您无需学习任何 CLI 命令。
 
 ## 通过 CLI 创建
 
-更喜欢 shell？CLI 路径通过三个命令给您相同的结果：
+更喜欢使用 shell？CLI 路径通过三个命令给您相同的结果：
 
 ```bash
-# 1. 编写您的脚本
+# 1. 编写脚本
 cat > ~/.hermes/scripts/memory-watchdog.sh <<'EOF'
 #!/usr/bin/env bash
 # 当 RAM 使用率超过 85% 时发出警报。否则静默。
@@ -116,7 +116,7 @@ RAM_PCT=$(free | awk '/^Mem:/ {printf "%d", $3 * 100 / $2}')
 if [ "$RAM_PCT" -ge 85 ]; then
   echo "⚠ RAM ${RAM_PCT}% on $(hostname)"
 fi
-# 空标准输出 = 静默运行；不发送消息。
+# Empty stdout = silent run; no message sent.
 EOF
 chmod +x ~/.hermes/scripts/memory-watchdog.sh
 
@@ -140,15 +140,15 @@ hermes cron run <job_id>    # 触发一次进行测试
 |-----------------|--------|
 | 退出码 0，标准输出非空 | 标准输出按原样投递 |
 | 退出码 0，标准输出为空 | 静默触发 —— 不投递 |
-| 退出码 0，标准输出最后一行包含 `{"wakeAgent": false}` | 静默触发（与 LLM 任务共享的关卡） |
+| 退出码 0，标准输出最后一行包含 `{"wakeAgent": false}` | 静默触发（与 LLM 任务共享的检查门） |
 | 非零退出码 | 投递错误警报（这样损坏的看门狗不会静默失败） |
 | 脚本超时 | 投递错误警报 |
 
-"空时静默" 行为是经典看门狗模式的关键：脚本可以自由地每分钟运行，但频道只在确实需要注意某些事情时才会看到消息。
+"空输出时静默" 的行为是经典看门狗模式的关键：脚本可以自由地每分钟运行，但频道只在确实需要注意某些事情时才会看到消息。
 
 ## 脚本规则
 
-脚本必须位于 `~/.hermes/scripts/` 中。这在任务创建时和运行时都会强制执行 —— 绝对路径、`~/` 扩展和路径遍历模式（`../`）会被拒绝。同一目录与 LLM 任务使用的预检查脚本关卡共享。
+脚本必须位于 `~/.hermes/scripts/` 目录下。这在任务创建时和运行时都会强制执行 —— 绝对路径、`~/` 扩展和路径遍历模式（`../`）会被拒绝。该目录与 LLM 任务使用的预检查脚本门共享。
 
 解释器选择基于文件扩展名：
 
@@ -157,7 +157,7 @@ hermes cron run <job_id>    # 触发一次进行测试
 | `.sh`, `.bash` | `/bin/bash` |
 | 其他任何扩展名 | `sys.executable`（当前 Python） |
 
-我们有意**不**遵循 `#!/...` shebang —— 保持解释器设置明确且简单，减少了调度器信任的范围。
+我们特意**不**遵循 `#!/...` 的 shebang —— 保持解释器集明确且小，可以减少调度器需要信任的范围。
 
 ## 计划语法
 
@@ -186,7 +186,7 @@ hermes cron create "30m"             # 一次性：30 分钟后运行一次
 --deliver local                          # 仅保存到 ~/.hermes/cron/output/
 ```
 
-对于使用机器人令牌的平台（Telegram、Discord、Slack、Signal、SMS、WhatsApp），在脚本运行时不需要运行消息网关 —— 该工具直接调用每个平台的 REST 端点，使用已存储在 `~/.hermes/.env` / `~/.hermes/config.yaml` 中的凭据。
+对于使用机器人令牌的平台（Telegram、Discord、Slack、Signal、SMS、WhatsApp），在脚本运行时**不需要**运行消息网关 —— 该工具直接调用每个平台的 REST 端点，使用 `~/.hermes/.env` / `~/.hermes/config.yaml` 中已有的凭据。
 
 ## 编辑和生命周期
 
@@ -197,7 +197,7 @@ hermes cron resume <job_id>
 hermes cron edit <job_id> --schedule "every 10m"    # 调整频率
 hermes cron edit <job_id> --agent                   # 切换到 LLM 模式
 hermes cron edit <job_id> --no-agent --script …     # 切换回来
-hermes cron remove <job_id>                         # 删除它
+hermes cron remove <job_id>                         # 删除任务
 ```
 
 所有适用于 LLM 任务的操作（暂停、恢复、手动触发、投递目标更改）也适用于无 Agent 任务。
@@ -224,21 +224,21 @@ hermes cron create "*/15 * * * *" \
   --name "disk-alert"
 ```
 
-当两个文件系统都低于 90% 时静默；当某个文件系统填满时，每个超过阈值的文件系统会触发恰好一行消息。
+当两个文件系统都低于 90% 时静默；当某个文件系统填满时，每个超过阈值的文件系统会触发恰好一行输出。
 
 ## 与其他模式的比较
 
 | 方法 | 运行内容 | 使用时机 |
 |----------|-----------|-------------|
-| `cronjob --no-agent`（本页） | 您的脚本，按 Hermes 的计划 | 不需要推理的重复性看门狗 / 警报 / 指标 |
+| `cronjob --no-agent`（本页） | 您的脚本，按 Hermes 的计划运行 | 不需要推理的重复性看门狗 / 警报 / 指标 |
 | `cronjob`（默认，LLM） | Agent，带有可选的预检查脚本 | 当消息内容需要对数据进行推理时 |
-| 操作系统 cron + 向 [webhook 订阅](/docs/user-guide/features/webhooks) 发送 `curl` | 您的脚本，按操作系统的计划 | 当 Hermes 可能不健康时（您正在监控的对象） |
+| 操作系统 cron + 向 [webhook 订阅](/docs/user-guide/messaging/webhooks) 发送 `curl` | 您的脚本，按操作系统的计划运行 | 当 Hermes 可能不健康时（您正在监控的对象） |
 
-对于必须在*消息网关关闭时*也能触发的关键系统健康看门狗，请使用操作系统级别的 cron，通过简单的 `curl` 发送到 Hermes webhook 订阅（或任何外部警报端点）—— 这些作为独立的操作系统进程运行，不依赖于 Hermes 是否运行。当被监控的对象是外部系统时，消息网关内的调度器是合适的选择。
+对于**即使消息网关宕机也必须触发**的关键系统健康看门狗，请使用操作系统级别的 cron，通过简单的 `curl` 调用 Hermes webhook 订阅（或任何外部警报端点）—— 这些作为独立的操作系统进程运行，不依赖于 Hermes 是否运行。当被监控的对象是外部系统时，网关内的调度器是合适的选择。
 
 ## 相关
 
 - [使用定时任务自动化一切](/docs/guides/automate-with-cron) —— LLM 驱动的定时任务模式。
 - [定时任务参考](/docs/user-guide/features/cron) —— 完整的计划语法、生命周期、投递路由。
-- [Webhook 订阅](/docs/user-guide/features/webhooks) —— 用于外部调度器的即发即弃 HTTP 入口点。
-- [消息网关内部](/docs/developer-guide/gateway-internals) —— 投递路由器内部。
+- [Webhook 订阅](/docs/user-guide/messaging/webhooks) —— 用于外部调度器的即发即弃 HTTP 入口点。
+- [消息网关内部](/docs/developer-guide/gateway-internals) —— 投递路由器内部原理。
