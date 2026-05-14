@@ -1,4 +1,4 @@
-"""CLI 的欢迎横幅、ASCII 艺术、技能摘要和更新检查。
+"""欢迎横幅、ASCII 艺术、技能摘要和 CLI 更新检查。
 
 纯显示函数，不依赖 HermesCLI 状态。
 """
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 # =========================================================================
-# ANSI building blocks for conversation display
+# 用于对话显示的 ANSI 构建块
 # =========================================================================
 
 _GOLD = "\033[1;38;2;255;215;0m"  # True-color #FFD700 bold
@@ -40,7 +40,7 @@ def cprint(text: str):
 
 
 # =========================================================================
-# Skin-aware color helpers
+# 皮肤感知的颜色辅助函数
 # =========================================================================
 
 def _skin_color(key: str, fallback: str) -> str:
@@ -62,7 +62,7 @@ def _skin_branding(key: str, fallback: str) -> str:
 
 
 # =========================================================================
-# ASCII Art & Branding
+# ASCII 艺术与品牌标识
 # =========================================================================
 
 from hermes_cli import __version__ as VERSION, __release_date__ as RELEASE_DATE
@@ -93,7 +93,7 @@ HERMES_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀�
 
 
 # =========================================================================
-# Skills scanning
+# 技能扫描
 # =========================================================================
 def get_available_skills() -> Dict[str, List[str]]:
     """Return skills grouped by category, filtered by platform and disabled state.
@@ -122,7 +122,7 @@ def get_available_skills() -> Dict[str, List[str]]:
 # 缓存更新检查结果6小时，避免重复的 git fetch
 _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 
-# 当我们知道有更新但无法统计提交数时返回的标记值
+# 当我们知道有更新但无法统计提交次数时返回的标记值
 # (例如 nix 构建的 hermes — 没有本地 git 历史记录来统计差异)。
 UPDATE_AVAILABLE_NO_COUNT = -1
 
@@ -130,7 +130,7 @@ _UPSTREAM_REPO_URL = "https://github.com/NousResearch/hermes-agent.git"
 
 
 def _check_via_rev(local_rev: str) -> Optional[int]:
-    """通过 ls-remote 比较嵌入的 git 修订版本与上游 main 分支。
+    """通过 ls-remote 将嵌入的 git 修订版本与上游 main 分支进行比较。
 
     如果是最新则返回 0，如果落后则返回 ``UPDATE_AVAILABLE_NO_COUNT``，
     失败则返回 ``None``。
@@ -151,7 +151,7 @@ def _check_via_rev(local_rev: str) -> Optional[int]:
 
 
 def _check_via_local_git(repo_dir: Path) -> Optional[int]:
-    """统计本地检出仓库落后于 origin/main 的提交数。"""
+    """统计本地检出仓库落后于 origin/main 的提交次数。"""
     try:
         subprocess.run(
             ["git", "fetch", "origin", "--quiet"],
@@ -159,7 +159,7 @@ def _check_via_local_git(repo_dir: Path) -> Optional[int]:
             cwd=str(repo_dir),
         )
     except Exception:
-        pass  # 离线或超时 — 使用过时的引用，这没关系
+        pass  # 离线或超时 — 使用过时的引用，这没问题
 
     try:
         result = subprocess.run(
@@ -178,10 +178,10 @@ def check_for_updates() -> Optional[int]:
     """检查是否有 Hermes 更新可用。
 
     两条路径：如果设置了 ``HERMES_REVISION`` (nix 构建会嵌入它)，
-    则通过 ``git ls-remote`` 将其与上游 main 分支比较。
-    否则查找本地 git 检出仓库并统计落后于 ``origin/main`` 的提交数。
+    则通过 ``git ls-remote`` 将其与上游 main 分支进行比较。
+    否则查找本地 git 检出仓库并统计落后于 ``origin/main`` 的提交次数。
 
-    返回落后的提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
+    返回落后的提交次数，如果落后但次数未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
     如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存6小时。
     """
     hermes_home = get_hermes_home()
@@ -235,7 +235,7 @@ def _resolve_repo_dir() -> Optional[Path]:
 
 
 def _git_short_hash(repo_dir: Path, rev: str) -> Optional[str]:
-    """Resolve a git revision to an 8-character short hash."""
+    """将 git 修订版本解析为 8 字符短哈希值。"""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--short=8", rev],
@@ -253,7 +253,7 @@ def _git_short_hash(repo_dir: Path, rev: str) -> Optional[str]:
 
 
 def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
-    """Return upstream/local git hashes for the startup banner."""
+    """返回启动横幅所需的远端/本地 git 哈希值。"""
     repo_dir = repo_dir or _resolve_repo_dir()
     if repo_dir is None:
         return None
@@ -285,11 +285,10 @@ _latest_release_cache: Optional[tuple] = None  # (tag, url) once resolved
 
 
 def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
-    """Return ``(tag, release_url)`` for the latest git tag, or None.
+    """返回最新 git 标签的 ``(tag, release_url)``，若无则返回 None。
 
-    Local-only — runs ``git describe --tags --abbrev=0`` against the
-    Hermes checkout. Cached per-process. Release URL always points at the
-    canonical NousResearch/hermes-agent repo (forks don't get a link).
+    仅限本地操作 — 针对 Hermes 代码库运行 ``git describe --tags --abbrev=0``。
+    每个进程缓存一次。发布 URL 始终指向官方的 NousResearch/hermes-agent 仓库（分叉仓库不提供链接）。
     """
     global _latest_release_cache
     if _latest_release_cache is not None:
@@ -338,7 +337,7 @@ def format_banner_version_label() -> str:
     if ahead <= 0 or upstream == local:
         return f"{base} · 上游 {upstream}"
 
-    carried_word = "提交" if ahead == 1 else "提交"
+    carried_word = "个提交" if ahead == 1 else "个提交"
     return f"{base} · 上游 {upstream} · 本地 {local} (+{ahead} 个待合并 {carried_word})"
 
 
@@ -526,7 +525,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
         right_lines.append(f"[dim {dim}]{toolset}:[/] {tools_str}")
 
     if remaining_toolsets > 0:
-        right_lines.append(f"[dim {dim}](还有 {remaining_toolsets} 个工具集...)[/]")
+        right_lines.append(f"[dim {dim}](以及 {remaining_toolsets} 个更多工具集...)[/]")
 
     # MCP Servers section (only if configured)
     try:
@@ -567,7 +566,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
                 skills_str = skills_str[:47] + "..."
             right_lines.append(f"[dim {dim}]{category}:[/] [{text}]{skills_str}[/]")
     else:
-        right_lines.append(f"[dim {dim}]未安装技能[/]")
+        right_lines.append(f"[dim {dim}]未安装任何技能[/]")
 
     right_lines.append("")
     mcp_connected = sum(1 for s in mcp_status if s["connected"]) if mcp_status else 0
@@ -575,6 +574,19 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     if mcp_connected:
         summary_parts.append(f"{mcp_connected} 个 MCP 服务器")
     summary_parts.append("/help 查看命令")
+    # Indicate when the codex_app_server runtime is active so users
+    # understand why tool counts may not match what's actually reachable
+    # (codex builds its own tool list inside the spawned subprocess).
+    try:
+        from hermes_cli.codex_runtime_switch import get_current_runtime
+        from hermes_cli.config import load_config as _load_cfg
+        if get_current_runtime(_load_cfg()) == "codex_app_server":
+            right_lines.append(
+                f"[bold {accent}]运行时:[/] [{text}]codex app-server[/] "
+                f"[dim {dim}](终端/文件操作/MCP 在 codex 内运行)[/]"
+            )
+    except Exception:
+        pass
     # Show active profile name when not 'default'
     try:
         from hermes_cli.profiles import get_active_profile_name
@@ -592,9 +604,9 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
         if behind is not None and behind != 0:
             from hermes_cli.config import get_managed_update_command, recommended_update_command
             if behind > 0:
-                commits_word = "提交" if behind == 1 else "提交"
+                commits_word = "个提交" if behind == 1 else "个提交"
                 right_lines.append(
-                    f"[bold yellow]⚠ 落后 {behind} 个 {commits_word}[/]"
+                    f"[bold yellow]⚠ 落后 {behind} {commits_word}[/]"
                     f"[dim yellow] — 运行 [bold]{recommended_update_command()}[/bold] 以更新[/]"
                 )
             else:
