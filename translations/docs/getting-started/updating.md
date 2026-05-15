@@ -17,14 +17,14 @@ hermes update
 此命令会拉取最新代码、更新依赖项，并提示你配置自上次更新以来添加的任何新选项。
 
 :::tip
-`hermes update` 会自动检测新的配置选项并提示你添加它们。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
+`hermes update` 会自动检测新的配置选项并提示你添加。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
 :::
 
 ### 更新期间会发生什么
 
 当你运行 `hermes update` 时，会发生以下步骤：
 
-1.  **配对数据快照** — 保存一个轻量级的更新前状态快照（涵盖 `~/.hermes/pairing/`、飞书评论规则和其他在运行时被修改的状态文件）。可通过[快照和回滚](../user-guide/checkpoints-and-rollback.md)下描述的恢复流程恢复，或通过提取 Hermes 在你 `~/.hermes/` 目录旁边写入的最新快速快照 zip 文件来恢复。
+1.  **配对数据快照** — 保存一个轻量级的更新前状态快照（涵盖 `~/.hermes/pairing/`、飞书评论规则和其他在运行时被修改的状态文件）。可通过[快照和回滚](../user-guide/checkpoints-and-rollback.md)下描述的恢复流程恢复，或通过提取 Hermes 在你 `~/.hermes/` 目录旁边写入的最新快速快照 zip 文件恢复。
 2.  **Git 拉取** — 从 `main` 分支拉取最新代码并更新子模块
 3.  **依赖项安装** — 运行 `uv pip install -e ".[all]"` 以获取新的或更改的依赖项
 4.  **配置迁移** — 检测自你当前版本以来添加的新配置选项并提示你设置它们
@@ -32,7 +32,7 @@ hermes update
 
 ### 仅预览：`hermes update --check`
 
-想在实际拉取之前了解你是否落后于 `origin/main` 吗？运行 `hermes update --check` — 它会获取、并排打印你的本地提交和最新的远程提交，如果同步则退出码为 `0`，如果落后则退出码为 `1`。不会修改任何文件，也不会重启任何消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
+想在实际拉取之前知道你落后于 `origin/main` 吗？运行 `hermes update --check` — 它会获取、并排打印你的本地提交和最新的远程提交，如果同步则退出码为 `0`，如果落后则退出码为 `1`。不会修改任何文件，也不会重启任何消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
 
 ### 完整的更新前备份：`--backup`
 
@@ -42,7 +42,7 @@ hermes update
 hermes update --backup
 ```
 
-或者将其设置为每次运行的默认行为：
+或者将其设为每次运行的默认行为：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -50,7 +50,7 @@ updates:
   pre_update_backup: true
 ```
 
-`--backup` 在早期版本中是始终开启的行为，但在大型主目录上每次更新会增加几分钟时间，所以现在改为可选。上面提到的轻量级配对数据快照仍然无条件运行。
+`--backup` 在早期版本中是始终开启的行为，但对于大型主目录，它会给每次更新增加几分钟时间，所以现在改为可选。上面提到的轻量级配对数据快照仍然无条件运行。
 
 预期输出如下所示：
 
@@ -58,7 +58,7 @@ updates:
 $ hermes update
 正在更新 Hermes Agent...
 📥 正在拉取最新代码...
-已经是最新的。 (或：正在更新 abc1234..def5678)
+已是最新。 (或：正在更新 abc1234..def5678)
 📦 正在更新依赖项...
 ✅ 依赖项已更新
 🔍 正在检查新的配置选项...
@@ -76,7 +76,7 @@ $ hermes update
 2.  `hermes doctor` — 检查配置、依赖项和服务健康状况
 3.  `hermes --version` — 确认版本按预期更新
 4.  如果你使用消息网关：`hermes gateway status`
-5.  如果 `doctor` 报告 npm 审计问题：在标记的目录中运行 `npm audit fix`
+5.  如果 `doctor` 报告 npm audit 问题：在标记的目录中运行 `npm audit fix`
 
 :::warning 更新后工作树变脏
 如果 `git status --short` 在 `hermes update` 后显示意外的更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
@@ -103,7 +103,7 @@ tail -f ~/.hermes/logs/update.log
 hermes version
 ```
 
-与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases) 上的最新版本进行比较。
+与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases)上的最新版本进行比较。
 
 ### 从消息平台更新
 
@@ -123,17 +123,15 @@ hermes version
 cd /path/to/hermes-agent
 export VIRTUAL_ENV="$(pwd)/venv"
 
-# 拉取最新代码和子模块
+# 拉取最新代码
 git pull origin main
-git submodule update --init --recursive
 
 # 重新安装（获取新的依赖项）
 uv pip install -e ".[all]"
-uv pip install -e "./tinker-atropos"
 
 # 检查新的配置选项
 hermes config check
-hermes config migrate   # 交互式添加任何缺失的选项
+hermes config migrate   # 以交互方式添加任何缺失的选项
 ```
 
 ### 回滚说明
@@ -151,7 +149,7 @@ git checkout <commit-hash>
 git submodule update --init --recursive
 uv pip install -e ".[all]"
 
-# 如果正在运行，重启消息网关
+# 如果消息网关正在运行，则重启它
 hermes gateway restart
 ```
 
@@ -195,7 +193,7 @@ nix profile rollback
 hermes uninstall
 ```
 
-卸载程序会给你选择保留配置文件 (`~/.hermes/`) 以备将来重新安装。
+卸载程序会给你选择保留配置文件 (`~/.hermes/`) 以便将来重新安装。
 
 ### 手动卸载
 

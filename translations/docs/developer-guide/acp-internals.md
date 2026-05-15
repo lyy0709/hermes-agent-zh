@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
 title: "ACP 内部机制"
-description: "ACP 适配器的工作原理：生命周期、会话、事件桥接、审批和工具渲染"
+description: "ACP 适配器的工作原理：生命周期、会话、事件桥接、权限审批和工具渲染"
 ---
 
 # ACP 内部机制
 
-ACP 适配器将 Hermes 的同步 `AIAgent` 包装在一个异步 JSON-RPC stdio 服务器中。
+ACP 适配器将 Hermes 的同步 `AIAgent` 包装在一个异步的 JSON-RPC stdio 服务器中。
 
 关键实现文件：
 
@@ -24,11 +24,14 @@ ACP 适配器将 Hermes 的同步 `AIAgent` 包装在一个异步 JSON-RPC stdio
 ```text
 hermes acp / hermes-acp / python -m acp_adapter
   -> acp_adapter.entry.main()
-  -> load ~/.hermes/.env
-  -> configure stderr logging
-  -> construct HermesACPAgent
+  -> 在服务器启动前解析 --version / --check / --setup
+  -> 加载 ~/.hermes/.env
+  -> 配置 stderr 日志记录
+  -> 构造 HermesACPAgent
   -> acp.run_agent(agent, use_unstable_protocol=True)
 ```
+
+Zed ACP Registry 路径通过 `uvx --from 'hermes-agent[acp]==<version>' hermes-acp` 启动相同的适配器，指向 `hermes-agent` PyPI 发布版本。
 
 Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 
@@ -41,14 +44,14 @@ Stdout 保留给 ACP JSON-RPC 传输。人类可读的日志输出到 stderr。
 职责：
 
 - 初始化 / 身份验证
-- 新建/加载/恢复/分叉/列出/取消会话方法
+- 新建/加载/恢复/分叉/列出/取消会话的方法
 - 提示词执行
 - 会话模型切换
 - 将同步 AIAgent 回调连接到 ACP 异步通知
 
 ### `SessionManager`
 
-`acp_adapter/session.py` 跟踪活动的 ACP 会话。
+`acp_adapter/session.py` 跟踪活跃的 ACP 会话。
 
 每个会话存储：
 
@@ -97,7 +100,7 @@ asyncio.run_coroutine_threadsafe(...)
 
 超时和桥接失败默认拒绝。
 
-### 工具渲染助手
+### 工具渲染辅助函数
 
 `acp_adapter/tools.py` 将 Hermes 工具映射到 ACP 工具类型，并构建面向编辑器的内容。
 
@@ -112,17 +115,17 @@ asyncio.run_coroutine_threadsafe(...)
 
 ```text
 new_session(cwd)
-  -> create SessionState
-  -> create AIAgent(platform="acp", enabled_toolsets=["hermes-acp"])
-  -> bind task_id/session_id to cwd override
+  -> 创建 SessionState
+  -> 创建 AIAgent(platform="acp", enabled_toolsets=["hermes-acp"])
+  -> 将 task_id/session_id 绑定到 cwd 覆盖
 
 prompt(..., session_id)
-  -> extract text from ACP content blocks
-  -> reset cancel event
-  -> install callbacks + approval bridge
-  -> run AIAgent in ThreadPoolExecutor
-  -> update session history
-  -> emit final agent message chunk
+  -> 从 ACP 内容块中提取文本
+  -> 重置取消事件
+  -> 安装回调 + 审批桥接
+  -> 在 ThreadPoolExecutor 中运行 AIAgent
+  -> 更新会话历史记录
+  -> 发出最终的 Agent 消息块
 ```
 
 ### 取消
@@ -135,7 +138,7 @@ prompt(..., session_id)
 
 ### 分叉
 
-`fork_session()` 将消息历史记录深拷贝到一个新的活动会话中，保留对话状态，同时为分叉会话提供自己的会话 ID 和 cwd。
+`fork_session()` 将消息历史记录深拷贝到一个新的活跃会话中，保留对话状态，同时为分叉会话提供自己的会话 ID 和 cwd。
 
 ## 提供商/身份验证行为
 
@@ -146,17 +149,17 @@ ACP 不实现自己的身份验证存储。
 - `acp_adapter/auth.py`
 - `hermes_cli/runtime_provider.py`
 
-因此 ACP 会通告并使用当前配置的 Hermes 提供商/凭据。
+因此，ACP 会通告并使用当前配置的 Hermes 提供商/凭据。它还始终通告一个终端设置身份验证方法（`hermes-setup`，参数 `--setup`），以便首次运行的注册表客户端可以在启动正常的 ACP 会话之前打开 Hermes 的交互式模型/提供商配置。
 
 ## 工作目录绑定
 
 ACP 会话携带一个编辑器 cwd。
 
-会话管理器通过任务作用域的终端/文件覆盖，将该 cwd 绑定到 ACP 会话 ID，因此文件和终端工具相对于编辑器工作区进行操作。
+会话管理器通过任务作用域的终端/文件覆盖，将该 cwd 绑定到 ACP 会话 ID，因此文件和终端工具相对于编辑器工作空间进行操作。
 
 ## 重复的同名工具调用
 
-事件桥接按工具名称以 FIFO 方式跟踪工具 ID，而不仅仅是每个名称一个 ID。这对于以下情况很重要：
+事件桥接按工具名称 FIFO 跟踪工具 ID，而不仅仅是每个名称一个 ID。这对于以下情况很重要：
 
 - 并行的同名调用
 - 单一步骤中重复的同名调用
@@ -165,12 +168,12 @@ ACP 会话携带一个编辑器 cwd。
 
 ## 审批回调恢复
 
-ACP 在提示词执行期间，会在终端工具上临时安装一个审批回调，然后在之后恢复之前的回调。这避免了将 ACP 会话特定的审批处理程序永久地全局安装。
+ACP 在提示词执行期间临时在终端工具上安装一个审批回调，然后在之后恢复之前的回调。这避免了将 ACP 会话特定的审批处理程序永久地全局安装。
 
 ## 当前限制
 
-- ACP 会话持久化到共享的 `~/.hermes/state.db` (SessionDB) 中，并在进程重启时透明地恢复；它们会出现在 `session_search` 中
-- 非文本提示词块目前被忽略，不用于请求文本提取
+- ACP 会话持久化到共享的 `~/.hermes/state.db`（SessionDB）中，并在进程重启时透明地恢复；它们会出现在 `session_search` 中
+- 目前，非文本提示词块在提取请求文本时被忽略
 - 编辑器特定的 UX 因 ACP 客户端实现而异
 
 ## 相关文件
