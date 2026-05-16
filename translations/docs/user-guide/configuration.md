@@ -49,7 +49,7 @@ hermes config set OPENROUTER_API_KEY sk-or-...  # 保存到 .env
 1.  **CLI 参数** — 例如，`hermes chat --model anthropic/claude-sonnet-4`（每次调用覆盖）
 2.  **`~/.hermes/config.yaml`** — 所有非密钥设置的主要配置文件
 3.  **`~/.hermes/.env`** — 环境变量的后备；**必需**用于密钥（API 密钥、Token、密码）
-4.  **内置默认值** — 当没有其他设置时，硬编码的安全默认值
+4.  **内置默认值** — 未设置任何其他内容时的硬编码安全默认值
 
 :::info 经验法则
 密钥（API 密钥、机器人 Token、密码）放在 `.env` 中。其他所有内容（模型、终端后端、压缩设置、记忆限制、工具集）放在 `config.yaml` 中。当两者都设置时，对于非密钥设置，`config.yaml` 优先。
@@ -69,28 +69,28 @@ delegation:
   api_key: ${DELEGATION_KEY}
 ```
 
-单个值中的多个引用有效：`url: "${HOST}:${PORT}"`。如果引用的变量未设置，占位符将按字面保留（`${UNDEFINED_VAR}` 保持原样）。仅支持 `${VAR}` 语法 — 裸 `$VAR` 不会被展开。
+单个值中的多个引用有效：`url: "${HOST}:${PORT}"`。如果引用的变量未设置，占位符将按字面保留（`${UNDEFINED_VAR}` 保持不变）。仅支持 `${VAR}` 语法 — 裸 `$VAR` 不会被展开。
 
 有关 AI 提供商设置（OpenRouter、Anthropic、Copilot、自定义端点、自托管 LLM、后备模型等），请参阅 [AI 提供商](/docs/integrations/providers)。
 
-### 提供商超时
+### 提供商超时设置
 
-您可以设置 `providers.<id>.request_timeout_seconds` 作为提供商范围的请求超时，以及 `providers.<id>.models.<model>.timeout_seconds` 作为模型特定的覆盖。适用于每个传输上的主要轮次客户端（OpenAI-wire、原生 Anthropic、Anthropic 兼容）、后备链、凭据轮换后的重建，以及（对于 OpenAI-wire）每个请求的超时关键字参数 — 因此配置的值优先于旧的 `HERMES_API_TIMEOUT` 环境变量。
+您可以设置 `providers.<id>.request_timeout_seconds` 来配置提供商范围的请求超时，以及 `providers.<id>.models.<model>.timeout_seconds` 来配置模型特定的覆盖。这适用于每个传输协议上的主要轮次客户端（OpenAI-wire、原生 Anthropic、Anthropic 兼容）、后备链、凭据轮换后的重建，以及（对于 OpenAI-wire）每个请求的超时关键字参数 — 因此配置的值优先于旧的 `HERMES_API_TIMEOUT` 环境变量。
 
-您还可以设置 `providers.<id>.stale_timeout_seconds` 用于非流式陈旧调用检测器，以及 `providers.<id>.models.<model>.stale_timeout_seconds` 作为模型特定的覆盖。这优先于旧的 `HERMES_API_CALL_STALE_TIMEOUT` 环境变量。
+您还可以设置 `providers.<id>.stale_timeout_seconds` 用于非流式陈旧调用检测器，以及 `providers.<id>.models.<model>.stale_timeout_seconds` 用于模型特定的覆盖。这优先于旧的 `HERMES_API_CALL_STALE_TIMEOUT` 环境变量。
 
-不设置这些值将保留旧的默认值（`HERMES_API_TIMEOUT=1800`s，`HERMES_API_CALL_STALE_TIMEOUT=300`s，原生 Anthropic 900s）。目前未为 AWS Bedrock 连接（`bedrock_converse` 和 AnthropicBedrock SDK 路径都使用 boto3 及其自己的超时配置）。请参阅 [`cli-config.yaml.example`](https://github.com/NousResearch/hermes-agent/blob/main/cli-config.yaml.example) 中的注释示例。
+不设置这些值将保留旧的默认值（`HERMES_API_TIMEOUT=1800`s，`HERMES_API_CALL_STALE_TIMEOUT=300`s，原生 Anthropic 900s）。目前未为 AWS Bedrock 连接（`bedrock_converse` 和 AnthropicBedrock SDK 路径都使用具有自己超时配置的 boto3）。请参阅 [`cli-config.yaml.example`](https://github.com/NousResearch/hermes-agent/blob/main/cli-config.yaml.example) 中的注释示例。
 
 ## 终端后端配置
 
-Hermes 支持七种终端后端。每种都决定了 Agent 的 shell 命令实际执行的位置 — 您的本地机器、Docker 容器、通过 SSH 的远程服务器、Modal 云沙盒（直接或通过 Nous 管理的网关）、Daytona 工作区、Vercel Sandbox 或 Singularity/Apptainer 容器。
+Hermes 支持七种终端后端。每种后端决定了 Agent 的 shell 命令实际执行的位置 — 您的本地机器、Docker 容器、通过 SSH 连接的远程服务器、Modal 云沙盒（直接或通过 Nous 管理的网关）、Daytona 工作区、Vercel Sandbox 或 Singularity/Apptainer 容器。
 
 ```yaml
 terminal:
   backend: local    # local | docker | ssh | modal | daytona | vercel_sandbox | singularity
   cwd: "."          # 消息网关/定时任务的工作目录（CLI 始终使用启动目录）
-  timeout: 180      # 每个命令的超时时间（秒）
-  env_passthrough: []  # 要转发到沙盒化执行（终端 + execute_code）的环境变量名称
+  timeout: 180      # 每条命令的超时时间（秒）
+  env_passthrough: []  # 要转发到沙盒化执行的环境变量名称（终端 + execute_code）
   singularity_image: "docker://nikolaik/python-nodejs:python3.11-nodejs20"  # Singularity 后端的容器镜像
   modal_image: "nikolaik/python-nodejs:python3.11-nodejs20"                 # Modal 后端的容器镜像
   daytona_image: "nikolaik/python-nodejs:python3.11-nodejs20"               # Daytona 后端的容器镜像
@@ -100,18 +100,18 @@ terminal:
 
 ### 后端概述
 
-| 后端 | 命令运行位置 | 隔离性 | 最佳用途 |
+| 后端 | 命令执行位置 | 隔离性 | 最佳适用场景 |
 |---------|-------------------|-----------|----------|
-| **local** | 直接在您的机器上 | 无 | 开发、个人使用 |
-| **docker** | 单个持久化 Docker 容器（在会话、`/new`、子 Agent 之间共享） | 完全（命名空间、cap-drop） | 安全沙盒化、CI/CD |
-| **ssh** | 通过 SSH 的远程服务器 | 网络边界 | 远程开发、强大硬件 |
+| **local** | 直接在你的机器上 | 无 | 开发、个人使用 |
+| **docker** | 单个持久化 Docker 容器（跨会话、`/new`、子 Agent 共享） | 完全（命名空间、cap-drop） | 安全沙盒化、CI/CD |
+| **ssh** | 通过 SSH 连接的远程服务器 | 网络边界 | 远程开发、强大硬件 |
 | **modal** | Modal 云沙盒 | 完全（云虚拟机） | 临时云计算、评估 |
 | **daytona** | Daytona 工作区 | 完全（云容器） | 托管的云开发环境 |
 | **vercel_sandbox** | Vercel Sandbox | 完全（云微虚拟机） | 具有快照支持的文件系统持久化的云执行 |
 | **singularity** | Singularity/Apptainer 容器 | 命名空间（--containall） | HPC 集群、共享机器 |
 ### 本地后端
 
-默认选项。命令直接在您的机器上运行，无隔离。无需特殊设置。
+默认选项。命令直接在您的机器上运行，没有隔离。无需特殊设置。
 
 ```yaml
 terminal:
@@ -119,14 +119,14 @@ terminal:
 ```
 
 :::warning
-Agent 拥有与您的用户账户相同的文件系统访问权限。使用 `hermes tools` 命令禁用您不需要的工具，或切换到 Docker 后端以获得沙盒隔离。
+Agent 拥有与您的用户账户相同的文件系统访问权限。使用 `hermes tools` 来禁用您不需要的工具，或者切换到 Docker 后端以获得沙盒隔离。
 :::
 
 ### Docker 后端
 
 在 Docker 容器内运行命令，并进行了安全加固（所有能力被丢弃、无权限提升、PID 限制）。
 
-**单个持久化容器，非每命令一个容器。** Hermes 在首次使用时启动一个长期运行的容器，并通过 `docker exec` 将每个终端、文件和 `execute_code` 调用路由到同一个容器中——跨越会话、`/new`、`/reset` 和 `delegate_task` 子 Agent——在 Hermes 进程的生命周期内。工作目录更改、已安装的包以及 `/workspace` 中的文件会从一个工具调用延续到下一个，就像本地 shell 一样。容器在关闭时停止并移除。详情请参阅下面的**容器生命周期**。
+**单个持久化容器，非每命令一个容器。** Hermes 在首次使用时启动一个长期运行的容器，并通过 `docker exec` 将每个终端、文件和 `execute_code` 调用路由到同一个容器中——跨越会话、`/new`、`/reset` 和 `delegate_task` 子 Agent——在 Hermes 进程的生命周期内。工作目录更改、已安装的包以及 `/workspace` 中的文件都会从一个工具调用延续到下一个，就像本地 shell 一样。容器在关闭时停止并移除。详情请参阅下面的**容器生命周期**。
 
 ```yaml
 terminal:
@@ -143,23 +143,23 @@ terminal:
   # 资源限制
   container_cpu: 1                 # CPU 核心数 (0 = 无限制)
   container_memory: 5120           # MB (0 = 无限制)
-  container_disk: 51200            # MB (要求 overlay2 在 XFS+pquota 上)
+  container_disk: 51200            # MB (需要在 XFS+pquota 上启用 overlay2)
   container_persistent: true       # 跨会话持久化 /workspace 和 /root
 ```
 
-**要求：** Docker Desktop 或 Docker Engine 已安装并正在运行。Hermes 会探测 `$PATH` 以及常见的 macOS 安装位置（`/usr/local/bin/docker`、`/opt/homebrew/bin/docker`、Docker Desktop 应用程序包）。Podman 开箱即用：当两者都安装时，设置 `HERMES_DOCKER_BINARY=podman`（或完整路径）以强制使用它。
+**要求：** Docker Desktop 或 Docker Engine 已安装并正在运行。Hermes 会探测 `$PATH` 以及常见的 macOS 安装位置（`/usr/local/bin/docker`、`/opt/homebrew/bin/docker`、Docker Desktop 应用包）。Podman 开箱即用：当两者都安装时，设置 `HERMES_DOCKER_BINARY=podman`（或完整路径）来强制使用它。
 
 **容器生命周期：** Hermes 为每个终端和文件工具调用重用单个长期运行的容器（`docker run -d ... sleep 2h`），跨越会话、`/new`、`/reset` 和 `delegate_task` 子 Agent，在 Hermes 进程的生命周期内。命令通过 `docker exec` 使用登录 shell 运行，因此工作目录更改、已安装的包以及 `/workspace` 中的文件都会从一个工具调用持续到下一个。容器在 Hermes 关闭时停止并移除（或在空闲清理回收它时）。
 
-通过 `delegate_task(tasks=[...])` 生成的并行子 Agent 共享这一个容器——并发的 `cd`、环境变量修改和写入同一路径会发生冲突。如果子 Agent 需要隔离的沙盒，它必须通过 `register_task_env_overrides()` 注册每个任务的镜像覆盖，RL 和基准测试环境（TerminalBench2, HermesSweEnv 等）会为其每个任务的 Docker 镜像自动执行此操作。
+通过 `delegate_task(tasks=[...])` 生成的并行子 Agent 共享这一个容器——并发的 `cd`、环境变量修改以及对同一路径的写入会发生冲突。如果子 Agent 需要隔离的沙盒，它必须通过 `register_task_env_overrides()` 注册每个任务的镜像覆盖，RL 和基准测试环境（TerminalBench2、HermesSweEnv 等）会为它们的每个任务 Docker 镜像自动执行此操作。
 
 **安全加固：**
 - `--cap-drop ALL`，仅重新添加 `DAC_OVERRIDE`、`CHOWN`、`FOWNER`
 - `--security-opt no-new-privileges`
 - `--pids-limit 256`
-- 大小受限的 tmpfs：`/tmp` (512MB)、`/var/tmp` (256MB)、`/run` (64MB)
+- 为 `/tmp` (512MB)、`/var/tmp` (256MB)、`/run` (64MB) 设置大小限制的 tmpfs
 
-**凭据转发：** `docker_forward_env` 中列出的环境变量首先从您的 shell 环境解析，然后从 `~/.hermes/.env` 解析。技能也可以声明 `required_environment_variables`，这些变量会自动合并。
+**凭证转发：** `docker_forward_env` 中列出的环境变量首先从您的 shell 环境解析，然后从 `~/.hermes/.env` 解析。技能也可以声明 `required_environment_variables`，这些变量会自动合并。
 
 ### SSH 后端
 
@@ -186,7 +186,7 @@ TERMINAL_SSH_USER=ubuntu
 | `TERMINAL_SSH_KEY` | (系统默认) | SSH 私钥路径 |
 | `TERMINAL_SSH_PERSISTENT` | `true` | 启用持久化 shell |
 
-**工作原理：** 在初始化时使用 `BatchMode=yes` 和 `StrictHostKeyChecking=accept-new` 进行连接。持久化 shell 在远程主机上保持单个 `bash -l` 进程存活，通过临时文件进行通信。需要 `stdin_data` 或 `sudo` 的命令会自动回退到一次性模式。
+**工作原理：** 在初始化时使用 `BatchMode=yes` 和 `StrictHostKeyChecking=accept-new` 进行连接。持久化 shell 在远程主机上保持一个 `bash -l` 进程存活，通过临时文件进行通信。需要 `stdin_data` 或 `sudo` 的命令会自动回退到一次性模式。
 
 ### Modal 后端
 
@@ -201,11 +201,11 @@ terminal:
   container_persistent: true       # 快照/恢复文件系统
 ```
 
-**要求：** 需要 `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET` 环境变量，或 `~/.modal.toml` 配置文件。
+**要求：** 需要 `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET` 环境变量，或者 `~/.modal.toml` 配置文件。
 
-**持久化：** 启用后，沙盒文件系统在清理时进行快照，并在下一个会话时恢复。快照在 `~/.hermes/modal_snapshots.json` 中跟踪。这保留了文件系统状态，而不是活动进程、PID 空间或后台作业。
+**持久化：** 启用后，沙盒文件系统在清理时进行快照，并在下一个会话时恢复。快照记录在 `~/.hermes/modal_snapshots.json` 中。这保留了文件系统状态，而不是活动进程、PID 空间或后台作业。
 
-**凭据文件：** 自动从 `~/.hermes/` 挂载（OAuth 令牌等），并在每个命令前同步。
+**凭证文件：** 自动从 `~/.hermes/` 挂载（OAuth 令牌等），并在每个命令前同步。
 
 ### Daytona 后端
 
@@ -223,7 +223,7 @@ terminal:
 **要求：** `DAYTONA_API_KEY` 环境变量。
 
 **持久化：** 启用后，沙盒在清理时停止（而非删除），并在下一个会话时恢复。沙盒名称遵循模式 `hermes-{task_id}`。
-**磁盘限制：** Daytona 强制执行 10 GiB 的最大限制。超过此限制的请求将被限制并发出警告。
+**磁盘限制：** Daytona 强制执行 10 GiB 的最大限制。超过此限制的请求将被截断并发出警告。
 
 ### Vercel Sandbox 后端
 
@@ -262,11 +262,11 @@ OIDC 令牌是短期的，不应作为文档化的部署路径使用。
 
 **运行时：** `terminal.vercel_runtime` 支持 `node24`、`node22` 和 `python3.13`。如果未设置，Hermes 默认为 `node24`。
 
-**持久性：** 当 `container_persistent: true` 时，Hermes 会在清理期间对沙盒文件系统进行快照，并在后续为同一任务从该快照恢复沙盒。快照内容可以包括复制到沙盒中的 Hermes 同步的凭据、技能和缓存文件。这仅保留文件系统状态；不保留活动的沙盒身份、PID 空间、shell 状态或运行的后台进程。
+**持久性：** 当 `container_persistent: true` 时，Hermes 会在清理期间对沙盒文件系统进行快照，并在后续为同一任务从该快照恢复沙盒。快照内容可以包括复制到沙盒中的 Hermes 同步的凭据、技能和缓存文件。这仅保留文件系统状态；它不保留活动的沙盒身份、PID 空间、shell 状态或运行的后台进程。
 
 **后台命令：** `terminal(background=true)` 使用 Hermes 的通用非本地后台进程流程。在沙盒存活期间，您可以通过常规的进程工具生成、轮询、等待、查看日志和终止进程。Hermes 在清理或重启后不提供原生的 Vercel 分离进程恢复功能。
 
-**磁盘大小调整：** Vercel Sandbox 目前不支持 Hermes 的 `container_disk` 资源调节旋钮。请保持 `container_disk` 未设置或使用共享默认值 `51200`；非默认值会导致诊断和后台创建失败，而不是被静默忽略。
+**磁盘大小调整：** Vercel Sandbox 目前不支持 Hermes 的 `container_disk` 资源旋钮。请保持 `container_disk` 未设置或使用共享默认值 `51200`；非默认值会导致诊断和创建后端失败，而不是被静默忽略。
 
 ### Singularity/Apptainer 后端
 
@@ -291,22 +291,22 @@ terminal:
 
 ### 常见终端后端问题
 
-如果终端命令立即失败或终端工具被报告为禁用：
+如果终端命令立即失败或终端工具报告为禁用：
 
-- **Local** — 无特殊要求。入门时最安全的默认设置。
-- **Docker** — 运行 `docker version` 以验证 Docker 是否正常工作。如果失败，请修复 Docker 或设置 `hermes config set terminal.backend local`。
-- **SSH** — 必须同时设置 `TERMINAL_SSH_HOST` 和 `TERMINAL_SSH_USER`。如果缺少任何一个，Hermes 会记录清晰的错误。
-- **Modal** — 需要 `MODAL_TOKEN_ID` 环境变量或 `~/.modal.toml` 文件。运行 `hermes doctor` 进行检查。
+- **Local** — 无特殊要求。入门时最安全的默认选项。
+- **Docker** — 运行 `docker version` 以验证 Docker 是否正常工作。如果失败，请修复 Docker 或执行 `hermes config set terminal.backend local`。
+- **SSH** — 必须同时设置 `TERMINAL_SSH_HOST` 和 `TERMINAL_SSH_USER`。如果缺少任何一个，Hermes 会记录清晰的错误信息。
+- **Modal** — 需要 `MODAL_TOKEN_ID` 环境变量或 `~/.modal.toml`。运行 `hermes doctor` 进行检查。
 - **Daytona** — 需要 `DAYTONA_API_KEY`。Daytona SDK 处理服务器 URL 配置。
 - **Singularity** — 需要 `$PATH` 中存在 `apptainer` 或 `singularity`。在 HPC 集群上常见。
 
-如有疑问，请将 `terminal.backend` 设置回 `local`，并首先验证命令能否在那里运行。
+如有疑问，请将 `terminal.backend` 设置回 `local`，并首先验证命令是否能在那里运行。
 
 ### 拆除时的远程到主机文件同步
 
-对于 **SSH**、**Modal** 和 **Daytona** 后端（任何 Agent 的工作树所在机器与运行 Hermes 的主机不同的情况），Hermes 会跟踪 Agent 在远程沙盒内接触过的文件，并在会话拆除/沙盒清理时，**将修改过的文件同步回主机**，位置在 `~/.hermes/cache/remote-syncs/<session-id>/` 下。
+对于 **SSH**、**Modal** 和 **Daytona** 后端（Agent 的工作树所在机器与运行 Hermes 的主机不同的任何情况），Hermes 会跟踪 Agent 在远程沙盒内接触过的文件，并在会话拆除/沙盒清理时，**将修改过的文件同步回主机**，存放在 `~/.hermes/cache/remote-syncs/<session-id>/` 下。
 
-- 触发条件：会话关闭、`/new`、`/reset`、消息网关消息超时、当子 Agent 使用了远程后端时 `delegate_task` 子 Agent 完成。
+- 触发时机：会话关闭、`/new`、`/reset`、消息网关消息超时、当子 Agent 使用了远程后端时 `delegate_task` 子 Agent 完成。
 - 覆盖 Agent 修改的整个树，而不仅仅是它显式打开的文件。新增、编辑和删除都会被捕获。
 - 当您去查找时，远程沙盒可能已被拆除；本地的 `~/.hermes/cache/remote-syncs/…` 副本是 Agent 所做更改的权威记录。
 - 大型二进制输出（模型检查点、原始数据集）受大小限制 — 同步会跳过超过 `file_sync_max_mb`（默认 `100`）的文件。如果您期望有更大的产物返回，请调高此值。
@@ -317,7 +317,7 @@ terminal:
   file_sync_enabled: true   # 默认值 — 设置为 false 以完全跳过同步
 ```
 
-这就是您从会话结束后被销毁的临时云沙盒中恢复结果的方式，无需告诉 Agent 显式地 `scp` 或 `modal volume put` 每个产物。
+这就是您从会话结束后被销毁的临时云沙盒中恢复结果的方式，无需告诉 Agent 为每个产物显式执行 `scp` 或 `modal volume put`。
 
 ### Docker 卷挂载
 
@@ -333,18 +333,18 @@ terminal:
 ```
 这适用于：
 - **向 Agent 提供文件**（数据集、配置文件、参考代码）
-- **接收 Agent 生成的文件**（生成的代码、报告、导出文件）
+- **从 Agent 接收文件**（生成的代码、报告、导出文件）
 - **共享工作区**，您和 Agent 都可以访问相同的文件
 
-如果您使用消息网关，并希望 Agent 通过 `MEDIA:/...` 发送生成的文件，建议使用一个专用的、主机可见的导出挂载点，例如 `/home/user/.hermes/cache/documents:/output`。
+如果您使用消息网关并希望 Agent 通过 `MEDIA:/...` 发送生成的文件，建议使用专用的主机可见导出挂载点，例如 `/home/user/.hermes/cache/documents:/output`。
 
 - 在 Docker 内将文件写入 `/output/...`
 - 在 `MEDIA:` 中发出**主机路径**，例如：
   `MEDIA:/home/user/.hermes/cache/documents/report.txt`
-- **不要**发出 `/workspace/...` 或 `/output/...`，除非该确切路径也存在于主机上的网关进程中
+- **不要**发出 `/workspace/...` 或 `/output/...`，除非该确切路径在主机上的网关进程中也存在
 
 :::warning
-YAML 中的重复键会静默覆盖较早的键。如果您已经有一个 `docker_volumes:` 块，请将新的挂载合并到同一个列表中，而不是在文件后面再添加另一个 `docker_volumes:` 键。
+YAML 中的重复键会静默覆盖较早的键。如果您已经有一个 `docker_volumes:` 块，请将新的挂载合并到同一个列表中，而不是在文件后面添加另一个 `docker_volumes:` 键。
 :::
 
 也可以通过环境变量设置：`TERMINAL_DOCKER_VOLUMES='["/host:/container"]'`（JSON 数组）。
@@ -361,25 +361,25 @@ terminal:
     - "NPM_TOKEN"
 ```
 
-Hermes 首先从您当前的 shell 解析每个列出的变量，如果变量是通过 `hermes config set` 保存的，则回退到 `~/.hermes/.env`。
+Hermes 首先从您当前的 shell 解析每个列出的变量，如果变量已通过 `hermes config set` 保存，则回退到 `~/.hermes/.env`。
 
 :::warning
-`docker_forward_env` 中列出的任何内容都会对容器内运行的命令可见。只转发您愿意暴露给终端会话的凭据。
+`docker_forward_env` 中列出的任何内容都会对容器内运行的命令可见。仅转发您愿意暴露给终端会话的凭据。
 :::
 
-### 以主机用户身份运行容器
+### 以您的主机用户身份运行容器
 
-默认情况下，Docker 容器以 `root`（UID 0）身份运行。在 `/workspace` 或其他绑定挂载点内创建的文件在主机上最终归 root 所有，因此在会话结束后，您必须使用 `sudo chown` 才能从主机编辑器编辑它们。`terminal.docker_run_as_host_user` 标志可以解决此问题：
+默认情况下，Docker 容器以 `root`（UID 0）身份运行。在 `/workspace` 或其他绑定挂载点内创建的文件最终在主机上归 root 所有，因此在会话结束后，您必须使用 `sudo chown` 才能从主机编辑器编辑它们。`terminal.docker_run_as_host_user` 标志可以解决此问题：
 
 ```yaml
 terminal:
   backend: docker
-  docker_run_as_host_user: true   # 默认值: false
+  docker_run_as_host_user: true   # 默认值：false
 ```
 
-启用后，Hermes 会将 `--user $(id -u):$(id -g)` 附加到 `docker run` 命令，这样写入绑定挂载目录（`/workspace`、`/root`、`docker_volumes` 中的任何内容）的文件将由您的主机用户拥有，而不是 root。代价是：容器不能再执行 `apt install` 或写入 root 拥有的路径，如 `/root/.npm`——如果您两者都需要，请使用其 `HOME` 由非 root 用户拥有的基础镜像（或在构建镜像时添加您所需的工具）。
+启用后，Hermes 会将 `--user $(id -u):$(id -g)` 附加到 `docker run` 命令，因此写入绑定挂载目录（`/workspace`、`/root`、`docker_volumes` 中的任何内容）的文件将归您的主机用户所有，而不是 root。权衡是：容器无法再执行 `apt install` 或写入 root 拥有的路径，如 `/root/.npm`——如果您两者都需要，请使用其 `HOME` 归非 root 用户所有的基础镜像（或在镜像构建时添加您所需的工具）。
 
-为了保持向后兼容的行为，请将此选项设为 `false`（默认值）。当您的工作流主要是“编辑挂载的主机文件”并且厌倦了 `sudo chown -R` 时，请打开它。
+为了保持向后兼容性，请将其保留为 `false`（默认值）。当您的工作流主要是“编辑已挂载的主机文件”并且厌倦了 `sudo chown -R` 时，请打开此选项。
 
 ### 可选：将启动目录挂载到 `/workspace`
 
@@ -396,19 +396,19 @@ terminal:
 启用后：
 - 如果您从 `~/projects/my-app` 启动 Hermes，该主机目录将被绑定挂载到 `/workspace`
 - Docker 后端在 `/workspace` 中启动
-- 文件工具和终端命令都可以看到相同的挂载项目
+- 文件工具和终端命令都可以看到相同的已挂载项目
 
 禁用时，除非您通过 `docker_volumes` 显式挂载某些内容，否则 `/workspace` 仍归沙盒所有。
 
 安全权衡：
 - `false` 保留沙盒边界
-- `true` 让沙盒直接访问您启动 Hermes 的目录
+- `true` 使沙盒能够直接访问您启动 Hermes 的目录
 
-仅在您有意希望容器处理实时主机文件时，才使用此选择加入功能。
+仅在您有意希望容器处理实时主机文件时使用此选择加入选项。
 
 ### 持久化 Shell
 
-默认情况下，每个终端命令都在其自己的子进程中运行——工作目录、环境变量和 shell 变量在命令之间会重置。当启用**持久化 Shell** 时，会在多个 `execute()` 调用之间保持一个长期存活的 bash 进程，以便状态在命令之间得以保留。
+默认情况下，每个终端命令都在其自己的子进程中运行——工作目录、环境变量和 shell 变量在命令之间重置。当启用**持久化 Shell** 时，会在 `execute()` 调用之间保持一个长期存活的 bash 进程，以便状态在命令之间得以保留。
 
 这对于 **SSH 后端** 最有用，因为它还消除了每个命令的连接开销。持久化 Shell **默认对 SSH 启用**，对本地后端禁用。
 
@@ -423,7 +423,7 @@ terminal:
 hermes config set terminal.persistent_shell false
 ```
 
-**在命令之间保留的内容：**
+**在命令之间持久化的内容：**
 - 工作目录（`cd /tmp` 对下一个命令保持有效）
 - 导出的环境变量（`export FOO=bar`）
 - Shell 变量（`MY_VAR=hello`）
@@ -436,7 +436,7 @@ hermes config set terminal.persistent_shell false
 | SSH 覆盖 | `TERMINAL_SSH_PERSISTENT` | 遵循配置 |
 | 本地覆盖 | `TERMINAL_LOCAL_PERSISTENT` | `false` |
 
-每个后端的环变量具有最高优先级。如果您也想在本地后端使用持久化 Shell：
+每个后端的环变量具有最高优先级。如果您也想在本地后端上使用持久化 Shell：
 
 ```bash
 export TERMINAL_LOCAL_PERSISTENT=true
@@ -450,7 +450,7 @@ export TERMINAL_LOCAL_PERSISTENT=true
 
 ## 技能设置
 
-技能可以通过其 SKILL.md 的 frontmatter 声明自己的配置设置。这些是非机密值（路径、偏好、域设置），存储在 `config.yaml` 中的 `skills.config` 命名空间下。
+技能可以通过其 SKILL.md 的 frontmatter 声明自己的配置设置。这些是非机密值（路径、偏好设置、域设置），存储在 `config.yaml` 的 `skills.config` 命名空间下。
 
 ```yaml
 skills:
@@ -472,9 +472,9 @@ hermes config set skills.config.myplugin.path ~/myplugin-data
 ```
 关于在自定义技能中声明配置设置的详细信息，请参阅[创建技能 — 配置设置](/docs/developer-guide/creating-skills#config-settings-configyaml)。
 
-### 对 Agent 创建技能写入的防护
+### 对 Agent 创建技能的写入进行防护
 
-当 Agent 使用 `skill_manage` 创建、编辑、修补或删除技能时，Hermes 可以选择性地扫描新增/更新的内容，以查找危险的关键词模式（凭据窃取、明显的提示词注入、数据外泄指令）。扫描器**默认关闭**——因为合法的真实 Agent 工作流经常需要接触 `~/.ssh/` 或提及 `$OPENAI_API_KEY`，这导致启发式规则误报过于频繁。如果你希望扫描器在 Agent 的技能写入生效前提示你，可以重新开启它：
+当 Agent 使用 `skill_manage` 创建、编辑、修补或删除技能时，Hermes 可以选择性地扫描新增/更新的内容，以查找危险的关键字模式（凭据窃取、明显的提示词注入、数据外泄指令）。扫描器**默认关闭**——因为合法的真实 Agent 工作流经常需要操作 `~/.ssh/` 或提及 `$OPENAI_API_KEY`，这会导致启发式规则频繁误报。如果你希望扫描器在 Agent 的技能写入生效前提示你，可以重新开启它：
 
 ```yaml
 skills:
@@ -489,16 +489,16 @@ skills:
 memory:
   memory_enabled: true
   user_profile_enabled: true
-  memory_char_limit: 2200   # ~800 tokens
-  user_char_limit: 1375     # ~500 tokens
+  memory_char_limit: 2200   # ~800 个 Token
+  user_char_limit: 1375     # ~500 个 Token
 ```
 
 ## 文件读取安全
 
-控制单次 `read_file` 调用可以返回多少内容。超过限制的读取会被拒绝，并返回一个错误，告知 Agent 使用 `offset` 和 `limit` 来读取更小的范围。这可以防止单次读取压缩的 JS 包或大型数据文件时淹没上下文窗口。
+控制单次 `read_file` 调用可以返回多少内容。超过限制的读取会被拒绝，并向 Agent 返回错误，提示其使用 `offset` 和 `limit` 来读取更小的范围。这可以防止单次读取压缩的 JS 包或大型数据文件时淹没上下文窗口。
 
 ```yaml
-file_read_max_chars: 100000  # 默认值 — ~25-35K tokens
+file_read_max_chars: 100000  # 默认值 — ~25-35K 个 Token
 ```
 
 如果你使用的是具有大上下文窗口的模型，并且经常读取大文件，可以提高此值。对于小上下文模型，可以降低此值以保持读取效率：
@@ -511,7 +511,7 @@ file_read_max_chars: 200000
 file_read_max_chars: 30000
 ```
 
-Agent 还会自动对文件读取进行去重——如果同一文件区域被读取两次且文件未更改，则会返回一个轻量级的存根，而不是重新发送内容。这会在上下文压缩时重置，以便 Agent 在其内容被摘要化后可以重新读取文件。
+Agent 还会自动对文件读取进行去重——如果同一文件区域被读取两次且文件未更改，则会返回一个轻量级的存根，而不是重新发送内容。这在上下文压缩后会重置，以便 Agent 在其内容被摘要化后可以重新读取文件。
 
 ## 工具输出截断限制
 
@@ -519,16 +519,16 @@ Agent 还会自动对文件读取进行去重——如果同一文件区域被�
 
 ```yaml
 tool_output:
-  max_bytes: 50000        # 终端输出上限 (字符数)
+  max_bytes: 50000        # 终端输出上限（字符数）
   max_lines: 2000         # read_file 分页上限
   max_line_length: 2000   # read_file 行号视图中每行的上限
 ```
 
-- **`max_bytes`** — 当 `terminal` 命令产生的 stdout/stderr 组合字符数超过此值时，Hermes 会保留前 40% 和后 60%，并在它们之间插入一个 `[OUTPUT TRUNCATED]` 通知。默认值 `50000`（≈12-15K tokens，取决于典型的 tokeniser）。
+- **`max_bytes`** — 当 `terminal` 命令产生的 stdout/stderr 合并字符数超过此值时，Hermes 会保留前 40% 和后 60%，并在它们之间插入一个 `[OUTPUT TRUNCATED]` 通知。默认值 `50000`（≈12-15K 个 Token，取决于典型的 Token 化器）。
 - **`max_lines`** — 单次 `read_file` 调用 `limit` 参数的上限。超过此值的请求会被限制，以防止单次读取淹没上下文窗口。默认值 `2000`。
 - **`max_line_length`** — 当 `read_file` 输出带行号的视图时应用的每行上限。超过此长度的行会被截断为此字符数，后跟 `... [truncated]`。默认值 `2000`。
 
-对于具有大上下文窗口、能够承受每次调用更多原始输出的模型，可以提高这些限制。对于小上下文模型，可以降低这些限制以保持工具结果紧凑：
+对于具有大上下文窗口、每次调用可以承受更多原始输出的模型，可以提高这些限制。对于小上下文模型，可以降低它们以保持工具结果紧凑：
 
 ```yaml
 # 大上下文模型 (200K+)
@@ -550,25 +550,25 @@ tool_output:
 agent:
   disabled_toolsets:
     - memory       # 隐藏记忆工具 + MEMORY_GUIDANCE 注入
-    - web          # 在任何地方禁用 web_search / web_extract
+    - web          # 在任何地方都不使用 web_search / web_extract
 ```
 
-这会在每个平台的工具配置（由 `hermes tools` 写入的 `platform_toolsets`）**之后**应用，因此此处列出的工具集总是会被移除——即使某个平台的保存配置中仍然列出了它。当你想要一个单一的开关来实现“在所有地方关闭 X”，而不是在 `hermes tools` UI 中编辑 15+ 个平台行时，请使用此功能。
+这会在每个平台的工具配置（由 `hermes tools` 写入的 `platform_toolsets`）**之后**应用，因此此处列出的工具集总是会被移除——即使某个平台的保存配置仍然列出了它。当你想要一个单一的开关来实现“在所有地方关闭 X”，而不是在 `hermes tools` UI 中编辑 15+ 个平台行时，请使用此功能。
 
-将列表留空或省略该键，则无任何效果。
+将列表留空或省略该键，则无操作。
 
 ## Git 工作树隔离
 
 为在同一仓库上并行运行多个 Agent 启用隔离的 git 工作树：
 
 ```yaml
-worktree: true    # 始终创建工作树 (与 hermes -w 相同)
+worktree: true    # 始终创建工作树（与 hermes -w 相同）
 # worktree: false # 默认值 — 仅在传递 -w 标志时创建
 ```
 
-启用后，每个 CLI 会话都会在 `.worktrees/` 下创建一个带有自己分支的新工作树。Agent 可以编辑文件、提交、推送和创建 PR，而不会相互干扰。干净的工作树会在退出时被移除；脏的工作树会被保留以供手动恢复。
+启用后，每个 CLI 会话都会在 `.worktrees/` 下创建一个带有自己分支的新工作树。Agent 可以编辑文件、提交、推送和创建 PR，而不会相互干扰。干净的工作树在退出时会被移除；脏的工作树会被保留以供手动恢复。
 
-你还可以通过在仓库根目录下的 `.worktreeinclude` 文件中列出要复制到工作树中的 git 忽略文件：
+你也可以通过在仓库根目录下的 `.worktreeinclude` 文件中列出要复制到工作树中的 git 忽略文件：
 
 ```
 # .worktreeinclude
@@ -579,7 +579,7 @@ node_modules/
 
 ## 上下文压缩
 
-Hermes 会自动压缩长对话，以保持在模型的上下文窗口内。压缩摘要器是一个独立的 LLM 调用——你可以将其指向任何提供商或端点。
+Hermes 会自动压缩长对话，以保持在你的模型上下文窗口内。压缩摘要器是一个独立的 LLM 调用——你可以将其指向任何提供商或端点。
 
 所有压缩设置都位于 `config.yaml` 中（没有环境变量）。
 
@@ -588,8 +588,8 @@ Hermes 会自动压缩长对话，以保持在模型的上下文窗口内。压�
 ```yaml
 compression:
   enabled: true                                     # 开启/关闭压缩
-  threshold: 0.50                                   # 在此上下文限制百分比时触发压缩
-  target_ratio: 0.20                                # 作为最近尾部保留的阈值分数
+  threshold: 0.50                                   # 在此上下文限制百分比时进行压缩
+  target_ratio: 0.20                                # 作为最近尾部保留的阈值比例
   protect_last_n: 20                                # 保持未压缩的最小最近消息数
   hygiene_hard_message_limit: 400                   # 消息网关安全阀 — 见下文
 
@@ -597,17 +597,17 @@ compression:
 auxiliary:
   compression:
     model: ""                                       # 空 = 使用主聊天模型。覆盖示例："google/gemini-3-flash-preview" 以使用更便宜/更快的压缩。
-    provider: "auto"                                # 提供商: "auto", "openrouter", "nous", "codex", "main" 等。
-    base_url: null                                  # 自定义 OpenAI 兼容端点 (覆盖 provider)
+    provider: "auto"                                # 提供商："auto"、"openrouter"、"nous"、"codex"、"main" 等。
+    base_url: null                                  # 自定义 OpenAI 兼容端点（覆盖 provider）
 ```
 :::info 旧配置迁移
-旧版配置中的 `compression.summary_model`、`compression.summary_provider` 和 `compression.summary_base_url` 在首次加载时（配置版本 17）会自动迁移到 `auxiliary.compression.*`。无需手动操作。
+旧版配置中的 `compression.summary_model`、`compression.summary_provider` 和 `compression.summary_base_url` 会在首次加载时自动迁移到 `auxiliary.compression.*`（配置版本 17）。无需手动操作。
 :::
 
-`hygiene_hard_message_limit` 是仅用于消息网关的**预压缩安全阀**。拥有数千条消息的失控会话可能会在达到正常的上下文百分比阈值之前就触及模型上下文限制；当消息数量超过此上限时，无论 Token 使用情况如何，Hermes 都会强制进行压缩。默认值为 `400` —— 对于通常有超长会话的平台，可以提高此值；若要强制进行更积极的压缩，则降低此值。在运行中的网关上编辑此值将在下一条消息生效（见下文）。
+`hygiene_hard_message_limit` 是仅用于消息网关的**预压缩安全阀**。包含数千条消息的失控会话可能会在达到正常的上下文百分比阈值之前就触及模型上下文限制；当消息数量超过此上限时，无论 Token 使用情况如何，Hermes 都会强制进行压缩。默认值为 `400` —— 对于超长会话是常态的平台，可以调高此值；若要强制进行更激进的压缩，则可以降低此值。在运行中的网关上编辑此值会在下一条消息时生效（见下文）。
 
 :::tip 压缩和上下文长度的网关热重载
-自近期版本起，在运行中的网关上编辑 `config.yaml` 中的 `model.context_length` 或任何 `compression.*` 键值，将在下一条消息生效 —— 无需重启网关、无需 `/reset`、也无需轮换会话。缓存的 Agent 签名包含这些键，因此当网关检测到更改时，会透明地重建 Agent。API 密钥和工具/技能配置仍需要通常的重载路径。
+自近期版本起，在运行中的网关上编辑 `config.yaml` 中的 `model.context_length` 或任何 `compression.*` 键值，会在下一条消息时生效 —— 无需重启网关、无需 `/reset`、也无需轮换会话。缓存的 Agent 签名包含这些键，因此当网关检测到更改时，会透明地重建 Agent。API 密钥和工具/技能配置仍需要通常的重载路径。
 :::
 
 ### 常见设置
@@ -618,7 +618,7 @@ compression:
   enabled: true
   threshold: 0.50
 ```
-使用您的主提供商和主模型。如果您希望使用比主聊天模型更便宜的模型进行压缩，可以按任务覆盖（例如 `auxiliary.compression.provider: openrouter` + `model: google/gemini-2.5-flash`）。
+使用您的主提供商和主模型。如果您希望压缩使用比主聊天模型更便宜的模型，可以按任务覆盖（例如 `auxiliary.compression.provider: openrouter` + `model: google/gemini-2.5-flash`）。
 
 **强制使用特定提供商**（基于 OAuth 或 API 密钥）：
 ```yaml
@@ -642,12 +642,12 @@ auxiliary:
 
 | `auxiliary.compression.provider` | `auxiliary.compression.base_url` | 结果 |
 |---------------------|---------------------|--------|
-| `auto` （默认） | 未设置 | 自动检测最佳可用提供商 |
+| `auto`（默认） | 未设置 | 自动检测最佳可用提供商 |
 | `nous` / `openrouter` / 等 | 未设置 | 强制使用该提供商，使用其身份验证 |
 | 任意值 | 已设置 | 直接使用自定义端点（忽略提供商） |
 
 :::warning 摘要模型上下文长度要求
-摘要模型的上下文窗口**必须**至少与您的主 Agent 模型一样大。压缩器将会话的完整中间部分发送给摘要模型 —— 如果该模型的上下文窗口小于主模型，摘要调用将因上下文长度错误而失败。发生这种情况时，中间轮次将被**丢弃而不进行摘要**，从而静默地丢失会话上下文。如果您覆盖了模型，请验证其上下文长度是否达到或超过您的主模型。
+摘要模型**必须**拥有至少与您的主 Agent 模型一样大的上下文窗口。压缩器将会话的完整中间部分发送给摘要模型 —— 如果该模型的上下文窗口小于主模型，摘要调用将因上下文长度错误而失败。发生这种情况时，中间轮次将被**丢弃而不进行摘要**，从而静默地丢失会话上下文。如果您覆盖了模型，请验证其上下文长度是否达到或超过您的主模型。
 :::
 
 ## 上下文引擎
@@ -672,53 +672,53 @@ context:
 
 ## 迭代预算压力
 
-当 Agent 处理具有许多工具调用的复杂任务时，它可能会在不知不觉中耗尽迭代预算（默认值：90 轮）。预算压力会在接近限制时自动警告模型：
+当 Agent 处理具有许多工具调用的复杂任务时，它可能会在未意识到预算即将耗尽的情况下，快速消耗掉其迭代预算（默认：90 轮）。预算压力会在接近限制时自动警告模型：
 
 | 阈值 | 级别 | 模型看到的内容 |
 |-----------|-------|---------------------|
 | **70%** | 注意 | `[BUDGET: 63/90. 27 iterations left. Start consolidating.]` |
 | **90%** | 警告 | `[BUDGET WARNING: 81/90. Only 9 left. Respond NOW.]` |
 
-警告被注入到最后一个工具结果的 JSON 中（作为 `_budget_warning` 字段），而不是作为单独的消息 —— 这保留了提示词缓存，并且不会破坏会话结构。
+警告被注入到最后一个工具结果的 JSON 中（作为 `_budget_warning` 字段），而不是作为单独的消息 —— 这可以保留提示词缓存，并且不会破坏会话结构。
 
 ```yaml
 agent:
-  max_turns: 90                # 每次会话轮次的最大迭代次数（默认值：90）
-  api_max_retries: 3           # 触发备用提供商切换前，每个提供商的重试次数（默认值：3）
+  max_turns: 90                # 每次会话轮次的最大迭代次数（默认：90）
+  api_max_retries: 3           # 触发回退机制前，每个提供商的重试次数（默认：3）
 ```
 
 预算压力默认启用。Agent 会自然地看到作为工具结果一部分的警告，鼓励它在迭代次数用完之前整合工作并给出响应。
 
 当迭代预算完全耗尽时，CLI 会向用户显示通知：`⚠ Iteration budget reached (90/90) — response may be incomplete`。如果预算在活动工作中耗尽，Agent 会在停止前生成已完成工作的摘要。
 
-`agent.api_max_retries` 控制在触发备用提供商切换**之前**，Hermes 对瞬时错误（速率限制、连接中断、5xx 错误）重试提供商 API 调用的次数。默认值为 `3` —— 总共尝试四次。如果您配置了[备用提供商](/docs/user-guide/features/fallback-providers)并希望更快地故障转移，请将此值降至 `0`，这样主提供商上的第一个瞬时错误会立即切换到备用提供商，而不是对不稳定的端点进行重试。
+`agent.api_max_retries` 控制 Hermes 在触发回退提供商切换**之前**，对瞬时错误（速率限制、连接中断、5xx 错误）重试提供商 API 调用的次数。默认值为 `3` —— 总共尝试四次。如果您配置了[回退提供商](/docs/user-guide/features/fallback-providers)并希望更快地故障转移，请将此值降至 `0`，这样主提供商上的第一个瞬时错误会立即切换到回退，而不是对不稳定的端点进行重试。
 
 ### API 超时
 
-Hermes 为流式传输设置了单独的超时层，并为非流式调用设置了陈旧检测器。只有当您将本地提供商的这些设置保留为隐式默认值时，陈旧检测器才会自动调整。
+Hermes 为流式传输设置了独立的超时层，并为非流式调用设置了陈旧检测器。当您将本地提供商的陈旧检测器保留为隐式默认值时，它们会自动调整。
 | 超时设置 | 默认值 | 本地提供商 | 配置 / 环境变量 |
 |---------|---------|----------------|--------------|
-| Socket 读取超时 | 120秒 | 自动提升至 1800秒 | `HERMES_STREAM_READ_TIMEOUT` |
-| 陈旧流检测 | 180秒 | 自动禁用 | `HERMES_STREAM_STALE_TIMEOUT` |
-| 陈旧非流检测 | 300秒 | 当未显式设置时自动禁用 | `providers.<id>.stale_timeout_seconds` 或 `HERMES_API_CALL_STALE_TIMEOUT` |
-| API 调用（非流式） | 1800秒 | 保持不变 | `providers.<id>.request_timeout_seconds` / `timeout_seconds` 或 `HERMES_API_TIMEOUT` |
+| Socket 读取超时 | 120s | 自动提升至 1800s | `HERMES_STREAM_READ_TIMEOUT` |
+| 陈旧流检测 | 180s | 自动禁用 | `HERMES_STREAM_STALE_TIMEOUT` |
+| 陈旧非流检测 | 300s | 当隐式设置时自动禁用 | `providers.<id>.stale_timeout_seconds` 或 `HERMES_API_CALL_STALE_TIMEOUT` |
+| API 调用（非流式） | 1800s | 保持不变 | `providers.<id>.request_timeout_seconds` / `timeout_seconds` 或 `HERMES_API_TIMEOUT` |
 
 **Socket 读取超时** 控制 httpx 等待提供商发送下一个数据块的时间。本地 LLM 在处理大上下文进行预填充时，可能需要数分钟才能生成第一个 Token，因此当 Hermes 检测到本地端点时，会将此超时提升至 30 分钟。如果你显式设置了 `HERMES_STREAM_READ_TIMEOUT`，无论端点检测结果如何，都将始终使用该值。
 
-**陈旧流检测** 会终止那些接收 SSE 保活 ping 但没有实际内容的连接。对于本地提供商，此功能完全禁用，因为它们在预填充期间不发送保活 ping。
+**陈旧流检测** 会终止那些接收 SSE 保活 ping 但没有实际内容的连接。对于本地提供商，此功能完全禁用，因为它们在预填充期间不会发送保活 ping。
 
-**陈旧非流检测** 会终止长时间未产生响应的非流式调用。默认情况下，Hermes 在本地端点上禁用此功能，以避免在长时间预填充期间产生误报。如果你显式设置了 `providers.<id>.stale_timeout_seconds`、`providers.<id>.models.<model>.stale_timeout_seconds` 或 `HERMES_API_CALL_STALE_TIMEOUT`，即使在本地端点上也会遵循该显式值。
+**陈旧非流检测** 会终止那些长时间未产生响应的非流式调用。默认情况下，Hermes 在本地端点上禁用此功能，以避免在长时间预填充期间产生误报。如果你显式设置了 `providers.<id>.stale_timeout_seconds`、`providers.<id>.models.<model>.stale_timeout_seconds` 或 `HERMES_API_CALL_STALE_TIMEOUT`，即使在本地端点上也会遵循该显式值。
 
 ## 上下文压力警告
 
-与迭代预算压力不同，上下文压力跟踪的是对话距离**压缩阈值**有多近——即触发上下文压缩以总结旧消息的临界点。这有助于你和 Agent 了解对话何时变得过长。
+与迭代预算压力不同，上下文压力跟踪对话接近**压缩阈值**的程度——即触发上下文压缩以总结旧消息的临界点。这有助于你和 Agent 了解对话何时变得过长。
 
 | 进度 | 级别 | 发生的情况 |
 |----------|-------|-------------|
-| 距离阈值 **≥ 60%** | 信息 | CLI 显示青色进度条；消息网关发送信息性通知 |
-| 距离阈值 **≥ 85%** | 警告 | CLI 显示粗体黄色进度条；消息网关警告即将进行压缩 |
+| **≥ 60%** 接近阈值 | 信息 | CLI 显示青色进度条；消息网关发送信息性通知 |
+| **≥ 85%** 接近阈值 | 警告 | CLI 显示粗体黄色进度条；消息网关警告即将进行压缩 |
 
-在 CLI 中，上下文压力以工具输出流中的进度条形式显示：
+在 CLI 中，上下文压力在工具输出流中显示为进度条：
 
 ```
   ◐ context ████████████░░░░░░░░ 62% to compaction  48k threshold (50%) · approaching compaction
@@ -748,10 +748,10 @@ credential_pool_strategies:
 
 ## 辅助模型
 
-Hermes 使用“辅助”模型来处理图像分析、网页摘要、浏览器截图分析、会话标题生成和上下文压缩等辅助任务。默认情况下（`auxiliary.*.provider: "auto"`），Hermes 会将每个辅助任务路由到你的**主聊天模型**——即你在 `hermes model` 中选择的同一提供商/模型。你无需配置任何内容即可开始使用，但请注意，在昂贵的推理模型（Opus、MiniMax M2.7 等）上，辅助任务会增加可观的成本。如果你希望无论主模型是什么，辅助任务都使用廉价且快速的模型，请显式设置 `auxiliary.<task>.provider` 和 `auxiliary.<task>.model`（例如，使用 OpenRouter 上的 Gemini Flash 进行视觉和网页提取）。
+Hermes 使用“辅助”模型来处理图像分析、网页摘要、浏览器截图分析、会话标题生成和上下文压缩等辅助任务。默认情况下（`auxiliary.*.provider: "auto"`），Hermes 将每个辅助任务路由到你的**主聊天模型**——即你在 `hermes model` 中选择的同一提供商/模型。你无需配置任何内容即可开始使用，但请注意，在昂贵的推理模型（Opus、MiniMax M2.7 等）上，辅助任务会增加显著成本。如果你希望无论主模型是什么，辅助任务都使用廉价且快速的模型，请显式设置 `auxiliary.<task>.provider` 和 `auxiliary.<task>.model`（例如，使用 OpenRouter 上的 Gemini Flash 进行视觉和网页提取）。
 
 :::note 为什么 "auto" 使用你的主模型
-早期版本会将聚合器用户（OpenRouter、Nous Portal）分流到提供商端的廉价默认模型上。这令人意外——付费订阅聚合器的用户会看到不同的模型处理他们的辅助流量。现在 `auto` 为所有用户使用主模型，而 `config.yaml` 中针对每个任务的覆盖设置仍然优先（请参阅下面的[完整辅助配置参考](#full-auxiliary-config-reference)）。
+早期版本将聚合器用户（OpenRouter、Nous Portal）分流到提供商端的廉价默认模型上。这令人意外——付费订阅聚合器的用户会看到不同的模型处理他们的辅助流量。现在 `auto` 为所有用户使用主模型，而 `config.yaml` 中针对每个任务的覆盖设置仍然优先（请参阅下面的[完整辅助配置参考](#完整辅助配置参考)）。
 :::
 
 ### 交互式配置辅助模型
@@ -771,7 +771,7 @@ $ hermes model
 [ ] triage_specifier     当前: auto / 主模型
 ```
 
-选择一个任务，选择一个提供商（OAuth 流程会打开浏览器；API 密钥提供商会提示），选择一个模型。更改将持久保存到 `config.yaml` 中的 `auxiliary.<task>.*`。其机制与主模型选择器相同——无需学习额外的语法。
+选择一个任务，选择一个提供商（OAuth 流程会打开浏览器；API 密钥提供商会提示），选择一个模型。更改将持久保存到 `config.yaml` 中的 `auxiliary.<task>.*`。与主模型选择器使用相同的机制——无需学习额外的语法。
 
 ### 视频教程
 
@@ -791,19 +791,23 @@ Hermes 中的每个模型槽位——辅助任务、压缩、回退——都使�
 
 | 键 | 作用 | 默认值 |
 |-----|-------------|---------|
-| `provider` | 用于身份验证和路由的提供商 | `"auto"` |
+| `provider` | 用于认证和路由的提供商 | `"auto"` |
 | `model` | 请求的模型 | 提供商的默认模型 |
 | `base_url` | 自定义的 OpenAI 兼容端点（覆盖提供商） | 未设置 |
-当设置了 `base_url` 时，Hermes 会忽略 provider 并直接调用该端点（使用 `api_key` 或 `OPENAI_API_KEY` 进行身份验证）。当仅设置了 `provider` 时，Hermes 会使用该 provider 内置的身份验证和基础 URL。
+当设置了 `base_url` 时，Hermes 会忽略 provider 并直接调用该端点（使用 `api_key` 或 `OPENAI_API_KEY` 进行身份验证）。当仅设置了 `provider` 时，Hermes 会使用该提供商内置的身份验证和基础 URL。
 
-辅助任务可用的 provider：`auto`、`main`，以及 [provider registry](/docs/reference/environment-variables) 中的任何 provider — `openrouter`、`nous`、`openai-codex`、`copilot`、`copilot-acp`、`anthropic`、`gemini`、`google-gemini-cli`、`qwen-oauth`、`zai`、`kimi-coding`、`kimi-coding-cn`、`minimax`、`minimax-cn`、`minimax-oauth`、`deepseek`、`nvidia`、`xai`、`ollama-cloud`、`alibaba`、`bedrock`、`huggingface`、`arcee`、`xiaomi`、`kilocode`、`opencode-zen`、`opencode-go`、`ai-gateway`、`azure-foundry` — 或者来自你的 `custom_providers` 列表的任何命名的自定义 provider（例如 `provider: "beans"`）。
+辅助任务可用的提供商：`auto`、`main`，以及[提供商注册表](/docs/reference/environment-variables)中的任何提供商 — `openrouter`、`nous`、`openai-codex`、`copilot`、`copilot-acp`、`anthropic`、`gemini`、`google-gemini-cli`、`qwen-oauth`、`zai`、`kimi-coding`、`kimi-coding-cn`、`minimax`、`minimax-cn`、`minimax-oauth`、`deepseek`、`nvidia`、`xai`、`xai-oauth`、`ollama-cloud`、`alibaba`、`bedrock`、`huggingface`、`arcee`、`xiaomi`、`kilocode`、`opencode-zen`、`opencode-go`、`ai-gateway`、`azure-foundry` — 或者你 `custom_providers` 列表中的任何命名自定义提供商（例如 `provider: "beans"`）。
 
 :::tip MiniMax OAuth
 `minimax-oauth` 通过浏览器 OAuth 登录（无需 API 密钥）。运行 `hermes model` 并选择 **MiniMax (OAuth)** 进行身份验证。辅助任务会自动使用 `MiniMax-M2.7-highspeed`。请参阅 [MiniMax OAuth 指南](../guides/minimax-oauth.md)。
 :::
 
+:::tip xAI Grok OAuth
+`xai-oauth` 通过浏览器 OAuth 为 SuperGrok 订阅者登录（无需 API 密钥）。运行 `hermes model` 并选择 **xAI Grok OAuth (SuperGrok Subscription)** 进行身份验证。相同的 OAuth Token 会复用于每个直接面向 xAI 的界面（聊天、辅助任务、TTS、图像生成、视频生成、转录）。请参阅 [xAI Grok OAuth 指南](../guides/xai-grok-oauth.md)，如果 Hermes 在远程主机上，请参阅 [通过 SSH / 远程主机进行 OAuth](../guides/oauth-over-ssh.md)。
+:::
+
 :::warning `"main"` 仅用于辅助任务
-`"main"` provider 选项意味着“使用我的主 Agent 使用的任何 provider”——它仅在 `auxiliary:`、`compression:` 和 `fallback_model:` 配置内部有效。它**不是**顶层 `model.provider` 设置的有效值。如果你使用自定义的 OpenAI 兼容端点，请在 `model:` 部分设置 `provider: custom`。有关所有主模型 provider 选项，请参阅 [AI Providers](/docs/integrations/providers)。
+`"main"` 提供商选项意味着“使用我的主 Agent 使用的任何提供商” — 它仅在 `auxiliary:`、`compression:` 和 `fallback_model:` 配置内部有效。它**不是**你顶层 `model.provider` 设置的有效值。如果你使用自定义的 OpenAI 兼容端点，请在 `model:` 部分设置 `provider: custom`。请参阅 [AI 提供商](/docs/integrations/providers) 了解所有主模型提供商选项。
 :::
 
 ### 完整的辅助配置参考
@@ -837,7 +841,7 @@ auxiliary:
 
   # 上下文压缩超时 (与 compression.* 配置分开)
   compression:
-    timeout: 120               # 秒 — 压缩会总结长对话，需要更多时间
+    timeout: 120               # 秒 — 压缩功能会总结长对话，需要更多时间
 
   # 会话搜索 — 总结过去的会话匹配项
   session_search:
@@ -847,7 +851,7 @@ auxiliary:
     api_key: ""
     timeout: 30
     max_concurrency: 3       # 限制并行摘要数量以减少请求突发导致的 429 错误
-    extra_body: {}           # Provider 特定的 OpenAI 兼容请求字段
+    extra_body: {}           # 特定于提供商的 OpenAI 兼容请求字段
 
   # 技能中心 — 技能匹配和搜索
   skills_hub:
@@ -866,7 +870,7 @@ auxiliary:
     timeout: 30
 
   # 看板分类指定器 — `hermes kanban specify <id>` (或
-  # 仪表板上 Triage 列卡片的 ✨ Specify 按钮) 使用此
+  # 仪表板上分类列卡片的 ✨ Specify 按钮) 使用此
   # 槽位将一行描述扩展为具体规范，并将任务
   # 提升到 `todo` 状态。廉价快速的模型在这里效果很好；规范扩展
   # 很短，不需要推理深度。
@@ -879,19 +883,19 @@ auxiliary:
 ```
 
 :::tip
-每个辅助任务都有一个可配置的 `timeout`（以秒为单位）。默认值：vision 120秒，web_extract 360秒，approval 30秒，compression 120秒。如果你为辅助任务使用慢速的本地模型，请增加这些值。Vision 还有一个单独的 `download_timeout`（默认 30秒）用于 HTTP 图像下载——对于慢速连接或自托管的图像服务器，请增加此值。
+每个辅助任务都有一个可配置的 `timeout`（以秒为单位）。默认值：vision 120秒，web_extract 360秒，approval 30秒，compression 120秒。如果你为辅助任务使用慢速的本地模型，请增加这些值。Vision 还有一个单独的 `download_timeout`（默认 30秒）用于 HTTP 图像下载 — 对于慢速连接或自托管的图像服务器，请增加此值。
 :::
 
 :::info
-上下文压缩有自己的 `compression:` 块用于设置阈值，以及一个 `auxiliary.compression:` 块用于模型/provider 设置——请参阅上文的 [Context Compression](#context-compression)。回退模型使用一个 `fallback_model:` 块——请参阅 [Fallback Model](/docs/integrations/providers#fallback-model)。这三者都遵循相同的 provider/model/base_url 模式。
+上下文压缩有自己的 `compression:` 块用于设置阈值，以及一个 `auxiliary.compression:` 块用于模型/提供商设置 — 请参阅上文的 [上下文压缩](#context-compression)。回退模型使用 `fallback_model:` 块 — 请参阅 [回退模型](/docs/integrations/providers#fallback-model)。这三者都遵循相同的 provider/model/base_url 模式。
 :::
 
 ### 会话搜索调优
 
-如果你为 `auxiliary.session_search` 使用推理密集型的模型，Hermes 现在为你提供了两个内置控制选项：
+如果你为 `auxiliary.session_search` 使用推理密集型的模型，Hermes 现在为你提供了两个内置控制项：
 
 - `auxiliary.session_search.max_concurrency`：限制 Hermes 一次总结多少个匹配的会话
-- `auxiliary.session_search.extra_body`：在摘要调用中转发 provider 特定的 OpenAI 兼容请求字段
+- `auxiliary.session_search.extra_body`：在摘要调用中转发特定于提供商的 OpenAI 兼容请求字段
 
 示例：
 
@@ -906,17 +910,17 @@ auxiliary:
       enable_thinking: false
 ```
 
-当你的 provider 对请求突发进行速率限制，并且你希望 `session_search` 牺牲一些并行性以换取稳定性时，请使用 `max_concurrency`。
+当你的提供商对请求突发进行速率限制，并且你希望 `session_search` 牺牲一些并行性以换取稳定性时，请使用 `max_concurrency`。
 
-仅当你的 provider 文档中记录了希望 Hermes 为该任务传递的 OpenAI 兼容请求体字段时，才使用 `extra_body`。Hermes 会原样转发该对象。
-
+仅当你的提供商文档中记录了希望 Hermes 为该任务传递的 OpenAI 兼容请求体字段时，才使用 `extra_body`。Hermes 会原样转发该对象。
 :::warning
-`extra_body` 仅在你的 provider 实际支持你发送的字段时才有效。如果 provider 没有暴露原生的 OpenAI 兼容的推理关闭标志，Hermes 无法代表它合成一个。
+`extra_body` 仅在您的提供商实际支持您发送的字段时有效。如果提供商没有暴露原生的 OpenAI 兼容的推理关闭标志，Hermes 无法代表其合成一个。
 :::
 
-### 辅助任务的 OpenRouter 路由和 Pareto Code
+### OpenRouter 路由与 Pareto Code 用于辅助任务
 
-当辅助任务解析为 OpenRouter（无论是显式设置还是通过 `provider: "main"` 而你的主 Agent 正在使用 OpenRouter 时），主 Agent 的 `provider_routing` 和 `openrouter.min_coding_score` 设置**不会传播**——根据设计，每个辅助任务都是独立的。要为特定的辅助任务设置 OpenRouter provider 偏好或使用 [Pareto Code router](/docs/integrations/providers#openrouter-pareto-code-router)，请通过 `extra_body` 为每个任务单独设置：
+当辅助任务解析到 OpenRouter（无论是显式指定还是通过 `provider: "main"` 而您的主 Agent 使用 OpenRouter 时），主 Agent 的 `provider_routing` 和 `openrouter.min_coding_score` 设置**不会传播**——这是设计使然，每个辅助任务都是独立的。要为特定辅助任务设置 OpenRouter 提供商偏好或使用 [Pareto Code 路由器](/docs/integrations/providers#openrouter-pareto-code-router)，请通过 `extra_body` 按任务设置：
+
 ```yaml
 auxiliary:
   compression:
@@ -930,14 +934,14 @@ auxiliary:
         # ignore: [deepinfra]              # 排除特定提供商
       plugins:                             # OpenRouter Pareto Code 路由器旋钮
         - id: pareto-router
-          min_coding_score: 0.5            # 0.0–1.0；数值越高 = 编码能力越强
+          min_coding_score: 0.5            # 0.0–1.0；越高 = 编码能力越强
 ```
 
 其结构反映了 OpenRouter 在聊天补全请求体中接受的内容。Hermes 会原样转发整个 `extra_body`，因此 [openrouter.ai/docs](https://openrouter.ai/docs) 上记录的任何其他 OpenRouter 请求体字段都以相同方式工作。
 
 ### 更改视觉模型
 
-要使用 GPT-4o 而非 Gemini Flash 进行图像分析：
+要使用 GPT-4o 而不是 Gemini Flash 进行图像分析：
 
 ```yaml
 auxiliary:
@@ -958,13 +962,14 @@ AUXILIARY_VISION_MODEL=openai/gpt-4o
 | 提供商 | 描述 | 要求 |
 |----------|-------------|-------------|
 | `"auto"` | 最佳可用（默认）。视觉任务尝试 OpenRouter → Nous → Codex。 | — |
-| `"openrouter"` | 强制使用 OpenRouter — 可路由到任何模型（Gemini、GPT-4o、Claude 等） | `OPENROUTER_API_KEY` |
+| `"openrouter"` | 强制使用 OpenRouter —— 路由到任何模型（Gemini、GPT-4o、Claude 等） | `OPENROUTER_API_KEY` |
 | `"nous"` | 强制使用 Nous Portal | `hermes auth` |
 | `"codex"` | 强制使用 Codex OAuth（ChatGPT 账户）。支持视觉（gpt-5.3-codex）。 | `hermes model` → Codex |
 | `"minimax-oauth"` | 强制使用 MiniMax OAuth（浏览器登录，无需 API 密钥）。辅助任务使用 MiniMax-M2.7-highspeed。 | `hermes model` → MiniMax (OAuth) |
-| `"main"` | 使用您活动的自定义/主端点。这可以来自 `OPENAI_BASE_URL` + `OPENAI_API_KEY` 或通过 `hermes model` / `config.yaml` 保存的自定义端点。适用于 OpenAI、本地模型或任何 OpenAI 兼容的 API。**仅限辅助任务 — 对 `model.provider` 无效。** | 自定义端点凭据 + 基础 URL |
+| `"xai-oauth"` | 强制使用 xAI Grok OAuth（SuperGrok 订阅者的浏览器登录，无需 API 密钥）。同一个 OAuth Token 覆盖聊天、TTS、图像、视频和转录。 | `hermes model` → xAI Grok OAuth (SuperGrok Subscription) |
+| `"main"` | 使用您活动的自定义/主端点。这可以来自 `OPENAI_BASE_URL` + `OPENAI_API_KEY` 或通过 `hermes model` / `config.yaml` 保存的自定义端点。适用于 OpenAI、本地模型或任何 OpenAI 兼容的 API。**仅限辅助任务 —— 对 `model.provider` 无效。** | 自定义端点凭证 + 基础 URL |
 
-当您希望辅助任务绕过默认路由器时，来自主提供商目录的直接 API 密钥提供商在此处也适用。配置 `GMI_API_KEY` 后，`gmi` 即有效：
+当您希望辅助任务绕过默认路由器时，来自主提供商目录的直接 API 密钥提供商在此处也适用。配置 `GMI_API_KEY` 后，`gmi` 是有效的：
 
 ```yaml
 auxiliary:
@@ -997,7 +1002,7 @@ auxiliary:
 auxiliary:
   vision:
     provider: "main"
-    model: "gpt-4o"       # 或使用更便宜的 "gpt-4o-mini"
+    model: "gpt-4o"       # 或 "gpt-4o-mini" 以降低成本
 ```
 
 **使用 OpenRouter 进行视觉分析**（路由到任何模型）：
@@ -1008,7 +1013,7 @@ auxiliary:
     model: "openai/gpt-4o"      # 或 "google/gemini-2.5-flash" 等
 ```
 
-**使用 Codex OAuth**（ChatGPT Pro/Plus 账户 — 无需 API 密钥）：
+**使用 Codex OAuth**（ChatGPT Pro/Plus 账户 —— 无需 API 密钥）：
 ```yaml
 auxiliary:
   vision:
@@ -1033,21 +1038,20 @@ auxiliary:
     model: "my-local-model"
 ```
 
-`provider: "main"` 使用 Hermes 用于正常聊天的任何提供商 — 无论是命名的自定义提供商（例如 `beans`）、内置提供商如 `openrouter`，还是遗留的 `OPENAI_BASE_URL` 端点。
+`provider: "main"` 使用 Hermes 用于正常聊天的任何提供商——无论是命名的自定义提供商（例如 `beans`）、内置提供商如 `openrouter`，还是遗留的 `OPENAI_BASE_URL` 端点。
 
 :::tip
-如果您将 Codex OAuth 用作您的主模型提供商，视觉功能会自动工作 — 无需额外配置。Codex 已包含在视觉任务的自动检测链中。
+如果您使用 Codex OAuth 作为您的主模型提供商，视觉功能会自动工作——无需额外配置。Codex 已包含在视觉任务的自动检测链中。
 :::
 
 :::warning
-**视觉功能需要多模态模型。** 如果您设置 `provider: "main"`，请确保您的端点支持多模态/视觉 — 否则图像分析将失败。
+**视觉功能需要多模态模型。** 如果您设置 `provider: "main"`，请确保您的端点支持多模态/视觉——否则图像分析将失败。
 :::
-
 ### 环境变量（旧版）
 
-辅助模型也可以通过环境变量配置。但是，`config.yaml` 是首选方法 — 它更易于管理，并且支持包括 `base_url` 和 `api_key` 在内的所有选项。
+辅助模型也可以通过环境变量进行配置。但 `config.yaml` 是首选方法——它更易于管理，并且支持包括 `base_url` 和 `api_key` 在内的所有选项。
 
-| 设置 | 环境变量 |
+| 设置项 | 环境变量 |
 |---------|---------------------|
 | 视觉提供商 | `AUXILIARY_VISION_PROVIDER` |
 | 视觉模型 | `AUXILIARY_VISION_MODEL` |
@@ -1058,35 +1062,36 @@ auxiliary:
 | 网页提取端点 | `AUXILIARY_WEB_EXTRACT_BASE_URL` |
 | 网页提取 API 密钥 | `AUXILIARY_WEB_EXTRACT_API_KEY` |
 
-压缩和回退模型设置仅支持 config.yaml。
+压缩和回退模型设置仅可通过 config.yaml 配置。
 
 :::tip
-运行 `hermes config` 查看您当前的辅助模型设置。仅当覆盖项与默认值不同时才会显示。
+运行 `hermes config` 查看您当前的辅助模型设置。只有当覆盖项与默认值不同时才会显示。
 :::
 
 ## 推理强度
 
 控制模型在响应前进行多少“思考”：
+
 ```yaml
 agent:
-  reasoning_effort: ""   # 留空 = 中等（默认）。选项：none, minimal, low, medium, high, xhigh (max)
+  reasoning_effort: ""   # 空 = 中等（默认）。选项：none, minimal, low, medium, high, xhigh (max)
 ```
 
-当未设置时（默认），推理努力程度默认为 "medium" —— 这是一个适用于大多数任务的平衡级别。设置一个值会覆盖它 —— 更高的推理努力程度会在复杂任务上带来更好的结果，但代价是消耗更多 Token 和增加延迟。
+当未设置时（默认），推理强度默认为“medium”——这是一个适用于大多数任务的平衡水平。设置一个值会覆盖它——更高的推理强度会在复杂任务上提供更好的结果，但代价是消耗更多 Token 和增加延迟。
 
-你也可以在运行时使用 `/reasoning` 命令更改推理努力程度：
+您也可以在运行时使用 `/reasoning` 命令更改推理强度：
 
 ```
-/reasoning           # 显示当前努力程度和显示状态
-/reasoning high      # 将推理努力程度设置为 high
+/reasoning           # 显示当前强度级别和显示状态
+/reasoning high      # 将推理强度设置为 high
 /reasoning none      # 禁用推理
-/reasoning show      # 在每个回复上方显示模型思考过程
+/reasoning show      # 在每个响应上方显示模型思考过程
 /reasoning hide      # 隐藏模型思考过程
 ```
 
 ## 工具使用强制
 
-某些模型偶尔会将预期操作描述为文本，而不是进行工具调用（例如说“我会运行测试...”而不是实际调用终端）。工具使用强制会注入系统提示词指导，引导模型回到实际调用工具的行为。
+某些模型偶尔会以文本形式描述预期操作，而不是进行工具调用（例如“我会运行测试...”而不是实际调用终端）。工具使用强制会注入系统提示词指导，引导模型回到实际调用工具的行为。
 
 ```yaml
 agent:
@@ -1096,25 +1101,25 @@ agent:
 | 值 | 行为 |
 |-------|----------|
 | `"auto"` (默认) | 对匹配以下字符串的模型启用：`gpt`, `codex`, `gemini`, `gemma`, `grok`。对所有其他模型（Claude, DeepSeek, Qwen 等）禁用。 |
-| `true` | 无论模型如何，始终启用。如果你发现当前模型描述操作而不是执行操作，这很有用。 |
+| `true` | 无论模型如何，始终启用。如果您发现当前模型描述操作而不是执行操作，这很有用。 |
 | `false` | 无论模型如何，始终禁用。 |
-| `["gpt", "codex", "qwen", "llama"]` | 仅当模型名称包含所列子字符串之一时启用（不区分大小写）。 |
+| `["gpt", "codex", "qwen", "llama"]` | 仅当模型名称包含所列子字符串之一（不区分大小写）时启用。 |
 
 ### 它注入什么
 
 启用后，可能会向系统提示词添加三层指导：
 
-1.  **通用工具使用强制**（所有匹配的模型）—— 指示模型立即进行工具调用，而不是描述意图；持续工作直到任务完成；并且永远不要以承诺未来行动来结束一个回合。
+1.  **通用工具使用强制**（所有匹配的模型）——指示模型立即进行工具调用而不是描述意图，持续工作直到任务完成，并且永远不要以承诺未来行动来结束一个回合。
 
-2.  **OpenAI 执行纪律**（仅限 GPT 和 Codex 模型）—— 针对 GPT 特定失败模式的额外指导：放弃对部分结果的处理、跳过先决条件查找、产生幻觉而不是使用工具、以及未经验证就声明“完成”。
+2.  **OpenAI 执行纪律**（仅限 GPT 和 Codex 模型）——额外的指导，针对 GPT 特有的失败模式：放弃对部分结果的处理、跳过先决条件查找、产生幻觉而不是使用工具，以及未经验证就声明“完成”。
 
-3.  **Google 操作指导**（仅限 Gemini 和 Gemma 模型）—— 简洁性、绝对路径、并行工具调用以及编辑前验证模式。
+3.  **Google 操作指南**（仅限 Gemini 和 Gemma 模型）——简洁性、绝对路径、并行工具调用以及编辑前验证模式。
 
 这些对用户是透明的，只影响系统提示词。已经可靠使用工具的模型（如 Claude）不需要这种指导，这就是为什么 `"auto"` 排除了它们。
 
 ### 何时开启
 
-如果你使用的模型不在默认的自动列表中，并且发现它经常描述它*会*做什么而不是实际去做，请设置 `tool_use_enforcement: true` 或将模型子字符串添加到列表中：
+如果您使用的模型不在默认的自动列表中，并且发现它经常描述它*将*做什么而不是实际去做，请设置 `tool_use_enforcement: true` 或将模型子字符串添加到列表中：
 
 ```yaml
 agent:
@@ -1136,11 +1141,11 @@ tts:
   openai:
     model: "gpt-4o-mini-tts"
     voice: "alloy"              # alloy, echo, fable, onyx, nova, shimmer
-    speed: 1.0                  # 速度乘数（API 会将其限制在 0.25–4.0 范围内）
-    base_url: "https://api.openai.com/v1"  # 用于覆盖 OpenAI 兼容的 TTS 端点
+    speed: 1.0                  # 速度乘数（API 限制在 0.25–4.0 之间）
+    base_url: "https://api.openai.com/v1"  # 覆盖 OpenAI 兼容的 TTS 端点
   minimax:
     speed: 1.0                  # 语音速度乘数
-    # base_url: ""              # 可选：用于覆盖 OpenAI 兼容的 TTS 端点
+    # base_url: ""              # 可选：覆盖 OpenAI 兼容的 TTS 端点
   mistral:
     model: "voxtral-mini-tts-2603"
     voice_id: "c69964a6-ab8b-4f8a-9465-ec0925096ec8"  # Paul - Neutral (默认)
@@ -1160,9 +1165,9 @@ tts:
     device: cpu
 ```
 
-这同时控制着 `text_to_speech` 工具和语音模式中的语音回复（CLI 或消息网关中的 `/voice tts`）。
+这同时控制着 `text_to_speech` 工具和语音模式下的语音回复（CLI 或消息网关中的 `/voice tts`）。
 
-**速度回退层次结构：** 特定提供商的速度（例如 `tts.edge.speed`）→ 全局 `tts.speed` → `1.0` 默认值。设置全局 `tts.speed` 以在所有提供商之间应用统一的速度，或者按提供商覆盖以进行细粒度控制。
+**速度回退层级：** 特定提供商的速度（例如 `tts.edge.speed`）→ 全局 `tts.speed` → 默认值 `1.0`。设置全局 `tts.speed` 以在所有提供商间应用统一的速度，或者按提供商覆盖以进行细粒度控制。
 
 ## 显示设置
 
@@ -1170,32 +1175,32 @@ tts:
 display:
   tool_progress: all      # off | new | all | verbose
   tool_progress_command: false  # 在消息网关中启用 /verbose 斜杠命令
-  platforms: {}           # 每个平台的显示覆盖（见下文）
-  tool_progress_overrides: {}  # 已弃用 —— 请使用 display.platforms 代替
-  interim_assistant_messages: true  # 网关：将自然的回合中助手更新作为单独的消息发送
-  skin: default           # 内置或自定义 CLI 皮肤（参见 user-guide/features/skins）
+  platforms: {}           # 按平台的显示覆盖（见下文）
+  tool_progress_overrides: {}  # 已弃用 — 请使用 display.platforms 代替
+  interim_assistant_messages: true  # 网关：将自然的回合中助手更新作为单独消息发送
+  skin: default           # 内置或自定义 CLI 皮肤（见 user-guide/features/skins）
   personality: "kawaii"  # 旧版装饰性字段，仍在某些摘要中显示
-  compact: false          # 紧凑输出模式（更少的空白）
+  compact: false          # 紧凑输出模式（更少空白）
   resume_display: full    # full (恢复时显示之前的消息) | minimal (仅显示一行摘要)
-  bell_on_complete: false # 当 Agent 完成任务时播放终端提示音（适用于长时间任务）
-  show_reasoning: false   # 在每个回复上方显示模型推理/思考过程（用 /reasoning show|hide 切换）
+  bell_on_complete: false # 当 Agent 完成时播放终端铃声（非常适合长时间任务）
+  show_reasoning: false   # 在每个响应上方显示模型推理/思考过程（用 /reasoning show|hide 切换）
   streaming: false        # 将 Token 实时流式传输到终端（实时输出）
   show_cost: false        # 在 CLI 状态栏中显示估计的 $ 成本
   tool_preview_length: 0  # 工具调用预览的最大字符数（0 = 无限制，显示完整路径/命令）
   runtime_footer:         # 网关：在最终回复后附加运行时上下文页脚
     enabled: false
     fields: ["model", "context_pct", "cwd"]
-  file_mutation_verifier: true    # 当 write_file/patch 调用在本回合失败时，附加一个建议性页脚
+  file_mutation_verifier: true    # 当 write_file/patch 调用在本回合失败时，附加一个提示性页脚
   language: en            # 静态消息的 UI 语言（批准提示、某些网关回复）。en | zh | ja | de | es | fr | tr | uk
 ```
 ### 文件修改验证器
 
-当 `display.file_mutation_verifier` 为 `true`（默认值）时，如果在当前轮次中有 `write_file` 或 `patch` 调用失败且后续没有对同一路径的成功写入覆盖该失败，Hermes 会在助手最终回复的末尾附加一行提示。这可以捕捉到“一批并行补丁，一半静默失败，模型却总结为成功”这类过度声称的情况，而无需你在每次编辑后手动运行 `git status`。
+当 `display.file_mutation_verifier` 为 `true`（默认值）时，如果在当前轮次中有 `write_file` 或 `patch` 调用失败且后续没有对同一路径的成功写入覆盖该失败，Hermes 会在助手最终回复的末尾附加一行提示。这可以捕捉到"一批并行补丁，一半静默失败，模型却总结为成功"这类过度声称的情况，而无需你在每次编辑后手动运行 `git status`。
 
 示例页脚：
 
 ```
-⚠️ 文件修改验证器：尽管上述措辞可能暗示成功，但本轮有 3 个文件未被修改。请运行 `git status` 或 `read_file` 来确认。
+⚠️ 文件修改验证器：尽管上文的措辞可能暗示成功，但本轮有 3 个文件未被修改。请运行 `git status` 或 `read_file` 来确认。
   • concepts/automatic-organization.md — [patch] 无法匹配 old_string
   • concepts/lora.md — [patch] 无法匹配 old_string
   • concepts/rag-pipeline.md — [patch] 无法匹配 old_string
@@ -1205,7 +1210,7 @@ display:
 
 ### 静态消息的 UI 语言
 
-`display.language` 设置用于翻译一小部分面向用户的静态消息——CLI 审批提示、少数几个消息网关斜杠命令回复（例如重启-排空通知、“审批已过期”、“目标已清除”）。它**不**翻译 Agent 回复、日志行、工具输出、错误回溯或斜杠命令描述——这些内容保持英文。如果你希望 Agent 本身用另一种语言回复，只需在你的提示词或系统消息中告诉它。
+`display.language` 设置用于翻译一小部分面向用户的静态消息——CLI 审批提示、少数几个消息网关斜杠命令的回复（例如重启-排空通知、"审批已过期"、"目标已清除"）。它**不会**翻译 Agent 的回复、日志行、工具输出、错误回溯或斜杠命令描述——这些内容仍保持英文。如果你希望 Agent 本身用另一种语言回复，只需在你的提示词或系统消息中告诉它。
 
 支持的值：`en`（默认）、`zh`（简体中文）、`ja`（日语）、`de`（德语）、`es`（西班牙语）、`fr`（法语）、`tr`（土耳其语）、`uk`（乌克兰语）。未知值将回退到英文。
 
@@ -1219,11 +1224,11 @@ display:
 | 模式 | 你将看到的内容 |
 |------|-------------|
 | `off` | 静默——仅显示最终响应 |
-| `new` | 仅当工具发生变化时显示工具指示器 |
-| `all` | 每个工具调用都显示简短预览（默认） |
+| `new` | 仅在工具变更时显示工具指示器 |
+| `all` | 每次工具调用都显示简短预览（默认） |
 | `verbose` | 完整的参数、结果和调试日志 |
 
-在 CLI 中，可以使用 `/verbose` 命令在这些模式间循环切换。要在消息平台（Telegram、Discord、Slack 等）中使用 `/verbose`，请在上面的 `display` 部分设置 `tool_progress_command: true`。该命令将循环切换模式并保存到配置中。
+在 CLI 中，可以使用 `/verbose` 在这些模式间循环切换。要在消息平台（Telegram、Discord、Slack 等）中使用 `/verbose`，请在上面的 `display` 部分设置 `tool_progress_command: true`。该命令将循环切换模式并保存到配置中。
 
 ### 运行时元数据页脚（仅限消息网关）
 
@@ -1241,14 +1246,14 @@ display:
 附加到 Telegram/Discord/Slack 回复的示例页脚：
 
 ```
-— claude-opus-4.7 · 12 次工具调用 · 2 分 14 秒 · $0.042
+— claude-opus-4.7 · 12 次工具调用 · 2m 14s · $0.042
 ```
 
 只有轮次的**最终**消息会获得页脚；中间更新保持简洁。
 
 ### 按平台的进度覆盖设置
 
-不同的平台对详细程度有不同的需求。例如，Signal 无法编辑消息，因此每个进度更新都会成为一条独立的消息——这很嘈杂。使用 `display.platforms` 来设置每个平台的模式：
+不同的平台对详细程度有不同的需求。例如，Signal 无法编辑消息，因此每个进度更新都会成为一条独立的消息——这很嘈杂。使用 `display.platforms` 来设置按平台的模式：
 
 ```yaml
 display:
@@ -1270,10 +1275,10 @@ display:
 
 ```yaml
 privacy:
-  redact_pii: false  # 从 LLM 上下文中剥离个人身份信息（仅限消息网关）
+  redact_pii: false  # 从 LLM 上下文中剥离 PII（仅限消息网关）
 ```
 
-当 `redact_pii` 为 `true` 时，消息网关会在将系统提示词发送给 LLM 之前，从支持的平台中删除个人身份信息：
+当 `redact_pii` 为 `true` 时，在支持的平台上，消息网关会在将系统提示词发送给 LLM 之前，从中删除个人身份信息：
 
 | 字段 | 处理方式 |
 |-------|-----------|
@@ -1283,7 +1288,7 @@ privacy:
 | 主频道 ID | 数字部分被哈希化 |
 | 用户姓名 / 用户名 | **不受影响**（用户选择，公开可见） |
 
-**平台支持：** 隐私处理适用于 WhatsApp、Signal 和 Telegram。Discord 和 Slack 被排除在外，因为它们的提及系统（`<@user_id>`）需要在 LLM 上下文中使用真实的 ID。
+**平台支持：** 重写适用于 WhatsApp、Signal 和 Telegram。Discord 和 Slack 被排除在外，因为它们的提及系统（`<@user_id>`）需要在 LLM 上下文中使用真实的 ID。
 
 哈希是确定性的——同一用户始终映射到相同的哈希值，因此模型仍然可以区分群聊中的不同用户。路由和传递在内部使用原始值。
 
@@ -1296,7 +1301,7 @@ stt:
     model: "base"              # tiny, base, small, medium, large-v3
   openai:
     model: "whisper-1"         # whisper-1 | gpt-4o-mini-transcribe | gpt-4o-transcribe
-  # model: "whisper-1"         # 为了向后兼容，旧的顶级 model 键仍然有效
+  # model: "whisper-1"         # 为向后兼容，旧的顶级 model 键仍然有效
 ```
 
 提供商行为：
@@ -1321,7 +1326,7 @@ STT_OPENAI_BASE_URL=https://api.openai.com/v1
 voice:
   record_key: "ctrl+b"         # CLI 内的按键通话键
   max_recording_seconds: 120    # 长时间录音的硬性停止限制
-  auto_tts: false               # 当启用 /voice on 时，自动启用语音回复
+  auto_tts: false               # 当 /voice on 时自动启用语音回复
   beep_enabled: true            # 在 CLI 语音模式中播放开始/停止录音的提示音
   silence_threshold: 200        # 语音检测的 RMS 阈值
   silence_duration: 3.0         # 自动停止前的静音秒数
@@ -1341,7 +1346,7 @@ display:
   show_reasoning: true    # 同时流式传输推理/思考 Token（可选）
 ```
 
-启用后，响应会在一个流式传输框内逐个 Token 显示。工具调用仍会被静默捕获。如果提供商不支持流式传输，它会自动回退到正常显示。
+启用后，响应会在一个流式传输框中逐个 Token 显示。工具调用仍会被静默捕获。如果提供商不支持流式传输，它会自动回退到正常显示。
 
 ### 消息网关流式传输 (Telegram, Discord, Slack)
 
@@ -1352,19 +1357,19 @@ streaming:
   edit_interval: 0.3      # 消息编辑之间的秒数
   buffer_threshold: 40    # 强制刷新编辑前的字符数
   cursor: " ▉"            # 流式传输期间显示的光标
-  fresh_final_after_seconds: 60   # 当预览达到此时间后发送全新的最终消息（Telegram）；0 = 始终原地编辑
+  fresh_final_after_seconds: 60   # 当预览消息达到此年龄时发送全新的最终消息（Telegram）；0 = 始终原地编辑
 ```
 
 启用后，机器人会在第一个 Token 到达时发送一条消息，然后随着更多 Token 到达逐步编辑它。不支持消息编辑的平台（Signal、Email、Home Assistant）会在首次尝试时自动检测到——流式传输会优雅地在该会话中禁用，而不会产生消息洪流。
 
 对于无需渐进式 Token 编辑的、独立的自然中途助手更新，请设置 `display.interim_assistant_messages: true`。
 
-**溢出处理：** 如果流式传输的文本超过平台的消息长度限制（约 4096 个字符），当前消息会被最终确定，并自动开始一条新消息。
+**溢出处理：** 如果流式传输的文本超过了平台的消息长度限制（约 4096 个字符），当前消息将被最终确定，并自动开始一条新消息。
 
-**全新的最终消息（Telegram）：** Telegram 的 `editMessageText` 会保留原始消息的时间戳，因此一个长时间运行的流式回复即使在完成后也会保留第一个 Token 的时间戳。当 `fresh_final_after_seconds > 0`（默认为 `60`）时，完成的回复会作为一条全新的消息发送（并尽力删除过时的预览），以便 Telegram 显示的时间戳反映完成时间。较短的预览仍会原地最终确定。设置为 `0` 则始终原地编辑。
+**全新最终消息 (Telegram)：** Telegram 的 `editMessageText` 会保留原始消息的时间戳，因此一个长时间运行的流式回复即使在完成后也会保留第一个 Token 的时间戳。当 `fresh_final_after_seconds > 0`（默认 `60`）时，完成的回复将作为一条全新的消息发送（并尽力删除过时的预览消息），以便 Telegram 显示的时间戳反映完成时间。较短的预览消息仍会原地最终确定。设置为 `0` 则始终原地编辑。
 
 :::note
-流式传输默认是禁用的。在 `~/.hermes/config.yaml` 中启用它以尝试流式传输的用户体验。
+流式传输默认禁用。在 `~/.hermes/config.yaml` 中启用它以尝试流式传输用户体验。
 :::
 
 ## 群聊会话隔离
@@ -1372,12 +1377,12 @@ streaming:
 控制共享聊天是每个房间保持一个对话，还是每个参与者保持一个对话：
 
 ```yaml
-group_sessions_per_user: true  # true = 在群组/频道中实现每用户隔离，false = 每个聊天一个共享会话
+group_sessions_per_user: true  # true = 在群组/频道中按用户隔离，false = 每个聊天一个共享会话
 ```
 
 - `true` 是默认且推荐的设置。在 Discord 频道、Telegram 群组、Slack 频道和类似的共享上下文中，当平台提供用户 ID 时，每个发送者都会获得自己的会话。
-- `false` 会恢复到旧的共享房间行为。如果你明确希望 Hermes 将频道视为一个协作对话，这可能很有用，但这也意味着用户共享上下文、Token 成本和中断状态。
-- 私信不受影响。Hermes 仍会像往常一样按聊天/私信 ID 来区分私信。
+- `false` 恢复到旧的共享房间行为。如果你明确希望 Hermes 将频道视为一个协作对话，这可能很有用，但这也意味着用户共享上下文、Token 成本和中断状态。
+- 私信不受影响。Hermes 仍然像往常一样按聊天/私信 ID 来区分私信。
 - 无论哪种方式，线程都与其父频道保持隔离；当设置为 `true` 时，每个参与者在线程内也拥有自己的会话。
 
 有关行为细节和示例，请参阅[会话](/docs/user-guide/sessions)和 [Discord 指南](/docs/user-guide/messaging/discord)。
@@ -1397,9 +1402,9 @@ whatsapp:
 - `ignore` 会静默丢弃未经授权的私信。
 - 平台部分会覆盖全局默认值，因此你可以在广泛启用配对的同时，让某个平台保持安静。
 
-## 快捷命令
+## 快速命令
 
-定义自定义命令，这些命令要么运行 shell 命令而不调用 LLM，要么将一个斜杠命令别名到另一个。`exec` 类型的快捷命令是零 Token 的，在消息平台（Telegram、Discord 等）上用于快速服务器检查或实用脚本非常有用。
+定义自定义命令，这些命令要么运行 shell 命令而不调用 LLM，要么将一个斜杠命令别名到另一个。执行类快速命令是零 Token 的，在消息平台（Telegram、Discord 等）上对于快速服务器检查或实用脚本很有用。
 
 ```yaml
 quick_commands:
@@ -1420,14 +1425,14 @@ quick_commands:
     target: /gateway restart
 ```
 
-用法：在 CLI 或任何消息平台中输入 `/status`、`/disk`、`/update`、`/gpu` 或 `/restart`。`exec` 命令在主机上本地运行并直接返回输出——无需 LLM 调用，不消耗 Token。`alias` 命令会重写为配置的斜杠命令目标。
+用法：在 CLI 或任何消息平台中键入 `/status`、`/disk`、`/update`、`/gpu` 或 `/restart`。`exec` 命令在主机上本地运行并直接返回输出——无需 LLM 调用，不消耗 Token。`alias` 命令会重写为配置的斜杠命令目标。
 
-- **30 秒超时** — 长时间运行的命令会被终止并显示错误消息
-- **优先级** — 快捷命令在技能命令之前被检查，因此你可以覆盖技能名称
-- **自动补全** — 快捷命令在调度时解析，不会显示在内置的斜杠命令自动补全表中
-- **类型** — 支持的类型是 `exec` 和 `alias`；其他类型会显示错误
-- **随处可用** — CLI、Telegram、Discord、Slack、WhatsApp、Signal、Email、Home Assistant
-纯字符串提示词快捷方式不是有效的快速命令。对于可复用的提示词工作流，请创建技能或为现有斜杠命令设置别名。
+- **30 秒超时** —— 长时间运行的命令会被终止并显示错误消息
+- **优先级** —— 快速命令在技能命令之前被检查，因此你可以覆盖技能名称
+- **自动补全** —— 快速命令在调度时解析，不会显示在内置的斜杠命令自动补全表中
+- **类型** —— 支持的类型是 `exec` 和 `alias`；其他类型会显示错误
+- **随处可用** —— CLI、Telegram、Discord、Slack、WhatsApp、Signal、Email、Home Assistant
+纯字符串的提示词快捷方式不是有效的快速命令。对于可复用的提示词工作流，请创建技能或为现有斜杠命令设置别名。
 
 ## 人工延迟
 
@@ -1453,8 +1458,8 @@ code_execution:
 
 **`mode`** 控制脚本的工作目录和 Python 解释器：
 
-- **`project`**（默认）— 脚本在会话的工作目录中运行，使用活动的 virtualenv/conda 环境的 python。项目依赖（`pandas`、`torch`、项目包）和相对路径（`.env`、`./data.csv`）会自然解析，与 `terminal()` 看到的内容匹配。
-- **`strict`** — 脚本在临时暂存目录中运行，使用 `sys.executable`（Hermes 自身的 python）。最大程度的可复现性，但项目依赖和相对路径将无法解析。
+- **`project`**（默认）— 脚本在会话的工作目录中运行，使用活跃的 virtualenv/conda 环境的 python。项目依赖（`pandas`、`torch`、项目包）和相对路径（`.env`、`./data.csv`）会自然解析，与 `terminal()` 看到的内容匹配。
+- **`strict`** — 脚本在临时暂存目录中运行，使用 `sys.executable`（Hermes 自身的 python）。最大程度保证可复现性，但项目依赖和相对路径将无法解析。
 
 环境清理（清除 `*_API_KEY`、`*_TOKEN`、`*_SECRET`、`*_PASSWORD`、`*_CREDENTIAL`、`*_PASSWD`、`*_AUTH`）和工具白名单在两种模式下同样适用 — 切换模式不会改变安全态势。
 
@@ -1466,7 +1471,7 @@ code_execution:
 web:
   backend: firecrawl    # firecrawl | searxng | parallel | tavily | exa
 
-  # 或者使用按能力键来混合提供商（例如免费搜索 + 付费提取）：
+  # 或者使用按能力划分的键来混合提供商（例如，免费搜索 + 付费提取）：
   search_backend: "searxng"
   extract_backend: "firecrawl"
 ```
@@ -1479,9 +1484,9 @@ web:
 | **Tavily** | `TAVILY_API_KEY` | ✔ | ✔ | ✔ |
 | **Exa** | `EXA_API_KEY` | ✔ | ✔ | — |
 
-**后端选择：** 如果未设置 `web.backend`，则根据可用的 API 密钥自动检测后端。如果仅设置了 `SEARXNG_URL`，则使用 SearXNG。如果仅设置了 `EXA_API_KEY`，则使用 Exa。如果仅设置了 `TAVILY_API_KEY`，则使用 Tavily。如果仅设置了 `PARALLEL_API_KEY`，则使用 Parallel。否则 Firecrawl 是默认值。
+**后端选择：** 如果未设置 `web.backend`，则根据可用的 API 密钥自动检测后端。如果仅设置了 `SEARXNG_URL`，则使用 SearXNG。如果仅设置了 `EXA_API_KEY`，则使用 Exa。如果仅设置了 `TAVILY_API_KEY`，则使用 Tavily。如果仅设置了 `PARALLEL_API_KEY`，则使用 Parallel。否则 Firecrawl 为默认值。
 
-**SearXNG** 是一个免费、自托管、尊重隐私的元搜索引擎，可查询 70 多个搜索引擎。无需 API 密钥 — 只需将 `SEARXNG_URL` 设置为你的实例（例如 `http://localhost:8080`）。SearXNG 仅支持搜索；`web_extract` 和 `web_crawl` 需要单独的提取提供商（设置 `web.extract_backend`）。有关 Docker 设置说明，请参阅[网络搜索设置指南](/docs/user-guide/features/web-search)。
+**SearXNG** 是一个免费、自托管、尊重隐私的元搜索引擎，可查询 70 多个搜索引擎。无需 API 密钥 — 只需将 `SEARXNG_URL` 设置为你的实例（例如，`http://localhost:8080`）。SearXNG 仅支持搜索；`web_extract` 和 `web_crawl` 需要单独的提取提供商（设置 `web.extract_backend`）。有关 Docker 设置说明，请参阅[网络搜索设置指南](/docs/user-guide/features/web-search)。
 
 **自托管 Firecrawl：** 将 `FIRECRAWL_API_URL` 设置为指向你自己的实例。设置自定义 URL 后，API 密钥变为可选（在服务器上设置 `USE_DB_AUTHENTICATION=***` 以禁用身份验证）。
 
@@ -1498,16 +1503,16 @@ browser:
   inactivity_timeout: 120        # 自动关闭空闲会话前的秒数
   command_timeout: 30             # 浏览器命令（截图、导航等）的超时时间（秒）
   record_sessions: false         # 自动将浏览器会话录制为 WebM 视频到 ~/.hermes/browser_recordings/
-  # 可选的 CDP 覆盖 — 设置后，Hermes 直接连接到你的 Chrome（通过 /browser connect），而不是启动无头浏览器。
+  # 可选的 CDP 覆盖 — 设置后，Hermes 直接附加到你自己的 Chrome（通过 /browser connect），而不是启动无头浏览器。
   cdp_url: ""
-  # 对话框监督器 — 控制当 CDP 后端（Browserbase、通过 /browser connect 的本地 Chrome）连接时如何处理原生 JS 对话框（alert / confirm / prompt）。在 Camofox 和默认的本地 agent-browser 模式下忽略。
+  # 对话框监督器 — 控制当附加 CDP 后端（Browserbase、通过 /browser connect 的本地 Chrome）时如何处理原生 JS 对话框（alert / confirm / prompt）。在 Camofox 和默认的本地 agent-browser 模式下忽略。
   dialog_policy: must_respond    # must_respond | auto_dismiss | auto_accept
   dialog_timeout_s: 300          # must_respond 下的安全自动关闭时间（秒）
   camofox:
-    managed_persistence: false   # 为 true 时，Camofox 会话在重启后保留 cookie/登录状态
-    user_id: ""                  # 可选的由外部管理的 Camofox userId
+    managed_persistence: false   # 为 true 时，Camofox 会话在重启后持久化 cookies/登录状态
+    user_id: ""                  # 可选的外部管理的 Camofox userId
     session_key: ""              # Hermes 创建标签页时发送的可选会话密钥
-    adopt_existing_tab: false    # 在创建新标签页之前，为此身份重用现有标签页
+    adopt_existing_tab: false    # 在创建新标签页前，为这个身份重用现有标签页
 ```
 
 **对话框策略：**
@@ -1528,21 +1533,21 @@ browser:
 timezone: "America/New_York"   # IANA 时区（默认："" = 服务器本地时间）
 ```
 
-支持的值：任何 IANA 时区标识符（例如 `America/New_York`、`Europe/London`、`Asia/Kolkata`、`UTC`）。留空或省略以使用服务器本地时间。
+支持的值：任何 IANA 时区标识符（例如 `America/New_York`、`Europe/London`、`Asia/Kolkata`、`UTC`）。留空或省略则使用服务器本地时间。
 ## Discord
 
 配置消息网关的 Discord 特定行为：
 
 ```yaml
 discord:
-  require_mention: true          # 在服务器频道中需要 @提及 才能响应
-  free_response_channels: ""     # 逗号分隔的频道 ID 列表，在此类频道中机器人无需 @提及 即可响应所有消息
-  auto_thread: true              # 在频道中 @提及 时自动创建线程
+  require_mention: true          # 在服务器频道中需要 @提及 才响应
+  free_response_channels: ""     # 逗号分隔的频道 ID 列表，在此类频道中机器人无需 @提及 即可响应每条消息
+  auto_thread: true              # 在频道中 @提及 时自动创建对话线程
 ```
 
-- `require_mention` — 当为 `true`（默认）时，机器人仅在服务器频道中被 `@BotName` 提及时才会响应。私信始终无需提及即可工作。
-- `free_response_channels` — 逗号分隔的频道 ID 列表，在此类频道中机器人会响应每条消息，无需提及。
-- `auto_thread` — 当为 `true`（默认）时，在频道中的提及会自动为对话创建一个线程，以保持频道整洁（类似于 Slack 的线程功能）。
+- `require_mention` — 当为 `true`（默认）时，机器人仅在服务器频道中被 `@BotName` 提及时才响应。私信始终无需提及即可工作。
+- `free_response_channels` — 逗号分隔的频道 ID 列表，在此类频道中机器人无需提及即可响应每条消息。
+- `auto_thread` — 当为 `true`（默认）时，在频道中的提及会自动为该对话创建一个线程，以保持频道整洁（类似于 Slack 的线程功能）。
 
 ## 安全
 
@@ -1552,7 +1557,7 @@ discord:
 security:
   redact_secrets: false          # 在工具输出和日志中对 API 密钥模式进行脱敏（默认关闭）
   tirith_enabled: true           # 为终端命令启用 Tirith 安全扫描
-  tirith_path: "tirith"          # tirith 二进制文件的路径（默认：在 $PATH 中的 "tirith"）
+  tirith_path: "tirith"          # tirith 二进制文件路径（默认：在 $PATH 中的 "tirith"）
   tirith_timeout: 5              # 等待 tirith 扫描的超时时间（秒）
   tirith_fail_open: true         # 如果 tirith 不可用，则允许命令执行
   website_blocklist:             # 请参阅下面的网站阻止列表部分
@@ -1561,7 +1566,7 @@ security:
     shared_files: []
 ```
 
-- `redact_secrets` — 当为 `true` 时，在工具输出进入对话上下文和日志之前，自动检测并脱敏其中类似 API 密钥、Token 和密码的模式。**默认关闭** — 如果您经常在工具输出中处理真实凭据并希望有一个安全网，请启用。需显式设置为 `true` 来开启。
+- `redact_secrets` — 当为 `true` 时，在工具输出进入对话上下文和日志之前，自动检测并脱敏看起来像 API 密钥、Token 和密码的模式。**默认关闭** — 如果你经常在工具输出中使用真实凭据并希望有一个安全网，请启用。需显式设置为 `true` 来开启。
 - `tirith_enabled` — 当为 `true` 时，终端命令在执行前会由 [Tirith](https://github.com/sheeki03/tirith) 进行扫描，以检测潜在的危险操作。
 - `tirith_path` — tirith 二进制文件的路径。如果 tirith 安装在非标准位置，请设置此项。
 - `tirith_timeout` — 等待 tirith 扫描的最大秒数。如果扫描超时，命令将继续执行。
@@ -1579,18 +1584,18 @@ security:
       - "*.internal.company.com"
       - "admin.example.com"
       - "*.local"
-    shared_files:                # 从外部文件加载额外的规则
+    shared_files:                # 从外部文件加载额外规则
       - "/etc/hermes/blocked-sites.txt"
 ```
 
-启用后，任何匹配被阻止域名模式的 URL 在网页或浏览器工具执行前都会被拒绝。这适用于 `web_search`、`web_extract`、`browser_navigate` 以及任何访问 URL 的工具。
+启用后，任何匹配被阻止域名模式的 URL 都会在网页或浏览器工具执行前被拒绝。这适用于 `web_search`、`web_extract`、`browser_navigate` 以及任何访问 URL 的工具。
 
 域名规则支持：
 - 精确域名：`admin.example.com`
 - 通配符子域名：`*.internal.company.com`（阻止所有子域名）
 - TLD 通配符：`*.local`
 
-共享文件每行包含一个域名规则（空行和以 `#` 开头的注释行会被忽略）。缺失或无法读取的文件会记录警告，但不会禁用其他网页工具。
+共享文件每行包含一个域名规则（空行和以 `#` 开头的注释行会被忽略）。缺失或不可读的文件会记录警告，但不会禁用其他网页工具。
 
 策略会缓存 30 秒，因此配置更改无需重启即可快速生效。
 
@@ -1605,8 +1610,8 @@ approvals:
 
 | 模式 | 行为 |
 |------|----------|
-| `manual`（默认） | 在执行任何被标记的命令之前提示用户。在 CLI 中，显示交互式审批对话框。在消息传递中，将待处理的审批请求加入队列。 |
-| `smart` | 使用辅助 LLM 来评估被标记的命令是否确实危险。低风险命令会自动批准，并具有会话级别的持久性。真正有风险的命令会升级给用户处理。 |
+| `manual` (默认) | 在执行任何被标记的命令之前提示用户。在 CLI 中，显示交互式审批对话框。在消息传递中，将待处理的审批请求加入队列。 |
+| `smart` | 使用辅助 LLM 来评估被标记的命令是否真正危险。低风险命令会自动批准，并具有会话级别的持久性。真正有风险的命令会升级给用户处理。 |
 | `off` | 跳过所有审批检查。等同于 `HERMES_YOLO_MODE=true`。**请谨慎使用。** |
 
 智能模式对于减少审批疲劳特别有用 — 它允许 Agent 在安全操作上更自主地工作，同时仍能捕获真正具有破坏性的命令。
@@ -1635,19 +1640,19 @@ delegation:
   # provider: "openrouter"                  # 覆盖提供商（空 = 继承父级）
   # base_url: "http://localhost:1234/v1"    # 直接的 OpenAI 兼容端点（优先于 provider）
   # api_key: "local-key"                    # base_url 的 API 密钥（回退到 OPENAI_API_KEY）
-  max_concurrent_children: 3                # 每批次的并行子任务数（下限 1，无上限）。也可通过 DELEGATION_MAX_CONCURRENT_CHILDREN 环境变量设置。
+  max_concurrent_children: 3                # 每批次并行子任务数（下限 1，无上限）。也可通过 DELEGATION_MAX_CONCURRENT_CHILDREN 环境变量设置。
   max_spawn_depth: 1                        # 委派树深度上限（1-3，会被限制）。1 = 扁平（默认）：父级生成不能委派的叶子节点。2 = 编排器子级可以生成叶子孙级。3 = 三级。
-  orchestrator_enabled: true                # 全局开关。当为 false 时，role="orchestrator" 被忽略，无论 max_spawn_depth 如何，每个子级都被强制设为叶子节点。
+  orchestrator_enabled: true                # 全局总开关。当为 false 时，忽略 role="orchestrator"，并且无论 max_spawn_depth 如何，每个子级都被强制设为叶子节点。
 ```
 
-**子 Agent 提供商:模型覆盖：** 默认情况下，子 Agent 继承父级 Agent 的提供商和模型。设置 `delegation.provider` 和 `delegation.model` 可以将子 Agent 路由到不同的提供商:模型组合 — 例如，为主 Agent 使用昂贵/复杂的推理模型，而为范围狭窄的子任务使用廉价/快速的模型。
+**子 Agent 提供商:模型覆盖：** 默认情况下，子 Agent 继承父 Agent 的提供商和模型。设置 `delegation.provider` 和 `delegation.model` 可以将子 Agent 路由到不同的提供商:模型组合 — 例如，为范围狭窄的子任务使用廉价/快速的模型，而你的主 Agent 运行昂贵的推理模型。
 **直接端点覆盖：** 如果您想要明显的自定义端点路径，请设置 `delegation.base_url`、`delegation.api_key` 和 `delegation.model`。这将直接把子 Agent 发送到该 OpenAI 兼容端点，并优先于 `delegation.provider`。如果省略了 `delegation.api_key`，Hermes 将仅回退到 `OPENAI_API_KEY`。
 
-委派提供商使用与 CLI/消息网关启动相同的凭据解析机制。支持所有已配置的提供商：`openrouter`、`nous`、`copilot`、`zai`、`kimi-coding`、`minimax`、`minimax-cn`。当设置了提供商时，系统会自动解析正确的基础 URL、API 密钥和 API 模式——无需手动配置凭据。
+委派提供商使用与 CLI/消息网关启动时相同的凭据解析机制。支持所有已配置的提供商：`openrouter`、`nous`、`copilot`、`zai`、`kimi-coding`、`minimax`、`minimax-cn`。设置提供商后，系统会自动解析正确的基础 URL、API 密钥和 API 模式——无需手动配置凭据。
 
 **优先级：** 配置中的 `delegation.base_url` → 配置中的 `delegation.provider` → 父级提供商（继承）。配置中的 `delegation.model` → 父级模型（继承）。仅设置 `model` 而不设置 `provider` 只会更改模型名称，同时保留父级的凭据（适用于在同一提供商内切换模型，例如 OpenRouter）。
 
-**宽度和深度：** `max_concurrent_children` 限制每个批次中并行运行的子 Agent 数量（默认 `3`，下限为 1，无上限）。也可以通过 `DELEGATION_MAX_CONCURRENT_CHILDREN` 环境变量设置。当模型提交的 `tasks` 数组长度超过此上限时，`delegate_task` 会返回一个工具错误来解释限制，而不是静默截断。`max_spawn_depth` 控制委派树的深度（限制在 1-3）。在默认值 `1` 时，委派是扁平的：子 Agent 不能生成孙 Agent，并且传递 `role="orchestrator"` 会静默降级为 `leaf`。提高到 `2` 以便编排者子 Agent 可以生成叶子孙 Agent；`3` 用于三级树。Agent 通过 `role="orchestrator"` 在每次调用时选择加入编排；`orchestrator_enabled: false` 会强制每个子 Agent 恢复为叶子节点，无论其他设置如何。成本呈乘法级增长——在 `max_spawn_depth: 3` 且 `max_concurrent_children: 3` 的情况下，树最多可以达到 3×3×3 = 27 个并发叶子 Agent。有关使用模式，请参阅 [子 Agent 委派 → 深度限制和嵌套编排](features/delegation.md#depth-limit-and-nested-orchestration)。
+**宽度和深度：** `max_concurrent_children` 限制每个批次中并行运行的子 Agent 数量（默认 `3`，下限为 1，无上限）。也可以通过 `DELEGATION_MAX_CONCURRENT_CHILDREN` 环境变量设置。当模型提交的 `tasks` 数组长度超过此限制时，`delegate_task` 会返回一个工具错误来解释该限制，而不是静默截断。`max_spawn_depth` 控制委派树的深度（限制在 1-3）。在默认值 `1` 时，委派是扁平的：子 Agent 不能生成孙 Agent，并且传递 `role="orchestrator"` 会静默降级为 `leaf`。提高到 `2` 以便编排者子 Agent 可以生成叶子孙 Agent；`3` 用于三级树。Agent 通过 `role="orchestrator"` 在每次调用时选择启用编排；`orchestrator_enabled: false` 则强制每个子 Agent 恢复为叶子节点，无论其他设置如何。成本呈乘法级增长——在 `max_spawn_depth: 3` 和 `max_concurrent_children: 3` 的情况下，树最多可以达到 3×3×3 = 27 个并发的叶子 Agent。有关使用模式，请参阅 [子 Agent 委派 → 深度限制和嵌套编排](features/delegation.md#depth-limit-and-nested-orchestration)。
 
 ## Clarify
 
@@ -1665,8 +1670,8 @@ Hermes 使用两种不同的上下文作用域：
 | 文件 | 用途 | 作用域 |
 |------|---------|-------|
 | `SOUL.md` | **主要 Agent 身份** — 定义 Agent 是谁（系统提示词中的槽位 #1） | `~/.hermes/SOUL.md` 或 `$HERMES_HOME/SOUL.md` |
-| `.hermes.md` / `HERMES.md` | 项目特定说明（最高优先级） | 向上遍历到 git 根目录 |
-| `AGENTS.md` | 项目特定说明，编码约定 | 递归目录遍历 |
+| `.hermes.md` / `HERMES.md` | 项目特定指令（最高优先级） | 向上遍历到 git 根目录 |
+| `AGENTS.md` | 项目特定指令，编码规范 | 递归目录遍历 |
 | `CLAUDE.md` | Claude Code 上下文文件（也会被检测） | 仅工作目录 |
 | `.cursorrules` | Cursor IDE 规则（也会被检测） | 仅工作目录 |
 | `.cursor/rules/*.mdc` | Cursor 规则文件（也会被检测） | 仅工作目录 |
@@ -1686,13 +1691,13 @@ Hermes 使用两种不同的上下文作用域：
 
 | 上下文 | 默认值 |
 |---------|---------|
-| **CLI (`hermes`)** | 运行命令的当前目录 |
+| **CLI (`hermes`)** | 运行命令时的当前目录 |
 | **消息网关** | 主目录 `~`（可使用 `MESSAGING_CWD` 覆盖） |
 | **Docker / Singularity / Modal / SSH** | 容器或远程机器内的用户主目录 |
 
 覆盖工作目录：
 ```bash
 # 在 ~/.hermes/.env 或 ~/.hermes/config.yaml 中：
-MESSAGING_CWD=/home/myuser/projects    # 网关会话
+MESSAGING_CWD=/home/myuser/projects    # 消息网关会话
 TERMINAL_CWD=/workspace                # 所有终端会话
 ```
