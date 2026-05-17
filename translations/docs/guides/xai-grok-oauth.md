@@ -6,7 +6,7 @@ description: "使用您的 SuperGrok 订阅登录，在 Hermes Agent 中使用 G
 
 # xAI Grok OAuth (SuperGrok 订阅)
 
-Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 xAI Grok，该流程针对 [accounts.x.ai](https://accounts.x.ai)，使用您现有的 **SuperGrok 订阅**。无需 `XAI_API_KEY` — 登录一次，Hermes 将在后台自动刷新您的会话。
+Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 xAI Grok，该流程针对 [accounts.x.ai](https://accounts.x.ai)，使用您现有的 **SuperGrok 订阅**。无需 `XAI_API_KEY` — 登录一次，Hermes 会自动在后台刷新您的会话。
 
 传输层复用了 `codex_responses` 适配器（xAI 暴露了一个 Responses 风格的端点），因此推理、工具调用、流式传输和提示词缓存无需任何适配器更改即可工作。
 
@@ -18,7 +18,7 @@ Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 xAI Grok，该流
 |------|-------|
 | 提供商 ID | `xai-oauth` |
 | 显示名称 | xAI Grok OAuth (SuperGrok 订阅) |
-| 认证类型 | 浏览器 OAuth 2.0 PKCE (回环回调) |
+| 认证类型 | 浏览器 OAuth 2.0 PKCE (环回回调) |
 | 传输层 | xAI Responses API (`codex_responses`) |
 | 默认模型 | `grok-4.3` |
 | 端点 | `https://api.x.ai/v1` |
@@ -31,7 +31,7 @@ Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 xAI Grok，该流
 - Python 3.9+
 - 已安装 Hermes Agent
 - 您的 xAI 账户拥有有效的 SuperGrok 订阅
-- 本地机器上可用浏览器（或对远程会话使用 `--no-browser`）
+- 本地机器上有可用的浏览器（或对远程会话使用 `--no-browser`）
 
 ## 快速开始
 
@@ -47,7 +47,7 @@ hermes model
 hermes
 ```
 
-首次登录后，凭据将存储在 `~/.hermes/auth.json` 下，并在过期前自动刷新。
+首次登录后，凭据存储在 `~/.hermes/auth.json` 下，并在过期前自动刷新。
 
 ## 手动登录
 
@@ -59,9 +59,9 @@ hermes auth add xai-oauth
 
 ### 远程 / 无头会话
 
-在服务器、容器或 SSH 会话等没有可用浏览器的远程环境中，Hermes 会检测到远程环境并打印授权 URL，而不是打开浏览器。
+在没有可用浏览器的服务器、容器或 SSH 会话中，Hermes 会检测到远程环境并打印授权 URL，而不是打开浏览器。
 
-**重要提示：** 回环监听器仍在远程机器的 `127.0.0.1:56121` 上运行。xAI 的重定向需要到达*该*监听器，因此在您的笔记本电脑上打开 URL 将会失败（`无法建立连接。我们无法访问您的应用。`），除非您转发端口：
+**重要提示：** 环回监听器仍在远程机器的 `127.0.0.1:56121` 上运行。xAI 的重定向需要到达*该*监听器，因此在您的笔记本电脑上打开 URL 将会失败（`无法建立连接。我们无法访问您的应用。`），除非您转发端口：
 
 ```bash
 # 在您本地机器的另一个终端中：
@@ -74,7 +74,7 @@ hermes auth add xai-oauth --no-browser
 
 通过跳板机 / 堡垒机：添加 `-J jump-user@jump-host`。
 
-完整的分步指南（包括 ProxyJump 链、mosh/tmux 和 ControlMaster 注意事项），请参阅 [通过 SSH / 远程主机进行 OAuth](./oauth-over-ssh.md)。
+完整的分步指南（跳板机、mosh/tmux、端口冲突）：[通过 SSH / 远程主机进行 OAuth](./oauth-over-ssh.md)。
 
 ## 登录工作原理
 
@@ -128,7 +128,7 @@ hermes --provider x-ai-oauth       # 别名
 hermes --provider xai-grok-oauth   # 别名
 ```
 
-## 直接连接 xAI 的工具 (TTS / 图像 / 视频 / 转录)
+## 直接连接 xAI 的工具 (TTS / 图像 / 视频 / 转录 / X 搜索)
 
 一旦您通过 OAuth 登录，每个直接连接 xAI 的工具都会自动复用同一个承载令牌 — **无需单独设置**，除非您更愿意使用 API 密钥。
 
@@ -136,15 +136,20 @@ hermes --provider xai-grok-oauth   # 别名
 
 ```bash
 hermes tools
-# → Text-to-Speech       → "xAI TTS"
-# → Image Generation     → "xAI Grok Imagine (image)"
-# → Video Generation     → "xAI Grok Imagine"
+# → 文本转语音       → "xAI TTS"
+# → 图像生成         → "xAI Grok Imagine (image)"
+# → 视频生成         → "xAI Grok Imagine"
+# → X (Twitter) 搜索 → "xAI Grok OAuth (SuperGrok Subscription)"
 ```
 
-如果 OAuth 令牌已存储，选择器会确认并跳过凭据提示。如果既未设置 OAuth 也未设置 `XAI_API_KEY`，选择器会提供一个三选一菜单：OAuth 登录、粘贴 API 密钥或跳过。
+如果 OAuth 令牌已存储，选择器会确认并跳过凭据提示。如果既未设置 OAuth 也未设置 `XAI_API_KEY`，选择器会提供一个包含 3 个选项的菜单：OAuth 登录、粘贴 API 密钥或跳过。
 
 :::note 视频生成默认关闭
-`video_gen` 工具集默认是禁用的。在 Agent 可以调用 `video_generate` 之前，请在 `hermes tools` → `🎬 Video Generation`（按空格键）中启用它。否则，Agent 可能会回退到捆绑的 ComfyUI 技能，该技能也标记为用于视频生成。
+`video_gen` 工具集默认禁用。在 Agent 可以调用 `video_generate` 之前，请在 `hermes tools` → `🎬 Video Generation` 中启用它（按空格键）。否则，Agent 可能会回退到捆绑的 ComfyUI 技能，该技能也标记为用于视频生成。
+:::
+
+:::note X 搜索默认关闭
+`x_search` 工具集默认禁用。在 Agent 可以调用 `x_search` 之前，请在 `hermes tools` → `🐦 X (Twitter) Search` 中启用它（按空格键）。该工具通过 xAI 内置的 `x_search` Responses API 路由 — 它适用于您的 SuperGrok OAuth 登录**或**付费的 `XAI_API_KEY`，并且在两者都配置时优先使用 OAuth（使用您的订阅配额而不是 API 支出）。无论工具集是否启用，当未配置 xAI 凭据时，工具模式对模型是隐藏的。
 :::
 
 ### 模型
@@ -160,26 +165,26 @@ hermes tools
 | 视频 | `grok-imagine-video` | 文本到视频和图像到视频；最多 7 个参考图像 |
 | TTS | (默认语音) | xAI `/v1/tts` 端点 |
 
-聊天目录是从磁盘上的 `models.dev` 缓存实时派生的；一旦该缓存刷新，新的 xAI 发布版本会自动出现。`grok-4.3` 始终固定在列表顶部。
+聊天目录是从磁盘上的 `models.dev` 缓存实时派生的；一旦该缓存刷新，新的 xAI 版本会自动出现。`grok-4.3` 始终固定在列表顶部。
 
 ## 环境变量
 
 | 变量 | 效果 |
 |----------|--------|
 | `XAI_BASE_URL` | 覆盖默认的 `https://api.x.ai/v1` 端点（很少需要）。 |
-| `HERMES_INFERENCE_PROVIDER` | 在运行时强制指定活动提供商，例如 `HERMES_INFERENCE_PROVIDER=xai-oauth hermes`。 |
+| `HERMES_INFERENCE_PROVIDER` | 在运行时强制指定活跃的提供商，例如 `HERMES_INFERENCE_PROVIDER=xai-oauth hermes`。 |
 
 ## 故障排除
 
 ### 令牌过期 — 未自动重新登录
 
-Hermes 在每次会话前刷新令牌，并在收到 401 响应时再次反应性地刷新。如果刷新失败并显示 `invalid_grant`（刷新令牌已被撤销，或账户已轮换），Hermes 会显示一个类型化的重新认证消息，而不是崩溃。
+Hermes 在每次会话前刷新令牌，并在收到 401 错误时再次主动刷新。如果刷新失败并显示 `invalid_grant`（刷新令牌被撤销，或账户被轮换），Hermes 会显示一个类型化的重新认证消息，而不是崩溃。
 
 **修复：** 再次运行 `hermes auth add xai-oauth` 以开始新的登录。
 
 ### 授权超时
 
-回环监听器有一个有限的过期窗口（默认 180 秒）。如果您没有及时批准登录，Hermes 会引发超时错误。
+环回监听器有一个有限的过期窗口（默认 180 秒）。如果您未在规定时间内批准登录，Hermes 会引发超时错误。
 
 **修复：** 重新运行 `hermes auth add xai-oauth`（或 `hermes model`）。流程将重新开始。
 
@@ -191,10 +196,10 @@ Hermes 检测到授权服务器返回的 `state` 值与它发送的值不匹配�
 
 ### 从远程服务器登录
 
-在 SSH 或容器会话中，Hermes 会打印授权 URL 而不是打开浏览器。回环回调监听器仍然绑定在远程主机的 `127.0.0.1:56121` 上 — 如果没有 SSH 本地转发，您的笔记本电脑浏览器无法访问它：
+在 SSH 或容器会话中，Hermes 会打印授权 URL 而不是打开浏览器。环回回调监听器仍然绑定在远程主机的 `127.0.0.1:56121` 上 — 如果没有 SSH 本地转发，您笔记本电脑的浏览器无法访问它：
 
 ```bash
-# 本地机器，单独的终端：
+# 本地机器，另一个终端：
 ssh -N -L 56121:127.0.0.1:56121 user@remote-host
 
 # 远程机器：
@@ -203,15 +208,15 @@ hermes auth add xai-oauth --no-browser
 
 完整演练（跳板机、mosh/tmux、端口冲突）：[通过 SSH / 远程主机进行 OAuth](./oauth-over-ssh.md)。
 
-### 运行时出现 "No xAI credentials found" 错误
+### 运行时出现“未找到 xAI 凭据”错误
 
-认证存储中没有 `xai-oauth` 条目，也没有设置 `XAI_API_KEY`。您尚未登录，或者凭据文件已被删除。
+认证存储中没有 `xai-oauth` 条目，也未设置 `XAI_API_KEY`。您尚未登录，或者凭据文件已被删除。
 
 **修复：** 运行 `hermes model` 并选择 xAI Grok OAuth 提供商，或者运行 `hermes auth add xai-oauth`。
 
 ## 注销
 
-要删除所有存储的 xAI Grok OAuth 凭据：
+要移除所有存储的 xAI Grok OAuth 凭据：
 
 ```bash
 hermes auth logout xai-oauth
@@ -225,4 +230,4 @@ hermes auth logout xai-oauth
 - [AI 提供商参考](../integrations/providers.md)
 - [环境变量](../reference/environment-variables.md)
 - [配置](../user-guide/configuration.md)
-- [语音和 TTS](../user-guide/features/tts.md)
+- [语音与 TTS](../user-guide/features/tts.md)

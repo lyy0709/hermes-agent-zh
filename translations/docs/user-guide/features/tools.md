@@ -13,7 +13,7 @@ description: "Hermes Agent 工具概览 —— 可用工具、工具集工作原
 Hermes 内置了广泛的工具注册表，涵盖网络搜索、浏览器自动化、终端执行、文件编辑、记忆、委派、RL 训练、消息传递、Home Assistant 等。
 
 :::note
-**Honcho 跨会话记忆**作为记忆提供商插件 (`plugins/memory/honcho/`) 提供，而非内置工具集。安装方法请参阅[插件](./plugins.md)。
+**Honcho 跨会话记忆**作为记忆提供商插件（`plugins/memory/honcho/`）提供，而非内置工具集。安装方法请参阅[插件](./plugins.md)。
 :::
 
 高级类别：
@@ -21,9 +21,10 @@ Hermes 内置了广泛的工具注册表，涵盖网络搜索、浏览器自动�
 | 类别 | 示例 | 描述 |
 |----------|----------|-------------|
 | **网络** | `web_search`, `web_extract` | 搜索网络并提取页面内容。 |
+| **X 搜索** | `x_search` | 通过 xAI 内置的 `x_search` Responses 工具搜索 X（Twitter）帖子和线程 —— 需要 xAI 凭证（SuperGrok OAuth 或 `XAI_API_KEY`）；默认关闭，可通过 `hermes tools` → 🐦 X (Twitter) Search 选择启用。 |
 | **终端与文件** | `terminal`, `process`, `read_file`, `patch` | 执行命令和操作文件。 |
 | **浏览器** | `browser_navigate`, `browser_snapshot`, `browser_vision` | 支持文本和视觉的交互式浏览器自动化。 |
-| **媒体** | `vision_analyze`, `image_generate`, `text_to_speech` | 多模态分析与生成。 |
+| **媒体** | `vision_analyze`, `image_generate`, `video_generate`, `video_analyze`, `text_to_speech` | 多模态分析和生成。`video_generate` 和 `video_analyze` 为可选启用（通过 `hermes tools` 或 `--toolsets` 添加 `video_gen` / `video` 工具集）。 |
 | **Agent 编排** | `todo`, `clarify`, `execute_code`, `delegate_task` | 规划、澄清、代码执行和子 Agent 委派。 |
 | **记忆与回忆** | `memory`, `session_search` | 持久化记忆和会话搜索。 |
 | **自动化与交付** | `cronjob`, `send_message` | 具有创建/列出/更新/暂停/恢复/运行/删除操作的定时任务，以及出站消息传递。 |
@@ -38,7 +39,7 @@ Hermes 内置了广泛的工具注册表，涵盖网络搜索、浏览器自动�
 ## 使用工具集
 
 ```bash
-# 使用特定的工具集
+# 使用特定工具集
 hermes chat --toolsets "web,terminal"
 
 # 查看所有可用工具
@@ -58,13 +59,13 @@ hermes tools
 
 | 后端 | 描述 | 使用场景 |
 |---------|-------------|----------|
-| `local` | 在您的机器上运行（默认） | 开发、受信任的任务 |
+| `local` | 在您的机器上运行（默认） | 开发、可信任务 |
 | `docker` | 隔离的容器 | 安全性、可复现性 |
 | `ssh` | 远程服务器 | 沙盒化，使 Agent 远离其自身代码 |
 | `singularity` | HPC 容器 | 集群计算、无 root 权限 |
 | `modal` | 云端执行 | 无服务器、可扩展 |
 | `daytona` | 云端沙盒工作空间 | 持久的远程开发环境 |
-| `vercel_sandbox` | Vercel Sandbox 云端微虚拟机 | 具有快照支持的文件系统持久化的云端执行 |
+| `vercel_sandbox` | Vercel Sandbox 云端微虚拟机 | 云端执行，支持快照的文件系统持久化 |
 
 ### 配置
 
@@ -84,9 +85,9 @@ terminal:
   docker_image: python:3.11-slim
 ```
 
-**一个持久化容器，在整个进程内共享。** Hermes 在首次使用时启动一个长期运行的容器 (`docker run -d ... sleep 2h`)，并通过 `docker exec` 将每个终端、文件和 `execute_code` 调用路由到同一个容器中。工作目录更改、安装的包、环境调整以及写入 `/workspace` 的文件，在 Hermes 进程的生命周期内，都会从一个工具调用延续到下一个，跨越 `/new`、`/reset` 和 `delegate_task` 子 Agent。容器在关闭时停止并移除。
+**一个持久化容器，在整个进程内共享。** Hermes 在首次使用时启动一个长期运行的容器（`docker run -d ... sleep 2h`），并通过 `docker exec` 将每个终端、文件和 `execute_code` 调用路由到同一个容器中。工作目录更改、安装的包、环境调整以及写入 `/workspace` 的文件都会从一个工具调用延续到下一个，跨越 `/new`、`/reset` 和 `delegate_task` 子 Agent，贯穿 Hermes 进程的整个生命周期。容器在关闭时停止并移除。
 
-这意味着 Docker 后端的行为类似于一个持久的沙盒虚拟机，而不是每个命令都使用一个新容器。如果您 `pip install foo` 一次，它将在会话的其余部分存在。如果您 `cd /workspace/project`，后续的 `ls` 调用将看到该目录。完整的生命周期细节以及控制 `/workspace` 和 `/root` 是否在 Hermes 重启后保留的 `container_persistent` 标志，请参阅[配置 → Docker 后端](../configuration.md#docker-backend)。
+这意味着 Docker 后端的行为类似于一个持久的沙盒虚拟机，而不是每个命令都使用一个新容器。如果您 `pip install foo` 一次，它在会话的其余部分都存在。如果您 `cd /workspace/project`，后续的 `ls` 调用将看到该目录。完整的生命周期细节以及控制 `/workspace` 和 `/root` 是否在 Hermes 重启后保留的 `container_persistent` 标志，请参阅[配置 → Docker 后端](../configuration.md#docker-backend)。
 
 ### SSH 后端
 
@@ -97,7 +98,7 @@ terminal:
   backend: ssh
 ```
 ```bash
-# 在 ~/.hermes/.env 中设置凭据
+# 在 ~/.hermes/.env 中设置凭证
 TERMINAL_SSH_HOST=my-server.example.com
 TERMINAL_SSH_USER=myuser
 TERMINAL_SSH_KEY=~/.ssh/id_rsa
@@ -130,25 +131,25 @@ hermes config set terminal.backend vercel_sandbox
 hermes config set terminal.vercel_runtime node24
 ```
 
-使用 `VERCEL_TOKEN`、`VERCEL_PROJECT_ID` 和 `VERCEL_TEAM_ID` 三者进行身份验证。这种访问令牌设置是部署以及在 Render、Railway、Docker 和类似主机上正常长期运行的 Hermes 进程的受支持路径。支持的运行时是 `node24`、`node22` 和 `python3.13`；Hermes 默认将 `/vercel/sandbox` 作为远程工作空间根目录。
+使用 `VERCEL_TOKEN`、`VERCEL_PROJECT_ID` 和 `VERCEL_TEAM_ID` 三者进行身份验证。这种访问令牌设置是部署以及在 Render、Railway、Docker 和类似主机上正常运行长期 Hermes 进程的受支持路径。支持的运行时是 `node24`、`node22` 和 `python3.13`；Hermes 默认将 `/vercel/sandbox` 作为远程工作空间根目录。
 
-对于一次性的本地开发，Hermes 也接受短期的 Vercel OIDC Token：
+对于一次性本地开发，Hermes 也接受短期的 Vercel OIDC 令牌：
 
 ```bash
 VERCEL_OIDC_TOKEN="$(vc project token <project-name>)" hermes chat
 ```
 
-从已链接的 Vercel 项目目录：
+从链接的 Vercel 项目目录中：
 
 ```bash
 VERCEL_OIDC_TOKEN="$(vc project token)" hermes chat
 ```
 
-当 `container_persistent: true` 时，Hermes 使用 Vercel 快照在沙盒重新创建时保留同一任务的文件系统状态。这可能包括沙盒内 Hermes 同步的凭据、技能和缓存文件。快照不保留活动进程、PID 空间或相同的活动沙盒身份。
+当 `container_persistent: true` 时，Hermes 使用 Vercel 快照在沙盒重新创建时保留同一任务的文件系统状态。这可能包括沙盒内 Hermes 同步的凭证、技能和缓存文件。快照不保留活动进程、PID 空间或相同的活动沙盒身份。
 
 后台终端命令使用 Hermes 的通用非本地进程流程：在沙盒存活期间，通过正常的进程工具进行生成、轮询、等待、记录和终止，但 Hermes 在清理或重启后不提供原生的 Vercel 分离进程恢复功能。
 
-保持 `container_disk` 未设置或使用共享默认值 `51200`；自定义磁盘大小对于 Vercel Sandbox 不受支持，将导致诊断/后端创建失败。
+将 `container_disk` 留空或保持共享默认值 `51200`；自定义磁盘大小不受 Vercel Sandbox 支持，将导致诊断/后端创建失败。
 
 ### 容器资源
 
@@ -158,8 +159,8 @@ VERCEL_OIDC_TOKEN="$(vc project token)" hermes chat
 terminal:
   backend: docker  # 或 singularity, modal, daytona, vercel_sandbox
   container_cpu: 1              # CPU 核心数（默认：1）
-  container_memory: 5120        # 内存大小（MB）（默认：5GB）
-  container_disk: 51200         # 磁盘大小（MB）（默认：50GB）
+  container_memory: 5120        # 内存，单位 MB（默认：5GB）
+  container_disk: 51200         # 磁盘，单位 MB（默认：50GB）
   container_persistent: true    # 跨会话持久化文件系统（默认：true）
 ```
 
@@ -195,12 +196,12 @@ process(action="kill", session_id="proc_abc123")   # 终止
 process(action="write", session_id="proc_abc123", data="y")  # 发送输入
 ```
 
-PTY 模式 (`pty=true`) 启用交互式 CLI 工具，如 Codex 和 Claude Code。
+PTY 模式（`pty=true`）启用交互式 CLI 工具，如 Codex 和 Claude Code。
 
 ## Sudo 支持
 
 如果命令需要 sudo，系统将提示您输入密码（在会话期间缓存）。或者在 `~/.hermes/.env` 中设置 `SUDO_PASSWORD`。
 
 :::warning
-在消息传递平台上，如果 sudo 失败，输出将包含一个提示，建议将 `SUDO_PASSWORD` 添加到 `~/.hermes/.env`。
+在消息传递平台上，如果 sudo 失败，输出将包含提示，建议将 `SUDO_PASSWORD` 添加到 `~/.hermes/.env`。
 :::

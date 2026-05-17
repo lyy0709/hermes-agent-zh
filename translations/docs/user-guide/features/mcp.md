@@ -1,22 +1,22 @@
 ---
 sidebar_position: 4
-title: "MCP (Model Context Protocol)"
+title: "MCP (模型上下文协议)"
 description: "通过 MCP 将 Hermes Agent 连接到外部工具服务器，并精确控制 Hermes 加载哪些 MCP 工具"
 ---
 
-# MCP (Model Context Protocol)
+# MCP (模型上下文协议)
 
-MCP 允许 Hermes Agent 连接到外部工具服务器，使 Agent 能够使用 Hermes 自身之外的各类工具——例如 GitHub、数据库、文件系统、浏览器栈、内部 API 等等。
+MCP 允许 Hermes Agent 连接到外部工具服务器，使 Agent 能够使用 Hermes 自身之外的各类工具——例如 GitHub、数据库、文件系统、浏览器堆栈、内部 API 等等。
 
-如果你曾希望 Hermes 使用一个已存在于别处的工具，MCP 通常是实现这一目标最简洁的方式。
+如果你曾希望 Hermes 使用一个已存在于别处的工具，MCP 通常是实现此目的最简洁的方式。
 
-## MCP 带来的能力
+## MCP 带来的优势
 
 - 无需先编写原生 Hermes 工具，即可访问外部工具生态系统
-- 可在同一配置中同时使用本地 stdio 服务器和远程 HTTP MCP 服务器
+- 可在同一配置中混合使用本地 stdio 服务器和远程 HTTP MCP 服务器
 - 启动时自动发现并注册工具
 - 当服务器支持时，为 MCP 资源和提示词提供实用程序包装器
-- 支持按服务器进行过滤，以便仅暴露你真正希望 Hermes 看到的 MCP 工具
+- 支持按服务器进行过滤，以便只暴露你真正希望 Hermes 看到的 MCP 工具
 
 ## 快速开始
 
@@ -70,7 +70,7 @@ mcp_servers:
 在以下情况下使用 stdio 服务器：
 - 服务器安装在本地
 - 你需要低延迟访问本地资源
-- 你正在参考展示 `command`、`args` 和 `env` 的 MCP 服务器文档
+- 你正在参考显示 `command`、`args` 和 `env` 的 MCP 服务器文档
 
 ### HTTP 服务器
 
@@ -97,17 +97,18 @@ Hermes 从 `~/.hermes/config.yaml` 中的 `mcp_servers` 下读取 MCP 配置。
 
 | 键 | 类型 | 含义 |
 |---|---|---|
-| `command` | 字符串 | Stdio MCP 服务器的可执行文件 |
-| `args` | 列表 | Stdio 服务器的参数 |
+| `command` | 字符串 | stdio MCP 服务器的可执行文件 |
+| `args` | 列表 | stdio 服务器的参数 |
 | `env` | 映射 | 传递给 stdio 服务器的环境变量 |
 | `url` | 字符串 | HTTP MCP 端点 |
 | `headers` | 映射 | 远程服务器的 HTTP 请求头 |
 | `timeout` | 数字 | 工具调用超时时间 |
 | `connect_timeout` | 数字 | 初始连接超时时间 |
 | `enabled` | 布尔值 | 如果为 `false`，Hermes 将完全跳过该服务器 |
-| `tools` | 映射 | 按服务器进行的工具过滤和实用程序策略 |
+| `supports_parallel_tool_calls` | 布尔值 | 如果为 `true`，来自此服务器的工具可以并发运行 |
+| `tools` | 映射 | 按服务器的工具过滤和实用程序策略 |
 
-### 最小化 stdio 示例
+### 最小 stdio 示例
 
 ```yaml
 mcp_servers:
@@ -116,7 +117,7 @@ mcp_servers:
     args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
 ```
 
-### 最小化 HTTP 示例
+### 最小 HTTP 示例
 
 ```yaml
 mcp_servers:
@@ -142,7 +143,7 @@ mcp_<server_name>_<tool_name>
 | `github` | `create-issue` | `mcp_github_create_issue` |
 | `my-api` | `query.data` | `mcp_my_api_query_data` |
 
-在实践中，你通常不需要手动调用带前缀的名称——Hermes 会看到该工具并在正常推理过程中选择它。
+在实践中，你通常不需要手动调用带前缀的名称——Hermes 会看到该工具，并在正常推理过程中选择它。
 
 ## MCP 实用工具
 
@@ -160,15 +161,15 @@ mcp_<server_name>_<tool_name>
 
 ### 重要说明
 
-这些实用工具现在具备能力感知：
-- 仅当 MCP 会话实际支持资源操作时，Hermes 才会注册资源实用工具
-- 仅当 MCP 会话实际支持提示词操作时，Hermes 才会注册提示词实用工具
+这些实用工具现在具备能力感知功能：
+- 只有当 MCP 会话实际支持资源操作时，Hermes 才会注册资源实用工具
+- 只有当 MCP 会话实际支持提示词操作时，Hermes 才会注册提示词实用工具
 
 因此，一个暴露了可调用工具但没有资源/提示词的服务器将不会获得这些额外的包装器。
 
 ## 按服务器过滤
 
-你可以控制每个 MCP 服务器向 Hermes 提供哪些工具，从而实现对工具命名空间的精细管理。
+你可以控制每个 MCP 服务器向 Hermes 提供哪些工具，从而实现对工具命名空间的细粒度管理。
 
 ### 完全禁用服务器
 
@@ -220,9 +221,9 @@ tools:
 
 `include` 优先。
 
-### 也过滤实用工具
+### 也可过滤实用工具
 
-你也可以单独禁用 Hermes 添加的实用程序包装器：
+你还可以单独禁用 Hermes 添加的实用程序包装器：
 
 ```yaml
 mcp_servers:
@@ -236,8 +237,8 @@ mcp_servers:
 这意味着：
 - `tools.resources: false` 会禁用 `list_resources` 和 `read_resource`
 - `tools.prompts: false` 会禁用 `list_prompts` 和 `get_prompt`
-
 ### 完整示例
+
 ```yaml
 mcp_servers:
   github:
@@ -264,23 +265,23 @@ mcp_servers:
 
 ## 如果所有内容都被过滤掉会怎样？
 
-如果你的配置过滤掉了所有可调用工具，并且禁用或省略了所有支持的实用程序，Hermes 将不会为该服务器创建一个空的运行时 MCP 工具集。
+如果你的配置过滤掉了所有可调用的工具，并且禁用或省略了所有支持的实用程序，Hermes 将不会为该服务器创建一个空的运行时 MCP 工具集。
 
 这可以保持工具列表的整洁。
 
 ## 运行时行为
 
-### 发现时机
+### 发现时间
 
-Hermes 在启动时发现 MCP 服务器，并将其工具注册到常规的工具注册表中。
+Hermes 在启动时发现 MCP 服务器，并将其工具注册到常规工具注册表中。
 
 ### 动态工具发现
 
-MCP 服务器可以在运行时其可用工具发生变化时，通过发送 `notifications/tools/list_changed` 通知来告知 Hermes。当 Hermes 收到此通知时，它会自动重新获取服务器的工具列表并更新注册表——无需手动执行 `/reload-mcp`。
+当 MCP 服务器在运行时其可用工具发生变化时，可以通过发送 `notifications/tools/list_changed` 通知来通知 Hermes。当 Hermes 收到此通知时，它会自动重新获取服务器的工具列表并更新注册表——无需手动执行 `/reload-mcp`。
 
-这对于能力动态变化的 MCP 服务器非常有用（例如，加载新数据库模式时添加工具的服务器，或服务下线时移除工具的服务器）。
+这对于能力动态变化的 MCP 服务器非常有用（例如，当加载新数据库模式时添加工具，或当服务离线时移除工具的服务器）。
 
-刷新操作受锁保护，因此来自同一服务器的快速连续通知不会导致重叠的刷新。提示词和资源变更通知（`prompts/list_changed`、`resources/list_changed`）会被接收，但尚未采取行动。
+刷新操作受锁保护，因此来自同一服务器的快速连续通知不会导致重叠刷新。提示词和资源变更通知（`prompts/list_changed`、`resources/list_changed`）会被接收，但目前尚未采取行动。
 
 ### 重新加载
 
@@ -290,7 +291,7 @@ MCP 服务器可以在运行时其可用工具发生变化时，通过发送 `no
 /reload-mcp
 ```
 
-这将从配置重新加载 MCP 服务器并刷新可用工具列表。对于服务器自身推送的运行时工具变更，请参阅上面的[动态工具发现](#动态工具发现)。
+这将从配置中重新加载 MCP 服务器并刷新可用工具列表。对于服务器自身推送的运行时工具变更，请参阅上面的[动态工具发现](#动态工具发现)。
 
 ### 工具集
 
@@ -300,7 +301,7 @@ MCP 服务器可以在运行时其可用工具发生变化时，通过发送 `no
 mcp-<server>
 ```
 
-这使得在工具集层面更容易理解 MCP 服务器。
+这使得在工具集级别更容易理解 MCP 服务器。
 
 ## 安全模型
 
@@ -308,14 +309,14 @@ mcp-<server>
 
 对于 stdio 服务器，Hermes 不会盲目传递你的完整 shell 环境。
 
-只有明确配置的 `env` 加上一个安全基线会被传递。这减少了意外泄露密钥的风险。
+只有明确配置的 `env` 加上一个安全的基线环境会被传递。这减少了意外泄露密钥的风险。
 
 ### 配置级别的暴露控制
 
 新的过滤支持也是一种安全控制：
 - 禁用你不希望模型看到的危险工具
 - 对于敏感服务器，仅暴露最小化的白名单
-- 当你不想暴露该功能面时，禁用资源/提示词包装器
+- 当你不想暴露该功能表面时，禁用资源/提示词包装器
 
 ## 使用示例
 
@@ -334,7 +335,7 @@ mcp_servers:
       resources: false
 ```
 
-使用方式：
+使用方式如下：
 
 ```text
 显示标记为 bug 的未解决问题，然后为不稳定的 MCP 重连行为草拟一个新问题。
@@ -352,10 +353,10 @@ mcp_servers:
       exclude: [delete_customer, refund_payment]
 ```
 
-使用方式：
+使用方式如下：
 
 ```text
-查找最近 10 笔失败的付款并总结常见的失败原因。
+查找最近 10 笔失败的付款，并总结常见的失败原因。
 ```
 
 ### 用于单个项目根目录的文件系统服务器
@@ -367,7 +368,7 @@ mcp_servers:
     args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/my-project"]
 ```
 
-使用方式：
+使用方式如下：
 
 ```text
 检查项目根目录并解释目录结构。
@@ -380,7 +381,7 @@ mcp_servers:
 检查：
 
 ```bash
-# 验证 MCP 依赖是否已安装（标准安装已包含）
+# 验证 MCP 依赖是否已安装（标准安装中已包含）
 cd ~/.hermes/hermes-agent && uv pip install -e ".[mcp]"
 
 node --version
@@ -394,7 +395,7 @@ npx --version
 可能的原因：
 - 服务器连接失败
 - 发现失败
-- 你的过滤器配置排除了这些工具
+- 你的过滤配置排除了这些工具
 - 该服务器上不存在该实用程序功能
 - 服务器被 `enabled: false` 禁用
 
@@ -402,17 +403,34 @@ npx --version
 
 ### 为什么资源或提示词实用程序没有出现？
 
-因为 Hermes 现在只在以下两个条件都满足时才注册这些包装器：
+因为 Hermes 现在只有在以下两个条件都满足时才会注册这些包装器：
 1. 你的配置允许它们
 2. 服务器会话实际支持该功能
 
 这是有意为之，以保持工具列表的真实性。
 
+## 并行工具调用
+
+默认情况下，MCP 工具按顺序运行——一次一个。如果你的 MCP 服务器暴露的工具可以安全地并发运行（例如，只读查询、独立的 API 调用），你可以选择启用并行执行：
+
+```yaml
+mcp_servers:
+  docs:
+    command: "docs-server"
+    supports_parallel_tool_calls: true
+```
+
+当 `supports_parallel_tool_calls` 为 `true` 时，Hermes 可以在单个工具调用批次中同时执行来自该服务器的多个工具，就像它对内置的只读工具（web_search、read_file 等）所做的那样。
+
+:::caution
+仅对工具可以安全同时运行的 MCP 服务器启用并行调用。如果工具读取和写入共享状态、文件、数据库或外部资源，请在启用此设置前审查读/写竞争条件。
+:::
+
 ## MCP 采样支持
 
 MCP 服务器可以通过 `sampling/createMessage` 协议向 Hermes 请求 LLM 推理。这允许 MCP 服务器请求 Hermes 代表其生成文本——对于需要 LLM 能力但没有自己模型访问权限的服务器非常有用。
 
-采样功能默认对所有 MCP 服务器**启用**（当 MCP SDK 支持时）。可以在每个服务器的 `sampling` 键下进行配置：
+采样功能默认对所有 MCP 服务器**启用**（当 MCP SDK 支持时）。可以在 `sampling` 键下为每个服务器进行配置：
 
 ```yaml
 mcp_servers:
@@ -421,17 +439,16 @@ mcp_servers:
     sampling:
       enabled: true            # 启用采样（默认：true）
       model: "openai/gpt-4o"  # 覆盖采样请求的模型（可选）
-      max_tokens_cap: 4096     # 每次采样响应的最大 Token 数（默认：4096）
-      timeout: 30              # 每次请求的超时时间（秒）（默认：30）
+      max_tokens_cap: 4096     # 每个采样响应的最大 Token 数（默认：4096）
+      timeout: 30              # 每个请求的超时时间（秒）（默认：30）
       max_rpm: 10              # 速率限制：每分钟最大请求数（默认：10）
-      max_tool_rounds: 5       # 采样循环中最大工具使用轮数（默认：5）
+      max_tool_rounds: 5       # 采样循环中的最大工具使用轮数（默认：5）
       allowed_models: []       # 服务器可以请求的模型名称白名单（空 = 任何）
       log_level: "info"        # 审计日志级别：debug、info 或 warning（默认：info）
 ```
+采样处理器包含滑动窗口限流器、单请求超时和工具循环深度限制，以防止使用失控。每个服务器实例都会跟踪指标（请求数、错误数、使用的 Token 数）。
 
-采样处理器包含滑动窗口速率限制器、每次请求超时和工具循环深度限制，以防止使用失控。指标（请求计数、错误、使用的 Token 数）按服务器实例进行跟踪。
-
-要为特定服务器禁用采样：
+要禁用特定服务器的采样：
 
 ```yaml
 mcp_servers:
@@ -440,15 +457,16 @@ mcp_servers:
     sampling:
       enabled: false
 ```
+
 ## 将 Hermes 作为 MCP 服务器运行
 
-除了可以连接**到** MCP 服务器，Hermes 也可以**作为**一个 MCP 服务器。这使得其他支持 MCP 的 Agent（Claude Code、Cursor、Codex 或任何 MCP 客户端）能够使用 Hermes 的消息传递能力——列出会话、读取消息历史记录，并通过您所有已连接的平台发送消息。
+除了连接**到** MCP 服务器，Hermes 也可以**作为**一个 MCP 服务器。这使得其他支持 MCP 的 Agent（Claude Code、Cursor、Codex 或任何 MCP 客户端）能够使用 Hermes 的消息传递功能——列出会话、读取消息历史记录，并通过所有已连接的平台发送消息。
 
-### 使用场景
+### 何时使用此功能
 
-- 您希望 Claude Code、Cursor 或其他编程 Agent 通过 Hermes 发送和读取 Telegram/Discord/Slack 消息
-- 您需要一个单一的 MCP 服务器，一次性桥接到 Hermes 所有已连接的消息平台
-- 您已经有一个正在运行的、连接了平台的 Hermes 消息网关
+- 你希望 Claude Code、Cursor 或其他编程 Agent 通过 Hermes 发送和读取 Telegram/Discord/Slack 消息
+- 你希望有一个单一的 MCP 服务器，能一次性桥接到 Hermes 所有已连接的消息平台
+- 你已经有一个正在运行的、连接了平台的 Hermes 消息网关
 
 ### 快速开始
 
@@ -456,11 +474,11 @@ mcp_servers:
 hermes mcp serve
 ```
 
-这将启动一个 stdio MCP 服务器。MCP 客户端（而不是您）管理进程的生命周期。
+这将启动一个 stdio MCP 服务器。MCP 客户端（而不是你）管理进程的生命周期。
 
 ### MCP 客户端配置
 
-将 Hermes 添加到您的 MCP 客户端配置中。例如，在 Claude Code 的 `~/.claude/claude_desktop_config.json` 中：
+将 Hermes 添加到你的 MCP 客户端配置中。例如，在 Claude Code 的 `~/.claude/claude_desktop_config.json` 中：
 
 ```json
 {
@@ -473,7 +491,7 @@ hermes mcp serve
 }
 ```
 
-或者，如果您将 Hermes 安装在了特定位置：
+或者，如果你将 Hermes 安装在了特定位置：
 
 ```json
 {
@@ -492,20 +510,20 @@ MCP 服务器公开了 10 个工具，与 OpenClaw 的频道桥接功能相匹�
 
 | 工具 | 描述 |
 |------|-------------|
-| `conversations_list` | 列出活跃的消息会话。可按平台筛选或按名称搜索。 |
-| `conversation_get` | 通过会话密钥获取一个会话的详细信息。 |
+| `conversations_list` | 列出活跃的消息会话。可按平台过滤或按名称搜索。 |
+| `conversation_get` | 通过会话键获取一个会话的详细信息。 |
 | `messages_read` | 读取一个会话的近期消息历史记录。 |
 | `attachments_fetch` | 从特定消息中提取非文本附件（图像、媒体）。 |
 | `events_poll` | 轮询自某个游标位置以来的新会话事件。 |
 | `events_wait` | 长轮询/阻塞直到下一个事件到达（近实时）。 |
 | `messages_send` | 通过平台发送消息（例如 `telegram:123456`， `discord:#general`）。 |
-| `channels_list` | 列出所有平台上可用的消息发送目标。 |
+| `channels_list` | 列出所有平台上可用的消息目标。 |
 | `permissions_list_open` | 列出在此桥接会话期间观察到的待处理审批请求。 |
-| `permissions_respond` | 批准或拒绝一个待处理的审批请求。 |
+| `permissions_respond` | 允许或拒绝一个待处理的审批请求。 |
 
 ### 事件系统
 
-MCP 服务器包含一个实时事件桥接器，它会轮询 Hermes 的会话数据库以获取新消息。这使 MCP 客户端能够近乎实时地感知到传入的会话：
+MCP 服务器包含一个实时事件桥接器，它会轮询 Hermes 的会话数据库以获取新消息。这使得 MCP 客户端能够近乎实时地感知到传入的会话：
 
 ```
 # 轮询新事件（非阻塞）
@@ -522,7 +540,7 @@ events_wait(after_cursor=42, timeout_ms=30000)
 ### 选项
 
 ```bash
-hermes mcp serve              # 正常模式
+hermes mcp serve              # 普通模式
 hermes mcp serve --verbose    # 在 stderr 上启用调试日志
 ```
 
@@ -535,13 +553,13 @@ MCP 服务器直接从 Hermes 的会话存储（`~/.hermes/sessions/sessions.jso
 ### 当前限制
 
 - 仅支持 Stdio 传输（尚不支持 HTTP MCP 传输）
-- 通过基于 mtime 优化的数据库轮询实现约 200 毫秒间隔的事件轮询（当文件未更改时跳过工作）
+- 通过基于 mtime 优化的数据库轮询，事件轮询间隔约为 200 毫秒（当文件未更改时跳过工作）
 - 尚不支持 `claude/channel` 推送通知协议
 - 仅支持纯文本发送（尚不支持通过 `messages_send` 发送媒体/附件）
 
 ## 相关文档
 
-- [与 Hermes 一起使用 MCP](/docs/guides/use-mcp-with-hermes)
+- [在 Hermes 中使用 MCP](/docs/guides/use-mcp-with-hermes)
 - [CLI 命令](/docs/reference/cli-commands)
 - [斜杠命令](/docs/reference/slash-commands)
 - [常见问题](/docs/reference/faq)

@@ -5,24 +5,24 @@
 # Hermes Agent ☤
 
 <p align="center">
-  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="文档"></a>
   <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="Built by Nous Research"></a>
+  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="许可证: MIT"></a>
+  <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="由 Nous Research 构建"></a>
   <a href="README.zh-CN.md"><img src="https://img.shields.io/badge/Lang-中文-red?style=for-the-badge" alt="中文"></a>
 </p>
 
-**由 [Nous Research](https://nousresearch.com) 构建的自我改进 AI Agent。** 它是唯一内置学习循环的 Agent —— 它从经验中创建技能，在使用过程中改进它们，推动自己持久化知识，搜索自己过去的对话，并在跨会话中构建一个关于你是谁且不断深化的模型。在 5 美元的 VPS、GPU 集群或闲置时成本几乎为零的无服务器基础设施上运行它。它不绑定在你的笔记本电脑上 —— 当它在云虚拟机（VM）上工作时，你可以通过 Telegram 与它对话。
+**由 [Nous Research](https://nousresearch.com) 构建的自我改进 AI Agent。** 它是唯一内置学习循环的 Agent —— 它从经验中创建技能，在使用过程中改进它们，推动自己持久化知识，搜索自己过去的对话，并在跨会话中构建一个关于你是谁且不断深化的模型。在 5 美元的 VPS、GPU 集群或闲置时成本几乎为零的无服务器基础设施上运行它。它不绑定在你的笔记本电脑上 —— 当它在云虚拟机上工作时，你可以通过 Telegram 与它对话。
 
-使用你想要的任何模型 —— [Nous Portal](https://portal.nousresearch.com)、[OpenRouter](https://openrouter.ai)（200+ 模型）、[NovitaAI](https://novita.ai)（面向 Model API、Agent 沙盒和 GPU 云的 AI 原生云）、[NVIDIA NIM](https://build.nvidia.com)（Nemotron）、[Xiaomi MiMo](https://platform.xiaomimimo.com)、[z.ai/GLM](https://z.ai)、[Kimi/Moonshot](https://platform.moonshot.ai)、[MiniMax](https://www.minimax.io）、[Hugging Face](https://huggingface.co)、OpenAI 或你自己的端点。使用 `hermes model` 切换 —— 无需更改代码，没有锁定。
+使用你想要的任何模型 —— [Nous Portal](https://portal.nousresearch.com)、[OpenRouter](https://openrouter.ai) (200+ 模型)、[NovitaAI](https://novita.ai) (面向 Model API、Agent Sandbox 和 GPU Cloud 的 AI 原生云)、[NVIDIA NIM](https://build.nvidia.com) (Nemotron)、[Xiaomi MiMo](https://platform.xiaomimimo.com)、[z.ai/GLM](https://z.ai)、[Kimi/Moonshot](https://platform.moonshot.ai)、[MiniMax](https://www.minimax.io)、[Hugging Face](https://huggingface.co)、OpenAI 或你自己的端点。使用 `hermes model` 切换 —— 无需更改代码，无锁定。
 
 <table>
-<tr><td><b>真正的终端界面</b></td><td>完整的 TUI，支持多行编辑、斜杠命令自动补全、对话历史记录、中断与重定向以及流式工具输出。</td></tr>
+<tr><td><b>真正的终端界面</b></td><td>完整的 TUI，支持多行编辑、斜杠命令自动补全、对话历史、中断与重定向以及流式工具输出。</td></tr>
 <tr><td><b>在你所在之处运行</b></td><td>Telegram、Discord、Slack、WhatsApp、Signal 和 CLI —— 全部来自单个消息网关进程。语音备忘录转录，跨平台对话连续性。</td></tr>
-<tr><td><b>闭环学习循环</b></td><td>Agent 管理的记忆，带有定期提醒。复杂任务后自主创建技能。技能在使用过程中自我改进。用于跨会话回忆的、带 LLM 摘要的 FTS5 会话搜索。<a href="https://github.com/plastic-labs/honcho">Honcho</a> 辩证用户建模。兼容 <a href="https://agentskills.io">agentskills.io</a> 开放标准。</td></tr>
-<tr><td><b>定时自动化</b></td><td>内置定时任务调度器，可交付到任何平台。每日报告、夜间备份、每周审计 —— 全部使用自然语言，无人值守运行。</td></tr>
+<tr><td><b>闭环学习循环</b></td><td>Agent 管理的记忆，带有定期提醒。复杂任务后自主创建技能。技能在使用过程中自我改进。用于跨会话回忆的、带有 LLM 摘要的 FTS5 会话搜索。<a href="https://github.com/plastic-labs/honcho">Honcho</a> 辩证用户建模。兼容 <a href="https://agentskills.io">agentskills.io</a> 开放标准。</td></tr>
+<tr><td><b>定时自动化</b></td><td>内置 cron 定时任务调度器，可交付到任何平台。每日报告、夜间备份、每周审计 —— 全部使用自然语言，无人值守运行。</td></tr>
 <tr><td><b>委派与并行化</b></td><td>为并行工作流生成隔离的子 Agent。编写通过 RPC 调用工具的 Python 脚本，将多步骤流水线压缩为零上下文成本的回合。</td></tr>
-<tr><td><b>随处运行，不限于你的笔记本电脑</b></td><td>七种终端后端 —— 本地、Docker、SSH、Singularity、Modal、Daytona 和 Vercel Sandbox。Daytona 和 Modal 提供无服务器持久性 —— 你的 Agent 执行环境在闲置时休眠，按需唤醒，在会话之间成本几乎为零。在 5 美元的 VPS 或 GPU 集群上运行它。</td></tr>
+<tr><td><b>随处运行，不限于你的笔记本电脑</b></td><td>七种终端后端 —— 本地、Docker、SSH、Singularity、Modal、Daytona 和 Vercel Sandbox。Daytona 和 Modal 提供无服务器持久化 —— 你的 Agent 执行环境在闲置时休眠，按需唤醒，在会话间成本几乎为零。在 5 美元的 VPS 或 GPU 集群上运行它。</td></tr>
 <tr><td><b>研究就绪</b></td><td>批量轨迹生成，用于训练下一代工具调用模型的轨迹压缩。</td></tr>
 </table>
 
@@ -38,7 +38,7 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 
 ### Windows (原生, PowerShell) — 早期测试版
 
-> **注意：** 原生 Windows 支持是**早期测试版**。它可以安装和运行，但尚未像我们的 Linux/macOS/WSL2 路径那样经过广泛的道路测试。遇到问题时请[提交问题](https://github.com/NousResearch/hermes-agent/issues)。对于目前经过最充分实战测试的 Windows 设置，请在 **WSL2** 内运行上面的 Linux/macOS 单行命令。
+> **注意：** 原生 Windows 支持是**早期测试版**。它可以安装和运行，但尚未像我们的 Linux/macOS/WSL2 路径那样经过广泛的道路测试。遇到问题时请[提交问题](https://github.com/NousResearch/hermes-agent/issues)。对于目前最经过实战检验的 Windows 设置，请在 **WSL2** 内运行上面的 Linux/macOS 单行命令。
 
 在 PowerShell 中运行：
 
@@ -46,18 +46,18 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 irm https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1 | iex
 ```
 
-安装程序会处理一切：uv、Python 3.11、Node.js、ripgrep、ffmpeg、**以及一个便携式 Git Bash**（MinGit，解压到 `%LOCALAPPDATA%\hermes\git` —— 无需管理员权限，与任何系统 Git 安装完全隔离）。Hermes 使用这个捆绑的 Git Bash 来运行 shell 命令。
+安装程序会处理一切：uv、Python 3.11、Node.js、ripgrep、ffmpeg、**以及一个便携式 Git Bash** (MinGit，解压到 `%LOCALAPPDATA%\hermes\git` —— 无需管理员权限，与任何系统 Git 安装完全隔离)。Hermes 使用这个捆绑的 Git Bash 来运行 shell 命令。
 
 如果你已经安装了 Git，安装程序会检测到并使用它。否则，只需要一个约 45MB 的 MinGit 下载 —— 它不会触及或干扰任何系统 Git。
 
-> **Android / Termux：** 经过测试的手动路径记录在 [Termux 指南](https://hermes-agent.nousresearch.com/docs/getting-started/termux) 中。在 Termux 上，Hermes 会安装一个精选的 `.[termux]` 额外包，因为完整的 `.[all]` 额外包目前会拉取与 Android 不兼容的语音依赖项。
+> **Android / Termux：** 经过测试的手动路径记录在 [Termux 指南](https://hermes-agent.nousresearch.com/docs/getting-started/termux) 中。在 Termux 上，Hermes 会安装一个精选的 `.[termux]` 额外依赖项，因为完整的 `.[all]` 额外依赖项目前会拉取与 Android 不兼容的语音依赖项。
 >
-> **Windows：** 原生 Windows 作为**早期测试版**受支持 —— 上面的 PowerShell 单行命令会安装所有内容，但请预期会遇到粗糙的边缘，并在遇到问题时提交问题。如果你更愿意使用 WSL2（我们经过最充分实战测试的 Windows 路径），Linux 命令在那里也有效。原生 Windows 安装位于 `%LOCALAPPDATA%\hermes` 下；WSL2 安装位于 `~/.hermes` 下，与 Linux 上相同。目前唯一需要 WSL2 的 Hermes 功能是基于浏览器的仪表板聊天窗格（它使用 POSIX PTY —— 经典 CLI 和消息网关都可以原生运行）。
+> **Windows：** 原生 Windows 作为**早期测试版**受支持 —— 上面的 PowerShell 单行命令会安装所有内容，但请预期会遇到粗糙之处，并在遇到问题时提交问题。如果你更愿意使用 WSL2 (我们最经过实战检验的 Windows 路径)，Linux 命令在那里也有效。原生 Windows 安装位于 `%LOCALAPPDATA%\hermes` 下；WSL2 安装位于 `~/.hermes` 下，与 Linux 上相同。目前唯一需要 WSL2 的 Hermes 功能是基于浏览器的仪表板聊天窗格 (它使用 POSIX PTY —— 经典 CLI 和消息网关都可以原生运行)。
 
 安装后：
 
 ```bash
-source ~/.bashrc    # 重新加载 shell（或：source ~/.zshrc）
+source ~/.bashrc    # 重新加载 shell (或: source ~/.zshrc)
 hermes              # 开始聊天！
 ```
 
@@ -70,9 +70,9 @@ hermes              # 交互式 CLI —— 开始对话
 hermes model        # 选择你的 LLM 提供商和模型
 hermes tools        # 配置启用哪些工具
 hermes config set   # 设置单个配置值
-hermes gateway      # 启动消息网关（Telegram、Discord 等）
-hermes setup        # 运行完整设置向导（一次性配置所有内容）
-hermes claw migrate # 从 OpenClaw 迁移（如果来自 OpenClaw）
+hermes gateway      # 启动消息网关 (Telegram, Discord 等)
+hermes setup        # 运行完整设置向导 (一次性配置所有内容)
+hermes claw migrate # 从 OpenClaw 迁移 (如果来自 OpenClaw)
 hermes update       # 更新到最新版本
 hermes doctor       # 诊断任何问题
 ```
@@ -84,7 +84,7 @@ Hermes 有两个入口点：使用 `hermes` 启动终端用户界面，或者运
 
 | 操作 | CLI | 消息平台 |
 |---------|-----|---------------------|
-| 开始聊天 | `hermes` | 运行 `hermes gateway setup` + `hermes gateway start`，然后给机器人发送消息 |
+| 开始聊天 | `hermes` | 运行 `hermes gateway setup` + `hermes gateway start`，然后向机器人发送消息 |
 | 开始新会话 | `/new` 或 `/reset` | `/new` 或 `/reset` |
 | 切换模型 | `/model [provider:model]` | `/model [provider:model]` |
 | 设置人格 | `/personality [name]` | `/personality [name]` |
@@ -100,11 +100,11 @@ Hermes 有两个入口点：使用 `hermes` 启动终端用户界面，或者运
 
 ## 文档
 
-所有文档位于 **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**：
+所有文档都位于 **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**：
 
-| 章节 | 内容 |
+| 章节 | 内容涵盖 |
 |---------|---------------|
-| [快速开始](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart) | 安装 → 设置 → 2 分钟内开始第一次对话 |
+| [快速开始](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart) | 安装 → 设置 → 2 分钟内开始首次对话 |
 | [CLI 使用](https://hermes-agent.nousresearch.com/docs/user-guide/cli) | 命令、快捷键、人格、会话 |
 | [配置](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) | 配置文件、提供商、模型、所有选项 |
 | [消息网关](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) | Telegram、Discord、Slack、WhatsApp、Signal、Home Assistant |
@@ -141,9 +141,9 @@ hermes claw migrate --overwrite  # 覆盖现有冲突
 - **SOUL.md** — 人格文件
 - **记忆** — MEMORY.md 和 USER.md 条目
 - **技能** — 用户创建的技能 → `~/.hermes/skills/openclaw-imports/`
-- **命令白名单** — 审批模式
+- **命令允许列表** — 审批模式
 - **消息设置** — 平台配置、允许的用户、工作目录
-- **API 密钥** — 白名单中的密钥（Telegram、OpenRouter、OpenAI、Anthropic、ElevenLabs）
+- **API 密钥** — 允许列表中的密钥（Telegram、OpenRouter、OpenAI、Anthropic、ElevenLabs）
 - **TTS 资源** — 工作区音频文件
 - **工作区指令** — AGENTS.md（使用 `--workspace-target` 选项）
 
@@ -181,12 +181,12 @@ scripts/run_tests.sh
 - 💬 [Discord](https://discord.gg/NousResearch)
 - 📚 [技能中心](https://agentskills.io)
 - 🐛 [问题反馈](https://github.com/NousResearch/hermes-agent/issues)
+- 🔌 [computer-use-linux](https://github.com/avifenesh/computer-use-linux) — 适用于 Hermes 和其他 MCP 主机的 Linux 桌面控制 MCP 服务器，支持 AT-SPI 无障碍树、Wayland/X11 输入、屏幕截图和合成器窗口定位。
 - 🔌 [HermesClaw](https://github.com/AaronWong1999/hermesclaw) — 社区微信桥接：在同一微信账号上运行 Hermes Agent 和 OpenClaw。
-
 ---
 
 ## 许可证
 
-MIT — 参见 [LICENSE](LICENSE)。
+MIT — 详见 [LICENSE](LICENSE)。
 
 由 [Nous Research](https://nousresearch.com) 构建。

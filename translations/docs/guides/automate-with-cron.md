@@ -1,30 +1,31 @@
 ---
 sidebar_position: 11
 title: "使用 Cron 自动化一切"
-description: "使用 Hermes cron 的现实世界自动化模式 —— 监控、报告、流水线和多技能工作流"
+description: "使用 Hermes 定时任务实现真实世界的自动化模式——监控、报告、流水线和多技能工作流"
 ---
 
 # 使用 Cron 自动化一切
 
-[每日简报机器人教程](/docs/guides/daily-briefing-bot) 涵盖了基础知识。本指南更进一步 —— 介绍五种现实世界的自动化模式，你可以将其适配到自己的工作流中。
+[每日简报机器人教程](/docs/guides/daily-briefing-bot) 涵盖了基础知识。本指南更进一步——介绍五种你可以适应自己工作流的真实世界自动化模式。
 
 完整的功能参考，请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。
 
 :::info 关键概念
-Cron 任务在新的 Agent 会话中运行，没有你当前聊天的记忆。提示词必须是 **完全自包含的** —— 包含 Agent 需要知道的一切。
+定时任务在全新的 Agent 会话中运行，没有你当前聊天的记忆。提示词必须是**完全自包含的**——包含 Agent 需要知道的一切。
 :::
 
-:::tip 不需要 LLM？使用无 Agent 模式。
-对于脚本已经生成你想要发送的确切消息（内存警报、磁盘警报、CI 心跳、健康检查）的周期性监控任务，可以使用 [纯脚本 cron 任务](/docs/guides/cron-script-only) 完全跳过 LLM。零 Token 消耗，相同的调度器。你可以在聊天中让 Hermes 为你设置一个 —— `cronjob` 工具知道何时选择 `no_agent=True` 并为你编写脚本。
+:::tip 不需要 LLM？你有两种零 Token 的选项。
+- **重复执行的看门狗**，脚本已经生成确切的消息（内存警报、磁盘警报、心跳检测）：使用 [纯脚本定时任务](/docs/guides/cron-script-only)。相同的调度器，无需 LLM。你可以在聊天中让 Hermes 为你设置一个——`cronjob` 工具知道何时选择 `no_agent=True` 并为你编写脚本。
+- **从已在运行的脚本中一次性发送**（CI 步骤、提交后钩子、部署脚本、外部调度的监控器）：使用 [`hermes send`](/docs/guides/pipe-script-output) 将标准输出或文件直接传输到 Telegram / Discord / Slack / 等，而无需设置定时任务条目。
 :::
 
 ---
 
 ## 模式 1：网站变更监控
 
-监控 URL 的变更，仅在内容发生变化时收到通知。
+监控一个 URL 的变更，仅在内容不同时收到通知。
 
-这里的 `script` 参数是秘密武器。每次执行前都会运行一个 Python 脚本，其标准输出会成为 Agent 的上下文。脚本处理机械性工作（获取、对比）；Agent 处理推理（这个变更有趣吗？）。
+这里的 `script` 参数是秘密武器。一个 Python 脚本在每次执行前运行，其标准输出成为 Agent 的上下文。脚本处理机械性工作（获取、对比）；Agent 处理推理（这个变更有趣吗？）。
 
 创建监控脚本：
 
@@ -63,14 +64,14 @@ else:
     print("NO_CHANGE")
 ```
 
-设置 cron 任务：
+设置定时任务：
 
 ```bash
 /cron add "every 1h" "If the script output says CHANGE DETECTED, summarize what changed on the page and why it might matter. If it says NO_CHANGE, respond with just [SILENT]." --script ~/.hermes/scripts/watch-site.py --name "Pricing monitor" --deliver telegram
 ```
 
 :::tip [SILENT] 技巧
-当 Agent 的最终响应包含 `[SILENT]` 时，消息传递会被抑制。这意味着你只在实际发生事情时收到通知 —— 在安静时段没有垃圾信息。
+当 Agent 的最终响应包含 `[SILENT]` 时，消息传递会被抑制。这意味着你只在真正有事情发生时收到通知——在安静时段没有垃圾信息。
 :::
 
 ---
@@ -105,7 +106,7 @@ hermes cron create "0 9 * * 1" \
 
 ## 模式 3：GitHub 仓库监视器
 
-监控仓库的新 issue、PR 或发布。
+监控一个仓库的新 issue、PR 或发布。
 
 ```bash
 /cron add "every 6h" "Check the GitHub repository NousResearch/hermes-agent for:
@@ -122,7 +123,7 @@ Otherwise, provide a concise summary of the activity." --name "Repo watcher" --d
 ```
 
 :::warning 自包含的提示词
-注意提示词如何包含确切的 `gh` 命令。Cron Agent 没有之前运行的记忆或你的偏好 —— 请详细说明一切。
+注意提示词如何包含确切的 `gh` 命令。定时任务 Agent 没有之前运行的记忆或你的偏好——把所有内容都写清楚。
 :::
 
 ---
@@ -202,7 +203,7 @@ cronjob(
 )
 ```
 
-技能按顺序加载 —— 先是 `arxiv`（教 Agent 如何搜索论文），然后是 `obsidian`（教如何写笔记）。提示词将它们联系在一起。
+技能按顺序加载——首先是 `arxiv`（教 Agent 如何搜索论文），然后是 `obsidian`（教如何写笔记）。提示词将它们联系在一起。
 
 ---
 
@@ -212,13 +213,13 @@ cronjob(
 # 列出所有活跃任务
 /cron list
 
-# 立即触发任务（用于测试）
+# 立即触发一个任务（用于测试）
 /cron run <job_id>
 
 # 暂停任务而不删除它
 /cron pause <job_id>
 
-# 编辑运行中任务的计划或提示词
+# 编辑正在运行的任务的调度或提示词
 /cron edit <job_id> --schedule "every 4h"
 /cron edit <job_id> --prompt "Updated task description"
 
@@ -226,7 +227,7 @@ cronjob(
 /cron edit <job_id> --skill arxiv --skill obsidian
 /cron edit <job_id> --clear-skills
 
-# 永久移除任务
+# 永久移除一个任务
 /cron remove <job_id>
 ```
 
@@ -250,16 +251,16 @@ cronjob(
 
 ## 提示
 
-**使提示词自包含。** Cron 任务中的 Agent 没有你对话的记忆。直接在提示词中包含 URL、仓库名称、格式偏好和传递指令。
+**使提示词自包含。** 定时任务中的 Agent 没有你对话的记忆。直接在提示词中包含 URL、仓库名称、格式偏好和传递指令。
 
-**自由使用 `[SILENT]`。** 对于监控任务，始终包含类似“如果没有任何变化，用 `[SILENT]` 响应”的指令。这可以防止通知噪音。
+**自由使用 `[SILENT]`。** 对于监控任务，总是包含类似“如果没有变化，用 `[SILENT]` 响应”的指令。这可以防止通知噪音。
 
-**使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。Agent 只看到脚本的标准输出并对其应用推理。这比让 Agent 自己获取更便宜、更可靠。
+**使用脚本进行数据收集。** `script` 参数让 Python 脚本处理枯燥的部分（HTTP 请求、文件 I/O、状态跟踪）。Agent 只看到脚本的标准输出并对其应用推理。这比让 Agent 自己进行获取更便宜、更可靠。
 
-**使用 `/cron run` 进行测试。** 在等待计划触发之前，使用 `/cron run <job_id>` 立即执行并验证输出是否正确。
+**使用 `/cron run` 进行测试。** 在等待调度触发之前，使用 `/cron run <job_id>` 立即执行并验证输出是否正确。
 
-**计划表达式。** 支持的格式：相对延迟（`30m`）、间隔（`every 2h`）、标准 cron 表达式（`0 9 * * *`）和 ISO 时间戳（`2025-06-15T09:00:00`）。不支持自然语言如 `daily at 9am` —— 请改用 `0 9 * * *`。
+**调度表达式。** 支持的格式：相对延迟（`30m`）、间隔（`every 2h`）、标准 cron 表达式（`0 9 * * *`）和 ISO 时间戳（`2025-06-15T09:00:00`）。不支持自然语言如 `daily at 9am`——请改用 `0 9 * * *`。
 
 ---
 
-*完整的 cron 参考 —— 所有参数、边界情况和内部原理 —— 请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。*
+*完整的定时任务参考——所有参数、边界情况和内部原理——请参阅 [定时任务 (Cron)](/docs/user-guide/features/cron)。*

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 8
 title: "MCP 配置参考"
-description: "Hermes Agent MCP 配置键、过滤语义和实用工具策略的参考文档"
+description: "Hermes Agent MCP 配置键、过滤语义和实用工具策略的参考"
 ---
 
 # MCP 配置参考
@@ -28,6 +28,7 @@ mcp_servers:
     enabled: true
     timeout: 120
     connect_timeout: 60
+    supports_parallel_tool_calls: false
     tools:
       include: []
       exclude: []
@@ -37,7 +38,7 @@ mcp_servers:
 
 ## 服务器键
 
-| 键 | 类型 | 适用对象 | 含义 |
+| 键 | 类型 | 适用于 | 含义 |
 |---|---|---|---|
 | `command` | 字符串 | stdio | 要启动的可执行文件 |
 | `args` | 列表 | stdio | 子进程的参数 |
@@ -47,16 +48,17 @@ mcp_servers:
 | `enabled` | 布尔值 | 两者 | 为 false 时完全跳过该服务器 |
 | `timeout` | 数字 | 两者 | 工具调用超时时间 |
 | `connect_timeout` | 数字 | 两者 | 初始连接超时时间 |
+| `supports_parallel_tool_calls` | 布尔值 | 两者 | 允许此服务器的工具并发运行 |
 | `tools` | 映射 | 两者 | 过滤和实用工具策略 |
-| `auth` | 字符串 | HTTP | 身份验证方法。设置为 `oauth` 以启用带 PKCE 的 OAuth 2.1 |
-| `sampling` | 映射 | 两者 | 服务器发起的 LLM 请求策略（参见 MCP 指南） |
+| `auth` | 字符串 | HTTP | 认证方法。设置为 `oauth` 以启用带 PKCE 的 OAuth 2.1 |
+| `sampling` | 映射 | 两者 | 服务器发起的 LLM 请求策略（见 MCP 指南） |
 
 ## `tools` 策略键
 
 | 键 | 类型 | 含义 |
 |---|---|---|
-| `include` | 字符串或列表 | 服务器原生 MCP 工具的白名单 |
-| `exclude` | 字符串或列表 | 服务器原生 MCP 工具的黑名单 |
+| `include` | 字符串或列表 | 白名单服务器原生 MCP 工具 |
+| `exclude` | 字符串或列表 | 黑名单服务器原生 MCP 工具 |
 | `resources` | 类布尔值 | 启用/禁用 `list_resources` + `read_resource` |
 | `prompts` | 类布尔值 | 启用/禁用 `list_prompts` + `get_prompt` |
 
@@ -73,7 +75,7 @@ tools:
 
 ### `exclude`
 
-如果设置了 `exclude` 且未设置 `include`，则注册除指定名称外的所有服务器原生 MCP 工具。
+如果设置了 `exclude` 且未设置 `include`，则注册除这些名称外的所有服务器原生 MCP 工具。
 
 ```yaml
 tools:
@@ -120,11 +122,11 @@ tools:
   prompts: false
 ```
 
-### 基于能力的注册
+### 能力感知注册
 
-即使 `resources: true` 或 `prompts: true`，Hermes 也只在 MCP 会话实际暴露相应能力时才会注册那些实用工具。
+即使 `resources: true` 或 `prompts: true`，Hermes 也只在 MCP 会话实际暴露相应能力时才注册那些实用工具。
 
-因此以下情况是正常的：
+因此这是正常情况：
 - 你启用了提示词
 - 但没有出现提示词实用工具
 - 因为服务器不支持提示词
@@ -142,7 +144,7 @@ mcp_servers:
 - 不尝试连接
 - 不进行发现
 - 不注册工具
-- 配置保留以便后续重用
+- 配置保留以供后续重用
 
 ## 空结果行为
 
@@ -218,7 +220,7 @@ mcp_<server>_<tool>
 
 ### 名称清理
 
-服务器名称和工具名称中的连字符 (`-`) 和点号 (`.`) 在注册前会被替换为下划线。这确保了工具名称是 LLM 函数调用 API 的有效标识符。
+服务器名称和工具名称中的连字符 (`-`) 和点 (`.`) 在注册前会被替换为下划线。这确保了工具名称是 LLM 函数调用 API 的有效标识符。
 
 例如，一个名为 `my-api` 的服务器暴露一个名为 `list-items.v2` 的工具，会变为：
 
@@ -226,9 +228,9 @@ mcp_<server>_<tool>
 mcp_my_api_list_items_v2
 ```
 
-在编写 `include` / `exclude` 过滤器时请记住这一点——使用**原始的** MCP 工具名称（带连字符/点号），而不是清理后的版本。
+在编写 `include` / `exclude` 过滤器时请记住这一点——使用**原始**的 MCP 工具名称（带连字符/点），而不是清理后的版本。
 
-## OAuth 2.1 身份验证
+## OAuth 2.1 认证
 
 对于需要 OAuth 的 HTTP 服务器，在服务器条目上设置 `auth: oauth`：
 
@@ -241,7 +243,7 @@ mcp_servers:
 
 行为：
 - Hermes 使用 MCP SDK 的 OAuth 2.1 PKCE 流程（元数据发现、动态客户端注册、令牌交换和刷新）
-- 首次连接时，会打开一个浏览器窗口进行授权
-- 令牌持久化到 `~/.hermes/mcp-tokens/<server>.json` 并在会话间重用
+- 首次连接时，会打开浏览器窗口进行授权
+- 令牌持久化到 `~/.hermes/mcp-tokens/<server>.json`，并在会话间重用
 - 令牌刷新是自动的；仅当刷新失败时才需要重新授权
 - 仅适用于 HTTP/StreamableHTTP 传输（基于 `url` 的服务器）
