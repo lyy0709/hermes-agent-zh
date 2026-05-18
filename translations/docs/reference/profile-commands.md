@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # 配置文件命令参考
 
-此页面涵盖了所有与 [Hermes 配置文件](../user-guide/profiles.md) 相关的命令。有关通用 CLI 命令，请参阅 [CLI 命令参考](./cli-commands.md)。
+此页面涵盖了所有与 [Hermes 配置文件](../user-guide/profiles.md) 相关的命令。关于通用 CLI 命令，请参阅 [CLI 命令参考](./cli-commands.md)。
 
 ## `hermes profile`
 
@@ -12,7 +12,7 @@ sidebar_position: 7
 hermes profile <子命令>
 ```
 
-管理配置文件的总命令。不带子命令运行 `hermes profile` 会显示帮助信息。
+用于管理配置文件的总命令。不带子命令运行 `hermes profile` 会显示帮助信息。
 
 | 子命令 | 描述 |
 |------------|-------------|
@@ -23,11 +23,11 @@ hermes profile <子命令>
 | `show` | 显示配置文件的详细信息。 |
 | `alias` | 为配置文件重新生成 shell 别名。 |
 | `rename` | 重命名配置文件。 |
-| `export` | 将配置文件导出为 tar.gz 归档文件。 |
+| `export` | 将配置文件导出到 tar.gz 归档文件。 |
 | `import` | 从 tar.gz 归档文件导入配置文件。 |
-| `install` | 从 git URL 或本地目录安装配置文件分发版。参见 [配置文件分发版](../user-guide/profile-distributions.md)。 |
-| `update` | 重新拉取分发版管理的配置文件并重新应用其捆绑包。 |
-| `info` | 显示配置文件的分布元数据（源 URL、提交、最后更新时间）。 |
+| `install` | 从 git URL 或本地目录安装配置文件发行版。参见 [配置文件发行版](../user-guide/profile-distributions.md)。 |
+| `update` | 重新拉取由发行版管理的配置文件并重新应用其捆绑包。 |
+| `info` | 显示配置文件的发行版元数据（源 URL、提交、最后更新时间）。 |
 
 ## `hermes profile list`
 
@@ -35,7 +35,7 @@ hermes profile <子命令>
 hermes profile list
 ```
 
-列出所有配置文件。当前活动的配置文件用 `*` 标记。
+列出所有配置文件。当前活动配置文件用 `*` 标记。
 
 **示例：**
 
@@ -83,6 +83,7 @@ hermes profile create <名称> [选项]
 | `--clone-all` | 从当前配置文件复制所有内容（配置、记忆、技能、会话、状态）。 |
 | `--clone-from <配置文件>` | 从特定配置文件克隆，而不是当前配置文件。与 `--clone` 或 `--clone-all` 一起使用。 |
 | `--no-alias` | 跳过包装脚本的创建。 |
+| `--description "<文本>"` | 描述此配置文件擅长什么的一两句话。看板编排器使用此描述来基于角色而非仅凭配置文件名称来路由任务。可以跳过，稍后通过 `hermes profile describe` 添加。保存在 `<profile_dir>/profile.yaml` 中。 |
 
 创建配置文件**不会**使该配置文件目录成为终端命令的默认项目/工作空间目录。如果你希望配置文件在特定项目中启动，请在该配置文件的 `config.yaml` 中设置 `terminal.cwd`。
 
@@ -100,6 +101,40 @@ hermes profile create backup --clone-all
 
 # 从特定配置文件克隆配置
 hermes profile create work2 --clone --clone-from work
+```
+
+## `hermes profile describe`
+
+```bash
+hermes profile describe [<名称>] [选项]
+```
+
+读取或设置配置文件的描述。看板编排器使用此描述来基于每个配置文件擅长什么来路由任务，而不是仅凭配置文件名称猜测。保存在 `<profile_dir>/profile.yaml` 中，因此描述在重启后仍然存在，并与消息网关共享。
+
+不带标志时，打印当前描述（如果为空，则打印 `(no description set for '<名称>')`）。
+
+| 参数 / 选项 | 描述 |
+|-------------------|-------------|
+| `<名称>` | 要描述的配置文件。除非使用 `--all --auto`，否则为必需。 |
+| `--text "<文本>"` | 将描述设置为这个确切的文本（用户编写）。覆盖任何现有描述。 |
+| `--auto` | 基于配置文件已安装的技能、配置的模型和名称，通过辅助 LLM 自动生成 1-2 句描述。在 `config.yaml` 的 `auxiliary.profile_describer` 下配置模型。自动生成的描述标记为 `description_auto: true`，以便仪表板可以标记它们以供审查。 |
+| `--overwrite` | 与 `--auto` 一起使用时，也替换用户编写的描述（默认：跳过描述已明确设置的配置文件）。 |
+| `--all` | 与 `--auto` 一起使用时，扫描每个缺少描述的配置文件。 |
+
+**示例：**
+
+```bash
+# 读取当前描述
+hermes profile describe researcher
+
+# 明确设置描述
+hermes profile describe researcher --text "阅读源代码并撰写发现。"
+
+# 让 LLM 生成一个描述
+hermes profile describe researcher --auto
+
+# 为每个没有描述的配置文件填写描述
+hermes profile describe --all --auto
 ```
 
 ## `hermes profile delete`
@@ -123,7 +158,7 @@ hermes profile delete mybot --yes
 ```
 
 :::warning
-此操作将永久删除配置文件的整个目录，包括所有配置、记忆、会话和技能。无法删除当前活动的配置文件。
+这将永久删除配置文件的整个目录，包括所有配置、记忆、会话和技能。无法删除当前活动的配置文件。
 :::
 
 ## `hermes profile show`
@@ -134,7 +169,7 @@ hermes profile show <名称>
 
 显示配置文件的详细信息，包括其主目录、配置的模型、消息网关状态、技能数量和配置文件状态。
 
-这显示的是配置文件的 Hermes 主目录，而不是终端工作目录。终端命令从 `terminal.cwd`（或在本地后端启动时，从启动目录，当 `cwd: "."` 时）开始。
+这显示的是配置文件的 Hermes 主目录，而不是终端工作目录。终端命令从 `terminal.cwd`（或在本地后端上启动时，当 `cwd: "."` 时的启动目录）开始。
 
 | 参数 | 描述 |
 |----------|-------------|
@@ -153,20 +188,19 @@ $ hermes profile show work
 SOUL.md: 存在
 别名:   ~/.local/bin/work
 ```
-
 ## `hermes profile alias`
 
 ```bash
-hermes profile alias <名称> [选项]
+hermes profile alias <name> [options]
 ```
 
-在 `~/.local/bin/<名称>` 处重新生成 shell 别名脚本。如果别名被意外删除，或者在移动 Hermes 安装后需要更新它，此命令很有用。
+在 `~/.local/bin/<name>` 重新生成 shell 别名脚本。如果别名被意外删除，或者在移动 Hermes 安装位置后需要更新，这个命令很有用。
 
 | 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<名称>` | 要为其创建/更新别名的配置文件。 |
-| `--remove` | 移除包装脚本而不是创建它。 |
-| `--name <别名>` | 自定义别名名称（默认：配置文件名称）。 |
+| `<name>` | 要为其创建/更新别名的配置文件。 |
+| `--remove` | 删除包装脚本，而不是创建它。 |
+| `--name <alias>` | 自定义别名名称（默认值：配置文件名称）。 |
 
 **示例：**
 
@@ -178,21 +212,21 @@ hermes profile alias work --name mywork
 # 创建 ~/.local/bin/mywork
 
 hermes profile alias work --remove
-# 移除包装脚本
+# 删除包装脚本
 ```
 
 ## `hermes profile rename`
 
 ```bash
-hermes profile rename <旧名称> <新名称>
+hermes profile rename <old-name> <new-name>
 ```
 
 重命名配置文件。更新目录和 shell 别名。
 
 | 参数 | 描述 |
 |----------|-------------|
-| `<旧名称>` | 当前配置文件名称。 |
-| `<新名称>` | 新的配置文件名称。 |
+| `<old-name>` | 当前配置文件名称。 |
+| `<new-name>` | 新的配置文件名称。 |
 
 **示例：**
 
@@ -205,15 +239,15 @@ hermes profile rename mybot assistant
 ## `hermes profile export`
 
 ```bash
-hermes profile export <名称> [选项]
+hermes profile export <name> [options]
 ```
 
 将配置文件导出为压缩的 tar.gz 归档文件。
 
 | 参数 / 选项 | 描述 |
 |-------------------|-------------|
-| `<名称>` | 要导出的配置文件。 |
-| `-o`, `--output <路径>` | 输出文件路径（默认：`<名称>.tar.gz`）。 |
+| `<name>` | 要导出的配置文件。 |
+| `-o`, `--output <path>` | 输出文件路径（默认值：`<name>.tar.gz`）。 |
 
 **示例：**
 
@@ -227,14 +261,15 @@ hermes profile export work -o ./work-2026-03-29.tar.gz
 ## `hermes profile import`
 
 ```bash
-hermes profile import <归档文件> [选项]
+hermes profile import <archive> [options]
 ```
 
 从 tar.gz 归档文件导入配置文件。
+
 | 参数 / 选项 | 描述 |
 |-------------------|-------------|
 | `<archive>` | 要导入的 tar.gz 归档文件的路径。 |
-| `--name <name>` | 导入后配置文件的名称（默认：从归档文件推断）。 |
+| `--name <name>` | 导入的配置文件的名称（默认值：从归档文件推断）。 |
 
 **示例：**
 
@@ -248,14 +283,14 @@ hermes profile import ./work-2026-03-29.tar.gz --name work-restored
 ## 分发命令
 
 :::tip
-**初次接触分发？** 请从 [配置文件分发用户指南](../user-guide/profile-distributions.md) 开始 —— 它通过完整示例涵盖了原因、时机和方法。以下部分是当你明确需求时的简明 CLI 参考。
+**初次接触分发？** 请从 [配置文件分发用户指南](../user-guide/profile-distributions.md) 开始 —— 它涵盖了原因、时机和方法，并提供了完整的示例。以下部分是当你明确需求时，一份简洁的 CLI 参考。
 :::
 
-分发将配置文件转换为可共享、版本化的工件，并以 **git 仓库** 的形式发布。接收者通过单个命令即可安装分发，并且以后可以在不触及本地记忆、会话或凭据的情况下就地更新。
+分发将配置文件转换为可共享、版本化的工件，并作为 **git 仓库** 发布。接收者只需一条命令即可安装分发，并且以后可以在不触及本地记忆、会话或凭据的情况下就地更新。
 
 `auth.json` 和 `.env` 从不属于分发的一部分 —— 它们保留在安装用户的机器上。
 
-接收者的用户数据（记忆、会话、认证信息、对 `.env` 的自有编辑）在初始安装和后续更新中始终会被保留。
+接收者的用户数据（记忆、会话、身份验证、他们对 `.env` 的编辑）在初始安装和后续更新中始终会被保留。
 
 :::info
 `hermes profile export` / `import` 仍然是用于 **本地备份和恢复** 你自己机器上配置文件的正确命令。分发（`install` / `update` / `info`）是一个独立的概念：通过 git 交付配置文件，以便他人可以安装它。
@@ -273,11 +308,11 @@ hermes profile install <source> [--name <name>] [--alias] [--force] [--yes]
 |--------|-------------|
 | `<source>` | Git URL (`github.com/user/repo`, `https://...`, `git@...`, `ssh://`, `git://`) 或包含根目录下 `distribution.yaml` 的本地目录。 |
 | `--name NAME` | 覆盖清单中的配置文件名称。 |
-| `--alias` | 同时创建一个 shell 包装器（例如 `telemetry` → `hermes -p telemetry`）。 |
+| `--alias` | 同时创建 shell 包装器（例如 `telemetry` → `hermes -p telemetry`）。 |
 | `--force` | 覆盖同名的现有配置文件。用户数据仍会被保留。 |
 | `-y`, `--yes` | 跳过清单预览确认提示。 |
 
-安装程序会显示清单，列出所需的环境变量，并在请求确认前警告定时任务。所需的环境变量会放入一个 `.env.EXAMPLE` 文件，你需要将其复制为 `.env` 并填写。
+安装程序会显示清单，列出所需的环境变量，并在请求确认前警告有关定时任务的信息。所需的环境变量会放入一个 `.env.EXAMPLE` 文件中，你需要将其复制为 `.env` 并填写。
 
 **示例：**
 
@@ -301,9 +336,9 @@ hermes profile install ./telemetry/
 hermes profile update <name> [--force-config] [--yes]
 ```
 
-从其记录的源重新克隆分发并应用更新。分发拥有的文件（SOUL.md, skills/, cron/, mcp.json）会被覆盖；用户数据（记忆、会话、认证信息、.env）永远不会被触及。
+从其记录的源重新克隆分发并应用更新。分发拥有的文件（SOUL.md, skills/, cron/, mcp.json）会被覆盖；用户数据（记忆、会话、身份验证、.env）永远不会被触及。
 
-默认情况下会保留 `config.yaml` 以维持你的本地覆盖。传递 `--force-config` 以将其重置为分发附带的配置。
+默认情况下会保留 `config.yaml` 以保持你的本地覆盖。传递 `--force-config` 以将其重置为分发附带的配置。
 
 ### `hermes profile info`
 
@@ -311,32 +346,31 @@ hermes profile update <name> [--force-config] [--yes]
 hermes profile info <name>
 ```
 
-打印配置文件的分布清单 —— 名称、版本、所需 Hermes 版本、作者、环境变量要求、源 URL/路径，以及上次 `install` 或 `update` 时记录的 `Installed:` 时间戳。在安装共享配置文件前检查其需求，以及发现“此配置文件是 6 个月前安装的且未更新过”时很有用。
+打印配置文件的分布清单 —— 名称、版本、所需的 Hermes 版本、作者、环境变量要求、源 URL/路径，以及上次 `install` 或 `update` 分发时记录的 `Installed:` 时间戳。在安装共享配置文件之前检查其需求，以及发现“此配置文件是 6 个月前安装的且尚未更新”时很有用。
 
-`hermes profile list` 也会在 `Distribution` 列中显示分发名称和版本，并且 `hermes profile show <name>` / `delete <name>` 会显示源 URL，以便你一眼就能看出哪些配置文件来自 git 仓库，哪些是本地创建的。
+`hermes profile list` 也会在 `Distribution` 列中显示分发名称和版本，而 `hermes profile show <name>` / `delete <name>` 会显示源 URL，以便你一眼就能看出哪些配置文件来自 git 仓库，哪些是本地创建的。
 
 ### 私有分发
 
-私有 git 仓库无需额外配置即可作为分发源 —— 安装过程会调用你正常的 `git` 二进制文件，因此你的 shell 已设置的任何认证（SSH 密钥、`git credential` 助手、GitHub CLI 存储的 HTTPS 凭据）都会透明地应用。
-
+私有 git 仓库无需额外配置即可作为分发源 —— 安装程序会调用你正常的 `git` 二进制文件，因此你的 shell 已设置的任何身份验证（SSH 密钥、`git credential` 助手、GitHub CLI 存储的 HTTPS 凭据）都会透明地应用。
 ```bash
-# 使用你的 SSH 密钥，与任何其他 `git clone` 相同
+# 使用你的 SSH 密钥，与任何其他 `git clone` 命令相同
 hermes profile install git@github.com:your-org/internal-assistant.git
 
 # 使用你的 git 凭据助手
 hermes profile install https://github.com/your-org/internal-assistant.git
 ```
 
-如果在安装过程中克隆操作在你的终端中交互式地提示输入凭据，该提示会正常显示。请先按照你通常对同一仓库使用 `git clone` 的方式设置认证，然后再安装。
+如果在安装过程中，克隆操作在终端中交互式地提示输入凭据，该提示会正常显示。请先按照你通常对同一仓库使用 `git clone` 的方式设置好认证，然后再进行安装。
 
 ### 分发清单 (`distribution.yaml`)
 
-每个分发在其仓库的根目录下都有一个 `distribution.yaml`：
+每个分发在其仓库根目录下都有一个 `distribution.yaml` 文件：
 
 ```yaml
 name: telemetry
 version: 0.1.0
-description: "合规监控工具"
+description: "合规性监控工具"
 hermes_requires: ">=0.12.0"
 author: "Your Name"
 license: "MIT"
@@ -355,18 +389,19 @@ distribution_owned:   # 可选；默认为 SOUL.md, config.yaml,
   - cron/
 ```
 
-`hermes_requires` 支持 `>=`, `<=`, `==`, `!=`, `>`, `<`，或一个裸版本号（视为 `>=`）。如果当前 Hermes 版本不满足规范，安装将失败并显示清晰的错误信息。
+`hermes_requires` 支持 `>=`、`<=`、`==`、`!=`、`>`、`<`，或一个裸版本号（视为 `>=`）。如果当前 Hermes 版本不满足规范，安装将失败并显示清晰的错误信息。
 
-`distribution_owned` 是可选的。如果设置，则更新时仅替换这些路径；配置文件中的其他任何内容都保持为用户所有。如果省略，则应用上述默认值。
+`distribution_owned` 是可选的。如果设置了，则更新时仅替换这些路径；配置文件中其他任何内容都保持为用户所有。如果省略，则应用上述默认值。
 
-### 发布分发
+### 发布一个分发
 
-创作分发只需一个 git push：
+创作一个分发只需进行 git push：
 
-1.  在你的配置文件目录中，创建至少包含 `name` 和 `version` 的 `distribution.yaml`。
-2.  初始化一个 git 仓库（或使用现有仓库）并推送到 GitHub / GitLab / Hermes 可以克隆的任何主机。
-3.  告诉接收者运行 `hermes profile install <your-repo-url>`。
-使用 git 标签进行版本化发布 —— 克隆 `HEAD` 的接收者会获得你的最新状态，并且你始终可以更新清单中的 `version:`。
+1.  在你的配置文件目录中，创建 `distribution.yaml`，至少包含 `name` 和 `version`。
+2.  初始化一个 git 仓库（或使用现有仓库）并推送到 GitHub / GitLab / 任何 Hermes 可以克隆的主机。
+3.  告知接收者运行 `hermes profile install <your-repo-url>`。
+
+使用 git 标签进行版本化发布 —— 克隆 `HEAD` 的接收者将获得你的最新状态，并且你始终可以在清单中更新 `version:`。
 
 ## `hermes -p` / `hermes --profile`
 
@@ -375,7 +410,7 @@ hermes -p <name> <command> [options]
 hermes --profile <name> <command> [options]
 ```
 
-全局标志，用于在特定配置文件中运行任何 Hermes 命令，而无需更改粘性默认值。这会在命令执行期间覆盖活动配置文件。
+全局标志，用于在特定配置文件下运行任何 Hermes 命令，而无需更改粘性默认值。此标志会在命令执行期间覆盖活动配置文件。
 
 | 选项 | 描述 |
 |--------|-------------|
@@ -384,7 +419,7 @@ hermes --profile <name> <command> [options]
 **示例：**
 
 ```bash
-hermes -p work chat -q "Check the server status"
+hermes -p work chat -q "检查服务器状态"
 hermes --profile dev gateway start
 hermes -p personal skills list
 hermes -p work config edit
@@ -405,7 +440,7 @@ hermes completion <shell>
 **示例：**
 
 ```bash
-# 安装补全
+# 安装补全脚本
 hermes completion bash >> ~/.bashrc
 hermes completion zsh >> ~/.zshrc
 hermes completion fish > ~/.config/fish/completions/hermes.fish
@@ -414,7 +449,7 @@ hermes completion fish > ~/.config/fish/completions/hermes.fish
 source ~/.bashrc
 ```
 
-安装后，Tab 补全适用于：
+安装后，Tab 键补全适用于：
 - `hermes profile <TAB>` — 子命令（list, use, create 等）
 - `hermes profile use <TAB>` — 配置文件名称
 - `hermes -p <TAB>` — 配置文件名称

@@ -10,7 +10,7 @@ sidebar_position: 2
 
 配置文件是一个独立的 Hermes 主目录。每个配置文件都有自己的目录，其中包含自己的 `config.yaml`、`.env`、`SOUL.md`、记忆、会话、技能、定时任务和状态数据库。配置文件允许您为不同目的运行独立的 Agent —— 例如代码助手、个人机器人、研究 Agent —— 而不会混淆 Hermes 的状态。
 
-当您创建一个配置文件时，它会自动成为一个独立的命令。创建一个名为 `coder` 的配置文件，您会立即拥有 `coder chat`、`coder setup`、`coder gateway start` 等命令。
+当您创建一个配置文件时，它会自动成为自己的命令。创建一个名为 `coder` 的配置文件，您立即就拥有了 `coder chat`、`coder setup`、`coder gateway start` 等命令。
 
 ## 快速开始
 
@@ -20,7 +20,7 @@ coder setup                       # 配置 API 密钥和模型
 coder chat                        # 开始聊天
 ```
 
-就是这样。`coder` 现在是一个拥有自己配置、记忆和状态的 Hermes 配置文件。
+就是这样。`coder` 现在是一个独立的 Hermes 配置文件，拥有自己的配置、记忆和状态。
 
 ## 创建配置文件
 
@@ -32,13 +32,21 @@ hermes profile create mybot
 
 创建一个全新的配置文件，并预置了捆绑的技能。运行 `mybot setup` 来配置 API 密钥、模型和消息网关令牌。
 
+如果您计划将此配置文件用作看板工作器（或希望看板编排器将工作路由给它），请在创建时传递 `--description "<role>"`，以便编排器了解其擅长之处：
+
+```bash
+hermes profile create researcher --description "读取源代码和外部文档，撰写发现报告。"
+```
+
+您也可以稍后使用 `hermes profile describe` 设置或自动生成描述 —— 完整的路由模型请参阅[看板指南](./features/kanban#auto-vs-manual-orchestration)。
+
 ### 仅克隆配置 (`--clone`)
 
 ```bash
 hermes profile create work --clone
 ```
 
-将当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新配置文件中。使用相同的 API 密钥和模型，但会话和记忆是全新的。编辑 `~/.hermes/profiles/work/.env` 以使用不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以赋予不同的灵魂（人格）。
+将当前配置文件的 `config.yaml`、`.env` 和 `SOUL.md` 复制到新配置文件中。使用相同的 API 密钥和模型，但会话和记忆是全新的。编辑 `~/.hermes/profiles/work/.env` 以使用不同的 API 密钥，或编辑 `~/.hermes/profiles/work/SOUL.md` 以设置不同的人格。
 
 ### 克隆所有内容 (`--clone-all`)
 
@@ -46,7 +54,7 @@ hermes profile create work --clone
 hermes profile create backup --clone-all
 ```
 
-复制**所有内容** —— 配置、API 密钥、灵魂（人格）、所有记忆、完整的会话历史、技能、定时任务、插件。一个完整的快照。适用于备份或分叉一个已经拥有上下文的 Agent。
+复制**所有内容** —— 配置、API 密钥、人格、所有记忆、完整的会话历史、技能、定时任务、插件。一个完整的快照。适用于备份或分叉一个已有上下文的 Agent。
 
 ### 从特定配置文件克隆
 
@@ -55,14 +63,14 @@ hermes profile create work --clone --clone-from coder
 ```
 
 :::tip Honcho 记忆 + 配置文件
-启用 Honcho 后，`--clone` 会自动为新配置文件创建一个专用的 AI 对等体，同时共享相同的用户工作空间。每个配置文件都会构建自己的观察和身份。详情请参阅 [Honcho -- 多 Agent / 配置文件](./features/memory-providers.md#honcho)。
+启用 Honcho 后，`--clone` 会自动为新配置文件创建一个专用的 AI 对等体，同时共享相同的用户工作空间。每个配置文件构建自己的观察和身份。详情请参阅 [Honcho -- 多 Agent / 配置文件](./features/memory-providers.md#honcho)。
 :::
 
 ## 使用配置文件
 
 ### 命令别名
 
-每个配置文件都会自动在 `~/.local/bin/<name>` 处获得一个命令别名：
+每个配置文件都会在 `~/.local/bin/<name>` 处自动获得一个命令别名：
 
 ```bash
 coder chat                    # 与 coder Agent 聊天
@@ -73,7 +81,7 @@ coder skills list             # 列出 coder 的技能
 coder config set model.default anthropic/claude-sonnet-4
 ```
 
-该别名适用于所有 hermes 子命令 —— 它本质上就是 `hermes -p <name>`。
+该别名适用于所有 hermes 子命令 —— 底层实现就是 `hermes -p <name>`。
 
 ### `-p` 标志
 
@@ -96,9 +104,9 @@ hermes profile use default    # 切换回默认
 
 设置一个默认值，这样普通的 `hermes` 命令就会以该配置文件为目标。类似于 `kubectl config use-context`。
 
-### 了解当前所在位置
+### 了解当前位置
 
-CLI 始终显示哪个配置文件是活动的：
+CLI 始终显示哪个配置文件处于活动状态：
 
 - **提示符**：显示 `coder ❯` 而不是 `❯`
 - **横幅**：启动时显示 `Profile: coder`
@@ -108,9 +116,9 @@ CLI 始终显示哪个配置文件是活动的：
 
 配置文件经常与工作空间或沙盒混淆，但它们是不同的概念：
 
-- **配置文件** 为 Hermes 提供其自己的状态目录：`config.yaml`、`.env`、`SOUL.md`、会话、记忆、日志、定时任务和消息网关状态。
-- **工作空间** 或**工作目录**是终端命令开始执行的地方。这由 `terminal.cwd` 单独控制。
-- **沙盒**是限制文件系统访问的机制。配置文件**不会**对 Agent 进行沙盒化。
+- **配置文件**为 Hermes 提供其自己的状态目录：`config.yaml`、`.env`、`SOUL.md`、会话、记忆、日志、定时任务和消息网关状态。
+- **工作空间**或**工作目录**是终端命令开始执行的地方。这由 `terminal.cwd` 单独控制。
+- **沙盒**是限制文件系统访问的机制。配置文件**不**对 Agent 进行沙盒化。
 
 在默认的 `local` 终端后端上，Agent 仍然拥有与您的用户帐户相同的文件系统访问权限。配置文件不会阻止它访问配置文件目录之外的文件夹。
 
@@ -122,7 +130,7 @@ terminal:
   cwd: /absolute/path/to/project
 ```
 
-在本地后端上使用 `cwd: "."` 意味着“启动 Hermes 的目录”，而不是“配置文件目录”。
+在本地后端上使用 `cwd: "."` 意味着“Hermes 启动时的目录”，而不是“配置文件目录”。
 
 另请注意：
 
@@ -170,11 +178,11 @@ assistant gateway install     # 创建 hermes-gateway-assistant 服务
 
 - **`config.yaml`** —— 模型、提供商、工具集、所有设置
 - **`.env`** —— API 密钥、机器人令牌
-- **`SOUL.md`** —— 灵魂（人格）和指令
+- **`SOUL.md`** —— 人格和指令
 
 ```bash
 coder config set model.default anthropic/claude-sonnet-4
-echo "You are a focused coding assistant." > ~/.hermes/profiles/coder/SOUL.md
+echo "你是一个专注的编码助手。" > ~/.hermes/profiles/coder/SOUL.md
 ```
 
 如果您希望此配置文件默认在特定项目中工作，也请设置其自己的 `terminal.cwd`：
@@ -189,8 +197,8 @@ coder config set terminal.cwd /absolute/path/to/project
 
 ```bash
 hermes update
-# → 代码已更新 (12 commits)
-# → 技能已同步：default (已是最新), coder (+2 个新技能), assistant (+2 个新技能)
+# → 代码已更新（12 次提交）
+# → 技能已同步：default（最新），coder（+2 个新技能），assistant（+2 个新技能）
 ```
 
 用户修改过的技能永远不会被覆盖。
@@ -219,7 +227,7 @@ hermes profile delete coder
 您不能删除默认配置文件 (`~/.hermes`)。要删除所有内容，请使用 `hermes uninstall`。
 :::
 
-## 标签补全
+## Tab 补全
 
 ```bash
 # Bash
@@ -233,15 +241,15 @@ eval "$(hermes completion zsh)"
 
 ## 工作原理
 
-配置文件使用 `HERMES_HOME` 环境变量。当您运行 `coder chat` 时，包装脚本会在启动 hermes 之前设置 `HERMES_HOME=~/.hermes/profiles/coder`。由于代码库中有 119+ 个文件通过 `get_hermes_home()` 解析路径，Hermes 状态会自动限定在配置文件的目录范围内 —— 配置、会话、记忆、技能、状态数据库、消息网关 PID、日志和定时任务。
+配置文件使用 `HERMES_HOME` 环境变量。当您运行 `coder chat` 时，包装脚本会在启动 hermes 之前设置 `HERMES_HOME=~/.hermes/profiles/coder`。由于代码库中有 119+ 个文件通过 `get_hermes_home()` 解析路径，Hermes 状态会自动限定在配置文件的目录内 —— 包括配置、会话、记忆、技能、状态数据库、消息网关 PID、日志和定时任务。
 
-这与终端工作目录是分开的。工具执行从 `terminal.cwd` 开始（或者在本地后端上使用 `cwd: "."` 时，从启动目录开始），而不是自动从 `HERMES_HOME` 开始。
+这与终端工作目录是分开的。工具执行从 `terminal.cwd` 开始（或者在本地后端上使用 `cwd: "."` 时从启动目录开始），而不是自动从 `HERMES_HOME` 开始。
 
 默认配置文件就是 `~/.hermes` 本身。无需迁移 —— 现有安装的工作方式完全相同。
 
 ## 将配置文件作为发行版共享
 
-您在一台机器上构建的配置文件可以打包成一个 **git 仓库**，并通过一个命令安装在另一台机器上 —— 无论是您自己的工作站、队友的笔记本电脑还是社区用户的环境。共享包包括 SOUL、配置、技能、定时任务和 MCP 连接。凭据、记忆和会话则保留在每台机器上。
+您在一台机器上构建的配置文件可以打包为一个 **git 仓库**，并通过一条命令安装在另一台机器上 —— 无论是您自己的工作站、队友的笔记本电脑还是社区用户的环境。共享的包包括 SOUL、配置、技能、定时任务和 MCP 连接。凭据、记忆和会话则保留在每台机器上。
 
 ```bash
 # 从 git 仓库安装整个 Agent
@@ -251,4 +259,4 @@ hermes profile install github.com/you/research-bot --alias
 hermes profile update research-bot
 ```
 
-请参阅 **[配置文件发行版：共享整个 Agent](./profile-distributions.md)** 获取完整指南 —— 包括创作、发布、更新语义、安全模型和用例。
+完整的指南请参阅 **[配置文件发行版：共享整个 Agent](./profile-distributions.md)** —— 包括创作、发布、更新语义、安全模型和用例。
