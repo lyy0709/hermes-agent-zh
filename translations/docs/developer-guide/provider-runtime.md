@@ -21,11 +21,11 @@ Hermes 有一个共享的 provider 运行时解析器，用于：
 - `hermes_cli/model_switch.py` — 共享的 `/model` 切换流水线 (CLI + 消息网关)
 - `agent/auxiliary_client.py` — 辅助模型路由
 - `providers/` — ABC + 注册表入口点 (`ProviderProfile`, `register_provider`, `get_provider_profile`, `list_providers`)
-- `plugins/model-providers/<name>/` — 每个 provider 的插件（捆绑），声明 `api_mode`、`base_url`、`env_vars`、`fallback_models`，并在首次访问时将自己注册到注册表中。用户插件位于 `$HERMES_HOME/plugins/model-providers/<name>/`，会覆盖同名的捆绑插件。
+- `plugins/model-providers/<name>/` — 每个 provider 的插件（捆绑），声明 `api_mode`、`base_url`、`env_vars`、`fallback_models`，并在首次访问时将自己注册到注册表中。位于 `$HERMES_HOME/plugins/model-providers/<name>/` 的用户插件会覆盖同名的捆绑插件。
 
 `providers/` 中的 `get_provider_profile()` 返回给定 provider id 的 `ProviderProfile`。`runtime_provider.py` 在解析时调用此函数以获取规范的 `base_url`、`env_vars` 优先级列表、`api_mode` 和 `fallback_models`，而无需在多个文件中复制这些数据。在 `plugins/model-providers/<your-provider>/`（或 `$HERMES_HOME/plugins/model-providers/<your-provider>/`）下添加一个调用 `register_provider()` 的新插件，就足以让 `runtime_provider.py` 识别它——解析器本身不需要分支。
 
-如果你正在尝试添加一个新的第一方推理提供商，请阅读 [添加提供商](./adding-providers.md) 和 [模型提供商插件指南](./model-provider-plugin.md) 以及本页。
+如果你试图添加一个新的第一方推理提供商，请阅读[添加提供商](./adding-providers.md)和[模型提供商插件指南](./model-provider-plugin.md)以及本页。
 
 ## 解析优先级
 
@@ -99,7 +99,7 @@ Hermes 有一个共享的 provider 运行时解析器，用于：
 
 ## OpenRouter、AI Gateway 和自定义的 OpenAI 兼容 base URL
 
-Hermes 包含逻辑，以避免在存在多个 provider 密钥（例如 `OPENROUTER_API_KEY`、`AI_GATEWAY_API_KEY` 和 `OPENAI_API_KEY`）时，将错误的 API 密钥泄漏给自定义端点。
+Hermes 包含逻辑，以避免在存在多个 provider 密钥（例如 `OPENROUTER_API_KEY`、`AI_GATEWAY_API_KEY` 和 `OPENAI_API_KEY`）时，将错误的 API 密钥泄露给自定义端点。
 
 每个 provider 的 API 密钥都限定在其自己的 base URL：
 
@@ -109,15 +109,15 @@ Hermes 包含逻辑，以避免在存在多个 provider 密钥（例如 `OPENROU
 
 Hermes 还区分：
 
--   用户选择的真实自定义端点
--   未配置自定义端点时使用的 OpenRouter 后备路径
+- 用户选择的真实自定义端点
+- 未配置自定义端点时使用的 OpenRouter 后备路径
 
 这种区分对于以下情况尤其重要：
 
--   本地模型服务器
--   非 OpenRouter/非 AI Gateway 的 OpenAI 兼容 API
--   无需重新运行设置即可切换 provider
--   即使当前 shell 中未导出 `OPENAI_BASE_URL`，配置保存的自定义端点也应继续工作
+- 本地模型服务器
+- 非 OpenRouter/非 AI Gateway 的 OpenAI 兼容 API
+- 无需重新运行设置即可切换 provider
+- 通过配置保存的自定义端点，即使当前 shell 中未导出 `OPENAI_BASE_URL`，也应继续工作
 
 ## 原生 Anthropic 路径
 
@@ -127,14 +127,14 @@ Anthropic 不再仅仅是“通过 OpenRouter”。
 
 - `api_mode = anthropic_messages`
 - 原生的 Anthropic Messages API
-- `agent/anthropic_adapter.py` 进行转换
+- `agent/anthropic_adapter.py` 进行翻译
 
 原生 Anthropic 的凭证解析现在优先选择可刷新的 Claude Code 凭证，而不是复制的环境变量令牌（当两者都存在时）。实际上这意味着：
 
 - 当 Claude Code 凭证文件包含可刷新的认证信息时，它们被视为首选来源
 - 手动的 `ANTHROPIC_TOKEN` / `CLAUDE_CODE_OAUTH_TOKEN` 值仍然可以作为显式覆盖使用
-- Hermes 在调用原生 Messages API 之前会预检 Anthropic 凭证刷新
-- Hermes 在重建 Anthropic 客户端后，仍然会在 401 错误时重试一次，作为后备路径
+- Hermes 在原生 Messages API 调用之前预检 Anthropic 凭证刷新
+- Hermes 在重建 Anthropic 客户端后，仍会在 401 错误时重试一次，作为后备路径
 
 ## OpenAI Codex 路径
 
@@ -150,7 +150,6 @@ Codex 使用单独的 Responses API 路径：
 - 视觉
 - 网页提取摘要
 - 上下文压缩摘要
-- 会话搜索摘要
 - 技能中心操作
 - MCP 助手操作
 - 记忆刷新
@@ -171,7 +170,7 @@ Hermes 支持配置的后备 provider 链——当主模型遇到错误时，按
 
 1.  **存储**：`AIAgent.__init__` 存储 `fallback_model` 字典并设置 `_fallback_activated = False`。
 
-2.  **触发点**：`_try_activate_fallback()` 在 `run_agent.py` 主重试循环中的三个位置被调用：
+2.  **触发点**：在 `run_agent.py` 的主重试循环中，从三个地方调用 `_try_activate_fallback()`：
     - 在无效 API 响应（无选择、缺少内容）达到最大重试次数后
     - 在不可重试的客户端错误（HTTP 401、403、404）时
     - 在瞬时错误（HTTP 429、500、502、503）达到最大重试次数后
@@ -196,7 +195,7 @@ Hermes 支持配置的后备 provider 链——当主模型遇到错误时，按
 -   **子 Agent 委派** (`tools/delegate_tool.py`)：子 Agent 继承父级的 provider，但不继承后备配置
 -   **辅助任务**：使用它们自己独立的 provider 自动检测链（参见上面的辅助模型路由）
 
-定时任务**确实**支持后备：`run_job()` 从 `config.yaml` 读取 `fallback_providers`（或旧的 `fallback_model`）并将其传递给 `AIAgent(fallback_model=...)`，与消息网关的 `_load_fallback_model()` 模式匹配。参见 [定时任务内部机制](./cron-internals.md)。
+定时任务**确实**支持后备：`run_job()` 从 `config.yaml` 读取 `fallback_providers`（或旧的 `fallback_model`）并将其传递给 `AIAgent(fallback_model=...)`，与消息网关的 `_load_fallback_model()` 模式匹配。参见[定时任务内部原理](./cron-internals.md)。
 
 ### 测试覆盖
 
@@ -204,6 +203,6 @@ Hermes 支持配置的后备 provider 链——当主模型遇到错误时，按
 
 ## 相关文档
 
-- [Agent 循环内部机制](./agent-loop.md)
-- [ACP 内部机制](./acp-internals.md)
-- [上下文压缩与提示词缓存](./context-compression-and-caching.md)
+-   [Agent 循环内部原理](./agent-loop.md)
+-   [ACP 内部原理](./acp-internals.md)
+-   [上下文压缩与提示词缓存](./context-compression-and-caching.md)
