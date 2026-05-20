@@ -1,12 +1,12 @@
 ---
 sidebar_position: 7
 title: "子 Agent 委派"
-description: "使用 delegate_task 生成具有独立上下文、受限工具集和独立终端会话的子 AIAgent 实例，用于并行工作流"
+description: "使用 delegate_task 生成具有独立上下文、受限工具集和独立终端会话的子 AIAgent 实例，实现并行工作流"
 ---
 
 # 子 Agent 委派
 
-`delegate_task` 工具会生成具有独立上下文、受限工具集和独立终端会话的子 AIAgent 实例。每个子 Agent 都拥有全新的对话并独立工作——只有其最终摘要会进入父 Agent 的上下文。
+`delegate_task` 工具会生成子 AIAgent 实例，这些实例拥有独立的上下文、受限的工具集以及它们自己的终端会话。每个子 Agent 都从一个全新的对话开始并独立工作——只有其最终摘要会进入父 Agent 的上下文。
 
 ## 单一任务
 
@@ -53,7 +53,7 @@ delegate_task(
 )
 ```
 
-子 Agent 会收到一个根据你的目标和上下文构建的、聚焦的系统提示词，指示其完成任务并提供结构化摘要，内容包括：它做了什么、发现了什么、修改了哪些文件以及遇到了哪些问题。
+子 Agent 会收到一个根据你的目标和上下文构建的、聚焦的系统提示词，指示它完成任务，并提供关于它做了什么、发现了什么、修改了哪些文件以及遇到了哪些问题的结构化摘要。
 
 ## 实际示例
 
@@ -123,11 +123,11 @@ delegate_task(
 
 - **最大并发数：** 默认 3 个任务（可通过 `delegation.max_concurrent_children` 或 `DELEGATION_MAX_CONCURRENT_CHILDREN` 环境变量配置；下限为 1，无硬性上限）。超过限制的批次会返回工具错误，而不是被静默截断。
 - **线程池：** 使用 `ThreadPoolExecutor`，配置的并发限制作为最大工作线程数
-- **进度显示：** 在 CLI 模式下，树状视图实时显示每个子 Agent 的工具调用，并带有每项任务的完成行。在消息网关模式下，进度会分批处理并中继到父 Agent 的进度回调
+- **进度显示：** 在 CLI 模式下，树状视图实时显示每个子 Agent 的工具调用，并带有每项任务的完成行。在消息网关模式下，进度会分批处理并中继到父 Agent 的进度回调函数
 - **结果排序：** 无论完成顺序如何，结果都按任务索引排序以匹配输入顺序
 - **中断传播：** 中断父 Agent（例如，发送新消息）会中断所有活动的子 Agent
 
-单任务委派直接运行，没有线程池开销。
+单一任务委派直接运行，没有线程池开销。
 
 ## 模型覆盖
 
@@ -153,102 +153,102 @@ delegation:
 | `["terminal", "file", "web"]` | 全栈任务（默认） |
 | `["file"]` | 只读分析、无需执行的代码审查 |
 | `["terminal"]` | 系统管理、进程管理 |
-某些工具集无论你如何指定，对于子 Agent 都是被禁用的：
-- `delegation` — 对于叶子子 Agent（默认）是禁用的。为 `role="orchestrator"` 的子 Agent 保留，但受 `max_spawn_depth` 限制 — 请参阅下面的[深度限制与嵌套编排](#深度限制与嵌套编排)。
+某些工具集对子 Agent 是禁用的，无论你如何指定：
+- `delegation` — 对叶子子 Agent（默认）禁用。为 `role="orchestrator"` 的子 Agent 保留，但受 `max_spawn_depth` 限制 — 参见下面的[深度限制与嵌套编排](#深度限制与嵌套编排)。
 - `clarify` — 子 Agent 无法与用户交互
-- `memory` — 不能写入共享的持久化记忆
+- `memory` — 无法写入共享持久化记忆
 - `code_execution` — 子 Agent 应逐步推理
-- `send_message` — 不能产生跨平台的副作用（例如，发送 Telegram 消息）
+- `send_message` — 无跨平台副作用（例如，发送 Telegram 消息）
 
 ## 最大迭代次数
 
-每个子 Agent 都有一个迭代次数限制（默认：50），用于控制它可以进行多少次工具调用轮次：
+每个子 Agent 都有一个迭代限制（默认：50），用于控制其可以进行多少次工具调用轮次：
 
 ```python
 delegate_task(
     goal="Quick file check",
     context="Check if /etc/nginx/nginx.conf exists and print its first 10 lines",
-    max_iterations=10  # Simple task, don't need many turns
+    max_iterations=10  # 简单任务，不需要很多轮次
 )
 ```
 
 ## 子 Agent 超时
 
-如果子 Agent 静默时间超过 `delegation.child_timeout_seconds` 挂钟秒数，它将被视为卡住并被终止。默认值是 **600**（10 分钟）— 比早期版本中的 300 秒有所提高，因为处理非平凡研究任务的高推理模型在思考过程中会被终止。请根据具体安装进行调整：
+如果子 Agent 静默时间超过 `delegation.child_timeout_seconds` 挂钟秒数，则会被判定为卡住并终止。默认值为 **600**（10 分钟）— 比早期版本的 300 秒有所提高，因为处理非平凡研究任务的高推理模型在思考过程中会被终止。请根据安装情况调整：
 
 ```yaml
 delegation:
-  child_timeout_seconds: 600   # default
+  child_timeout_seconds: 600   # 默认值
 ```
 
-对于快速的本地模型，可以降低此值；对于处理难题的慢速推理模型，可以提高此值。计时器在子 Agent 每次进行 API 调用或工具调用时都会重置 — 只有真正空闲的工作者才会触发终止。
+对于快速的本地模型，可以降低此值；对于处理困难问题的慢速推理模型，可以提高此值。计时器在子 Agent 每次进行 API 调用或工具调用时重置 — 只有真正空闲的工作者才会触发终止。
 
 :::tip 零调用超时的诊断转储
-如果一个子 Agent 在进行了 **零次** API 调用的情况下超时（通常是：提供商不可达、认证失败或工具模式拒绝），`delegate_task` 会将结构化的诊断信息写入 `~/.hermes/logs/subagent-timeout-<session>-<timestamp>.log`，其中包含子 Agent 的配置快照、凭据解析追踪以及任何早期错误消息。这比之前的静默超时行为更容易进行根本原因分析。
+如果子 Agent 在进行了 **零次** API 调用的情况下超时（通常是：提供商不可达、身份验证失败或工具模式拒绝），`delegate_task` 会将结构化诊断信息写入 `~/.hermes/logs/subagent-timeout-<session>-<timestamp>.log`，其中包含子 Agent 的配置快照、凭据解析跟踪以及任何早期错误消息。这比之前的静默超时行为更容易进行根本原因分析。
 :::
 
 ## 监控运行中的子 Agent (`/agents`)
 
-TUI 提供了一个 `/agents` 覆盖层（别名 `/tasks`），它将递归的 `delegate_task` 展开转变为一流的审计界面：
+TUI 提供了一个 `/agents` 叠加层（别名 `/tasks`），它将递归的 `delegate_task` 扇出转变为一流的审计界面：
 
 - 运行中和最近完成的子 Agent 的实时树状视图，按父级分组
 - 每个分支的成本、Token 和文件接触汇总
-- 终止和暂停控制 — 可以在运行中取消特定的子 Agent，而不影响其兄弟 Agent
-- 事后审查：即使子 Agent 已返回父级，也可以逐步查看每个子 Agent 的逐轮历史记录
+- 终止和暂停控制 — 在运行中取消特定子 Agent 而不中断其兄弟 Agent
+- 事后审查：逐步查看每个子 Agent 的逐轮历史记录，即使它们已返回父级
 
-经典 CLI 仅将 `/agents` 打印为文本摘要；TUI 才是覆盖层大放异彩的地方。请参阅 [TUI — 斜杠命令](/docs/user-guide/tui#slash-commands)。
+经典 CLI 仅将 `/agents` 打印为文本摘要；TUI 是叠加层大放异彩的地方。参见 [TUI — 斜杠命令](/docs/user-guide/tui#slash-commands)。
 
 ## 深度限制与嵌套编排
 
-默认情况下，委派是 **扁平** 的：父级（深度 0）生成子级（深度 1），而这些子级不能进一步委派。这可以防止失控的递归委派。
+默认情况下，委派是 **扁平** 的：父级（深度 0）生成子级（深度 1），而这些子级无法进一步委派。这可以防止失控的递归委派。
 
-对于多阶段工作流（研究 → 合成，或针对子问题的并行编排），父级可以生成 **编排器** 子级，这些子级*可以*委派它们自己的工作器：
+对于多阶段工作流（研究 → 综合，或针对子问题的并行编排），父级可以生成 **编排器** 子级，这些子级*可以*委派自己的工作者：
 
 ```python
 delegate_task(
     goal="Survey three code review approaches and recommend one",
-    role="orchestrator",  # Allows this child to spawn its own workers
+    role="orchestrator",  # 允许此子级生成自己的工作者
     context="...",
 )
 ```
 
-- `role="leaf"`（默认）：子级不能进一步委派 — 与扁平委派行为相同。
-- `role="orchestrator"`：子级保留 `delegation` 工具集。受 `delegation.max_spawn_depth` 控制（默认 **1** = 扁平，因此在默认设置下 `role="orchestrator"` 无效）。将 `max_spawn_depth` 提高到 2，以允许编排器子级生成叶子孙级；提高到 3 则允许三个层级（上限）。
-- `delegation.orchestrator_enabled: false`：全局关闭开关，无论 `role` 参数如何，强制每个子级都成为 `leaf`。
+- `role="leaf"`（默认）：子级无法进一步委派 — 与扁平委派行为相同。
+- `role="orchestrator"`：子级保留 `delegation` 工具集。受 `delegation.max_spawn_depth` 控制（默认 **1** = 扁平，因此 `role="orchestrator"` 在默认情况下无效）。将 `max_spawn_depth` 提高到 2 以允许编排器子级生成叶子孙级；提高到 3 则允许三个层级（上限）。
+- `delegation.orchestrator_enabled: false`：全局关闭开关，无论 `role` 参数如何，强制每个子级为 `leaf`。
 
-**成本警告：** 当 `max_spawn_depth: 3` 且 `max_concurrent_children: 3` 时，树状结构最多可达到 3×3×3 = 27 个并发叶子 Agent。每增加一个层级都会成倍增加开销 — 请有意识地提高 `max_spawn_depth`。
+**成本警告：** 当 `max_spawn_depth: 3` 且 `max_concurrent_children: 3` 时，树状结构最多可达到 3×3×3 = 27 个并发叶子 Agent。每个额外的层级都会成倍增加开销 — 请有意识地提高 `max_spawn_depth`。
 
 ## 生命周期与持久性
 
 :::warning delegate_task 是同步的 — 不具备持久性
-`delegate_task` 在**父级当前轮次内**运行。它会阻塞父级，直到每个子级完成（或被取消）。它**不是**一个后台作业队列：
+`delegate_task` 在**父级当前轮次内**运行。它会阻塞父级，直到每个子级完成（或被取消）。它**不是**后台作业队列：
 
-- 如果父级被中断（用户发送新消息、`/stop`、`/new`），所有活动的子级都会被取消并返回 `status="interrupted"`。它们正在进行的工作将被丢弃。
+- 如果父级被中断（用户发送新消息、`/stop`、`/new`），所有活动子级都会被取消并返回 `status="interrupted"`。它们正在进行的工作将被丢弃。
 - 子级在父级轮次结束后**不会**继续运行。
 - 被取消的子级会返回一个结构化结果（`status="interrupted"`，`exit_reason="interrupted"`），但由于父级也被中断，该结果通常永远不会出现在用户可见的回复中。
 
-对于必须能在中断后存活或比当前轮次运行时间更长的**持久性长时间运行工作**，请使用：
+对于**必须能在中断后存活或比当前轮次更持久的持久性长时间运行工作**，请使用：
 
-- `cronjob` (action=`create`) — 调度一个独立的 Agent 运行；不受父级轮次中断影响。
+- `cronjob` (action=`create`) — 调度一个单独的 Agent 运行；不受父级轮次中断影响。
 - `terminal(background=True, notify_on_complete=True)` — 长时间运行的 shell 命令，在 Agent 执行其他操作时保持运行。
 :::
 
 ## 关键特性
 
 - 每个子 Agent 拥有其**独立的终端会话**（与父级分离）
-- **嵌套委派是选择加入的** — 只有 `role="orchestrator"` 的子级可以进一步委派，并且仅在 `max_spawn_depth` 从其默认值 1（扁平）提高时才允许。可以通过 `orchestrator_enabled: false` 全局禁用。
-- 叶子子 Agent **不能**调用：`delegate_task`、`clarify`、`memory`、`send_message`、`execute_code`。编排器子 Agent 保留 `delegate_task`，但仍不能使用其他四个工具。
-- **中断传播** — 中断父级会中断所有活动的子级（包括编排器下的孙级）
+- **嵌套委派是选择加入的** — 只有 `role="orchestrator"` 的子级可以进一步委派，并且仅在 `max_spawn_depth` 从其默认值 1（扁平）提高时才允许。使用 `orchestrator_enabled: false` 全局禁用。
+- 叶子子 Agent **无法**调用：`delegate_task`、`clarify`、`memory`、`send_message`、`execute_code`。编排器子级保留 `delegate_task`，但仍无法使用其他四个工具。
+- **中断传播** — 中断父级会中断所有活动子级（包括编排器下的孙级）
 - 只有最终摘要会进入父级的上下文，从而保持 Token 使用效率
 - 子 Agent 继承父级的 **API 密钥、提供商配置和凭据池**（支持在达到速率限制时进行密钥轮换）
 
-## 委派 vs 代码执行
+## 委派 vs execute_code
 
 | 因素 | delegate_task | execute_code |
 |--------|--------------|-------------|
-| **推理** | 完整的 LLM 推理循环 | 仅执行 Python 代码 |
+| **推理** | 完整的 LLM 推理循环 | 仅 Python 代码执行 |
 | **上下文** | 全新的隔离对话 | 无对话，仅脚本 |
-| **工具访问** | 所有未被禁用的工具，附带推理 | 通过 RPC 访问 7 个工具，无推理 |
+| **工具访问** | 所有未被禁用的工具，附带推理 | 通过 RPC 的 7 个工具，无推理 |
 | **并行性** | 默认 3 个并发子 Agent（可配置） | 单个脚本 |
 | **最适合** | 需要判断的复杂任务 | 机械化的多步骤流水线 |
 | **Token 成本** | 较高（完整的 LLM 循环） | 较低（仅返回 stdout） |
@@ -261,19 +261,22 @@ delegate_task(
 # 在 ~/.hermes/config.yaml 文件中
 delegation:
   max_iterations: 50                        # 每个子任务的最大轮次（默认：50）
-  # max_concurrent_children: 3              # 每批次的并行子任务数（默认：3）
-  # max_spawn_depth: 1                      # 树深度（1-3，默认 1 = 扁平结构）。设置为 2 以允许协调者子任务生成叶子任务；3 表示三层结构。
+  # max_concurrent_children: 3              # 每个批次并行处理的子任务数（默认：3）
+  # max_spawn_depth: 1                      # 树深度（1-3，默认 1 = 扁平结构）。设置为 2 以允许编排器子任务生成叶子任务；3 表示三层结构。
   # orchestrator_enabled: true              # 禁用此项以强制所有子任务为叶子角色。
   model: "google/gemini-3-flash-preview"             # 可选的提供商/模型覆盖
   provider: "openrouter"                             # 可选的内置提供商
+  api_mode: anthropic_messages                       # 可选；对于 anthropic_messages 端点，会根据 base_url 自动检测
 
 # 或者使用直接的自定义端点代替提供商：
 delegation:
   model: "qwen2.5-coder"
   base_url: "http://localhost:1234/v1"
   api_key: "local-key"
-  # api_mode: "anthropic_messages"  # 可选。用于 base_url 的线路协议覆盖（"chat_completions"、"codex_responses" 或 "anthropic_messages"）。留空 = 根据 URL 自动检测（例如 /anthropic 后缀）。对于启发式方法无法分类的端点（Azure AI Foundry、MiniMax、智谱 GLM、LiteLLM 代理等），请显式设置。
+  # api_mode: "anthropic_messages"  # 可选。用于 base_url 的通信协议覆盖（"chat_completions"、"codex_responses" 或 "anthropic_messages"）。留空 = 根据 URL 自动检测（例如 /anthropic 后缀）。对于启发式方法无法分类的端点（Azure AI Foundry、MiniMax、Zhipu GLM、LiteLLM 代理等），请显式设置此项。
 ```
+
+当 `base_url` 指向一个与 Anthropic 兼容的端点时——例如路径以 `/anthropic` 结尾、Azure Foundry Claude 路由或 MiniMax `/anthropic` 代理——`api_mode` 会自动检测为 `anthropic_messages`，这样子 Agent 无需你设置任何东西就能使用正确的通信格式。当自动检测猜测错误时（很少见），请显式设置 `api_mode`。
 
 :::tip
 Agent 会根据任务复杂度自动处理委派。你不需要明确要求它委派——它会在合适的时候自动进行。

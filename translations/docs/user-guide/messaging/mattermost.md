@@ -6,32 +6,32 @@ description: "将 Hermes Agent 设置为 Mattermost 机器人"
 
 # Mattermost 设置
 
-Hermes Agent 可作为机器人集成到 Mattermost 中，让你可以通过直接消息或团队频道与你的 AI 助手聊天。Mattermost 是一个自托管、开源的 Slack 替代方案——你在自己的基础设施上运行它，完全控制你的数据。该机器人通过 Mattermost 的 REST API (v4) 和 WebSocket（用于实时事件）进行连接，通过 Hermes Agent 流水线（包括工具使用、记忆和推理）处理消息，并实时响应。它支持文本、文件附件、图片和斜杠命令。
+Hermes Agent 可作为机器人集成到 Mattermost 中，让你可以通过直接消息或团队频道与你的 AI 助手聊天。Mattermost 是一个自托管、开源的 Slack 替代方案——你在自己的基础设施上运行它，完全掌控自己的数据。该机器人通过 Mattermost 的 REST API (v4) 和 WebSocket（用于实时事件）进行连接，通过 Hermes Agent 流水线（包括工具使用、记忆和推理）处理消息，并实时响应。它支持文本、文件附件、图片和斜杠命令。
 
 无需外部 Mattermost 库——适配器使用 `aiohttp`，它已经是 Hermes 的依赖项。
 
-在设置之前，以下是大多数人想知道的部分：Hermes 在你的 Mattermost 实例中运行后的行为方式。
+在设置之前，以下是大多数人想知道的部分：Hermes 在你的 Mattermost 实例中运行时的行为方式。
 
 ## Hermes 的行为方式
 
-| 上下文 | 行为 |
+| 场景 | 行为 |
 |---------|----------|
-| **直接消息** | Hermes 响应每条消息。无需 `@提及`。每个直接消息都有其自己的会话。 |
-| **公开/私密频道** | 当你 `@提及` Hermes 时，它会响应。没有提及，Hermes 会忽略该消息。 |
-| **线程** | 如果 `MATTERMOST_REPLY_MODE=thread`，Hermes 会在你的消息下的线程中回复。线程上下文与父频道保持隔离。 |
-| **多用户共享频道** | 默认情况下，Hermes 在频道内为每个用户隔离会话历史记录。两个人在同一频道中交谈不会共享一个对话记录，除非你明确禁用该功能。 |
+| **直接消息** | Hermes 响应每条消息。无需 `@提及`。每个直接消息都有其独立的会话。 |
+| **公开/私密频道** | 当你 `@提及` Hermes 时，它会响应。没有提及时，Hermes 会忽略该消息。 |
+| **线程** | 如果 `MATTERMOST_REPLY_MODE=thread`，Hermes 会在你的消息下以线程形式回复。线程上下文与父频道保持隔离。 |
+| **多用户共享频道** | 默认情况下，Hermes 在频道内为每个用户隔离会话历史记录。两个人在同一频道中交谈不会共享一个对话记录，除非你明确禁用此功能。 |
 
 :::tip
-如果你希望 Hermes 以线程对话形式回复（嵌套在你的原始消息下），请设置 `MATTERMOST_REPLY_MODE=thread`。默认值为 `off`，即在频道中发送扁平消息。
+如果你希望 Hermes 以线程对话形式回复（嵌套在你的原始消息下），请设置 `MATTERMOST_REPLY_MODE=thread`。默认值为 `off`，即在频道中发送平铺的消息。
 :::
 
 ### Mattermost 中的会话模型
 
 默认情况下：
 
-- 每个直接消息都有自己的会话
-- 每个线程都有自己的会话命名空间
-- 共享频道中的每个用户在该频道内都有自己的会话
+- 每个直接消息都有其独立的会话
+- 每个线程都有其独立的会话命名空间
+- 共享频道中的每个用户在该频道内都有其独立的会话
 
 这由 `config.yaml` 控制：
 
@@ -85,18 +85,18 @@ group_sessions_per_user: false
 将令牌存储在安全的地方（例如密码管理器）。你将在步骤 5 中需要它。
 
 :::tip
-你也可以使用**个人访问令牌**代替机器人账户。转到**个人资料** → **安全** → **个人访问令牌** → **创建令牌**。如果你希望 Hermes 以你自己的用户身份发布消息，而不是以单独的机器人用户身份，这会很有用。
+你也可以使用**个人访问令牌**代替机器人账户。转到**个人资料** → **安全** → **个人访问令牌** → **创建令牌**。如果你希望 Hermes 以你自己的用户身份发布消息，而不是作为单独的机器人用户，这会很有用。
 :::
 
 ## 步骤 3：将机器人添加到频道
 
 机器人需要成为你希望它响应的任何频道的成员：
 
-1. 打开你希望机器人所在的频道。
+1. 打开你希望机器人加入的频道。
 2. 点击频道名称 → **添加成员**。
 3. 搜索你的机器人用户名（例如，`hermes`）并添加它。
 
-对于直接消息，只需与机器人打开直接消息——它将能够立即响应。
+对于直接消息，只需与机器人开启直接消息对话——它将能够立即响应。
 
 ## 步骤 4：查找你的 Mattermost 用户 ID
 
@@ -108,7 +108,7 @@ Hermes Agent 使用你的 Mattermost 用户 ID 来控制谁可以与机器人交
 你的用户 ID 是一个 26 个字符的字母数字字符串，例如 `3uo8dkh1p7g1mfk49ear5fzs5c`。
 
 :::warning
-你的用户 ID **不是**你的用户名。用户名是 `@` 之后出现的内容（例如，`@alice`）。用户 ID 是 Mattermost 内部使用的长字母数字标识符。
+你的用户 ID **不是**你的用户名。用户名是 `@` 后面出现的内容（例如，`@alice`）。用户 ID 是 Mattermost 内部使用的长字母数字标识符。
 :::
 
 **替代方法**：你也可以通过 API 获取你的用户 ID：
@@ -119,7 +119,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 ```
 
 :::tip
-要获取**频道 ID**：点击频道名称 → **查看信息**。频道 ID 显示在信息面板中。如果你想手动设置主频道，将需要这个。
+要获取**频道 ID**：点击频道名称 → **查看信息**。频道 ID 显示在信息面板中。如果你想手动设置主频道，将需要这个 ID。
 :::
 
 ## 步骤 5：配置 Hermes Agent
@@ -132,7 +132,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 hermes gateway setup
 ```
 
-出现提示时选择 **Mattermost**，然后在被询问时粘贴你的服务器 URL、机器人令牌和用户 ID。
+出现提示时选择 **Mattermost**，然后在被要求时粘贴你的服务器 URL、机器人令牌和用户 ID。
 
 ### 选项 B：手动配置
 
@@ -180,7 +180,7 @@ hermes gateway
 
 ## 主频道
 
-你可以指定一个“主频道”，机器人会向该频道发送主动消息（例如定时任务输出、提醒和通知）。有两种设置方法：
+你可以指定一个"主频道"，机器人会向该频道发送主动消息（例如定时任务输出、提醒和通知）。有两种设置方式：
 
 ### 使用斜杠命令
 
@@ -188,7 +188,7 @@ hermes gateway
 
 ### 手动配置
 
-将此添加到你的 `~/.hermes/.env` 文件中：
+将此添加到你的 `~/.hermes/.env`：
 
 ```bash
 MATTERMOST_HOME_CHANNEL=abc123def456ghi789jkl012mn
@@ -203,9 +203,9 @@ MATTERMOST_HOME_CHANNEL=abc123def456ghi789jkl012mn
 | 模式 | 行为 |
 |------|----------|
 | `off` (默认) | Hermes 在频道中发布普通消息，就像普通用户一样。 |
-| `thread` | Hermes 在你的原始消息下以线程形式回复。在有很多来回对话时保持频道整洁。 |
+| `thread` | Hermes 在你的原始消息下的线程中回复。当有大量来回对话时，可以保持频道整洁。 |
 
-在你的 `~/.hermes/.env` 文件中设置：
+在你的 `~/.hermes/.env` 中设置：
 
 ```bash
 MATTERMOST_REPLY_MODE=thread
@@ -218,17 +218,44 @@ MATTERMOST_REPLY_MODE=thread
 | 变量 | 默认值 | 描述 |
 |----------|---------|-------------|
 | `MATTERMOST_REQUIRE_MENTION` | `true` | 设置为 `false` 以响应频道中的所有消息（私信始终有效）。 |
-| `MATTERMOST_FREE_RESPONSE_CHANNELS` | _(无)_ | 逗号分隔的频道 ID 列表，即使 `require_mention` 为 true，机器人在这些频道中也会响应而无需 `@提及`。 |
+| `MATTERMOST_FREE_RESPONSE_CHANNELS` | _(无)_ | 逗号分隔的频道 ID 列表，即使 require_mention 为 true，机器人在这些频道中也会响应而无需 `@提及`。 |
 
-在 Mattermost 中查找频道 ID：打开频道，点击频道名称标题，在 URL 或频道详细信息中查找 ID。
+要在 Mattermost 中查找频道 ID：打开频道，点击频道名称标题，在 URL 或频道详细信息中查找 ID。
 
-当机器人被 `@提及` 时，在处理消息前会自动去除提及部分。
+当机器人被 `@提及` 时，在处理消息之前，提及会自动从消息中剥离。
+
+## 频道白名单 (`allowed_channels`)
+
+将机器人限制在固定的 Mattermost 频道集合中。设置后，机器人**仅**响应其 ID 出现在列表中的频道——来自任何其他频道的消息都会被静默忽略，即使机器人被 `@提及`。
+
+**私信不受此过滤器限制**，因此授权用户始终可以通过私信联系到机器人。
+
+```yaml
+mattermost:
+  allowed_channels:
+    - "abc123def456ghi789jkl012mno"   # #ops
+    - "xyz987uvw654rst321opq098nml"   # #incident-response
+```
+
+或通过环境变量（逗号分隔）：
+
+```bash
+MATTERMOST_ALLOWED_CHANNELS="abc123def456ghi789jkl012mno,xyz987uvw654rst321opq098nml"
+```
+
+行为：
+
+- 空 / 未设置 → 无限制（完全向后兼容）。
+- 非空 → 频道 ID 必须在列表中，否则消息会在任何其他门控（提及要求、`MATTERMOST_FREE_RESPONSE_CHANNELS` 等）运行之前被丢弃。
+- 通过 Mattermost UI → 频道标题 → "查看信息" 查找频道 ID，或从频道 URL 中读取。
+
+另请参阅：[管理员/用户斜杠命令拆分](../../reference/slash-commands.md#permissions-and-adminuser-split)。
 
 ## 故障排除
 
 ### 机器人不响应消息
 
-**原因**：机器人不是该频道的成员，或者 `MATTERMOST_ALLOWED_USERS` 不包含你的用户 ID。
+**原因**：机器人不是频道的成员，或者 `MATTERMOST_ALLOWED_USERS` 不包含你的用户 ID。
 
 **解决方法**：将机器人添加到频道（频道名称 → 添加成员 → 搜索机器人）。验证你的用户 ID 是否在 `MATTERMOST_ALLOWED_USERS` 中。重启消息网关。
 
@@ -242,7 +269,7 @@ MATTERMOST_REPLY_MODE=thread
 
 **原因**：网络不稳定、Mattermost 服务器重启，或防火墙/代理对 WebSocket 连接造成问题。
 
-**解决方法**：适配器会自动以指数退避方式重连（2秒 → 60秒）。检查服务器的 WebSocket 配置——反向代理（nginx、Apache）需要配置 WebSocket 升级头。确认没有防火墙阻止 Mattermost 服务器上的 WebSocket 连接。
+**解决方法**：适配器会自动以指数退避（2秒 → 60秒）重新连接。检查服务器的 WebSocket 配置——反向代理（nginx、Apache）需要配置 WebSocket 升级头。确认没有防火墙阻止 Mattermost 服务器上的 WebSocket 连接。
 
 对于 nginx，确保你的配置包含：
 
@@ -255,7 +282,7 @@ location /api/v4/websocket {
 }
 ```
 
-### 启动时出现“身份验证失败”
+### 启动时"身份验证失败"
 
 **原因**：Token 或服务器 URL 不正确。
 
@@ -272,18 +299,17 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 **原因**：Hermes 消息网关未运行，或连接失败。
 
-**解决方法**：检查 `hermes gateway` 是否正在运行。查看终端输出中的错误信息。常见问题：URL 错误、Token 过期、Mattermost 服务器无法访问。
+**解决方法**：检查 `hermes gateway` 是否正在运行。查看终端输出中的错误消息。常见问题：URL 错误、Token 过期、Mattermost 服务器无法访问。
 
-### “用户不允许” / 机器人忽略你
+### "用户不允许" / 机器人忽略你
 
 **原因**：你的用户 ID 不在 `MATTERMOST_ALLOWED_USERS` 中。
 
 **解决方法**：将你的用户 ID 添加到 `~/.hermes/.env` 中的 `MATTERMOST_ALLOWED_USERS` 并重启消息网关。记住：用户 ID 是一个 26 位的字母数字字符串，不是你的 `@用户名`。
 
-## 按频道提示词
+## 每频道提示词
 
-为特定的 Mattermost 频道分配临时的系统提示词。该提示词在每次交互时于运行时注入——永远不会持久化到对话历史记录中——因此更改会立即生效。
-
+为特定的 Mattermost 频道分配临时系统提示词。该提示词在每次交互时在运行时注入——永远不会持久化到对话历史记录中——因此更改会立即生效。
 ```yaml
 mattermost:
   channel_prompts:
@@ -293,18 +319,18 @@ mattermost:
       代码审查模式。请精确关注边界情况和性能影响。
 ```
 
-键是 Mattermost 频道 ID（在频道 URL 中或通过 API 查找）。匹配频道中的所有消息都会获得作为临时系统指令注入的提示词。
+键是 Mattermost 频道 ID（可在频道 URL 或通过 API 找到）。匹配频道中的所有消息都会将该提示词作为临时系统指令注入。
 
 ## 安全
 
 :::warning
-始终设置 `MATTERMOST_ALLOWED_USERS` 以限制可以与机器人交互的人员。如果没有设置，作为安全措施，消息网关默认会拒绝所有用户。只添加你信任的人员的用户 ID——授权用户可以完全访问 Agent 的能力，包括工具使用和系统访问。
+务必设置 `MATTERMOST_ALLOWED_USERS` 以限制谁可以与机器人交互。如果没有设置，作为安全措施，消息网关默认会拒绝所有用户。只添加你信任的用户 ID —— 授权用户可以完全访问 Agent 的能力，包括工具使用和系统访问。
 :::
 
 有关保护 Hermes Agent 部署的更多信息，请参阅[安全指南](../security.md)。
 
-## 注意事项
+## 说明
 
 - **自托管友好**：适用于任何自托管的 Mattermost 实例。无需 Mattermost Cloud 账户或订阅。
-- **无需额外依赖**：适配器使用 `aiohttp` 处理 HTTP 和 WebSocket，这已包含在 Hermes Agent 中。
-- **团队版兼容**：适用于 Mattermost 团队版（免费）和企业版。
+- **无需额外依赖**：该适配器使用 `aiohttp` 处理 HTTP 和 WebSocket，这已包含在 Hermes Agent 中。
+- **兼容团队版**：适用于 Mattermost 团队版（免费）和企业版。

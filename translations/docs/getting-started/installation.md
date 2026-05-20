@@ -6,22 +6,22 @@ description: "在 Linux、macOS、WSL2、原生 Windows（早期测试版）或�
 
 # 安装
 
-使用一行安装程序，在两分钟内启动并运行 Hermes Agent。
+使用一行安装程序，在不到两分钟的时间内启动并运行 Hermes Agent。
 
 ## 快速安装
 
 ### 一行安装程序 (Linux / macOS / WSL2)
 
-要进行基于 git 的安装（跟踪 `main` 分支并立即获取最新更改）：
+要进行基于 git 的安装，以跟踪 `main` 分支并立即获取最新更改：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
-### Windows（原生，PowerShell）— 早期测试版
+### Windows (原生，PowerShell) — 早期测试版
 
 :::warning 早期测试版
-原生 Windows 支持是**早期测试版**。它可以在常见路径上安装并运行，但尚未像我们的 POSIX 安装程序那样经过广泛的道路测试。遇到问题时请[提交问题](https://github.com/NousResearch/hermes-agent/issues)。对于目前在 Windows 上经过最充分测试的设置，请在 **WSL2** 中使用上面的 Linux/macOS 一行安装程序。
+原生 Windows 支持是**早期测试版**。它可以在常见路径下安装并运行，但尚未像我们的 POSIX 安装程序那样经过广泛的道路测试。遇到问题时请[提交问题](https://github.com/NousResearch/hermes-agent/issues)。对于目前 Windows 上最经得起考验的设置，请在 **WSL2** 中使用上面的 Linux/macOS 一行安装程序。
 :::
 
 打开 PowerShell 并运行：
@@ -30,17 +30,19 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 iex (irm https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1)
 ```
 
-安装程序会处理**所有内容**：`uv`、Python 3.11、Node.js 22、`ripgrep`、`ffmpeg`、**以及一个便携式 Git Bash**（PortableGit — 一个自包含的 Git-for-Windows 发行版，包含 Hermes 用于 shell 命令的 `bash.exe` 和完整的 POSIX 工具链；在 32 位 Windows 上，安装程序会回退到 MinGit，它缺少 bash 并禁用终端工具 / agent-browser 功能）。它将仓库克隆到 `%LOCALAPPDATA%\hermes\hermes-agent` 下，创建虚拟环境，并将 `hermes` 添加到您的**用户 PATH** 中。安装后重新启动终端（或打开一个新的 PowerShell 窗口），以便 PATH 生效。
+安装程序会处理**所有内容**：`uv`、Python 3.11、Node.js 22、`ripgrep`、`ffmpeg`、**以及一个便携式 Git Bash**（PortableGit — 一个自包含的 Git-for-Windows 发行版，提供 Hermes 用于 shell 命令的 `bash.exe` 和完整的 POSIX 工具链；在 32 位 Windows 上，安装程序会回退到 MinGit，它缺少 bash 并禁用终端工具 / agent-browser 功能）。它将仓库克隆到 `%LOCALAPPDATA%\hermes\hermes-agent` 下，创建虚拟环境，并将 `hermes` 添加到您的**用户 PATH** 中。安装后请重启终端（或打开一个新的 PowerShell 窗口），以便 PATH 生效。
 
 **Git 的处理方式：**
 1. 如果 `git` 已经在您的 PATH 上，安装程序将使用您现有的安装。
-2. 否则，它会下载便携式 **PortableGit**（约 50MB，来自官方的 `git-for-windows` GitHub 发布版）并将其解压到 `%LOCALAPPDATA%\hermes\git`。不需要管理员权限。完全隔离 — 它不会干扰任何系统 Git 安装，无论其是否损坏。（在 32 位 Windows 上，它会回退到 MinGit，因为 PortableGit 仅提供 64 位和 ARM64 资源；依赖 bash 的 Hermes 功能在 32 位主机上将无法工作。）
+2. 否则，它会下载便携式 **PortableGit**（约 50MB，来自官方的 `git-for-windows` GitHub 发布版）并将其解压到 `%LOCALAPPDATA%\hermes\git`。无需管理员权限。完全隔离 — 它不会干扰任何系统 Git 安装，无论其是否损坏。（在 32 位 Windows 上，它会回退到 MinGit，因为 PortableGit 仅提供 64 位和 ARM64 资源；依赖 bash 的 Hermes 功能在 32 位主机上将无法工作。）
 
-**为什么不使用 winget？** 早期的设计通过 `winget install Git.Git` 自动安装 Git，但当系统 Git 安装处于部分或损坏状态时（这正是用户需要安装程序正常工作的时候），winget 会严重失败。便携式 Git 方法绕过了 winget、Windows 安装程序注册表以及任何现有的系统 Git。如果 Hermes Git 安装本身损坏，只需 `Remove-Item %LOCALAPPDATA%\hermes\git` 并重新运行安装程序 — 不会影响系统，也没有卸载的麻烦。
+**为什么不使用 winget？** 早期的设计通过 `winget install Git.Git` 自动安装 Git，但当系统 Git 安装处于部分或损坏状态时（这正是用户需要安装程序正常工作的时候），winget 会严重失败。便携式 Git 方法绕过了 winget、Windows 安装程序注册表以及任何现有的系统 Git。如果 Hermes Git 安装本身损坏，只需 `Remove-Item %LOCALAPPDATA%\hermes\git` 并重新运行安装程序 — 不影响系统，没有卸载麻烦。
 
 安装程序还将 `HERMES_GIT_BASH_PATH` 设置为找到的 `bash.exe`，以便 Hermes 在新 shell 中确定性地解析它。
 
 如果您更喜欢 WSL2，上面的 Linux 安装程序可以在其中运行；原生和 WSL 安装可以共存而不冲突（原生数据位于 `%LOCALAPPDATA%\hermes` 下，WSL 数据位于 `~/.hermes` 下）。
+
+**桌面安装程序（替代方案）：** 还提供了一个轻量级 GUI 安装程序 — 下载 Hermes Desktop，运行 `.exe`，首次启动时会在后台调用 `install.ps1` 来配置 Python（通过 `uv`）、Node、PortableGit 和其他依赖项。桌面应用程序和 PowerShell 安装的 CLI 共享相同的安装和数据目录，因此您可以使用其中之一或两者。详情请参阅 [Windows（原生）指南](../user-guide/windows-native#desktop-installer-alternative)。
 
 ### Android / Termux
 
@@ -54,22 +56,22 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 - 使用 Termux `pkg` 安装系统依赖项（`git`、`python`、`nodejs`、`ripgrep`、`ffmpeg`、构建工具）
 - 使用 `python -m venv` 创建虚拟环境
 - 自动导出 `ANDROID_API_LEVEL` 用于 Android wheel 构建
-- 优先使用广泛的 `.[termux-all]` 额外依赖项，如果第一次尝试编译失败，则回退到较小的 `.[termux]` 额外依赖项（最后是基础安装）
+- 优先使用广泛的 `.[termux-all]` 额外包，如果第一次尝试编译失败，则回退到较小的 `.[termux]` 额外包（最后是基础安装）
 - 默认跳过未经测试的浏览器 / WhatsApp 引导程序
 
 如果您想要完全明确的路径，请遵循专门的 [Termux 指南](./termux.md)。
 
 :::note Windows 功能对等性（早期测试版）
 
-原生 Windows 处于**早期测试版**。除了基于浏览器的仪表板聊天终端外，所有功能都可以在 Windows 上原生运行：
+原生 Windows 处于**早期测试版**。除了基于浏览器的仪表板聊天终端外，其他所有功能都可以在 Windows 上原生运行：
 - **CLI (`hermes chat`, `hermes setup`, `hermes gateway`, …)** — 原生，使用您的默认终端
 - **消息网关 (Telegram, Discord, Slack, …)** — 原生，作为后台 PowerShell 进程运行
 - **定时任务调度器** — 原生
 - **浏览器工具** — 原生（通过 Node.js 使用 Chromium）
 - **MCP 服务器** — 原生（支持 stdio 和 HTTP 传输）
-- **仪表板 `/chat` 终端窗格** — **仅限 WSL2**（使用 POSIX PTY；原生 Windows 没有等效项）。仪表板的其余部分（会话、作业、指标）可以原生运行 — 只有嵌入式 PTY 终端选项卡受到限制。
+- **仪表板 `/chat` 终端面板** — **仅限 WSL2**（使用 POSIX PTY；原生 Windows 没有等效项）。仪表板的其余部分（会话、作业、指标）可以原生运行 — 只有嵌入式 PTY 终端选项卡受限。
 
-如果您遇到与编码相关的错误并希望回退到传统的 cp1252 stdio 路径（对二分查找有用），请在您的环境中设置 `HERMES_DISABLE_WINDOWS_UTF8=1`。
+如果在环境中遇到与编码相关的错误并希望回退到传统的 cp1252 stdio 路径，请设置 `HERMES_DISABLE_WINDOWS_UTF8=1`（用于二分查找时很有用）。
 :::
 
 ### 安装程序的作用
@@ -78,15 +80,15 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 
 #### 安装布局
 
-安装程序将文件放在哪里取决于您是作为普通用户还是 root 用户安装：
+安装程序将文件放在何处取决于您是作为普通用户还是 root 用户安装：
 
-| 安装程序 | 代码位置 | `hermes` 二进制文件 | 数据目录 |
+| 安装方式 | 代码位置 | `hermes` 二进制文件 | 数据目录 |
 |---|---|---|---|
 | pip install | Python site-packages | `~/.local/bin/hermes` (console_scripts) | `~/.hermes/` |
-| 按用户安装（git 安装程序） | `~/.hermes/hermes-agent/` | `~/.local/bin/hermes` (符号链接) | `~/.hermes/` |
+| 按用户安装 (git 安装程序) | `~/.hermes/hermes-agent/` | `~/.local/bin/hermes` (符号链接) | `~/.hermes/` |
 | Root 模式 (`sudo curl … \| sudo bash`) | `/usr/local/lib/hermes-agent/` | `/usr/local/bin/hermes` | `/root/.hermes/` (或 `$HERMES_HOME`) |
 
-Root 模式的 **FHS 布局**（`/usr/local/lib/…`、`/usr/local/bin/hermes`）与 Linux 上其他系统范围的开发工具的安装位置相匹配。这对于共享机器部署非常有用，其中一个系统安装应为每个用户服务。每个用户的配置（身份验证、技能、会话）仍然位于每个用户的 `~/.hermes/` 或显式的 `HERMES_HOME` 下。
+Root 模式的 **FHS 布局** (`/usr/local/lib/…`, `/usr/local/bin/hermes`) 与 Linux 上其他系统级开发工具的放置位置相匹配。这对于共享机器部署非常有用，其中一个系统安装应为每个用户服务。按用户配置（身份验证、技能、会话）仍位于每个用户的 `~/.hermes/` 或显式的 `HERMES_HOME` 下。
 
 ### 安装后
 
@@ -111,7 +113,7 @@ hermes setup          # 或者运行完整的设置向导一次性配置所有�
 
 ## 先决条件
 
-**pip 安装：** 除了 Python 3.11+ 外，没有其他先决条件。其他所有内容都会自动处理。
+**pip install：** 除了 Python 3.11+ 外，没有其他先决条件。其他所有内容都会自动处理。
 
 **Git 安装程序：** 唯一的先决条件是 **Git**。安装程序会自动处理其他所有内容：
 
@@ -139,22 +141,22 @@ hermes setup          # 或者运行完整的设置向导一次性配置所有�
 
 ## 非 Sudo / 系统服务用户安装
 
-支持以专用非特权用户身份运行 Hermes（例如，`hermes` systemd 服务帐户，或任何没有 `sudo` 访问权限的用户）。安装路径上唯一真正需要 root 权限的是 Playwright 的 `--with-deps` 步骤，它通过 `apt` 安装 Chromium 使用的共享库（`libnss3`、`libxkbcommon` 等）。安装程序会检测 sudo 是否可用，并在不可用时优雅降级 — 它将把 Chromium 二进制文件安装到服务用户自己的 Playwright 缓存中，并打印管理员需要单独运行的确切命令。
+支持以专用非特权用户身份运行 Hermes（例如 `hermes` systemd 服务帐户，或任何没有 `sudo` 访问权限的用户）。安装路径上唯一真正需要 root 权限的是 Playwright 的 `--with-deps` 步骤，它通过 `apt` 安装 Chromium 使用的共享库（`libnss3`、`libxkbcommon` 等）。安装程序会检测 sudo 是否可用，并在不可用时优雅降级 — 它将把 Chromium 二进制文件安装到服务用户自己的 Playwright 缓存中，并打印管理员需要单独运行的确切命令。
 
 **推荐的分步操作（Debian/Ubuntu）：**
 
-1. **一次，以具有 sudo 权限的管理员用户身份**，安装 Chromium 所需的系统库：
+1. **一次性操作，以具有 sudo 权限的管理员用户身份**，安装 Chromium 所需的系统库：
    ```bash
    sudo npx playwright install-deps chromium
    ```
-   （您可以从任何地方运行此命令 — `npx` 会动态获取 Playwright。）
+   （您可以从任何地方运行此命令 — `npx` 将动态获取 Playwright。）
 
 2. **以非特权服务用户身份**，运行常规安装程序。它将检测到缺少 sudo，跳过 `--with-deps`，并将 Chromium 安装到用户的本地 Playwright 缓存中：
    ```bash
    curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
    ```
 
-   如果您想完全跳过 Playwright 步骤 — 例如，因为您正在无头运行且不需要浏览器自动化 — 请传递 `--skip-browser`：
+   如果您想完全跳过 Playwright 步骤 — 例如因为您正在运行无头模式且不需要浏览器自动化 — 请传递 `--skip-browser`：
    ```bash
    curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-browser
    ```
@@ -168,7 +170,7 @@ hermes setup          # 或者运行完整的设置向导一次性配置所有�
    sudo ln -s /home/hermes/.hermes/hermes-agent/venv/bin/hermes /usr/local/bin/hermes
    ```
 
-4. **验证：** `hermes doctor` 现在应该能正常运行。如果您遇到 `ModuleNotFoundError: No module named 'dotenv'`，说明您正在使用系统 Python 调用仓库源代码 `hermes` 文件（`~/.hermes/hermes-agent/hermes`），而不是虚拟环境启动器（`~/.hermes/hermes-agent/venv/bin/hermes`）— 请修复步骤 3。
+4. **验证：** `hermes doctor` 现在应该可以干净地运行。如果出现 `ModuleNotFoundError: No module named 'dotenv'`，说明您正在使用系统 Python 调用仓库源代码 `hermes` 文件（`~/.hermes/hermes-agent/hermes`），而不是虚拟环境启动器（`~/.hermes/hermes-agent/venv/bin/hermes`）— 请修复步骤 3。
 
 相同的模式适用于 Arch（安装程序使用 pacman 和相同的 sudo 检测逻辑）、Fedora/RHEL 和 openSUSE — 这些发行版根本不支持 `--with-deps`，因此管理员总是单独安装系统库。相关的 `dnf`/`zypper` 命令由安装程序打印。
 
@@ -179,7 +181,11 @@ hermes setup          # 或者运行完整的设置向导一次性配置所有�
 | 问题 | 解决方案 |
 |---------|----------|
 | `hermes: command not found` | 重新加载您的 shell（`source ~/.bashrc`）或检查 PATH |
-| `API key not set` | 运行 `hermes model` 来配置您的提供商，或运行 `hermes config set OPENROUTER_API_KEY your_key` |
+| `API key not set` | 运行 `hermes model` 配置您的提供商，或运行 `hermes config set OPENROUTER_API_KEY your_key` |
 | 更新后缺少配置 | 运行 `hermes config check` 然后 `hermes config migrate` |
 
-如需更多诊断，请运行 `hermes doctor` — 它会确切地告诉您缺少什么以及如何修复。
+要获取更多诊断信息，请运行 `hermes doctor` — 它会确切地告诉您缺少什么以及如何修复。
+
+## 安装方法自动检测
+
+Hermes 会自动检测它是通过 `pip`、git 安装程序、Homebrew 还是 NixOS 安装的，并且 `hermes update` 会打印该路径对应的更新命令。无需设置环境变量 — 检测基于安装布局（Python site-packages、`~/.hermes/hermes-agent/`、Homebrew 前缀或 Nix 存储路径）。`hermes doctor` 也会在其环境摘要中显示检测到的方法。

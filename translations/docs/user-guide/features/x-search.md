@@ -1,6 +1,6 @@
 ---
 title: X (Twitter) 搜索
-description: 在 Agent 内部使用 xAI 内置的 x_search Responses 工具搜索 X (Twitter) 帖子和线程 — 支持 SuperGrok OAuth 登录或 XAI_API_KEY。
+description: 使用 xAI 内置的 x_search Responses 工具，在 Agent 内部搜索 X (Twitter) 帖子和线程 — 支持 SuperGrok OAuth 登录或 XAI_API_KEY。
 sidebar_label: X (Twitter) 搜索
 sidebar_position: 7
 ---
@@ -17,28 +17,28 @@ sidebar_position: 7
 
 | 凭证 | 来源 | 设置 |
 |------------|--------|-------|
-| **SuperGrok OAuth** (首选) | 在 `accounts.x.ai` 进行浏览器登录，自动刷新 | `hermes auth add xai-oauth` — 参见 [xAI Grok OAuth (SuperGrok 订阅)](../../guides/xai-grok-oauth.md) |
+| **SuperGrok / X Premium+ OAuth** (首选) | 在 `accounts.x.ai` 进行浏览器登录，自动刷新 | `hermes auth add xai-oauth` — 参见 [xAI Grok OAuth (SuperGrok / X Premium+)](../../guides/xai-grok-oauth.md) |
 | **`XAI_API_KEY`** | 付费的 xAI API 密钥 | 在 `~/.hermes/.env` 中设置 |
 
-两者都使用相同的端点和相同的负载 — 唯一的区别是承载令牌。**当两者都配置时，SuperGrok OAuth 优先**，因此 x_search 将使用你的订阅配额运行，而不是消耗付费 API 额度。
+两者都使用相同的负载访问相同的端点 — 唯一的区别是承载令牌。**当两者都配置时，SuperGrok OAuth 优先**，因此 x_search 将使用你的订阅配额运行，而不是消耗付费 API 额度。
 
-该工具的 `check_fn` 每次重建模型的工具列表时都会运行 xAI 凭证解析器。返回 `True` 意味着承载令牌可获取、非空且（如果已过期）已成功刷新。刷新失败导致令牌被撤销时，该工具将从模式中隐藏；模型根本看不到它。
+该工具的 `check_fn` 每次重建模型的工具列表时都会运行 xAI 凭证解析器。返回 `True` 意味着承载令牌可获取、非空且（如果已过期）已成功刷新。刷新失败导致令牌失效时，该工具将从模式中隐藏；模型根本看不到它。
 
 ## 启用工具
 
-默认关闭。在 `hermes tools` 中启用：
+当存在 xAI 凭证（OAuth 令牌或 `XAI_API_KEY`）时自动启用。如果你不需要此功能，可以通过 `hermes tools` → Search → x_search 显式禁用它。
 
 ```bash
 hermes tools
-# → 🐦 X (Twitter) Search   (按空格键切换启用)
+# → 🐦 X (Twitter) Search   (按空格键切换启用状态)
 ```
 
 选择器提供两种凭证选择：
 
-1.  **xAI Grok OAuth (SuperGrok 订阅)** — 如果你尚未登录，将打开浏览器访问 `accounts.x.ai`
-2.  **xAI API 密钥** — 提示输入 `XAI_API_KEY`
+1. **xAI Grok OAuth (SuperGrok 订阅)** — 如果你尚未登录，将在浏览器中打开 `accounts.x.ai`
+2. **xAI API 密钥** — 提示输入 `XAI_API_KEY`
 
-任一选择都满足启用条件。你可以选择你已有的任何凭证；该工具对两者都同样有效。如果最终两者都配置了，在调用时 OAuth 是首选。
+任一选择都满足启用条件。你可以选择已有的任意凭证；该工具对两者功能相同。如果两者最终都配置了，在调用时 OAuth 优先。
 
 ## 配置
 
@@ -66,7 +66,7 @@ Agent 使用以下参数调用 `x_search`：
 | `query` | 字符串 (必需) | 在 X 上查找的内容。 |
 | `allowed_x_handles` | 字符串数组 | 可选的要**专门**包含的句柄列表（最多 10 个）。开头的 `@` 会被去除。 |
 | `excluded_x_handles` | 字符串数组 | 可选的要排除的句柄列表（最多 10 个）。与 `allowed_x_handles` 互斥。 |
-| `from_date` | 字符串 | 可选的 `YYYY-MM-DD` 开始日期。 |
+| `from_date` | 字符串 | 可选的 `YYYY-MM-DD` 起始日期。 |
 | `to_date` | 字符串 | 可选的 `YYYY-MM-DD` 结束日期。 |
 | `enable_image_understanding` | 布尔值 | 要求 xAI 分析匹配帖子附带的图片。 |
 | `enable_video_understanding` | 布尔值 | 要求 xAI 分析匹配帖子附带的视频。 |
@@ -76,7 +76,7 @@ Agent 使用以下参数调用 `x_search`：
 - `answer` — 来自 Grok 的综合文本响应
 - `citations` — Responses API 顶级字段返回的引用
 - `inline_citations` — 从消息体中提取的 `url_citation` 注释（每个包含 `url`、`title`、`start_index`、`end_index`）
-- `credential_source` — 如果 OAuth 解析成功则为 `"xai-oauth"`，如果 API 密钥解析成功则为 `"xai"`
+- `credential_source` — 如果解析为 OAuth 则为 `"xai-oauth"`，如果解析为 API 密钥则为 `"xai"`
 - `model`、`query`、`provider`、`tool`、`success`
 
 ## 示例
@@ -87,9 +87,9 @@ Agent 使用以下参数调用 `x_search`：
 
 Agent 将：
 
-1.  使用 `query="reactions to new Grok image features"`、`allowed_x_handles=["xai"]` 调用 `x_search`
-2.  获取一个综合答案以及链接到特定帖子的引用列表
-3.  用答案和引用进行回复
+1. 使用 `query="reactions to new Grok image features"` 和 `allowed_x_handles=["xai"]` 调用 `x_search`
+2. 获取一个综合答案以及链接到特定帖子的引用列表
+3. 用答案和引用进行回复
 
 ## 故障排除
 
@@ -99,17 +99,17 @@ Agent 将：
 
 ### "`x_search` 未为此模型启用"
 
-配置的 `x_search.model` 无法访问服务器端的 `x_search` 工具。切换到 `grok-4.20-reasoning`（默认值）或支持该工具的其他 Grok 模型。请查阅 [xAI 文档](https://docs.x.ai/) 获取当前支持的模型列表。
+配置的 `x_search.model` 无权访问服务器端的 `x_search` 工具。切换到 `grok-4.20-reasoning`（默认值）或另一个支持该工具的 Grok 模型。请查看 [xAI 文档](https://docs.x.ai/) 获取当前支持的模型列表。
 
 ### 工具未出现在模式中
 
 两种可能的原因：
 
-1.  **工具集未启用。** 运行 `hermes tools` 并确认 `🐦 X (Twitter) Search` 已勾选。
-2.  **没有 xAI 凭证。** check_fn 返回 False，因此模式保持隐藏。运行 `hermes auth status` 以确认 xai-oauth 登录状态，并检查 `XAI_API_KEY` 是否已设置（如果你使用的是 API 密钥路径）。
+1. **工具集未启用。** 运行 `hermes tools` 并确认 `🐦 X (Twitter) Search` 已勾选。
+2. **没有 xAI 凭证。** check_fn 返回 False，因此模式保持隐藏。运行 `hermes auth status` 以确认 xai-oauth 登录状态，并检查 `XAI_API_KEY` 是否已设置（如果你使用的是 API 密钥路径）。
 
 ## 另请参阅
 
--   [xAI Grok OAuth (SuperGrok 订阅)](../../guides/xai-grok-oauth.md) — OAuth 设置指南
--   [网页搜索与提取](web-search.md) — 用于一般（非 X）网页搜索
--   [工具参考](../../reference/tools-reference.md) — 完整的工具目录
+- [xAI Grok OAuth (SuperGrok 订阅)](../../guides/xai-grok-oauth.md) — OAuth 设置指南
+- [网页搜索与提取](web-search.md) — 用于一般（非 X）网页搜索
+- [工具参考](../../reference/tools-reference.md) — 完整的工具目录

@@ -10,7 +10,7 @@ description: "如何将 Hermes Agent 更新到最新版本或卸载它"
 
 ### Git 安装
 
-使用一条命令更新到最新版本：
+使用单个命令更新到最新版本：
 
 ```bash
 hermes update
@@ -20,36 +20,36 @@ hermes update
 
 ### pip 安装
 
-PyPI 发布跟踪的是**带标签的版本**（主要和次要版本），而不是 `main` 分支上的每次提交。检查更新并升级：
+PyPI 发布跟踪的是**带标签的版本**（主要和次要版本），而不是 `main` 分支上的每次提交。使用以下命令检查更新并升级：
 
 ```bash
 hermes update --check    # 查看 PyPI 上是否有新版本
 hermes update            # 运行 pip install --upgrade hermes-agent
 ```
 
-或手动操作：
+或者手动操作：
 
 ```bash
-pip install --upgrade hermes-agent    # 或：uv pip install --upgrade hermes-agent
+pip install --upgrade hermes-agent    # 或者：uv pip install --upgrade hermes-agent
 ```
 
 :::tip
-`hermes update` 会自动检测新的配置选项并提示你添加。如果你跳过了该提示，可以手动运行 `hermes config check` 查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
+`hermes update` 会自动检测新的配置选项并提示你添加它们。如果你跳过了该提示，可以手动运行 `hermes config check` 来查看缺失的选项，然后运行 `hermes config migrate` 以交互方式添加它们。
 :::
 
 ### 更新期间会发生什么（Git 安装）
 
 当你运行 `hermes update` 时，会发生以下步骤：
 
-1.  **配对数据快照** — 保存一个轻量级的更新前状态快照（涵盖 `~/.hermes/pairing/`、飞书评论规则和其他在运行时被修改的状态文件）。可通过[快照和回滚](../user-guide/checkpoints-and-rollback.md)下描述的恢复流程恢复，或通过提取 Hermes 在你 `~/.hermes/` 目录旁写入的最新快速快照 zip 文件恢复。
+1.  **配对数据快照** — 保存一个轻量级的更新前状态快照（涵盖 `~/.hermes/pairing/`、飞书评论规则和其他在运行时被修改的状态文件）。可通过[快照和回滚](../user-guide/checkpoints-and-rollback.md)中描述的快照恢复流程恢复，或通过提取 Hermes 在你 `~/.hermes/` 目录旁边写入的最新快速快照 zip 文件来恢复。
 2.  **Git pull** — 从 `main` 分支拉取最新代码并更新子模块
 3.  **依赖项安装** — 运行 `uv pip install -e ".[all]"` 以获取新的或更改的依赖项
 4.  **配置迁移** — 检测自你当前版本以来添加的新配置选项，并提示你设置它们
-5.  **消息网关自动重启** — 更新完成后，正在运行的消息网关会被刷新，以便新代码立即生效。由服务管理的消息网关（Linux 上的 systemd，macOS 上的 launchd）通过服务管理器重启。当 Hermes 可以将正在运行的 PID 映射回配置文件时，手动启动的消息网关会自动重新启动。
+5.  **消息网关自动重启** — 更新完成后，正在运行的消息网关会被刷新，以便新代码立即生效。由服务管理的消息网关（Linux 上的 systemd，macOS 上的 launchd）通过服务管理器重启。当 Hermes 可以将正在运行的 PID 映射回一个配置文件时，手动启动的消息网关会自动重新启动。
 
 ### 仅预览：`hermes update --check`
 
-想在拉取之前知道是否有可用更新吗？运行 `hermes update --check` — 对于 Git 安装，它会获取并与 `origin/main` 比较提交；对于 pip 安装，它会查询 PyPI 获取最新版本。不会修改任何文件，也不会重启消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
+想在拉取之前知道是否有更新可用吗？运行 `hermes update --check` — 对于 Git 安装，它会获取并与 `origin/main` 比较提交；对于 pip 安装，它会查询 PyPI 获取最新版本。不会修改任何文件，也不会重启消息网关。在需要判断“是否有更新”的脚本和定时任务中很有用。
 
 ### 完整的更新前备份：`--backup`
 
@@ -59,7 +59,7 @@ pip install --upgrade hermes-agent    # 或：uv pip install --upgrade hermes-ag
 hermes update --backup
 ```
 
-或将其设置为每次运行的默认行为：
+或者将其设置为每次运行的默认行为：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -67,50 +67,70 @@ updates:
   pre_update_backup: true
 ```
 
-`--backup` 是早期版本中始终开启的行为，但在大型主目录上每次更新都会增加几分钟时间，所以现在改为可选。上述轻量级配对数据快照仍会无条件运行。
+`--backup` 在早期版本中是始终开启的行为，但在大型主目录上每次更新会增加几分钟时间，所以现在改为可选。上面提到的轻量级配对数据快照仍然无条件运行。
 
-预期输出如下所示：
+### Windows：另一个 `hermes.exe` 正在运行
+
+在 Windows 上，如果 `hermes update` 检测到另一个 `hermes.exe` 进程正在占用虚拟环境的入口点可执行文件（最常见的是 Hermes Desktop 应用生成的后端、另一个终端中打开的 `hermes` REPL，或正在运行的消息网关），它将拒绝运行：
 
 ```
 $ hermes update
-正在更新 Hermes Agent...
-📥 正在拉取最新代码...
-已经是最新的。 (或：正在更新 abc1234..def5678)
-📦 正在更新依赖项...
-✅ 依赖项已更新
-🔍 正在检查新的配置选项...
-✅ 配置是最新的 (或：发现 2 个新选项 — 正在运行迁移...)
-🔄 正在重启消息网关...
-✅ 消息网关已重启
-✅ Hermes Agent 更新成功！
+✗ Another hermes.exe is running:
+    PID 12345  hermes.exe
+
+  Updating now would fail to overwrite ...\venv\Scripts\hermes.exe because
+  Windows blocks REPLACE on a running executable.
+
+  Close Hermes Desktop, exit any open `hermes` REPLs, and
+  stop the gateway (`hermes gateway stop`) before retrying.
+  Override with `hermes update --force` if you've already
+  confirmed those processes will not write to the venv.
+```
+
+关闭列出的进程并重新运行。如果你确定并发进程不会干扰（这种情况很少见 — 通常只在防病毒软件垫片被错误归因时有用），可以传递 `--force` 来跳过检查。在这种情况下，更新程序仍将使用指数退避重试 `.exe` 重命名，并且在顽固锁定的情况下，通过 `MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)` 安排在下一次重启时替换，以便更新可以完成。
+
+预期的输出如下所示：
+
+```
+$ hermes update
+Updating Hermes Agent...
+📥 Pulling latest code...
+Already up to date.  (或: Updating abc1234..def5678)
+📦 Updating dependencies...
+✅ Dependencies updated
+🔍 Checking for new config options...
+✅ Config is up to date  (或: Found 2 new options — running migration...)
+🔄 Restarting gateways...
+✅ Gateway restarted
+✅ Hermes Agent updated successfully!
 ```
 
 ### 推荐的更新后验证
 
 `hermes update` 处理主要的更新路径，但快速验证可以确认一切顺利落地：
 
-1.  `git status --short` — 如果工作树意外变脏，请在继续之前检查
+1.  `git status --short` — 如果工作树意外地变脏了，请在继续之前检查
 2.  `hermes doctor` — 检查配置、依赖项和服务健康状况
 3.  `hermes --version` — 确认版本按预期更新
 4.  如果你使用消息网关：`hermes gateway status`
-5.  如果 `doctor` 报告 npm audit 问题：在标记的目录中运行 `npm audit fix`
+5.  如果 `doctor` 报告 npm 审计问题：在标记的目录中运行 `npm audit fix`
 
 :::warning 更新后工作树变脏
-如果 `git status --short` 在 `hermes update` 后显示意外更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
+如果 `git status --short` 在 `hermes update` 后显示意外的更改，请在继续之前停止并检查它们。这通常意味着本地修改被重新应用到更新后的代码之上，或者依赖项步骤刷新了锁文件。
 :::
 
 ### 如果你的终端在更新过程中断开连接
 
 `hermes update` 会保护自己免受意外终端丢失的影响：
 
-- 更新会忽略 `SIGHUP`，因此关闭 SSH 会话或终端窗口不会再在安装过程中终止它。`pip` 和 `git` 子进程继承了这种保护，因此 Python 环境不会因连接断开而处于半安装状态。
-- 所有输出在更新运行时都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失，请重新连接并检查日志，查看更新是否完成以及消息网关重启是否成功：
+-   更新忽略 `SIGHUP`，因此关闭 SSH 会话或终端窗口不再会在安装过程中杀死它。`pip` 和 `git` 子进程继承了这种保护，因此 Python 环境不会因为连接断开而处于半安装状态。
+-   所有输出在更新运行时都会镜像到 `~/.hermes/logs/update.log`。如果你的终端消失了，重新连接并检查日志，看看更新是否完成以及消息网关重启是否成功：
 
 ```bash
 tail -f ~/.hermes/logs/update.log
 ```
 
-- `Ctrl-C` (SIGINT) 和系统关机 (SIGTERM) 仍然会被响应 — 这些是故意的取消操作，而不是意外。
+-   `Ctrl-C` (SIGINT) 和系统关机 (SIGTERM) 仍然会被响应 — 这些是故意的取消操作，而不是意外。
 
 你不再需要将 `hermes update` 包装在 `screen` 或 `tmux` 中以在终端断开连接时存活。
 
@@ -120,7 +140,7 @@ tail -f ~/.hermes/logs/update.log
 hermes version
 ```
 
-与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases)上的最新版本进行比较。
+与 [GitHub 发布页面](https://github.com/NousResearch/hermes-agent/releases) 上的最新版本进行比较。
 
 ### 从消息平台更新
 
@@ -130,7 +150,7 @@ hermes version
 /update
 ```
 
-这会拉取最新代码，更新依赖项，并重启正在运行的消息网关。机器人将在重启期间短暂离线（通常 5–15 秒），然后恢复。
+这会拉取最新代码，更新依赖项，并重启正在运行的消息网关。机器人将在重启期间短暂离线（通常 5-15 秒），然后恢复。
 
 ### 手动更新
 
@@ -148,7 +168,7 @@ uv pip install -e ".[all]"
 
 # 检查新的配置选项
 hermes config check
-hermes config migrate   # 以交互方式添加任何缺失的选项
+hermes config migrate   # 交互式添加任何缺失的选项
 ```
 
 ### 回滚说明
@@ -166,11 +186,11 @@ git checkout <commit-hash>
 git submodule update --init --recursive
 uv pip install -e ".[all]"
 
-# 如果消息网关正在运行，则重启它
+# 如果正在运行，重启消息网关
 hermes gateway restart
 ```
 
-回滚到特定的发布标签：
+要回滚到特定的发布标签：
 
 ```bash
 git checkout v0.6.0
@@ -182,7 +202,7 @@ uv pip install -e ".[all]"
 如果添加了新选项，回滚可能会导致配置不兼容。回滚后运行 `hermes config check`，如果遇到错误，请从 `config.yaml` 中删除任何无法识别的选项。
 :::
 
-### 给 Nix 用户的说明
+### 给 Nix 用户的注意事项
 
 如果你通过 Nix flake 安装，更新是通过 Nix 包管理器管理的：
 
@@ -190,7 +210,7 @@ uv pip install -e ".[all]"
 # 更新 flake 输入
 nix flake update hermes-agent
 
-# 或使用最新版本重新构建
+# 或者用最新版本重新构建
 nix profile upgrade hermes-agent
 ```
 
@@ -212,7 +232,7 @@ nix profile rollback
 hermes uninstall
 ```
 
-卸载程序会给你保留配置文件（`~/.hermes/`）以便将来重新安装的选项。
+卸载程序会给你选择保留配置文件（`~/.hermes/`）以便将来重新安装。
 
 ### pip 安装
 
