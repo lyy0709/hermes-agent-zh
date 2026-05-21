@@ -22,23 +22,23 @@ sidebar_position: 7
 
 两者都使用相同的负载访问相同的端点 — 唯一的区别是承载令牌。**当两者都配置时，SuperGrok OAuth 优先**，因此 x_search 将使用你的订阅配额运行，而不是消耗付费 API 额度。
 
-该工具的 `check_fn` 每次重建模型的工具列表时都会运行 xAI 凭证解析器。返回 `True` 意味着承载令牌可获取、非空且（如果已过期）已成功刷新。刷新失败导致令牌失效时，该工具将从模式中隐藏；模型根本看不到它。
+该工具的 `check_fn` 每次重建模型的工具列表时都会运行 xAI 凭证解析器。返回 `True` 意味着承载令牌可获取、非空且（如果已过期）已成功刷新。刷新失败导致令牌被撤销时，该工具将从模式中隐藏；模型根本看不到它。
 
 ## 启用工具
 
-当存在 xAI 凭证（OAuth 令牌或 `XAI_API_KEY`）时自动启用。如果你不需要此功能，可以通过 `hermes tools` → Search → x_search 显式禁用它。
+当存在 xAI 凭证（OAuth 令牌或 `XAI_API_KEY`）时自动启用。如果你不需要此功能，可以通过 `hermes tools` → 搜索 → x_search 显式禁用它。
 
 ```bash
 hermes tools
-# → 🐦 X (Twitter) Search   (按空格键切换启用状态)
+# → 🐦 X (Twitter) 搜索   (按空格键切换启用)
 ```
 
 选择器提供两种凭证选择：
 
-1. **xAI Grok OAuth (SuperGrok 订阅)** — 如果你尚未登录，将在浏览器中打开 `accounts.x.ai`
-2. **xAI API 密钥** — 提示输入 `XAI_API_KEY`
+1.  **xAI Grok OAuth (SuperGrok 订阅)** — 如果你尚未登录，将在浏览器中打开 `accounts.x.ai`
+2.  **xAI API 密钥** — 提示输入 `XAI_API_KEY`
 
-任一选择都满足启用条件。你可以选择已有的任意凭证；该工具对两者功能相同。如果两者最终都配置了，在调用时 OAuth 优先。
+任一选择都满足启用条件。你可以选择你已有的任何凭证；该工具对两者同样有效。如果最终两者都配置了，则在调用时优先使用 OAuth。
 
 ## 配置
 
@@ -64,7 +64,7 @@ Agent 使用以下参数调用 `x_search`：
 | 参数 | 类型 | 描述 |
 |-----------|------|-------------|
 | `query` | 字符串 (必需) | 在 X 上查找的内容。 |
-| `allowed_x_handles` | 字符串数组 | 可选的要**专门**包含的句柄列表（最多 10 个）。开头的 `@` 会被去除。 |
+| `allowed_x_handles` | 字符串数组 | 可选的要**独占**包含的句柄列表（最多 10 个）。开头的 `@` 会被去除。 |
 | `excluded_x_handles` | 字符串数组 | 可选的要排除的句柄列表（最多 10 个）。与 `allowed_x_handles` 互斥。 |
 | `from_date` | 字符串 | 可选的 `YYYY-MM-DD` 起始日期。 |
 | `to_date` | 字符串 | 可选的 `YYYY-MM-DD` 结束日期。 |
@@ -76,20 +76,33 @@ Agent 使用以下参数调用 `x_search`：
 - `answer` — 来自 Grok 的综合文本响应
 - `citations` — Responses API 顶级字段返回的引用
 - `inline_citations` — 从消息体中提取的 `url_citation` 注释（每个包含 `url`、`title`、`start_index`、`end_index`）
-- `credential_source` — 如果解析为 OAuth 则为 `"xai-oauth"`，如果解析为 API 密钥则为 `"xai"`
+- `degraded` — 当设置了任何限制性过滤器（`allowed_x_handles`、`excluded_x_handles`、`from_date`、`to_date`）**且**两个引用渠道都返回空时，为 `true`。在这种情况下，`answer` 是根据模型自身的知识综合得出的，而不是来自 X 索引，因此应将其视为无来源信息。否则为 `false`（包括“未设置过滤器”的情况 — 一个宽泛的无来源答案只是一个答案，而不是过滤器未命中）
+- `degraded_reason` — 简短字符串，说明哪些过滤器处于活动状态，当 `degraded` 为 `false` 时为 `null`
+- `credential_source` — 如果 OAuth 解析成功，则为 `"xai-oauth"`；如果 API 密钥解析成功，则为 `"xai"`
 - `model`、`query`、`provider`、`tool`、`success`
+
+### 日期验证
+
+`from_date` / `to_date` 在 HTTP 调用之前会在客户端进行验证：
+
+- 如果提供了两者，都必须能解析为 `YYYY-MM-DD`。
+- 当两者都设置时，`from_date` 必须早于或等于 `to_date`。
+- `from_date` 不能晚于今天的 UTC 日期 — 不可能存在尚未开始的时间窗口内的帖子，因此调用将保证返回零引用。
+- 允许 `to_date` 在未来（调用者可能合法地请求“从昨天到明天”以捕获新发布的帖子）。
+
+验证失败会以结构化的 `{"error": "..."}` 工具结果形式呈现，而不会作为对 xAI 的 HTTP 调用。
 
 ## 示例
 
 与 Agent 对话：
 
-> X 上的人们对新的 Grok 图像功能有什么看法？重点关注来自 @xai 的回复。
+> X 上的人们对新的 Grok 图像功能有什么看法？重点关注来自 @xai 的回应。
 
 Agent 将：
 
-1. 使用 `query="reactions to new Grok image features"` 和 `allowed_x_handles=["xai"]` 调用 `x_search`
-2. 获取一个综合答案以及链接到特定帖子的引用列表
-3. 用答案和引用进行回复
+1.  使用 `query="reactions to new Grok image features"` 和 `allowed_x_handles=["xai"]` 调用 `x_search`
+2.  获取一个综合答案以及链接到特定帖子的引用列表
+3.  用答案和引用进行回复
 
 ## 故障排除
 
@@ -99,17 +112,27 @@ Agent 将：
 
 ### "`x_search` 未为此模型启用"
 
-配置的 `x_search.model` 无权访问服务器端的 `x_search` 工具。切换到 `grok-4.20-reasoning`（默认值）或另一个支持该工具的 Grok 模型。请查看 [xAI 文档](https://docs.x.ai/) 获取当前支持的模型列表。
+配置的 `x_search.model` 无权访问服务器端的 `x_search` 工具。切换到 `grok-4.20-reasoning`（默认值）或支持该工具的其他 Grok 模型。请查阅 [xAI 文档](https://docs.x.ai/) 获取当前支持的列表。
 
 ### 工具未出现在模式中
 
 两种可能的原因：
 
-1. **工具集未启用。** 运行 `hermes tools` 并确认 `🐦 X (Twitter) Search` 已勾选。
-2. **没有 xAI 凭证。** check_fn 返回 False，因此模式保持隐藏。运行 `hermes auth status` 以确认 xai-oauth 登录状态，并检查 `XAI_API_KEY` 是否已设置（如果你使用的是 API 密钥路径）。
+1.  **工具集未启用。** 运行 `hermes tools` 并确认 `🐦 X (Twitter) 搜索` 已勾选。
+2.  **没有 xAI 凭证。** check_fn 返回 False，因此模式保持隐藏。运行 `hermes auth status` 以确认 xai-oauth 登录状态，并检查是否设置了 `XAI_API_KEY`（如果你使用的是 API 密钥路径）。
+
+### `degraded: true` — 答案没有引用
+
+当你使用了 `allowed_x_handles`、`excluded_x_handles` 或日期范围，并且响应返回 `degraded: true` 时，意味着 xAI 的 X 索引没有返回匹配的帖子，但 Grok 仍然根据其自身的训练数据生成了一个综合答案。该答案是无来源的 — 不要将其视为真实的 X 结果。
+
+值得检查的原因：
+
+-   **句柄拼写错误。** 去掉 `@`，仔细检查拼写，并确认账户存在。
+-   **日期范围太窄**或错过了今天的帖子；扩大范围并重试。
+-   **xAI 索引间隙。** 一些活跃账户会间歇性地无法在 `x_search` 中显示，即使它们定期发帖。几分钟后重试，或者当你需要精确获取某个句柄的时间线时，使用 `xurl` 技能进行直接的 X API 读取。
 
 ## 另请参阅
 
-- [xAI Grok OAuth (SuperGrok 订阅)](../../guides/xai-grok-oauth.md) — OAuth 设置指南
-- [网页搜索与提取](web-search.md) — 用于一般（非 X）网页搜索
-- [工具参考](../../reference/tools-reference.md) — 完整的工具目录
+-   [xAI Grok OAuth (SuperGrok 订阅)](../../guides/xai-grok-oauth.md) — OAuth 设置指南
+-   [网页搜索与提取](web-search.md) — 用于一般（非 X）网页搜索
+-   [工具参考](../../reference/tools-reference.md) — 完整的工具目录
