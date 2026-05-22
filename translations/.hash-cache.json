@@ -25,8 +25,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "AGENTS.md": {
-    "source_hash": "sha256:bf21e121a1097091654b4bc0bf3636f5c8834dd026e6a8880517faa7b1e7a877",
-    "translated_at": "2026-05-19T06:09:33.480163+00:00",
+    "source_hash": "sha256:7126ce48f0dc07d71659fb97910a3852c7830df8e3254bc853690963ae9fe8fd",
+    "translated_at": "2026-05-22T06:09:51.959100+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/developer-guide/adding-providers.md": {
@@ -265,8 +265,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/integrations/providers.md": {
-    "source_hash": "sha256:0f25bc8e18920699f64aa7f5650ed79f1176c63595ceedafea0870747f0b9d7f",
-    "translated_at": "2026-05-20T06:16:24.202117+00:00",
+    "source_hash": "sha256:8a38154d25f33ae2a427403b4be57e7f36a744242b7b531c0d656faded35af5a",
+    "translated_at": "2026-05-22T06:12:19.967686+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/tools-reference.md": {
@@ -650,8 +650,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/tui.md": {
-    "source_hash": "sha256:974df40f55f738590fdf545179ad09d5447d8be830210e17bdf0de2c51773007",
-    "translated_at": "2026-05-20T06:39:50.246727+00:00",
+    "source_hash": "sha256:b00322b6526cd78111da059c934f2bb4efd2985b6cd4950f00bafd2921cd712f",
+    "translated_at": "2026-05-22T06:02:06.866324+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/github-pr-review-agent.md": {
@@ -1757,6 +1757,16 @@
   "website/docs/developer-guide/web-search-provider-plugin.md": {
     "source_hash": "sha256:438c9bdde97298ed922c4f2266e0ef23d856a977b3d3edf3027b13d7c42e7d3c",
     "translated_at": "2026-05-20T06:02:19.290015+00:00",
+    "model": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "website/docs/user-guide/secrets/index.md": {
+    "source_hash": "sha256:04387f0f467f762120fbea148f49e0e8b57235dd96f19aebd9676c30539813cc",
+    "translated_at": "2026-05-22T05:59:35.337070+00:00",
+    "model": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "website/docs/user-guide/secrets/bitwarden.md": {
+    "source_hash": "sha256:7e74c12913c9fb0647abca532dfdd4caa716ff24d457baea3245816e7d01f41d",
+    "translated_at": "2026-05-22T06:00:44.750467+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   }
 }
