@@ -605,8 +605,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/commands.py": {
-    "source_hash": "sha256:a1c9284d0dea5365df3e45df2887d7c117d395ba81b3b0a15fec60ccd3a479ee",
-    "translated_at": "2026-05-21T06:20:20.520136+00:00",
+    "source_hash": "sha256:36330977b69c1729682237809aea2864cb406b1692447f4f147f26134b00984e",
+    "translated_at": "2026-05-23T05:45:33.251746+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/doctor.py": {
@@ -615,8 +615,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/setup.py": {
-    "source_hash": "sha256:a8ef36687d17172b15ac789fda64866b3079a21fb7ca050915a05f272354db7d",
-    "translated_at": "2026-05-20T07:02:11.607234+00:00",
+    "source_hash": "sha256:1bbe45e9f51c65eca5b5339ea90899b56df6d25b32ababce36a9c52a8cdbbbbc",
+    "translated_at": "2026-05-23T05:55:44.507547+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/automation-templates.md": {
