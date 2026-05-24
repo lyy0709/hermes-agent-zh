@@ -2,23 +2,22 @@
 
 [SimpleX Chat](https://simplex.chat/) 是一个私密、去中心化的消息平台，用户拥有自己的联系人和群组。与其他平台不同，SimpleX 不分配持久的用户 ID —— 每个联系人通过连接时生成的不透明内部 ID 来识别，这使其成为目前最私密的即时通讯工具之一。
 
-## 前提条件
+## 先决条件
 
 - 已安装 **simplex-chat** CLI 并作为守护进程运行
 - Python 包 **websockets** (`pip install websockets`)
 
 ## 安装 simplex-chat
 
-从 [simplex-chat GitHub 发布页面](https://github.com/simplex-chat/simplex-chat/releases) 下载最新版本，或通过 Docker 安装：
+从 [simplex-chat GitHub 发布页面](https://github.com/simplex-chat/simplex-chat/releases) 下载最新版本：
 
 ```bash
 # Linux / macOS 二进制文件
 curl -L https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-chat-ubuntu-22_04-x86-64 -o simplex-chat
 chmod +x simplex-chat
-
-# 或使用 Docker
-docker run -p 5225:5225 simplexchat/simplex-chat -p 5225
 ```
+
+SimpleX Chat 项目没有为聊天客户端发布预构建的 Docker 镜像；要在 Docker 下运行，请从 [simplex-chat 仓库](https://github.com/simplex-chat/simplex-chat) 从源代码构建。
 
 ## 启动守护进程
 
@@ -26,7 +25,7 @@ docker run -p 5225:5225 simplexchat/simplex-chat -p 5225
 simplex-chat -p 5225
 ```
 
-默认情况下，守护进程在 `ws://127.0.0.1:5225` 上监听 WebSocket 连接。
+默认情况下，守护进程在 `ws://127.0.0.1:5225` 上监听 WebSocket。
 
 ## 配置 Hermes
 
@@ -40,7 +39,7 @@ hermes setup gateway
 
 ### 通过环境变量
 
-将以下内容添加到 `~/.hermes/.env`：
+将这些添加到 `~/.hermes/.env`：
 
 ```
 SIMPLEX_WS_URL=ws://127.0.0.1:5225
@@ -58,16 +57,16 @@ SIMPLEX_HOME_CHANNEL=<contact-id>
 
 ## 查找您的联系人 ID
 
-启动守护进程后，打开与您的 Agent 联系人的对话。联系人 ID 将出现在会话日志中，或通过 `hermes send_message action=list` 命令获取。
+启动守护进程后，打开与您的 Agent 联系人的对话。联系人 ID 将出现在会话日志中或通过 `hermes send_message action=list` 命令获取。
 
 ## 授权
 
 默认情况下 **所有联系人都被拒绝**。您必须：
 
 1. 将 `SIMPLEX_ALLOWED_USERS` 设置为逗号分隔的联系人 ID 列表，或者
-2. 使用 **私信配对** —— 向机器人发送任何消息，它将回复一个配对码。通过 `hermes gateway pair` 命令输入该配对码。
+2. 使用 **私信配对** —— 向机器人发送任何消息，它将回复一个配对码。通过 `hermes gateway pair` 输入该代码。
 
-## 将 SimpleX 与定时任务结合使用
+## 将 SimpleX 与定时任务一起使用
 
 ```python
 cronjob(
@@ -86,8 +85,8 @@ send_message(target="simplex:<contact-id>", message="Done!")
 
 ## 隐私说明
 
-- SimpleX 从不泄露电话号码或电子邮件地址 —— 联系人使用不透明的 ID
-- Hermes 与守护进程之间的连接是本地的 WebSocket (`ws://127.0.0.1:5225`) —— 数据不会离开您的机器
+- SimpleX 从不透露电话号码或电子邮件地址 —— 联系人使用不透明的 ID
+- Hermes 和守护进程之间的连接是本地的 WebSocket (`ws://127.0.0.1:5225`) —— 数据不会离开您的机器
 - 消息在到达守护进程之前已通过 SimpleX 协议进行端到端加密
 
 ## 故障排除

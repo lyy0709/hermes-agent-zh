@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # 图像生成
 
-Hermes Agent 通过 FAL.ai 从文本提示词生成图像。开箱即用支持九种模型，每种模型在速度、质量和成本方面有不同的权衡。活动模型可通过 `hermes tools` 由用户配置，并持久化保存在 `config.yaml` 中。
+Hermes Agent 通过 FAL.ai 从文本提示词生成图像。开箱即用支持九种模型，每种模型在速度、质量和成本之间有不同的权衡。活动模型可通过 `hermes tools` 由用户配置，并持久化保存在 `config.yaml` 中。
 
 ## 支持的模型
 
@@ -16,11 +16,11 @@ Hermes Agent 通过 FAL.ai 从文本提示词生成图像。开箱即用支持�
 | `fal-ai/flux-2/klein/9b` *(默认)* | `<1s` | 快速，清晰的文本 | $0.006/MP |
 | `fal-ai/flux-2-pro` | ~6s | 工作室级照片写实 | $0.03/MP |
 | `fal-ai/z-image/turbo` | ~2s | 双语 EN/CN，6B 参数 | $0.005/MP |
-| `fal-ai/nano-banana-pro` | ~8s | Gemini 3 Pro，推理深度，文本渲染 | $0.15/张 (1K) |
-| `fal-ai/gpt-image-1.5` | ~15s | 提示词遵循度 | $0.034/张 |
-| `fal-ai/gpt-image-2` | ~20s | SOTA 文本渲染 + CJK，世界感知照片写实 | $0.04–0.06/张 |
-| `fal-ai/ideogram/v3` | ~5s | 最佳排版 | $0.03–0.09/张 |
-| `fal-ai/recraft/v4/pro/text-to-image` | ~8s | 设计，品牌系统，生产就绪 | $0.25/张 |
+| `fal-ai/nano-banana-pro` | ~8s | Gemini 3 Pro，推理深度，文本渲染 | $0.15/图像 (1K) |
+| `fal-ai/gpt-image-1.5` | ~15s | 提示词遵循度 | $0.034/图像 |
+| `fal-ai/gpt-image-2` | ~20s | SOTA 文本渲染 + CJK，世界感知照片写实 | $0.04–0.06/图像 |
+| `fal-ai/ideogram/v3` | ~5s | 最佳字体排印 | $0.03–0.09/图像 |
+| `fal-ai/recraft/v4/pro/text-to-image` | ~8s | 设计，品牌系统，生产就绪 | $0.25/图像 |
 | `fal-ai/qwen-image` | ~12s | 基于 LLM，复杂文本 | $0.02/MP |
 
 价格为撰写本文时 FAL 的定价；请查看 [fal.ai](https://fal.ai/) 获取当前价格。
@@ -28,7 +28,7 @@ Hermes Agent 通过 FAL.ai 从文本提示词生成图像。开箱即用支持�
 ## 设置
 
 :::tip Nous 订阅用户
-如果您拥有付费的 [Nous Portal](https://portal.nousresearch.com) 订阅，您可以通过 **[工具网关](tool-gateway.md)** 使用图像生成功能，无需 FAL API 密钥。您的模型选择在两个路径中都会持久化。
+如果您拥有付费的 [Nous Portal](https://portal.nousresearch.com) 订阅，您可以通过 **[Tool Gateway](tool-gateway.md)** 使用图像生成功能，而无需 FAL API 密钥。您的模型选择在两个路径中都会持久保存。新安装可以通过运行 `hermes setup --portal` 登录并一次性开启所有网关工具；现有安装可以通过 `hermes tools` 选择 **Nous Subscription** 作为图像生成后端。
 
 如果托管网关针对特定模型返回 `HTTP 4xx`，则表示该模型尚未在门户端代理 —— Agent 会告知您此情况，并提供补救步骤（设置 `FAL_KEY` 以直接访问，或选择其他模型）。
 :::
@@ -46,13 +46,13 @@ Hermes Agent 通过 FAL.ai 从文本提示词生成图像。开箱即用支持�
 hermes tools
 ```
 
-导航到 **🎨 图像生成**，选择您的后端（Nous 订阅或 FAL.ai），然后选择器会以列对齐的表格显示所有支持的模型 —— 使用方向键导航，按 Enter 键选择：
+导航到 **🎨 Image Generation**，选择您的后端（Nous Subscription 或 FAL.ai），然后选择器会以列对齐的表格显示所有支持的模型 —— 使用方向键导航，按 Enter 键选择：
 
 ```
-  模型                          速度     优势                         价格
-  fal-ai/flux-2/klein/9b        <1s      快速，清晰的文本             $0.006/MP   ← 当前使用中
-  fal-ai/flux-2-pro             ~6s      工作室级照片写实              $0.03/MP
-  fal-ai/z-image/turbo          ~2s      双语 EN/CN，6B               $0.005/MP
+  Model                          Speed    Strengths                    Price
+  fal-ai/flux-2/klein/9b         <1s      Fast, crisp text             $0.006/MP   ← currently in use
+  fal-ai/flux-2-pro              ~6s      Studio photorealism          $0.03/MP
+  fal-ai/z-image/turbo           ~2s      Bilingual EN/CN, 6B          $0.005/MP
   ...
 ```
 
@@ -61,27 +61,27 @@ hermes tools
 ```yaml
 image_gen:
   model: fal-ai/flux-2/klein/9b
-  use_gateway: false            # 如果使用 Nous 订阅则为 true
+  use_gateway: false            # 如果使用 Nous Subscription 则为 true
 ```
 
 ### GPT-Image 质量
 
-`fal-ai/gpt-image-1.5` 和 `fal-ai/gpt-image-2` 的请求质量固定为 `medium`（在 1024×1024 分辨率下约 $0.034–$0.06/张）。我们不将 `low` / `high` 等级作为面向用户的选项公开，以便 Nous Portal 的计费在所有用户中保持可预测性 —— 不同等级之间的成本差异为 3–22 倍。如果您想要更便宜的选项，请选择 Klein 9B 或 Z-Image Turbo；如果您想要更高质量，请使用 Nano Banana Pro 或 Recraft V4 Pro。
+`fal-ai/gpt-image-1.5` 和 `fal-ai/gpt-image-2` 的请求质量固定为 `medium`（在 1024×1024 分辨率下约 $0.034–$0.06/图像）。我们不将 `low` / `high` 层级作为面向用户的选项公开，以便 Nous Portal 的计费在所有用户中保持可预测性 —— 层级之间的成本差异为 3–22 倍。如果您想要更便宜的选项，请选择 Klein 9B 或 Z-Image Turbo；如果您想要更高的质量，请使用 Nano Banana Pro 或 Recraft V4 Pro。
 
-## 使用方式
+## 使用
 
-面向 Agent 的模式有意保持最小化 —— 模型会选取您配置的任何内容：
-
-```
-生成一幅宁静的山景与樱花的图像
-```
+面向 Agent 的模式设计上保持极简 —— 模型会采用您配置的任何内容：
 
 ```
-创建一张智慧老猫头鹰的方形肖像 —— 使用排版模型
+Generate an image of a serene mountain landscape with cherry blossoms
 ```
 
 ```
-为我制作一幅未来主义城市景观，横向构图
+Create a square portrait of a wise old owl — use the typography model
+```
+
+```
+Make me a futuristic cityscape, landscape orientation
 ```
 
 ## 宽高比
@@ -100,12 +100,12 @@ GPT Image 2 映射到 4:3 预设而不是 16:9，因为其最小像素数为 655
 
 ## 自动放大
 
-通过 FAL 的 **Clarity Upscaler** 进行放大是按模型门控的：
+通过 FAL 的 **Clarity Upscaler** 进行放大是按模型控制的：
 
 | 模型 | 放大？ | 原因 |
 |---|---|---|
 | `fal-ai/flux-2-pro` | ✓ | 向后兼容（曾是选择器出现前的默认设置） |
-| 所有其他模型 | ✗ | 快速模型将失去其亚秒级的价值主张；高分辨率模型不需要它 |
+| 所有其他模型 | ✗ | 快速模型将失去其亚秒级价值主张；高分辨率模型不需要它 |
 
 当放大运行时，使用以下设置：
 
@@ -122,7 +122,7 @@ GPT Image 2 映射到 4:3 预设而不是 16:9，因为其最小像素数为 655
 ## 内部工作原理
 
 1.  **模型解析** — `_resolve_fal_model()` 从 `config.yaml` 读取 `image_gen.model`，回退到 `FAL_IMAGE_MODEL` 环境变量，然后回退到 `fal-ai/flux-2/klein/9b`。
-2.  **负载构建** — `_build_fal_payload()` 将您的 `aspect_ratio` 转换为模型的原生格式（预设枚举、宽高比枚举或 GPT 字面量），合并模型的默认参数，应用任何调用者覆盖，然后过滤到模型的 `supports` 白名单，以便永远不会发送不支持的键。
+2.  **负载构建** — `_build_fal_payload()` 将您的 `aspect_ratio` 转换为模型的原生格式（预设枚举、宽高比枚举或 GPT 字面量），合并模型的默认参数，应用任何调用方覆盖，然后过滤到模型的 `supports` 白名单，以便永远不会发送不支持的键。
 3.  **提交** — `_submit_fal_request()` 通过直接的 FAL 凭据或托管的 Nous 网关进行路由。
 4.  **放大** — 仅当模型的元数据具有 `upscale: True` 时才运行。
 5.  **交付** — 最终图像 URL 返回给 Agent，Agent 发出一个 `MEDIA:<url>` 标签，平台适配器会将其转换为原生媒体。
@@ -150,7 +150,7 @@ export IMAGE_TOOLS_DEBUG=true
 
 ## 限制
 
-*   **需要 FAL 凭据**（直接的 `FAL_KEY` 或 Nous 订阅）
-*   **仅限文生图** —— 此工具不支持修复、图生图或编辑
-*   **临时 URL** —— FAL 返回的托管 URL 在数小时/数天后过期；如有需要请本地保存
-*   **每个模型的约束** —— 某些模型不支持 `seed`、`num_inference_steps` 等。`supports` 过滤器会静默丢弃不支持的参数；这是预期行为
+-   **需要 FAL 凭据**（直接的 `FAL_KEY` 或 Nous Subscription）
+-   **仅限文生图** —— 此工具不支持修复、图生图或编辑
+-   **临时 URL** —— FAL 返回的托管 URL 在数小时/数天后过期；如有需要请本地保存
+-   **每个模型的约束** —— 某些模型不支持 `seed`、`num_inference_steps` 等。`supports` 过滤器会静默丢弃不支持的参数；这是预期行为

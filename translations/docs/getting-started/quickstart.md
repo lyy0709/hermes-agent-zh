@@ -6,11 +6,11 @@ description: "与 Hermes Agent 的第一次对话 —— 从安装到聊天，5 
 
 # 快速开始
 
-本指南将带你从零开始，搭建一个能够实际使用的 Hermes 环境。完成安装、选择提供商、验证聊天功能，并确切知道当出现问题时该如何处理。
+本指南将带你从零开始，搭建一个能在实际使用中稳定运行的 Hermes 环境。完成安装、选择提供商、验证聊天功能正常工作，并确切知道当出现问题时该如何处理。
 
 ## 更喜欢观看视频？
 
-**Onchain AI Garage** 制作了一个关于安装、设置和基本命令的 Masterclass 视频教程 —— 如果你更愿意跟随视频操作，这是本页面的绝佳伴侣。更多内容，请查看完整的 [Hermes Agent 教程与用例](https://www.youtube.com/channel/UCqB1bhMwGsW-yefBxYwFCCg) 播放列表。
+**Onchain AI Garage** 制作了一个关于安装、设置和基本命令的 Masterclass 视频教程 —— 如果你更喜欢跟着视频操作，这是本页面的绝佳伴侣。更多内容，请查看完整的 [Hermes Agent 教程与用例](https://www.youtube.com/channel/UCqB1bhMwGsW-yefBxYwFCCg) 播放列表。
 
 <div style={{position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '100%', marginBottom: '1.5rem'}}>
   <iframe
@@ -25,24 +25,24 @@ description: "与 Hermes Agent 的第一次对话 —— 从安装到聊天，5 
 
 ## 适用人群
 
--   全新用户，希望以最短路径获得可用的环境
--   切换提供商，不想因配置错误浪费时间
--   为团队、机器人或常驻工作流设置 Hermes
--   厌倦了“安装成功，但依然无法使用”的情况
+- 初次接触，希望以最短路径获得可工作的环境
+- 切换提供商，不想在配置错误上浪费时间
+- 为团队、机器人或常驻工作流设置 Hermes
+- 厌倦了“安装成功，但依然无法使用”的情况
 
 ## 最快路径
 
-根据你的目标选择对应的行：
+选择符合你目标的对应行：
 
 | 目标 | 首先执行 | 然后执行 |
 |---|---|---|
-| 我只想在本地机器上运行 Hermes | `hermes setup` | 运行一次真实聊天并验证其响应 |
-| 我已经知道要用的提供商 | `hermes model` | 保存配置，然后开始聊天 |
+| 我只想在我的机器上让 Hermes 运行起来 | `hermes setup` | 运行一次真实的聊天并验证其响应 |
+| 我已经知道我的提供商 | `hermes model` | 保存配置，然后开始聊天 |
 | 我想要一个机器人或常驻设置 | CLI 正常工作后执行 `hermes gateway setup` | 连接 Telegram、Discord、Slack 或其他平台 |
 | 我想要本地或自托管模型 | `hermes model` → 自定义端点 | 验证端点、模型名称和上下文长度 |
 | 我想要多提供商故障转移 | 先执行 `hermes model` | 仅在基础聊天正常工作后，再添加路由和故障转移 |
 
-**经验法则：** 如果 Hermes 无法完成一次正常的聊天，请先不要添加更多功能。先让一次干净的对话正常工作，然后再叠加消息网关、定时任务、技能、语音或路由等功能。
+**经验法则：** 如果 Hermes 无法完成一次正常的聊天，暂时不要添加更多功能。先让一次干净的对话正常工作，然后再叠加消息网关、定时任务、技能、语音或路由等功能。
 
 ---
 
@@ -82,35 +82,45 @@ source ~/.bashrc   # 或 source ~/.zshrc
 
 ## 2. 选择提供商
 
-这是最重要的设置步骤。使用 `hermes model` 以交互方式完成选择：
+这是最重要的一个设置步骤。使用 `hermes model` 以交互方式完成选择：
 
 ```bash
 hermes model
 ```
 
-推荐的默认选项：
+:::tip 最简单路径：Nous Portal
+一个订阅涵盖 300+ 模型以及 [工具网关](../user-guide/features/tool-gateway.md)（网络搜索、图像生成、TTS、云浏览器）。在新安装后：
+
+```bash
+hermes setup --portal
+```
+
+该命令将登录、设置 Nous 为你的提供商，并一键开启工具网关。
+:::
+
+推荐的默认设置：
 
 | 提供商 | 说明 | 如何设置 |
 |----------|-----------|---------------|
 | **Nous Portal** | 基于订阅，零配置 | 通过 `hermes model` 进行 OAuth 登录 |
 | **OpenAI Codex** | ChatGPT OAuth，使用 Codex 模型 | 通过 `hermes model` 进行设备代码授权 |
-| **Anthropic** | 直接使用 Claude 模型 —— Max 计划 + 额外使用额度（OAuth），或按 Token 付费的 API 密钥 | `hermes model` → OAuth 登录（需要 Max 计划 + 额外额度），或提供 Anthropic API 密钥 |
+| **Anthropic** | 直接使用 Claude 模型 —— Max 计划 + 额外使用额度（OAuth），或按 Token 付费的 API 密钥 | `hermes model` → OAuth 登录（需要 Max + 额外额度），或提供 Anthropic API 密钥 |
 | **OpenRouter** | 跨多个模型的多提供商路由 | 输入你的 API 密钥 |
 | **Z.AI** | GLM / 智谱托管模型 | 设置 `GLM_API_KEY` / `ZAI_API_KEY` |
 | **Kimi / Moonshot** | Moonshot 托管的编码和聊天模型 | 设置 `KIMI_API_KEY`（或 Kimi-Coding 专用的 `KIMI_CODING_API_KEY`） |
-| **Kimi / Moonshot China** | 中国区 Moonshot 端点 | 设置 `KIMI_CN_API_KEY` |
+| **Kimi / Moonshot 中国区** | 中国区 Moonshot 端点 | 设置 `KIMI_CN_API_KEY` |
 | **Arcee AI** | Trinity 模型 | 设置 `ARCEEAI_API_KEY` |
 | **GMI Cloud** | 多模型直接 API | 设置 `GMI_API_KEY` |
 | **MiniMax (OAuth)** | 通过浏览器 OAuth 使用 MiniMax-M2.7 —— 无需 API 密钥 | `hermes model` → MiniMax (OAuth) |
 | **MiniMax** | 国际版 MiniMax 端点 | 设置 `MINIMAX_API_KEY` |
-| **MiniMax China** | 中国区 MiniMax 端点 | 设置 `MINIMAX_CN_API_KEY` |
+| **MiniMax 中国区** | 中国区 MiniMax 端点 | 设置 `MINIMAX_CN_API_KEY` |
 | **Alibaba Cloud** | 通过 DashScope 使用 Qwen 模型 | 设置 `DASHSCOPE_API_KEY` |
 | **Hugging Face** | 通过统一路由器使用 20+ 开源模型（Qwen、DeepSeek、Kimi 等） | 设置 `HF_TOKEN` |
 | **AWS Bedrock** | 通过原生 Converse API 使用 Claude、Nova、Llama、DeepSeek | IAM 角色或 `aws configure`（[指南](../guides/aws-bedrock.md)） |
 | **Kilo Code** | KiloCode 托管模型 | 设置 `KILOCODE_API_KEY` |
 | **OpenCode Zen** | 按需付费访问精选模型 | 设置 `OPENCODE_ZEN_API_KEY` |
 | **OpenCode Go** | 每月 10 美元订阅开源模型 | 设置 `OPENCODE_GO_API_KEY` |
-| **DeepSeek** | 直接访问 DeepSeek API | 设置 `DEEPSEEK_API_KEY` |
+| **DeepSeek** | 直接 DeepSeek API 访问 | 设置 `DEEPSEEK_API_KEY` |
 | **NVIDIA NIM** | 通过 build.nvidia.com 或本地 NIM 使用 Nemotron 模型 | 设置 `NVIDIA_API_KEY`（可选：`NVIDIA_BASE_URL`） |
 | **GitHub Copilot** | GitHub Copilot 订阅（GPT-5.x、Claude、Gemini 等） | 通过 `hermes model` 进行 OAuth，或设置 `COPILOT_GITHUB_TOKEN` / `GH_TOKEN` |
 | **GitHub Copilot ACP** | Copilot ACP Agent 后端（生成本地 `copilot` CLI） | `hermes model`（需要 `copilot` CLI + `copilot login`） |
@@ -177,9 +187,9 @@ Hermes 附带两个终端界面：经典的 `prompt_toolkit` CLI 和一个较新
 
 如果这能正常工作，你就度过了最困难的部分。
 
-## 4. 验证会话是否正常工作
+## 4. 验证会话工作
 
-在继续之前，请确保恢复功能有效：
+在继续之前，确保恢复功能有效：
 
 ```bash
 hermes --continue    # 恢复最近的会话
@@ -212,7 +222,7 @@ Agent 将代表你运行终端命令并显示结果。
 
 ### 多行输入
 
-按 `Alt+Enter`、`Ctrl+J` 或 `Shift+Enter` 添加新行。`Shift+Enter` 需要一个能将其作为不同序列发送的终端（Kitty / foot / WezTerm / Ghostty 默认支持；iTerm2 / Alacritty / VS Code 终端在启用 Kitty 键盘协议后支持）。`Alt+Enter` 和 `Ctrl+J` 在所有终端中都有效。
+按 `Alt+Enter`、`Ctrl+J` 或 `Shift+Enter` 添加新行。`Shift+Enter` 需要一个能将其作为不同序列发送的终端（默认情况下是 Kitty / foot / WezTerm / Ghostty；启用 Kitty 键盘协议后，iTerm2 / Alacritty / VS Code 终端也可以）。`Alt+Enter` 和 `Ctrl+J` 在所有终端中都有效。
 
 ### 中断 Agent
 
@@ -220,9 +230,9 @@ Agent 将代表你运行终端命令并显示结果。
 
 ## 6. 添加下一层
 
-仅在基础聊天正常工作后进行。选择你需要的功能：
+只有在基础聊天正常工作之后。选择你需要的功能：
 
-### 机器人或共享助手
+### Bot 或共享助手
 
 ```bash
 hermes gateway setup    # 交互式平台配置
@@ -233,8 +243,8 @@ hermes gateway setup    # 交互式平台配置
 ### 自动化和工具
 
 - `hermes tools` — 按平台调整工具访问权限
-- `hermes skills` — 浏览并安装可复用的工作流
-- Cron — 仅在你的机器人或 CLI 设置稳定后进行
+- `hermes skills` — 浏览并安装可重用的工作流
+- Cron — 仅在你的 bot 或 CLI 设置稳定后使用
 
 ### 沙盒化终端
 
@@ -298,10 +308,10 @@ hermes acp
 | 症状 | 可能原因 | 解决方法 |
 |---|---|---|
 | Hermes 能打开但回复为空或损坏 | 提供商认证或模型选择错误 | 再次运行 `hermes model` 并确认提供商、模型和认证信息 |
-| 自定义端点“可用”但返回乱码 | 基础 URL、模型名称错误，或端点并非真正兼容 OpenAI | 先在单独的客户端验证端点 |
+| 自定义端点"可用"但返回乱码 | 基础 URL、模型名称错误，或端点并非真正兼容 OpenAI | 先在单独的客户端验证该端点 |
 | 消息网关启动但无人能发送消息 | Bot Token、允许列表或平台设置不完整 | 重新运行 `hermes gateway setup` 并检查 `hermes gateway status` |
 | `hermes --continue` 找不到旧会话 | 切换了配置文件或会话从未保存 | 检查 `hermes sessions list` 并确认处于正确的配置文件中 |
-| 模型不可用或出现奇怪的备用行为 | 提供商路由或备用设置过于激进 | 在基础提供商稳定前，保持路由关闭 |
+| 模型不可用或出现奇怪的降级行为 | 提供商路由或降级设置过于激进 | 在基础提供商稳定前，保持路由关闭 |
 | `hermes doctor` 标记配置问题 | 配置值缺失或已过时 | 修复配置，在添加功能前重新测试一次普通聊天 |
 
 ## 恢复工具包
@@ -315,7 +325,7 @@ hermes acp
 5. `hermes --continue`
 6. `hermes gateway status`
 
-这个顺序能让你从“不对劲的状态”快速回到已知的正常状态。
+这个流程能让你从"不对劲的状态"快速回到已知的正常状态。
 
 ---
 
