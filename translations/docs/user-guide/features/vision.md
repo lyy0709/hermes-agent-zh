@@ -1,13 +1,13 @@
 ---
 title: 视觉与图片粘贴
-description: 从剪贴板粘贴图片到 Hermes CLI，进行多模态视觉分析。
+description: 将图片从剪贴板粘贴到 Hermes CLI 中，进行多模态视觉分析。
 sidebar_label: 视觉与图片粘贴
 sidebar_position: 7
 ---
 
 # 视觉与图片粘贴
 
-Hermes Agent 支持**多模态视觉**——你可以直接从剪贴板粘贴图片到 CLI，并要求 Agent 对其进行分析、描述或处理。图片会以 base64 编码的内容块形式发送给模型，因此任何支持视觉的模型都能处理它们。
+Hermes Agent 支持**多模态视觉**——你可以将图片直接从剪贴板粘贴到 CLI 中，并要求 Agent 对其进行分析、描述或处理。图片会以 base64 编码的内容块形式发送给模型，因此任何支持视觉的模型都可以处理它们。
 
 ## 工作原理
 
@@ -27,18 +27,18 @@ Hermes Agent 支持**多模态视觉**——你可以直接从剪贴板粘贴图
 
 ### `/paste` 命令
 
-**最可靠的显式图片附加备用方案。**
+**最可靠、显式的图片附加备用方案。**
 
 ```
 /paste
 ```
 
-输入 `/paste` 并按 Enter 键。Hermes 会检查你的剪贴板中是否有图片并附加它。当你的终端重写了 `Cmd+V`/`Ctrl+V`，或者当你只复制了图片而没有可供检查的括号粘贴文本负载时，这是最安全的选择。
+输入 `/paste` 并按 Enter 键。Hermes 会检查你的剪贴板中是否有图片并附加它。当你的终端重写 `Cmd+V`/`Ctrl+V`，或者当你只复制了图片而没有可供检查的括号粘贴文本负载时，这是最安全的选择。
 
 ### Ctrl+V / Cmd+V
 
 Hermes 现在将粘贴视为一个分层流程：
-- 首先是普通文本粘贴
+- 首先进行普通文本粘贴
 - 如果终端未能干净地传递文本，则回退到原生剪贴板 / OSC52 文本
 - 当剪贴板或粘贴的负载解析为图片或图片路径时，附加图片
 
@@ -123,7 +123,7 @@ echo $XDG_SESSION_TYPE
 
 ### WSL2
 
-**无需额外设置。** Hermes 会自动检测 WSL2（通过 `/proc/version`），并使用 `powershell.exe` 通过 .NET 的 `System.Windows.Forms.Clipboard` 访问 Windows 剪贴板。这内置于 WSL2 的 Windows 互操作中——`powershell.exe` 默认可用。
+**无需额外设置。** Hermes 会自动检测 WSL2（通过 `/proc/version`），并使用 `powershell.exe` 通过 .NET 的 `System.Windows.Forms.Clipboard` 访问 Windows 剪贴板。这是 WSL2 Windows 互操作性内置的功能——默认情况下 `powershell.exe` 可用。
 
 剪贴板数据通过 stdout 以 base64 编码的 PNG 格式传输，因此不需要文件路径转换或临时文件。
 
@@ -142,20 +142,20 @@ which powershell.exe
 
 # 3. 复制一张图片，然后检查
 powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::ContainsImage()"
-# 应该打印 "True"
+# 应打印 "True"
 ```
 
 ## SSH 与远程会话
 
-**通过 SSH 无法完全实现剪贴板图片粘贴。** 当你 SSH 到远程机器时，Hermes CLI 在远程主机上运行。剪贴板工具（`xclip`、`wl-paste`、`powershell.exe`、`osascript`）读取的是它们运行所在机器的剪贴板——即远程服务器，而不是你的本地机器。因此，你的本地剪贴板图片无法从远程端访问。
+**通过 SSH 无法完全实现剪贴板图片粘贴。** 当你 SSH 连接到远程机器时，Hermes CLI 在远程主机上运行。剪贴板工具（`xclip`、`wl-paste`、`powershell.exe`、`osascript`）读取的是它们运行所在机器的剪贴板——即远程服务器，而不是你的本地机器。因此，你的本地剪贴板图片无法从远程端访问。
 
 文本有时仍然可以通过终端粘贴或 OSC52 桥接，但图片剪贴板访问和本地截图临时路径仍然与运行 Hermes 的机器绑定。
 
 ### SSH 的变通方案
 
-1.  **上传图片文件**——将图片保存在本地，通过 `scp`、VSCode 的文件资源管理器（拖放）或任何文件传输方法上传到远程服务器。然后通过路径引用它。*(计划在未来的版本中添加 `/attach <文件路径>` 命令。)*
+1.  **上传图片文件**——将图片保存在本地，通过 `scp`、VSCode 的文件资源管理器（拖放）或任何文件传输方法上传到远程服务器。然后通过路径引用它。*(计划在未来的版本中添加 `/attach <filepath>` 命令。)*
 
-2.  **使用 URL**——如果图片可以在线访问，只需将 URL 粘贴到你的消息中。Agent 可以直接使用 `vision_analyze` 查看任何图片 URL。
+2.  **使用 URL**——如果图片可以在线访问，只需将 URL 粘贴到你的消息中。Agent 可以使用 `vision_analyze` 直接查看任何图片 URL。
 
 3.  **X11 转发**——使用 `ssh -X` 连接以转发 X11。这使得远程机器上的 `xclip` 可以访问你的本地 X11 剪贴板。需要在本地运行 X 服务器（macOS 上的 XQuartz，Linux X11 桌面内置）。对于大图片速度较慢。
 
@@ -173,11 +173,11 @@ powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms;
 
 如果剪贴板只包含图片（没有文本），终端就没有内容可发送。没有标准的终端转义序列用于二进制图片数据。终端什么也不做。
 
-这就是为什么 Hermes 使用单独的剪贴板检查——它不是通过终端粘贴事件接收图片数据，而是通过子进程直接调用操作系统级工具（`osascript`、`powershell.exe`、`xclip`、`wl-paste`）来独立读取剪贴板。
+这就是为什么 Hermes 使用单独的剪贴板检查——它通过子进程直接调用操作系统级工具（`osascript`、`powershell.exe`、`xclip`、`wl-paste`）来独立读取剪贴板，而不是通过终端粘贴事件接收图片数据。
 
 ## 支持的模型
 
-图片粘贴适用于任何支持视觉的模型。图片以 OpenAI 视觉内容格式中的 base64 编码数据 URL 形式发送：
+图片粘贴适用于任何支持视觉的模型。图片以 OpenAI 视觉内容格式的 base64 编码数据 URL 发送：
 
 ```json
 {
@@ -190,21 +190,21 @@ powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms;
 
 大多数现代模型都支持这种格式，包括 GPT-4 Vision、Claude（带视觉）、Gemini 以及通过 OpenRouter 提供的开源多模态模型。
 
-## 图片路由（支持视觉与纯文本模型）
+## 图片路由（支持视觉的模型与纯文本模型）
 
 当用户附加一张图片时——无论是来自 CLI 剪贴板、消息网关（Telegram/Discord 照片）还是任何其他入口点——Hermes 会根据你当前模型是否实际支持视觉来路由它：
 
 | 你的模型 | 图片的处理方式 |
 |---|---|
-| **支持视觉** (GPT-4V, 带视觉的 Claude, Gemini, Qwen-VL, MiMo-VL 等) | 使用上述提供商的原生图片内容格式，以**真实像素**形式发送。没有文本摘要层。 |
-| **纯文本** (DeepSeek V3, 较小的开源模型, 较旧的仅聊天端点) | 通过 `vision_analyze` 辅助工具路由——一个辅助视觉模型描述图片，并将文本描述注入到对话中。 |
+| **支持视觉的模型** (GPT-4V、带视觉的 Claude、Gemini、Qwen-VL、MiMo-VL 等) | 使用上述提供商的原生图片内容格式，以**真实像素**形式发送。没有文本摘要层。 |
+| **纯文本模型** (DeepSeek V3、较小的开源模型、较旧的仅聊天端点) | 通过 `vision_analyze` 辅助工具路由——一个辅助视觉模型描述图片，并将文本描述注入到对话中。 |
 
-你无需配置这个——Hermes 会在提供商元数据中查找你当前模型的能力，并自动选择正确的路径。实际效果是：你可以在会话中途在支持视觉和不支持视觉的模型之间切换，图片处理“直接生效”，无需改变你的工作流程。纯文本模型会获得关于图片的连贯上下文，而不是它们必须拒绝的损坏的多模态负载。
+你无需配置此行为——Hermes 会在提供商元数据中查找你当前模型的能力，并自动选择正确的路径。实际效果是：你可以在会话中途在支持视觉和不支持视觉的模型之间切换，图片处理“正常工作”，无需改变你的工作流程。纯文本模型获得关于图片的连贯上下文，而不是它们必须拒绝的损坏的多模态负载。
 
-哪个辅助模型处理文本描述路径可在 `auxiliary.vision` 下配置——参见[辅助模型](/docs/user-guide/configuration#auxiliary-models)。
+哪个辅助模型处理文本描述路径可在 `auxiliary.vision` 下配置——请参阅[辅助模型](/user-guide/configuration#auxiliary-models)。
 
 ### `vision_analyze` 具有相同的双重行为
 
-`vision_analyze` 工具本身遵循相同的路由。当活动的主模型支持视觉**并且**其提供商支持在工具结果中包含图片内容时（目前是 Anthropic、OpenAI、Azure-OpenAI 和 Gemini 3.x 技术栈），`vision_analyze` 会绕过辅助描述器，并将原始图片像素作为多模态工具结果信封返回。主模型在其下一轮中会原生看到图片——无需辅助调用，没有文本摘要信息损失，没有额外延迟。
+`vision_analyze` 工具本身遵循相同的路由。当活动的主模型支持视觉**并且**其提供商支持在工具结果中包含图片内容时（目前是 Anthropic、OpenAI、Azure-OpenAI 和 Gemini 3.x 技术栈），`vision_analyze` 会绕过辅助描述器，并将原始图片像素作为多模态工具结果信封返回。主模型在其下一轮中本地看到图片——无需辅助调用，没有文本摘要信息损失，没有额外延迟。
 
-对于纯文本主模型（或其工具结果通道不携带图片的提供商），`vision_analyze` 会回退到旧路径：它要求配置的辅助视觉模型描述图片，并将描述作为纯文本返回。无论哪种方式，调用工具签名都是相同的——工具在运行时根据活动模型决定采用哪条路径。
+对于纯文本主模型（或其工具结果通道不携带图片的提供商），`vision_analyze` 回退到传统路径：它要求配置的辅助视觉模型描述图片，并将描述作为纯文本返回。无论哪种方式，调用工具签名都是相同的——工具在运行时根据活动模型决定采用哪条路径。

@@ -4,7 +4,7 @@ sidebar_label: "Opencode"
 description: "将编码任务委派给 OpenCode CLI（功能、PR 审核）"
 ---
 
-{/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Opencode
 
@@ -21,12 +21,12 @@ description: "将编码任务委派给 OpenCode CLI（功能、PR 审核）"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Coding-Agent`, `OpenCode`, `Autonomous`, `Refactoring`, `Code-Review` |
-| 相关技能 | [`claude-code`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
+| 相关技能 | [`claude-code`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # OpenCode CLI
@@ -36,9 +36,9 @@ description: "将编码任务委派给 OpenCode CLI（功能、PR 审核）"
 ## 使用时机
 
 - 用户明确要求使用 OpenCode
-- 您希望外部编码 Agent 实现/重构/审查代码
-- 您需要进行长时间运行的编码会话并检查进度
-- 您需要在隔离的工作目录/工作树中并行执行任务
+- 您希望外部编码 Agent 来实现/重构/审查代码
+- 您需要进行带有进度检查的长时间运行的编码会话
+- 您需要在隔离的工作目录/工作树中执行并行任务
 
 ## 先决条件
 
@@ -57,7 +57,7 @@ terminal(command="which -a opencode")
 terminal(command="opencode --version")
 ```
 
-如果需要，请指定明确的二进制路径：
+如果需要，指定明确的二进制路径：
 
 ```
 terminal(command="$HOME/.opencode/bin/opencode run '...'", workdir="~/project", pty=true)
@@ -80,7 +80,7 @@ terminal(command="opencode run '审查此配置是否存在安全问题' -f conf
 使用 `--thinking` 显示模型思考过程：
 
 ```
-terminal(command="opencode run '调试 CI 中测试失败的原因' --thinking", workdir="~/project")
+terminal(command="opencode run '调试为何测试在 CI 中失败' --thinking", workdir="~/project")
 ```
 
 强制使用特定模型：
@@ -113,7 +113,7 @@ process(action="write", session_id="<id>", data="\x03")
 process(action="kill", session_id="<id>")
 ```
 
-**重要：** 请勿使用 `/exit` — 它不是有效的 OpenCode 命令，而是会打开 Agent 选择器对话框。使用 Ctrl+C (`\x03`) 或 `process(action="kill")` 来退出。
+**重要：** 请勿使用 `/exit` — 它不是有效的 OpenCode 命令，而是会打开一个 Agent 选择对话框。使用 Ctrl+C (`\x03`) 或 `process(action="kill")` 来退出。
 
 ### TUI 快捷键
 
@@ -133,7 +133,7 @@ process(action="kill", session_id="<id>")
 退出后，OpenCode 会打印一个会话 ID。使用以下命令恢复：
 
 ```
-terminal(command="opencode -c", workdir="~/project", background=true, pty=true)  # 继续上次会话
+terminal(command="opencode -c", workdir="~/project", background=true, pty=true)  # 继续上一个会话
 terminal(command="opencode -s ses_abc123", workdir="~/project", background=true, pty=true)  # 特定会话
 ```
 
@@ -142,7 +142,7 @@ terminal(command="opencode -s ses_abc123", workdir="~/project", background=true,
 | 标志 | 用途 |
 |------|-----|
 | `run 'prompt'` | 一次性执行并退出 |
-| `--continue` / `-c` | 继续上次的 OpenCode 会话 |
+| `--continue` / `-c` | 继续上一个 OpenCode 会话 |
 | `--session <id>` / `-s` | 继续特定会话 |
 | `--agent <name>` | 选择 OpenCode Agent（build 或 plan） |
 | `--model provider/model` | 强制使用特定模型 |
@@ -160,7 +160,7 @@ terminal(command="opencode -s ses_abc123", workdir="~/project", background=true,
     - `terminal(command="opencode auth list")`
 2.  对于有界任务，使用 `opencode run '...'`（不需要 pty）。
 3.  对于迭代任务，使用 `background=true, pty=true` 启动 `opencode`。
-4.  使用 `process(action="poll"|"log")` 监控长时间运行的任务。
+4.  使用 `process(action="poll"|"log")` 监控长时间任务。
 5.  如果 OpenCode 请求输入，通过 `process(action="submit", ...)` 响应。
 6.  使用 `process(action="write", data="\x03")` 或 `process(action="kill")` 退出。
 7.  向用户总结文件更改、测试结果和后续步骤。
@@ -207,12 +207,12 @@ terminal(command="opencode stats --days 7 --models anthropic/claude-sonnet-4")
 ## 常见问题
 
 -   交互式 `opencode` (TUI) 会话需要 `pty=true`。`opencode run` 命令**不需要** pty。
--   `/exit` **不是**有效命令 — 它会打开 Agent 选择器。使用 Ctrl+C 退出 TUI。
--   PATH 不匹配可能导致选择错误的 OpenCode 二进制文件/模型配置。
+-   `/exit` **不是**有效命令 — 它会打开一个 Agent 选择器。使用 Ctrl+C 退出 TUI。
+-   PATH 不匹配可能导致选择了错误的 OpenCode 二进制文件/模型配置。
 -   如果 OpenCode 似乎卡住，请在终止前检查日志：
     - `process(action="log", session_id="<id>")`
 -   避免在并行 OpenCode 会话之间共享一个工作目录。
--   在 TUI 中，可能需要按两次 Enter 才能提交（一次完成文本，一次发送）。
+-   在 TUI 中，Enter 键可能需要按两次才能提交（一次完成文本输入，一次发送）。
 
 ## 验证
 
@@ -224,7 +224,7 @@ terminal(command="opencode run 'Respond with exactly: OPENCODE_SMOKE_OK'")
 
 成功标准：
 - 输出包含 `OPENCODE_SMOKE_OK`
-- 命令退出时没有提供商/模型错误
+- 命令退出，没有提供商/模型错误
 - 对于代码任务：预期文件已更改且测试通过
 
 ## 规则
@@ -232,6 +232,6 @@ terminal(command="opencode run 'Respond with exactly: OPENCODE_SMOKE_OK'")
 1.  对于一次性自动化任务，优先使用 `opencode run` — 它更简单且不需要 pty。
 2.  仅在需要迭代时才使用交互式后台模式。
 3.  始终将 OpenCode 会话限定在单个仓库/工作目录内。
-4.  对于长时间运行的任务，从 `process` 日志提供进度更新。
+4.  对于长时间任务，从 `process` 日志中提供进度更新。
 5.  报告具体结果（文件更改、测试、剩余风险）。
 6.  使用 Ctrl+C 或 kill 退出交互式会话，切勿使用 `/exit`。

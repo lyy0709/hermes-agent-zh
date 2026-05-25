@@ -21,7 +21,7 @@ description: "调试 Hermes TUI 斜杠命令：Python、消息网关、Ink UI"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `debugging`, `hermes-agent`, `tui`, `slash-commands`, `typescript`, `python` |
-| 相关技能 | [`python-debugpy`](/docs/user-guide/skills/bundled/software-development/software-development-python-debugpy), [`node-inspect-debugger`](/docs/user-guide/skills/bundled/software-development/software-development-node-inspect-debugger), [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging) |
+| 相关技能 | [`python-debugpy`](/user-guide/skills/bundled/software-development/software-development-python-debugpy), [`node-inspect-debugger`](/user-guide/skills/bundled/software-development/software-development-node-inspect-debugger), [`systematic-debugging`](/user-guide/skills/bundled/software-development/software-development-systematic-debugging) |
 
 ## 参考：完整的 SKILL.md
 
@@ -33,17 +33,17 @@ description: "调试 Hermes TUI 斜杠命令：Python、消息网关、Ink UI"
 
 ## 概述
 
-Hermes 斜杠命令跨越三个层次 — Python 命令注册表、tui_gateway JSON-RPC 桥接器，以及 Ink/TypeScript 前端。当命令行为异常时（例如在自动补全中缺失、在 CLI 中工作但在 TUI 中不工作、配置持久化但 UI 不更新），问题几乎总是某一层与其他层不同步。
+Hermes 斜杠命令横跨三个层次 — Python 命令注册表、tui_gateway JSON-RPC 桥接器，以及 Ink/TypeScript 前端。当命令行为异常时（例如在自动补全中缺失、在 CLI 中工作但在 TUI 中不工作、配置持久化但 UI 不更新），问题几乎总是某一层与其他层不同步。
 
 当你在 Hermes TUI 中遇到斜杠命令问题时，请使用此技能，特别是当命令未在自动补全中显示、在 TUI 中无法正常工作或需要添加/更新时。
 
 ## 使用时机
 
-- 代码库的某一部分存在斜杠命令，但无法完全工作
+- 斜杠命令存在于代码库的某一部分但无法完全工作
 - 需要向后端和前端同时添加命令
 - 特定命令的自动补全功能失效
 - CLI 和 TUI 之间的命令行为不一致
-- 命令持久化配置但未在 TUI 中实时应用
+- 命令持久化了配置但未在 TUI 中实时应用
 
 ## 架构概述
 
@@ -59,7 +59,7 @@ TUI 前端 (ui-tui/src/app/slash/)        <- 本地处理器 + 回退处理
 ```
 <!-- ascii-guard-ignore-end -->
 
-命令定义必须在 Python 和 TypeScript 中一致注册才能正常工作。Python 的 `COMMAND_REGISTRY` 是以下内容的权威来源：CLI 分发、消息网关帮助、Telegram BotCommand 菜单、Slack 子命令映射，以及发送给 Ink 的自动补全数据。
+命令定义必须在 Python 和 TypeScript 中一致地注册才能正常工作。Python 的 `COMMAND_REGISTRY` 是以下方面的单一事实来源：CLI 分发、消息网关帮助、Telegram BotCommand 菜单、Slack 子命令映射，以及发送给 Ink 的自动补全数据。
 
 ## 调查步骤
 
@@ -121,13 +121,13 @@ TUI 前端 (ui-tui/src/app/slash/)        <- 本地处理器 + 回退处理
 
 ## 常见问题
 
-1. **命令在 TUI 中显示但不在自动补全中。** 命令在 TUI 代码库中定义，但缺失于 `hermes_cli/commands.py` 中的 `COMMAND_REGISTRY`。自动补全数据从 Python 端发送。
+1. **命令在 TUI 中显示但不在自动补全中。** 命令在 TUI 代码库中定义，但缺失于 `hermes_cli/commands.py` 中的 `COMMAND_REGISTRY`。自动补全数据来自 Python。
 
-2. **命令在自动补全中显示但无法工作。** 检查 `tui_gateway/server.py` 中的命令处理器和 `ui-tui/src/app/createSlashHandler.ts` 中的前端处理器。如果命令在 Ink 中是本地唯一的，则必须在 `app.tsx` 的内置分支中处理；否则它会回退到 `slash.exec` 并且必须有一个 Python 处理器。
+2. **命令在自动补全中显示但无法工作。** 检查 `tui_gateway/server.py` 中的命令处理器和 `ui-tui/src/app/createSlashHandler.ts` 中的前端处理器。如果命令在 Ink 中是本地唯一的，它必须在 `app.tsx` 的内置分支中处理；否则它会回退到 `slash.exec` 并且必须有一个 Python 处理器。
 
 3. **CLI 和 TUI 之间的命令行为不同。** 命令可能有不同的实现。同时检查 `cli.py::process_command` 和 TUI 的本地处理器。本地 TUI 处理器优先于消息网关分发。
 
-4. **命令持久化配置但未实时应用。** 对于 TUI 本地命令，仅更新 `config.set` 是不够的。还需要立即修补相关的 nanostore 状态（通常是 `patchUiState(...)`），并将任何新状态传递给渲染组件。例如：`/details collapsed` 必须实时更新详细信息可见性，而不仅仅是保存 `details_mode`；会话内的全局 `/details <mode>` 可能需要一个单独的命令覆盖标志，以便实时命令可以覆盖内置部分的默认值，同时启动/配置同步保留默认展开的思考/工具行为。
+4. **命令持久化了配置但未实时应用。** 对于 TUI 本地命令，仅更新 `config.set` 是不够的。还需要立即修补相关的 nanostore 状态（通常是 `patchUiState(...)`），并将任何新状态传递给渲染组件。示例：`/details collapsed` 必须实时更新详细信息可见性，而不仅仅是保存 `details_mode`；会话内的全局 `/details <mode>` 可能需要一个单独的命令覆盖标志，以便实时命令可以覆盖内置部分的默认值，同时启动/配置同步保留默认展开的思考/工具行为。
 
 5. **消息网关分发静默忽略命令。** 消息网关只分发它知道的命令。检查 `GATEWAY_KNOWN_COMMANDS`（自动从 `COMMAND_REGISTRY` 派生）是否包含规范名称。如果命令是带有 `gateway_config_gate` 的 `cli_only`，请验证门控配置值为真。
 
@@ -145,7 +145,7 @@ TUI 前端 (ui-tui/src/app/slash/)        <- 本地处理器 + 回退处理
 - 确保任何别名都正确注册在 `aliases` 元组中 — 不需要其他文件更改，所有下游（Telegram 菜单、Slack 映射、自动补全、帮助）都从中派生
 - 对于带有子命令的命令，确保 `CommandDef` 中的 `subcommands` 元组与 TUI 代码中的内容匹配
 - `cli_only=True` 的命令在消息网关/消息平台中无法工作 — 除非你添加一个 `gateway_config_gate` 并且门控为真
-- 添加实时 UI 状态后，搜索旧属性/辅助函数的每个使用者，并将新状态传递到所有渲染路径，而不仅仅是活动的流式路径。TUI 详细信息渲染至少有两个重要路径：实时的 `StreamingAssistant`/`ToolTrail` 和转录/待处理的 `MessageLine` 行。进行 `/clean` 检查时应明确检查两者。
+- 添加实时 UI 状态后，搜索旧属性/助手的每个使用者，并将新状态传递到所有渲染路径，而不仅仅是活动的流式路径。TUI 详细信息渲染至少有两个重要路径：实时的 `StreamingAssistant`/`ToolTrail` 和转录/待处理的 `MessageLine` 行。一次 `/clean` 清理应明确检查两者。
 - 在测试前重新构建 TUI（`npm --prefix ui-tui run build`）— tsx 监视模式在首次启动时可能滞后
 
 ## 验证
@@ -165,8 +165,8 @@ TUI 前端 (ui-tui/src/app/slash/)        <- 本地处理器 + 回退处理
 3. 输入 `/` 并验证命令出现在自动补全建议中，并带有预期的描述和参数提示。
 
 4. 执行命令并确认：
-   - 触发预期行为
+   - 触发了预期的行为
    - 任何持久化的配置都正确更新（`read_file ~/.hermes/config.yaml`）
    - 实时 UI 状态立即反映更改（不仅仅是重启后）
 
-5. 如果命令在消息网关中也可用，请至少从一个消息平台测试它（或运行消息网关测试：`scripts/run_tests.sh tests/gateway/`）。
+5. 如果命令在消息网关也可用，请至少从一个消息平台测试它（或运行消息网关测试：`scripts/run_tests.sh tests/gateway/`）。

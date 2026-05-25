@@ -6,7 +6,7 @@ description: "将您的 OpenClaw / Clawdbot 设置迁移到 Hermes Agent 的完�
 
 # 从 OpenClaw 迁移
 
-`hermes claw migrate` 命令将您的 OpenClaw（或旧版 Clawdbot/Moldbot）设置导入到 Hermes。本指南详细说明了迁移的内容、配置键的映射关系以及迁移后需要验证的事项。
+`hermes claw migrate` 命令可将您的 OpenClaw（或旧版 Clawdbot/Moldbot）设置导入到 Hermes。本指南详细说明了迁移的具体内容、配置键的映射关系以及迁移后需要验证的事项。
 
 ## 快速开始
 
@@ -23,19 +23,19 @@ hermes claw migrate --preset full --migrate-secrets --yes
 
 迁移总是在进行任何更改之前，显示将要导入内容的完整预览。请查看列表，然后确认以继续。
 
-默认从 `~/.openclaw/` 读取。旧版的 `~/.clawdbot/` 或 `~/.moltbot/` 目录会被自动检测。旧版配置文件（`clawdbot.json`, `moltbot.json`）同理。
+默认从 `~/.openclaw/` 读取。系统会自动检测旧版的 `~/.clawdbot/` 或 `~/.moltbot/` 目录。对于旧版配置文件（`clawdbot.json`, `moltbot.json`）也是如此。
 
 ## 选项
 
 | 选项 | 描述 |
 |--------|-------------|
 | `--dry-run` | 仅预览 —— 在显示将要迁移的内容后停止。 |
-| `--preset <name>` | `full`（所有兼容的设置）或 `user-data`（排除基础设施配置）。默认情况下，两种预设都不会导入密钥 —— 需要显式传递 `--migrate-secrets`。 |
+| `--preset <name>` | `full`（所有兼容设置）或 `user-data`（排除基础设施配置）。默认情况下，两种预设都不会导入密钥 —— 需要显式传递 `--migrate-secrets`。 |
 | `--overwrite` | 冲突时覆盖现有的 Hermes 文件（默认：当计划存在冲突时拒绝应用）。 |
 | `--migrate-secrets` | 包含 API 密钥。即使在 `--preset full` 下也需要此选项 —— 没有预设会静默导入密钥。 |
 | `--no-backup` | 跳过迁移前对 `~/.hermes/` 的 zip 快照（默认情况下，在应用前会写入一个恢复点存档，位于 `~/.hermes/backups/pre-migration-*.zip`；可通过 `hermes import` 恢复）。 |
 | `--source <path>` | 自定义 OpenClaw 目录。 |
-| `--workspace-target <path>` | `AGENTS.md` 的放置位置。 |
+| `--workspace-target <path>` | 放置 `AGENTS.md` 的位置。 |
 | `--skill-conflict <mode>` | `skip`（默认）、`overwrite` 或 `rename`。 |
 | `--yes` | 预览后跳过确认提示。 |
 
@@ -51,7 +51,7 @@ hermes claw migrate --preset full --migrate-secrets --yes
 | 用户档案 | `workspace/USER.md` | `~/.hermes/memories/USER.md` | 与记忆相同的条目合并逻辑。 |
 | 每日记忆文件 | `workspace/memory/*.md` | `~/.hermes/memories/MEMORY.md` | 所有每日文件合并到主记忆中。 |
 
-工作空间文件也会在 `workspace.default/` 和 `workspace-main/` 路径下检查作为备用路径（OpenClaw 在近期版本中将 `workspace/` 重命名为 `workspace-main/`，并为多 Agent 设置使用 `workspace-{agentId}`）。
+工作空间文件也会在 `workspace.default/` 和 `workspace-main/` 作为备用路径进行检查（OpenClaw 在近期版本中将 `workspace/` 重命名为 `workspace-main/`，并为多 Agent 设置使用 `workspace-{agentId}`）。
 
 ### 技能（4 个来源）
 
@@ -124,14 +124,14 @@ TTS 设置从 **两个** OpenClaw 配置位置读取，优先级如下：
 | ElevenLabs 模型 ID | `config.yaml` → `tts.elevenlabs.model_id` |
 | OpenAI 模型 | `config.yaml` → `tts.openai.model` |
 | OpenAI 语音 | `config.yaml` → `tts.openai.voice` |
-| Edge TTS 语音 | `config.yaml` → `tts.edge.voice`（OpenClaw 将 "edge" 重命名为 "microsoft" — 两者都能识别） |
+| Edge TTS 语音 | `config.yaml` → `tts.edge.voice`（OpenClaw 将 "edge" 重命名为 "microsoft" — 两者都支持） |
 | TTS 资源文件 | `~/.hermes/tts/`（文件复制） |
 
 ### 消息平台
 
 | 平台 | OpenClaw 配置路径 | Hermes `.env` 变量 | 备注 |
 |----------|---------------------|----------------------|-------|
-| Telegram | `channels.telegram.botToken` 或 `.accounts.default.botToken` | `TELEGRAM_BOT_TOKEN` | Token 可以是字符串或 [SecretRef](#secretref-handling)。支持扁平布局和账户布局。 |
+| Telegram | `channels.telegram.botToken` 或 `.accounts.default.botToken` | `TELEGRAM_BOT_TOKEN` | Token 可以是字符串或 [SecretRef](#secretref-handling)。支持扁平结构和账户结构。 |
 | Telegram | `credentials/telegram-default-allowFrom.json` | `TELEGRAM_ALLOWED_USERS` | 由 `allowFrom[]` 数组连接而成，用逗号分隔 |
 | Discord | `channels.discord.token` 或 `.accounts.default.token` | `DISCORD_BOT_TOKEN` | |
 | Discord | `channels.discord.allowFrom` 或 `.accounts.default.allowFrom` | `DISCORD_ALLOWED_USERS` | |
@@ -150,7 +150,7 @@ TTS 设置从 **两个** OpenClaw 配置位置读取，优先级如下：
 | 内容 | OpenClaw 路径 | Hermes 路径 | 备注 |
 |------|-------------|-------------|-------|
 | 审批模式 | `approvals.exec.mode` | `config.yaml` → `approvals.mode` | "auto"→"off", "always"→"manual", "smart"→"smart" |
-| 命令允许列表 | `exec-approvals.json` | `config.yaml` → `command_allowlist` | 模式合并并去重 |
+| 命令白名单 | `exec-approvals.json` | `config.yaml` → `command_allowlist` | 模式合并并去重 |
 | 浏览器 CDP URL | `browser.cdpUrl` | `config.yaml` → `browser.cdp_url` | |
 | 浏览器无头模式 | `browser.headless` | `config.yaml` → `browser.headless` | |
 | Brave 搜索密钥 | `tools.web.search.brave.apiKey` | `.env` → `BRAVE_API_KEY` | 需要 `--migrate-secrets` |
@@ -167,16 +167,16 @@ TTS 设置从 **两个** OpenClaw 配置位置读取，优先级如下：
 | `TOOLS.md` | `archive/workspace/TOOLS.md` | Hermes 有内置的工具说明 |
 | `HEARTBEAT.md` | `archive/workspace/HEARTBEAT.md` | 使用定时任务处理周期性任务 |
 | `BOOTSTRAP.md` | `archive/workspace/BOOTSTRAP.md` | 使用上下文文件或技能 |
-| 定时任务 | `archive/cron-config.json` | 使用 `hermes cron create` 重新创建 |
-| 插件 | `archive/plugins-config.json` | 参见 [插件指南](/docs/user-guide/features/hooks) |
-| 钩子/webhook | `archive/hooks-config.json` | 使用 `hermes webhook` 或消息网关钩子 |
+| 定时任务 | `archive/cron-config.json` | 使用 `hermes cron create` 重建 |
+| 插件 | `archive/plugins-config.json` | 参见[插件指南](/user-guide/features/hooks) |
+| 钩子/Webhook | `archive/hooks-config.json` | 使用 `hermes webhook` 或消息网关钩子 |
 | 记忆后端 | `archive/memory-backend-config.json` | 通过 `hermes honcho` 配置 |
 | 技能注册表 | `archive/skills-registry-config.json` | 使用 `hermes skills config` |
 | UI/身份 | `archive/ui-identity-config.json` | 使用 `/skin` 命令 |
 | 日志记录 | `archive/logging-diagnostics-config.json` | 在 `config.yaml` 的日志记录部分设置 |
 | 多 Agent 列表 | `archive/agents-list.json` | 使用 Hermes 配置文件 |
 | 通道绑定 | `archive/bindings.json` | 按平台手动设置 |
-| 复杂通道配置 | `archive/channels-deep-config.json` | 手动配置平台 |
+| 复杂通道 | `archive/channels-deep-config.json` | 手动平台配置 |
 
 ## API 密钥解析
 
@@ -184,15 +184,15 @@ TTS 设置从 **两个** OpenClaw 配置位置读取，优先级如下：
 
 1.  **配置值** — `openclaw.json` 中的 `models.providers.*.apiKey` 和 TTS 提供商密钥
 2.  **环境文件** — `~/.openclaw/.env`（包含 `OPENROUTER_API_KEY`、`ANTHROPIC_API_KEY` 等键）
-3.  **配置中的 env 子对象** — `openclaw.json` → `"env"` 或 `"env"."vars"`（某些设置将密钥存储在此处，而不是单独的 `.env` 文件中）
+3.  **配置中的 env 子对象** — `openclaw.json` → `"env"` 或 `"env"."vars"`（某些设置将密钥存储在此处，而不是单独的环境文件中）
 4.  **认证配置文件** — `~/.openclaw/agents/main/agent/auth-profiles.json`（每个 Agent 的凭据）
-配置值具有优先权。每个后续来源会填补剩余的空缺。
+配置值具有最高优先级。后续的每个来源会填补剩余的空缺。
 
-### 支持的关键目标
+### 支持的键目标
 
 `OPENROUTER_API_KEY`、`OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`DEEPSEEK_API_KEY`、`GEMINI_API_KEY`、`ZAI_API_KEY`、`MINIMAX_API_KEY`、`ELEVENLABS_API_KEY`、`TELEGRAM_BOT_TOKEN`、`VOICE_TOOLS_OPENAI_KEY`
 
-不在这个允许列表中的密钥永远不会被复制。
+不在这个允许列表中的键永远不会被复制。
 
 ## SecretRef 处理
 
@@ -209,23 +209,23 @@ OpenClaw 配置中用于 Token 和 API 密钥的值可以有以下三种格式�
 "channels": { "telegram": { "botToken": { "source": "env", "id": "TELEGRAM_BOT_TOKEN" } } }
 ```
 
-迁移过程会解析所有三种格式。对于环境变量模板和 `source: "env"` 的 SecretRef 对象，它会从 `~/.openclaw/.env` 和 `openclaw.json` 的 env 子对象中查找值。对于 `source: "file"` 或 `source: "exec"` 的 SecretRef 对象，无法自动解析——迁移过程会对此发出警告，这些值必须通过 `hermes config set` 手动添加到 Hermes。
+迁移过程会解析所有三种格式。对于环境变量模板和 `source: "env"` 的 SecretRef 对象，它会在 `~/.openclaw/.env` 和 `openclaw.json` 的 env 子对象中查找对应的值。对于 `source: "file"` 或 `source: "exec"` 的 SecretRef 对象，无法自动解析——迁移过程会对此发出警告，这些值必须通过 `hermes config set` 手动添加到 Hermes。
 
 ## 迁移后
 
-1.  **检查迁移报告** — 完成后会打印，包含已迁移、已跳过和冲突项的数量。
+1.  **检查迁移报告** — 完成后会打印，包含已迁移、已跳过和存在冲突的项目数量。
 
 2.  **审查归档文件** — `~/.hermes/migration/openclaw/<timestamp>/archive/` 目录下的任何内容都需要手动处理。
 
-3.  **启动新会话** — 导入的技能和记忆条目在新的会话中生效，而不是当前会话。
+3.  **启动新会话** — 导入的技能和记忆条目会在新会话中生效，而不是当前会话。
 
-4.  **验证 API 密钥** — 运行 `hermes status` 来检查提供商认证。
+4.  **验证 API 密钥** — 运行 `hermes status` 来检查提供商认证状态。
 
-5.  **测试消息收发** — 如果迁移了平台 Token，请重启消息网关：`systemctl --user restart hermes-gateway`
+5.  **测试消息收发** — 如果你迁移了平台 Token，请重启消息网关：`systemctl --user restart hermes-gateway`
 
 6.  **检查会话策略** — 验证 `hermes config get session_reset` 是否符合你的预期。
 
-7.  **重新配对 WhatsApp** — WhatsApp 使用二维码配对 (Baileys)，不迁移 Token。运行 `hermes whatsapp` 进行配对。
+7.  **重新配对 WhatsApp** — WhatsApp 使用二维码配对（Baileys），不涉及 Token 迁移。运行 `hermes whatsapp` 进行配对。
 
 8.  **清理归档** — 确认一切正常后，运行 `hermes claw cleanup` 将剩余的 OpenClaw 目录重命名为 `.pre-migration/`（防止状态混淆）。
 
@@ -233,15 +233,15 @@ OpenClaw 配置中用于 Token 和 API 密钥的值可以有以下三种格式�
 
 ### "未找到 OpenClaw 目录"
 
-迁移过程会依次检查 `~/.openclaw/`、`~/.clawdbot/`、`~/.moltbot/`。如果你的安装在其他位置，请使用 `--source /path/to/your/openclaw`。
+迁移过程会依次检查 `~/.openclaw/`、`~/.clawdbot/`、`~/.moltbot/`。如果你的安装位置不同，请使用 `--source /path/to/your/openclaw`。
 
 ### "未找到提供商 API 密钥"
 
-根据你的 OpenClaw 版本，密钥可能存储在几个地方：`openclaw.json` 中 `models.providers.*.apiKey` 下的内联值、`~/.openclaw/.env` 中、`openclaw.json` 的 `"env"` 子对象中，或 `agents/main/agent/auth-profiles.json` 中。迁移过程会检查所有四个位置。如果密钥使用了 `source: "file"` 或 `source: "exec"` 的 SecretRef，则无法自动解析——需要通过 `hermes config set` 添加。
+根据你的 OpenClaw 版本，密钥可能存储在几个地方：直接写在 `openclaw.json` 的 `models.providers.*.apiKey` 下、在 `~/.openclaw/.env` 中、在 `openclaw.json` 的 `"env"` 子对象中，或者在 `agents/main/agent/auth-profiles.json` 中。迁移过程会检查所有四个位置。如果密钥使用了 `source: "file"` 或 `source: "exec"` 的 SecretRef，则无法自动解析——请通过 `hermes config set` 添加它们。
 
 ### 迁移后技能未出现
 
-导入的技能位于 `~/.hermes/skills/openclaw-imports/`。启动新会话使其生效，或运行 `/skills` 来验证它们是否已加载。
+导入的技能位于 `~/.hermes/skills/openclaw-imports/`。启动一个新会话使其生效，或者运行 `/skills` 来验证它们是否已加载。
 
 ### TTS 语音未迁移
 

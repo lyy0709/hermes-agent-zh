@@ -21,7 +21,7 @@ ASCII 艺术：pyfiglet、cowsay、boxes、image-to-ascii。
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `ASCII`, `Art`, `Banners`, `Creative`, `Unicode`, `Text-Art`, `pyfiglet`, `figlet`, `cowsay`, `boxes` |
-| 相关技能 | [`excalidraw`](/docs/user-guide/skills/bundled/creative/creative-excalidraw) |
+| 相关技能 | [`excalidraw`](/user-guide/skills/bundled/creative/creative-excalidraw) |
 
 ## 参考：完整的 SKILL.md
 
@@ -35,7 +35,7 @@ ASCII 艺术：pyfiglet、cowsay、boxes、image-to-ascii。
 
 ## 工具 1：文本横幅 (pyfiglet — 本地)
 
-将文本渲染为大型 ASCII 艺术横幅。内置 571 种字体。
+将文本渲染为大型 ASCII 艺术横幅。包含 571 种内置字体。
 
 ### 安装
 
@@ -72,7 +72,7 @@ python3 -m pyfiglet --list_fonts             # 列出所有 571 种字体
 
 ## 工具 2：文本横幅 (asciified API — 远程，无需安装)
 
-将文本转换为 ASCII 艺术的免费 REST API。250+ 种 FIGlet 字体。直接返回纯文本——无需解析。当 pyfiglet 未安装或作为快速替代方案时使用此工具。
+将文本转换为 ASCII 艺术的免费 REST API。包含 250+ 种 FIGlet 字体。直接返回纯文本——无需解析。当 pyfiglet 未安装或作为快速替代方案时使用此工具。
 
 ### 用法 (通过终端 curl)
 
@@ -93,8 +93,8 @@ curl -s "https://asciified.thelicato.io/api/v2/fonts"
 
 ### 提示
 
-- 在文本参数中将空格 URL 编码为 `+`
-- 响应是纯文本 ASCII 艺术——没有 JSON 包装，可直接显示
+- 在文本参数中，将空格 URL 编码为 `+`
+- 响应是纯文本 ASCII 艺术——无 JSON 包装，可直接显示
 - 字体名称区分大小写；使用 fonts 端点获取确切名称
 - 任何带有 curl 的终端均可使用——无需 Python 或 pip
 
@@ -144,7 +144,7 @@ cowsay -T "U " "Msg"   # 自定义舌头
 
 ## 工具 4：Boxes (装饰边框)
 
-为任何文本绘制装饰性 ASCII 艺术边框/框架。70+ 种内置设计。
+为任何文本绘制装饰性 ASCII 艺术边框/框架。包含 70+ 种内置设计。
 
 ### 安装
 
@@ -156,7 +156,7 @@ sudo apt install boxes -y    # Debian/Ubuntu
 ### 用法
 
 ```bash
-echo "Hello World" | boxes                    # 默认框
+echo "Hello World" | boxes                    # 默认方框
 echo "Hello World" | boxes -d stone           # 石头边框
 echo "Hello World" | boxes -d parchment       # 羊皮纸卷轴
 echo "Hello World" | boxes -d cat             # 猫边框
@@ -282,7 +282,7 @@ for art in arts:
 
 ### 来源 B：GitHub Octocat API (有趣的彩蛋)
 
-返回一个带有智慧引语的随机 GitHub Octocat。无需身份验证。
+返回一个带有智慧引语的随机 GitHub Octocat。无需认证。
 
 ```bash
 curl -s https://api.github.com/octocat
@@ -303,7 +303,7 @@ curl -s "qrenco.de/https://example.com"
 
 ```bash
 curl -s "wttr.in/London"          # 带有 ASCII 图形的完整天气报告
-curl -s "wttr.in/Moon"            # ASCII 艺术月相
+curl -s "wttr.in/Moon"            # ASCII 艺术中的月相
 curl -s "v2.wttr.in/London"       # 详细版本
 ```
 
@@ -333,6 +333,6 @@ curl -s "v2.wttr.in/London"       # 详细版本
 4.  **特定事物的艺术** (猫、火箭、龙) → 通过 curl + 解析使用 ascii.co.uk
 5.  **将图像转换为 ASCII** → ascii-image-converter 或 jp2a
 6.  **二维码** → 通过 curl 使用 qrenco.de
-7.  **天气/月相艺术** → 通过 curl 使用 wttr.in
+7.  **天气/月亮艺术** → 通过 curl 使用 wttr.in
 8.  **自定义/创意内容** → 使用 Unicode 调色板进行 LLM 生成
 9.  **任何未安装的工具** → 安装它，或回退到下一个选项

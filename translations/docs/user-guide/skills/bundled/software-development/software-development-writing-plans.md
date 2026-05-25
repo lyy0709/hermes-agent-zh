@@ -1,14 +1,14 @@
 ---
-title: "编写计划 — 撰写实现计划：细粒度任务、路径、代码"
+title: "编写计划 — 编写实现计划：小任务、路径、代码"
 sidebar_label: "编写计划"
-description: "撰写实现计划：细粒度任务、路径、代码"
+description: "编写实现计划：小任务、路径、代码"
 ---
 
-{/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能目录中的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 编写计划
 
-撰写实现计划：细粒度任务、路径、代码。
+编写实现计划：小任务、路径、代码。
 
 ## 技能元数据
 
@@ -17,11 +17,11 @@ description: "撰写实现计划：细粒度任务、路径、代码"
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/software-development/writing-plans` |
 | 版本 | `1.1.0` |
-| 作者 | Hermes Agent (改编自 obra/superpowers) |
+| 作者 | Hermes Agent (adapted from obra/superpowers) |
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `planning`, `design`, `implementation`, `workflow`, `documentation` |
-| 相关技能 | [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
+| 相关技能 | [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
 
 ## 参考：完整的 SKILL.md
 
@@ -33,7 +33,7 @@ description: "撰写实现计划：细粒度任务、路径、代码"
 
 ## 概述
 
-编写全面的实现计划，假设实施者对代码库零了解且品味存疑。记录他们需要的一切：要修改的文件、完整代码、测试命令、需查阅的文档、验证方法。给他们细粒度的任务。遵循 DRY、YAGNI、TDD。频繁提交。
+编写全面的实现计划，假设实施者对代码库零了解且品味存疑。记录他们所需的一切：要修改的文件、完整代码、测试命令、要查阅的文档、如何验证。给他们小任务。DRY。YAGNI。TDD。频繁提交。
 
 假设实施者是一名熟练的开发人员，但对工具集或问题领域几乎一无所知。假设他们不太了解良好的测试设计。
 
@@ -51,7 +51,7 @@ description: "撰写实现计划：细粒度任务、路径、代码"
 - 你计划自己实现（未来的你需要指导）
 - 独自工作（文档很重要）
 
-## 细粒度任务粒度
+## 小任务粒度
 
 **每个任务 = 2-5 分钟的专注工作。**
 
@@ -91,7 +91,7 @@ description: "撰写实现计划：细粒度任务、路径、代码"
 
 > **给 Hermes 的提示：** 使用 subagent-driven-development 技能按任务实现此计划。
 
-**目标：** [一句话描述要构建什么]
+**目标：** [一句话描述构建的内容]
 
 **架构：** [2-3 句话描述方法]
 
@@ -107,7 +107,7 @@ description: "撰写实现计划：细粒度任务、路径、代码"
 ````markdown
 ### 任务 N: [描述性名称]
 
-**目标：** 此任务要完成什么（一句话）
+**目标：** 此任务完成什么（一句话）
 
 **文件：**
 - 创建：`exact/path/to/new_file.py`
@@ -127,7 +127,7 @@ def test_specific_behavior():
 运行：`pytest tests/path/test.py::test_specific_behavior -v`
 预期：FAIL — "function not defined"
 
-**步骤 3：编写最小实现**
+**步骤 3：编写最少实现**
 
 ```python
 def function(input):
@@ -180,7 +180,7 @@ read_file("src/app.py")
 决定：
 - 架构模式
 - 文件组织
-- 所需依赖
+- 所需的依赖项
 - 测试策略
 
 ### 步骤 4：编写任务
@@ -204,10 +204,10 @@ read_file("src/app.py")
 
 检查：
 - [ ] 任务顺序合理且逻辑清晰
-- [ ] 每个任务都是细粒度的（2-5 分钟）
-- [ ] 文件路径是确切的
-- [ ] 代码示例是完整的（可复制粘贴）
-- [ ] 命令是确切的，并带有预期输出
+- [ ] 每个任务都是小任务（2-5 分钟）
+- [ ] 文件路径确切
+- [ ] 代码示例完整（可复制粘贴）
+- [ ] 命令确切且带有预期输出
 - [ ] 没有遗漏上下文
 - [ ] 应用了 DRY、YAGNI、TDD 原则
 
@@ -241,7 +241,7 @@ class User:
         self.preferences = {}  # 现在还不需要！
         self.metadata = {}     # 现在还不需要！
 
-# 好 — 遵循 YAGNI
+# 好 — YAGNI
 class User:
     def __init__(self, name, email):
         self.name = name
@@ -295,15 +295,15 @@ git commit -m "type: description"
 **"计划已完成并保存。准备使用 subagent-driven-development 执行 — 我将为每个任务分派一个新的子 Agent，并进行两阶段审查（规范符合性审查，然后是代码质量审查）。我可以继续吗？"**
 
 执行时，使用 `subagent-driven-development` 技能：
-- 每个任务使用全新的 `delegate_task` 并提供完整上下文
+- 每个任务使用新的 `delegate_task` 并附带完整上下文
 - 每个任务后进行规范符合性审查
 - 规范通过后进行代码质量审查
-- 仅在两次审查都批准后继续
+- 仅在两项审查都批准后继续
 
 ## 记住
 
 ```
-细粒度任务（每个 2-5 分钟）
+小任务（每个 2-5 分钟）
 确切的文件路径
 完整的代码（可复制粘贴）
 确切的命令及预期输出

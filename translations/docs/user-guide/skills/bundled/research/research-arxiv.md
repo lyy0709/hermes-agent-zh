@@ -21,17 +21,17 @@ description: "通过关键词、作者、类别或 ID 搜索 arXiv 论文"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Research`, `Arxiv`, `Papers`, `Academic`, `Science`, `API` |
-| 相关技能 | [`ocr-and-documents`](/docs/user-guide/skills/bundled/productivity/productivity-ocr-and-documents) |
+| 相关技能 | [`ocr-and-documents`](/user-guide/skills/bundled/productivity/productivity-ocr-and-documents) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # arXiv 研究
 
-通过其免费的 REST API 搜索和检索 arXiv 上的学术论文。无需 API 密钥，无依赖——只需 curl。
+通过其免费的 REST API 搜索和检索 arXiv 上的学术论文。无需 API 密钥，无依赖 —— 只需 curl。
 
 ## 快速参考
 
@@ -77,7 +77,7 @@ for i, entry in enumerate(root.findall('a:entry', ns)):
 
 ## 搜索查询语法
 
-| 前缀 | 搜索范围 | 示例 |
+| 前缀 | 搜索字段 | 示例 |
 |--------|----------|---------|
 | `all:` | 所有字段 | `all:transformer+attention` |
 | `ti:` | 标题 | `ti:large+language+models` |
@@ -89,7 +89,7 @@ for i, entry in enumerate(root.findall('a:entry', ns)):
 ### 布尔运算符
 
 ```
-# AND（使用 + 时的默认值）
+# AND (使用 + 时的默认行为)
 search_query=all:transformer+attention
 
 # OR
@@ -115,7 +115,7 @@ search_query=au:hinton+AND+cat:cs.LG
 | `max_results` | 结果数量（默认 10，最大 30000） |
 
 ```bash
-# cs.AI 类别中最新 10 篇论文
+# cs.AI 类别的最新 10 篇论文
 curl -s "https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=10"
 ```
 
@@ -123,7 +123,7 @@ curl -s "https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submit
 
 ```bash
 # 通过 arXiv ID
-curl -s "https://export.arxiv.org/api/query?id_list=2402.03300")
+curl -s "https://export.arxiv.org/api/query?id_list=2402.03300"
 
 # 多篇论文
 curl -s "https://export.arxiv.org/api/query?id_list=2402.03300,2401.12345,2403.00001"
@@ -203,13 +203,13 @@ python scripts/search_arxiv.py --id 2402.03300
 python scripts/search_arxiv.py --id 2402.03300,2401.12345
 ```
 
-无依赖——仅使用 Python 标准库。
+无依赖 —— 仅使用 Python 标准库。
 
 ---
 
 ## Semantic Scholar（引用、相关论文、作者档案）
 
-arXiv 不提供引用数据或推荐。为此请使用 **Semantic Scholar API**——免费，基本使用（每秒 1 次请求）无需密钥，返回 JSON。
+arXiv 不提供引用数据或推荐。为此请使用 **Semantic Scholar API** —— 免费，基本使用无需密钥（1 次请求/秒），返回 JSON。
 
 ### 获取论文详情 + 引用
 
@@ -274,12 +274,12 @@ curl -s "https://api.semanticscholar.org/graph/v1/author/search?query=Yann+LeCun
 | API | 速率 | 认证 |
 |-----|------|------|
 | arXiv | ~1 次请求 / 3 秒 | 无需 |
-| Semantic Scholar | 1 次请求 / 秒 | 无需（使用 API 密钥可达 100/秒） |
+| Semantic Scholar | 1 次请求 / 秒 | 无需（使用 API 密钥可达 100 次/秒） |
 
 ## 注意事项
 
--   arXiv 返回 Atom XML——使用辅助脚本或解析片段以获得清晰输出
--   Semantic Scholar 返回 JSON——通过 `python3 -m json.tool` 管道传输以提高可读性
+-   arXiv 返回 Atom XML —— 使用辅助脚本或解析片段以获得清晰输出
+-   Semantic Scholar 返回 JSON —— 通过 `python3 -m json.tool` 管道传输以提高可读性
 -   arXiv ID：旧格式 (`hep-th/0601001`) 与新格式 (`2402.03300`)
 -   PDF：`https://arxiv.org/pdf/{id}` —— 摘要：`https://arxiv.org/abs/{id}`
 -   HTML（如果可用）：`https://arxiv.org/html/{id}`

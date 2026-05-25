@@ -21,12 +21,12 @@ TDD：强制执行红-绿-重构，先写测试后写代码。
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `testing`, `tdd`, `development`, `quality`, `red-green-refactor` |
-| 相关技能 | [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
+| 相关技能 | [`systematic-debugging`](/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # 测试驱动开发 (TDD)
@@ -68,7 +68,7 @@ TDD：强制执行红-绿-重构，先写测试后写代码。
 - 不要看它
 - 删除就是删除
 
-完全根据测试重新实现。就这样。
+根据测试重新实现。就这样。
 
 ## 红-绿-重构循环
 
@@ -94,7 +94,7 @@ def test_retries_failed_operations_3_times():
 ```
 名称清晰，测试真实行为，只做一件事。
 
-**差的测试：**
+**坏的测试：**
 ```python
 def test_retry_works():
     mock = MagicMock()
@@ -124,21 +124,21 @@ pytest tests/test_feature.py::test_specific_behavior -v
 - 失败信息符合预期
 - 失败是因为功能缺失
 
-**测试立即通过？** 你测试的是现有行为。修复测试。
+**测试立即通过？** 你正在测试现有行为。修复测试。
 
 **测试出错？** 修复错误，重新运行直到它正确失败。
 
 ### 绿 — 最少的代码
 
-编写最简单的代码使测试通过。不多不少。
+编写最简单的代码使测试通过。不要多写。
 
 **好的：**
 ```python
 def add(a, b):
-    return a + b  # 没有多余的东西
+    return a + b  # 没有额外内容
 ```
 
-**差的：**
+**坏的：**
 ```python
 def add(a, b):
     result = a + b
@@ -227,17 +227,17 @@ pytest tests/ -q
 
 TDD 就是务实的：
 - 在提交前发现 Bug（比之后调试更快）
-- 防止回归（测试能立即捕捉到破坏）
-- 记录行为（测试展示了如何使用代码）
-- 支持重构（自由更改，测试捕捉破坏）
+- 防止回归（测试能立即捕获破坏）
+- 记录行为（测试展示如何使用代码）
+- 支持重构（自由更改，测试捕获破坏）
 
 “务实”的捷径 = 在生产环境中调试 = 更慢。
 
-**“事后测试能达到同样的目标 — 这是精神而非仪式”**
+**“事后测试能达到同样的目标 — 重要的是精神而非仪式”**
 
 不。事后测试回答“这段代码做了什么？” 测试先行回答“这段代码应该做什么？”
 
-事后测试受你的实现影响。你测试你构建的东西，而不是所需的东西。测试先行迫使你在实现之前发现边界情况。
+事后测试受你的实现影响。你测试你构建的东西，而不是要求的东西。测试先行迫使你在实现之前发现边界情况。
 
 ## 常见的合理化借口
 
@@ -247,7 +247,7 @@ TDD 就是务实的：
 | “我之后会测试” | 测试立即通过证明不了任何东西。 |
 | “事后测试能达到同样的目标” | 事后测试 = “这段代码做了什么？” 测试先行 = “这段代码应该做什么？” |
 | “已经手动测试过了” | 临时 ≠ 系统。没有记录，无法重新运行。 |
-| “删除 X 小时的工作是浪费的” | 沉没成本谬误。保留未经验证的代码是技术债务。 |
+| “删除 X 小时是浪费的” | 沉没成本谬误。保留未验证的代码是技术债务。 |
 | “保留作为参考，先写测试” | 你会调整它。那就是事后测试。删除就是删除。 |
 | “需要先探索一下” | 可以。扔掉探索，用 TDD 开始。 |
 | “测试困难 = 设计不清晰” | 倾听测试。难以测试 = 难以使用。 |
@@ -262,7 +262,7 @@ TDD 就是务实的：
 - 先写代码后写测试
 - 实现后写测试
 - 测试在第一次运行时立即通过
-- 无法解释测试失败的原因
+- 无法解释测试为什么失败
 - 测试“稍后”添加
 - 合理化“就这一次”
 - “我已经手动测试过了”
@@ -270,7 +270,7 @@ TDD 就是务实的：
 - “保留作为参考”或“调整现有代码”
 - “已经花了 X 小时，删除是浪费的”
 - “TDD 是教条主义的，我是务实的”
-- “这次不一样，因为...”
+- “这次不同，因为...”
 
 **所有这些都意味着：删除代码。用 TDD 重新开始。**
 
@@ -279,7 +279,7 @@ TDD 就是务实的：
 在标记工作完成之前：
 
 - [ ] 每个新函数/方法都有测试
-- [ ] 在实现前看着每个测试失败
+- [ ] 在实现之前看着每个测试失败
 - [ ] 每个测试都因预期原因失败（功能缺失，而非拼写错误）
 - [ ] 编写了最少的代码使每个测试通过
 - [ ] 所有测试通过
@@ -302,7 +302,7 @@ TDD 就是务实的：
 
 ### 运行测试
 
-使用 `terminal` 工具在每个步骤运行测试：
+在每个步骤使用 `terminal` 工具运行测试：
 
 ```python
 # 红 — 验证失败
@@ -340,7 +340,7 @@ delegate_task(
 
 ### 与 systematic-debugging 结合
 
-发现 Bug？编写重现它的失败测试。遵循 TDD 循环。测试证明了修复并防止了回归。
+发现 Bug？编写重现它的失败测试。遵循 TDD 循环。测试证明修复并防止回归。
 
 永远不要在没有测试的情况下修复 Bug。
 
@@ -358,4 +358,4 @@ delegate_task(
 否则 → 不是 TDD
 ```
 
-没有用户的明确许可，不得有例外。
+没有用户的明确许可，没有例外。

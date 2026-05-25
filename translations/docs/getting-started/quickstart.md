@@ -1,16 +1,16 @@
 ---
 sidebar_position: 1
 title: "快速开始"
-description: "与 Hermes Agent 的第一次对话 —— 从安装到聊天，5 分钟内完成"
+description: "与 Hermes Agent 的首次对话 —— 从安装到聊天，5 分钟内完成"
 ---
 
 # 快速开始
 
-本指南将带你从零开始，搭建一个能在实际使用中稳定运行的 Hermes 环境。完成安装、选择提供商、验证聊天功能正常工作，并确切知道当出现问题时该如何处理。
+本指南将带你从零开始，搭建一个能够应对实际使用的 Hermes 环境。完成安装、选择提供商、验证聊天功能正常工作，并确切知道当出现问题时该如何处理。
 
 ## 更喜欢观看视频？
 
-**Onchain AI Garage** 制作了一个关于安装、设置和基本命令的 Masterclass 视频教程 —— 如果你更喜欢跟着视频操作，这是本页面的绝佳伴侣。更多内容，请查看完整的 [Hermes Agent 教程与用例](https://www.youtube.com/channel/UCqB1bhMwGsW-yefBxYwFCCg) 播放列表。
+**Onchain AI Garage** 制作了一个关于安装、设置和基本命令的 Masterclass 视频教程 —— 如果你更愿意跟随视频学习，这是本页面的绝佳伴侣。更多内容，请查看完整的 [Hermes Agent 教程与用例](https://www.youtube.com/channel/UCqB1bhMwGsW-yefBxYwFCCg) 播放列表。
 
 <div style={{position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '100%', marginBottom: '1.5rem'}}>
   <iframe
@@ -26,23 +26,23 @@ description: "与 Hermes Agent 的第一次对话 —— 从安装到聊天，5 
 ## 适用人群
 
 - 初次接触，希望以最短路径获得可工作的环境
-- 切换提供商，不想在配置错误上浪费时间
+- 切换提供商，不想因配置错误浪费时间
 - 为团队、机器人或常驻工作流设置 Hermes
 - 厌倦了“安装成功，但依然无法使用”的情况
 
 ## 最快路径
 
-选择符合你目标的对应行：
+根据你的目标选择对应的行：
 
 | 目标 | 首先执行 | 然后执行 |
 |---|---|---|
-| 我只想在我的机器上让 Hermes 运行起来 | `hermes setup` | 运行一次真实的聊天并验证其响应 |
-| 我已经知道我的提供商 | `hermes model` | 保存配置，然后开始聊天 |
+| 我只想在本地机器上运行 Hermes | `hermes setup` | 运行一次真实聊天并验证其响应 |
+| 我已经知道要用的提供商 | `hermes model` | 保存配置，然后开始聊天 |
 | 我想要一个机器人或常驻设置 | CLI 正常工作后执行 `hermes gateway setup` | 连接 Telegram、Discord、Slack 或其他平台 |
 | 我想要本地或自托管模型 | `hermes model` → 自定义端点 | 验证端点、模型名称和上下文长度 |
-| 我想要多提供商故障转移 | 先执行 `hermes model` | 仅在基础聊天正常工作后，再添加路由和故障转移 |
+| 我想要多提供商故障转移 | 先执行 `hermes model` | 仅在基础聊天正常工作后添加路由和故障转移 |
 
-**经验法则：** 如果 Hermes 无法完成一次正常的聊天，暂时不要添加更多功能。先让一次干净的对话正常工作，然后再叠加消息网关、定时任务、技能、语音或路由等功能。
+**经验法则：** 如果 Hermes 无法完成一次正常的聊天，请先不要添加更多功能。先让一次干净的对话正常工作，然后再叠加消息网关、定时任务、技能、语音或路由等功能。
 
 ---
 
@@ -82,14 +82,14 @@ source ~/.bashrc   # 或 source ~/.zshrc
 
 ## 2. 选择提供商
 
-这是最重要的一个设置步骤。使用 `hermes model` 以交互方式完成选择：
+这是最重要的设置步骤。使用 `hermes model` 以交互方式完成选择：
 
 ```bash
 hermes model
 ```
 
 :::tip 最简单路径：Nous Portal
-一个订阅涵盖 300+ 模型以及 [工具网关](../user-guide/features/tool-gateway.md)（网络搜索、图像生成、TTS、云浏览器）。在新安装后：
+一个订阅涵盖 300+ 模型以及 [工具网关](../user-guide/features/tool-gateway.md)（网络搜索、图像生成、TTS、云浏览器）。在全新安装后：
 
 ```bash
 hermes setup --portal
@@ -98,7 +98,7 @@ hermes setup --portal
 该命令将登录、设置 Nous 为你的提供商，并一键开启工具网关。
 :::
 
-推荐的默认设置：
+推荐的默认选项：
 
 | 提供商 | 说明 | 如何设置 |
 |----------|-----------|---------------|
@@ -119,21 +119,21 @@ hermes setup --portal
 | **AWS Bedrock** | 通过原生 Converse API 使用 Claude、Nova、Llama、DeepSeek | IAM 角色或 `aws configure`（[指南](../guides/aws-bedrock.md)） |
 | **Kilo Code** | KiloCode 托管模型 | 设置 `KILOCODE_API_KEY` |
 | **OpenCode Zen** | 按需付费访问精选模型 | 设置 `OPENCODE_ZEN_API_KEY` |
-| **OpenCode Go** | 每月 10 美元订阅开源模型 | 设置 `OPENCODE_GO_API_KEY` |
+| **OpenCode Go** | 每月 $10 订阅开源模型 | 设置 `OPENCODE_GO_API_KEY` |
 | **DeepSeek** | 直接 DeepSeek API 访问 | 设置 `DEEPSEEK_API_KEY` |
 | **NVIDIA NIM** | 通过 build.nvidia.com 或本地 NIM 使用 Nemotron 模型 | 设置 `NVIDIA_API_KEY`（可选：`NVIDIA_BASE_URL`） |
 | **GitHub Copilot** | GitHub Copilot 订阅（GPT-5.x、Claude、Gemini 等） | 通过 `hermes model` 进行 OAuth，或设置 `COPILOT_GITHUB_TOKEN` / `GH_TOKEN` |
 | **GitHub Copilot ACP** | Copilot ACP Agent 后端（生成本地 `copilot` CLI） | `hermes model`（需要 `copilot` CLI + `copilot login`） |
 | **Vercel AI Gateway** | Vercel AI Gateway 路由 | 设置 `AI_GATEWAY_API_KEY` |
 | **自定义端点** | VLLM、SGLang、Ollama 或任何 OpenAI 兼容的 API | 设置基础 URL + API 密钥 |
-对于大多数首次用户：选择一个提供商，除非你知道为什么要更改它们，否则接受默认设置。完整的提供商目录（包含环境变量和设置步骤）位于[Providers](../integrations/providers.md)页面。
+对于大多数首次用户：选择一个提供商，除非你知道为什么要更改，否则接受默认设置。完整的提供商目录（包含环境变量和设置步骤）位于[Providers](../integrations/providers.md)页面。
 
 :::caution 最低上下文要求：64K Token
-Hermes Agent 需要一个至少具有 **64,000 Token** 上下文的模型。上下文窗口较小的模型无法为多步骤工具调用工作流维持足够的工作记忆，并会在启动时被拒绝。大多数托管模型（Claude、GPT、Gemini、Qwen、DeepSeek）都能轻松满足此要求。如果你运行的是本地模型，请将其上下文大小设置为至少 64K（例如，对于 llama.cpp 使用 `--ctx-size 65536`，对于 Ollama 使用 `-c 65536`）。
+Hermes Agent 需要一个至少具有 **64,000 Token** 上下文的模型。上下文窗口较小的模型无法为多步骤工具调用工作流维持足够的工作记忆，并将在启动时被拒绝。大多数托管模型（Claude、GPT、Gemini、Qwen、DeepSeek）都轻松满足此要求。如果你运行的是本地模型，请将其上下文大小设置为至少 64K（例如，对于 llama.cpp 使用 `--ctx-size 65536`，对于 Ollama 使用 `-c 65536`）。
 :::
 
 :::tip
-你可以随时使用 `hermes model` 切换提供商——没有锁定。有关所有支持的提供商的完整列表和设置详情，请参阅 [AI Providers](../integrations/providers.md)。
+你可以随时使用 `hermes model` 切换提供商——没有锁定。有关所有支持的提供商的完整列表和设置详情，请参阅[AI Providers](../integrations/providers.md)。
 :::
 
 ### 设置如何存储
@@ -143,7 +143,7 @@ Hermes 将密钥与普通配置分开存储：
 - **密钥和 Token** → `~/.hermes/.env`
 - **非机密设置** → `~/.hermes/config.yaml`
 
-通过 CLI 设置值是最简单的方法：
+通过 CLI 正确设置值是最简单的方法：
 
 ```bash
 hermes config set model anthropic/claude-opus-4.6
@@ -163,7 +163,7 @@ hermes --tui      # 现代 TUI（推荐）
 你将看到一个欢迎横幅，显示你的模型、可用工具和技能。使用一个具体且易于验证的提示词：
 
 :::tip 选择你的界面
-Hermes 附带两个终端界面：经典的 `prompt_toolkit` CLI 和一个较新的 [TUI](../user-guide/tui.md)，后者具有模态叠加层、鼠标选择和非阻塞输入。两者共享相同的会话、斜杠命令和配置——分别使用 `hermes` 和 `hermes --tui` 尝试一下。
+Hermes 附带两个终端界面：经典的 `prompt_toolkit` CLI 和一个较新的[TUI](../user-guide/tui.md)，后者具有模态叠加层、鼠标选择和非阻塞输入。两者共享相同的会话、斜杠命令和配置——分别使用 `hermes` 和 `hermes --tui` 尝试一下。
 :::
 
 ```
@@ -175,7 +175,7 @@ Hermes 附带两个终端界面：经典的 `prompt_toolkit` CLI 和一个较新
 ```
 
 ```
-帮助我为这个代码库设置一个干净的 GitHub PR 工作流。
+帮我为这个代码库设置一个干净的 GitHub PR 工作流。
 ```
 
 **成功的样子：**
@@ -183,7 +183,7 @@ Hermes 附带两个终端界面：经典的 `prompt_toolkit` CLI 和一个较新
 - 横幅显示你选择的模型/提供商
 - Hermes 无错误回复
 - 如果需要，它可以使用工具（终端、文件读取、网络搜索）
-- 对话可以正常进行多个回合
+- 对话可以正常进行多轮
 
 如果这能正常工作，你就度过了最困难的部分。
 
@@ -196,7 +196,7 @@ hermes --continue    # 恢复最近的会话
 hermes -c            # 简写形式
 ```
 
-这应该能让你回到刚刚的会话。如果不能，请检查你是否在同一个配置文件中，以及会话是否确实已保存。当你以后需要处理多个设置或机器时，这一点很重要。
+这应该能让你回到刚刚的会话。如果不能，请检查你是否在同一个配置文件中以及会话是否确实已保存。当你以后需要处理多个设置或机器时，这一点很重要。
 
 ## 5. 尝试关键功能
 
@@ -222,29 +222,29 @@ Agent 将代表你运行终端命令并显示结果。
 
 ### 多行输入
 
-按 `Alt+Enter`、`Ctrl+J` 或 `Shift+Enter` 添加新行。`Shift+Enter` 需要一个能将其作为不同序列发送的终端（默认情况下是 Kitty / foot / WezTerm / Ghostty；启用 Kitty 键盘协议后，iTerm2 / Alacritty / VS Code 终端也可以）。`Alt+Enter` 和 `Ctrl+J` 在所有终端中都有效。
+按 `Alt+Enter`、`Ctrl+J` 或 `Shift+Enter` 添加新行。`Shift+Enter` 需要一个能将其作为不同序列发送的终端（默认情况下 Kitty / foot / WezTerm / Ghostty 支持；启用 Kitty 键盘协议后，iTerm2 / Alacritty / VS Code 终端也支持）。`Alt+Enter` 和 `Ctrl+J` 在每个终端中都有效。
 
 ### 中断 Agent
 
-如果 Agent 耗时过长，输入新消息并按 Enter 键——它会中断当前任务并切换到你的新指令。`Ctrl+C` 也有效。
+如果 Agent 耗时过长，输入新消息并按 Enter——它将中断当前任务并切换到你的新指令。`Ctrl+C` 也有效。
 
 ## 6. 添加下一层
 
-只有在基础聊天正常工作之后。选择你需要的功能：
+仅在基础聊天正常工作后进行。选择你需要的功能：
 
-### Bot 或共享助手
+### 机器人或共享助手
 
 ```bash
 hermes gateway setup    # 交互式平台配置
 ```
 
-连接 [Telegram](/docs/user-guide/messaging/telegram)、[Discord](/docs/user-guide/messaging/discord)、[Slack](/docs/user-guide/messaging/slack)、[WhatsApp](/docs/user-guide/messaging/whatsapp)、[Signal](/docs/user-guide/messaging/signal)、[Email](/docs/user-guide/messaging/email)、[Home Assistant](/docs/user-guide/messaging/homeassistant) 或 [Microsoft Teams](/docs/user-guide/messaging/teams)。
+连接 [Telegram](/user-guide/messaging/telegram)、[Discord](/user-guide/messaging/discord)、[Slack](/user-guide/messaging/slack)、[WhatsApp](/user-guide/messaging/whatsapp)、[Signal](/user-guide/messaging/signal)、[Email](/user-guide/messaging/email)、[Home Assistant](/user-guide/messaging/homeassistant) 或 [Microsoft Teams](/user-guide/messaging/teams)。
 
 ### 自动化和工具
 
 - `hermes tools` — 按平台调整工具访问权限
 - `hermes skills` — 浏览并安装可重用的工作流
-- Cron — 仅在你的 bot 或 CLI 设置稳定后使用
+- Cron — 仅在你的机器人或 CLI 设置稳定后使用
 
 ### 沙盒化终端
 
@@ -262,10 +262,10 @@ hermes config set terminal.backend ssh       # 远程服务器
 # Linux/macOS 的 ~/.hermes/hermes-agent 或 Windows 的 %LOCALAPPDATA%\hermes\hermes-agent）：
 cd ~/.hermes/hermes-agent
 uv pip install -e ".[voice]"
-# 包含 faster-whisper，用于免费的本地语音转文本
+# 包含用于免费本地语音转文本的 faster-whisper
 ```
 
-然后在 CLI 中：`/voice on`。按 `Ctrl+B` 开始录音。参见 [Voice Mode](../user-guide/features/voice-mode.md)。
+然后在 CLI 中：`/voice on`。按 `Ctrl+B` 进行录音。参见[语音模式](../user-guide/features/voice-mode.md)。
 
 ### 技能
 
@@ -298,22 +298,22 @@ hermes acp
 
 （如果你安装时没有 `[all]`，请先运行 `cd ~/.hermes/hermes-agent && uv pip install -e ".[acp]"`。）
 
-参见 [ACP Editor Integration](../user-guide/features/acp.md)。
+参见[ACP 编辑器集成](../user-guide/features/acp.md)。
 
 ---
 
 ## 常见故障模式
 
-以下是浪费最多时间的问题：
-| 症状 | 可能原因 | 解决方法 |
-|---|---|---|
-| Hermes 能打开但回复为空或损坏 | 提供商认证或模型选择错误 | 再次运行 `hermes model` 并确认提供商、模型和认证信息 |
-| 自定义端点"可用"但返回乱码 | 基础 URL、模型名称错误，或端点并非真正兼容 OpenAI | 先在单独的客户端验证该端点 |
-| 消息网关启动但无人能发送消息 | Bot Token、允许列表或平台设置不完整 | 重新运行 `hermes gateway setup` 并检查 `hermes gateway status` |
-| `hermes --continue` 找不到旧会话 | 切换了配置文件或会话从未保存 | 检查 `hermes sessions list` 并确认处于正确的配置文件中 |
-| 模型不可用或出现奇怪的降级行为 | 提供商路由或降级设置过于激进 | 在基础提供商稳定前，保持路由关闭 |
-| `hermes doctor` 标记配置问题 | 配置值缺失或已过时 | 修复配置，在添加功能前重新测试一次普通聊天 |
+这些问题最浪费时间：
 
+| 症状 | 可能原因 | 修复方法 |
+|---|---|---|
+| Hermes 打开但给出空回复或损坏的回复 | 提供商身份验证或模型选择错误 | 再次运行 `hermes model` 并确认提供商、模型和身份验证 |
+| 自定义端点"有效"但返回垃圾信息 | 基础 URL 错误、模型名称错误或实际上不兼容 OpenAI | 先在单独的客户端中验证端点 |
+| 消息网关启动但无人能向其发送消息 | 机器人 Token、允许列表或平台设置不完整 | 重新运行 `hermes gateway setup` 并检查 `hermes gateway status` |
+| `hermes --continue` 找不到旧会话 | 切换了配置文件或会话从未保存 | 检查 `hermes sessions list` 并确认你在正确的配置文件中 |
+| 模型不可用或出现奇怪的备用行为 | 提供商路由或备用设置过于激进 | 在基础提供商稳定之前保持路由关闭 |
+| `hermes doctor` 标记配置问题 | 配置值缺失或过时 | 修复配置，在添加功能之前重新测试一个简单的聊天 |
 ## 恢复工具包
 
 当感觉不对劲时，按此顺序操作：
@@ -325,7 +325,7 @@ hermes acp
 5. `hermes --continue`
 6. `hermes gateway status`
 
-这个流程能让你从"不对劲的状态"快速回到已知的正常状态。
+这个序列能让你从“不对劲的状态”快速回到已知的正常状态。
 
 ---
 
@@ -340,13 +340,13 @@ hermes acp
 | `hermes doctor` | 诊断问题 |
 | `hermes update` | 更新到最新版本 |
 | `hermes gateway` | 启动消息网关 |
-| `hermes --continue` | 恢复上次会话 |
+| `hermes --continue` | 恢复上一个会话 |
 
 ## 后续步骤
 
 - **[CLI 指南](../user-guide/cli.md)** — 掌握终端界面
 - **[配置](../user-guide/configuration.md)** — 自定义你的设置
-- **[消息网关](../user-guide/messaging/index.md)** — 连接 Telegram、Discord、Slack、WhatsApp、Signal、Email、Home Assistant、Teams 等
+- **[消息网关](../user-guide/messaging/index.md)** — 连接 Telegram、Discord、Slack、WhatsApp、Signal、电子邮件、Home Assistant、Teams 等
 - **[工具与工具集](../user-guide/features/tools.md)** — 探索可用功能
 - **[AI 提供商](../integrations/providers.md)** — 完整的提供商列表和设置详情
 - **[技能系统](../user-guide/features/skills.md)** — 可复用的工作流和知识

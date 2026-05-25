@@ -21,7 +21,7 @@ description: "计划模式：将 Markdown 计划写入"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `planning`, `plan-mode`, `implementation`, `workflow` |
-| 相关技能 | [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
+| 相关技能 | [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,7 +31,7 @@ description: "计划模式：将 Markdown 计划写入"
 
 # 计划模式
 
-当用户想要一个计划而非执行时，使用此技能。
+当用户需要计划而非执行时，使用此技能。
 
 ## 核心行为
 
@@ -39,7 +39,7 @@ description: "计划模式：将 Markdown 计划写入"
 
 - 不要实现代码。
 - 除了计划 Markdown 文件外，不要编辑项目文件。
-- 不要运行会修改的终端命令、提交、推送或执行外部操作。
+- 不要运行会修改状态的终端命令、提交、推送或执行外部操作。
 - 需要时，你可以使用只读命令/工具检查仓库或其他上下文。
 - 你的交付物是一个保存在活动工作空间下 `.hermes/plans/` 内的 Markdown 计划。
 
@@ -50,7 +50,7 @@ description: "计划模式：将 Markdown 计划写入"
 在相关时包含：
 - 目标
 - 当前上下文 / 假设
-- 建议的方法
+- 建议方法
 - 分步计划
 - 可能更改的文件
 - 测试 / 验证
@@ -72,5 +72,5 @@ description: "计划模式：将 Markdown 计划写入"
 
 - 如果请求足够清晰，直接编写计划。
 - 如果 `/plan` 没有明确的指令，请从当前会话上下文中推断任务。
-- 如果确实不够明确，请提出一个简短的澄清问题，而不是猜测。
+- 如果确实信息不足，请提出一个简短的澄清问题，而不是猜测。
 - 保存计划后，简要回复你计划的内容以及保存的路径。

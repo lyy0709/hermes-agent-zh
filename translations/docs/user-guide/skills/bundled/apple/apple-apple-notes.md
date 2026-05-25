@@ -1,14 +1,14 @@
 ---
-title: "Apple Notes — 通过 memo CLI 管理 Apple Notes：创建、搜索、编辑"
+title: "Apple Notes — 通过 memo CLI 管理 Apple 笔记：创建、搜索、编辑"
 sidebar_label: "Apple Notes"
-description: "通过 memo CLI 管理 Apple Notes：创建、搜索、编辑"
+description: "通过 memo CLI 管理 Apple 笔记：创建、搜索、编辑"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Apple Notes
 
-通过 memo CLI 管理 Apple Notes：创建、搜索、编辑。
+通过 memo CLI 管理 Apple 笔记：创建、搜索、编辑。
 
 ## 技能元数据
 
@@ -21,7 +21,7 @@ description: "通过 memo CLI 管理 Apple Notes：创建、搜索、编辑"
 | 许可证 | MIT |
 | 平台 | macos |
 | 标签 | `Notes`, `Apple`, `macOS`, `note-taking` |
-| 相关技能 | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian) |
+| 相关技能 | [`obsidian`](/user-guide/skills/bundled/note-taking/note-taking-obsidian) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,26 +31,26 @@ description: "通过 memo CLI 管理 Apple Notes：创建、搜索、编辑"
 
 # Apple Notes
 
-使用 `memo` 直接从终端管理 Apple Notes。笔记通过 iCloud 在所有 Apple 设备间同步。
+使用 `memo` 直接从终端管理 Apple 笔记。笔记通过 iCloud 在所有 Apple 设备间同步。
 
 ## 先决条件
 
 - 装有 Notes.app 的 **macOS**
 - 安装：`brew tap antoniorodr/memo && brew install antoniorodr/memo/memo`
-- 出现提示时，授予 Notes.app 自动化访问权限（系统设置 → 隐私与安全性 → 自动化）
+- 出现提示时，授予对 Notes.app 的自动化访问权限（系统设置 → 隐私与安全性 → 自动化）
 
 ## 使用时机
 
-- 用户要求创建、查看或搜索 Apple Notes
+- 用户要求创建、查看或搜索 Apple 笔记
 - 将信息保存到 Notes.app 以实现跨设备访问
 - 将笔记整理到文件夹中
 - 将笔记导出为 Markdown/HTML
 
-## 避免使用时机
+## 不适用时机
 
 - Obsidian 库管理 → 使用 `obsidian` 技能
-- Bear Notes → 独立的应用程序（此处不支持）
-- 仅供 Agent 使用的快速笔记 → 改用 `memory` 工具
+- Bear Notes → 独立应用（此处不支持）
+- 仅限 Agent 的快速笔记 → 改用 `memory` 工具
 
 ## 快速参考
 
@@ -66,7 +66,7 @@ memo notes -s "query"             # 搜索笔记（模糊匹配）
 
 ```bash
 memo notes -a                     # 交互式编辑器
-memo notes -a "Note Title"        # 快速添加并指定标题
+memo notes -a "Note Title"        # 快速添加（带标题）
 ```
 
 ### 编辑笔记

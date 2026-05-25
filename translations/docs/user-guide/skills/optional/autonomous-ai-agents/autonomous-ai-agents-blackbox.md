@@ -8,20 +8,20 @@ description: "将编码任务委派给 Blackbox AI CLI Agent"
 
 # Blackbox
 
-将编码任务委派给 Blackbox AI CLI Agent。这是一个多模型 Agent，内置评判器，可将任务通过多个 LLM 运行并选取最佳结果。需要安装 blackbox CLI 并拥有 Blackbox AI API 密钥。
+将编码任务委派给 Blackbox AI CLI Agent。这是一个内置评判机制的多模型 Agent，通过多个 LLM 运行任务并选取最佳结果。需要安装 blackbox CLI 并拥有 Blackbox AI API 密钥。
 
 ## 技能元数据
 
 | | |
 |---|---|
-| 来源 | 可选 — 使用 `hermes skills install official/autonomous-ai-agents/blackbox` 安装 |
+| 来源 | 可选 — 通过 `hermes skills install official/autonomous-ai-agents/blackbox` 安装 |
 | 路径 | `optional-skills/autonomous-ai-agents/blackbox` |
 | 版本 | `1.0.0` |
 | 作者 | Hermes Agent (Nous Research) |
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Coding-Agent`, `Blackbox`, `Multi-Agent`, `Judge`, `Multi-Model` |
-| 相关技能 | [`claude-code`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
+| 相关技能 | [`claude-code`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,7 +31,7 @@ description: "将编码任务委派给 Blackbox AI CLI Agent"
 
 # Blackbox CLI
 
-通过 Hermes 终端将编码任务委派给 [Blackbox AI](https://www.blackbox.ai/)。Blackbox 是一个多模型编码 Agent CLI，可将任务分派给多个 LLM（Claude、Codex、Gemini、Blackbox Pro）并使用评判器来选择最佳实现。
+通过 Hermes 终端将编码任务委派给 [Blackbox AI](https://www.blackbox.ai/)。Blackbox 是一个多模型编码 Agent CLI，它将任务分派给多个 LLM（Claude、Codex、Gemini、Blackbox Pro）并使用一个评判器来选择最佳实现。
 
 该 CLI 是[开源](https://github.com/blackboxaicode/cli)的（GPL-3.0，TypeScript，从 Gemini CLI 分叉而来），支持交互式会话、非交互式单次执行、检查点、MCP 和视觉模型切换。
 
@@ -48,7 +48,7 @@ description: "将编码任务委派给 Blackbox AI CLI Agent"
 - 已配置：运行 `blackbox configure` 并输入你的 API 密钥
 - 在终端调用中使用 `pty=true` — Blackbox CLI 是一个交互式终端应用程序
 
-## 单次任务
+## 单次执行任务
 
 ```
 terminal(command="blackbox --prompt '为 Express API 添加 JWT 认证和刷新令牌'", workdir="/path/to/project", pty=true)
@@ -64,8 +64,8 @@ terminal(command="cd $(mktemp -d) && git init && blackbox --prompt '使用 SQLit
 对于需要数分钟的任务，使用后台模式以便监控进度：
 
 ```
-# 在后台启动并启用 PTY
-terminal(command="blackbox --prompt '重构认证模块以使用 OAuth 2.0'", workdir="~/project", background=true, pty=true)
+# 在后台启动并使用 PTY
+terminal(command="blackbox --prompt '将认证模块重构为使用 OAuth 2.0'", workdir="~/project", background=true, pty=true)
 # 返回 session_id
 
 # 监控进度
@@ -96,7 +96,7 @@ terminal(command="blackbox --resume-checkpoint 'task-abc123-2026-03-06' --prompt
 | 命令 | 效果 |
 |---------|--------|
 | `/compress` | 压缩对话历史以节省 Token |
-| `/clear` | 清除历史并重新开始 |
+| `/clear` | 清除历史记录并重新开始 |
 | `/stats` | 查看当前 Token 使用情况 |
 | `Ctrl+C` | 取消当前操作 |
 
@@ -116,7 +116,7 @@ terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.
 terminal(command="blackbox --prompt '修复登录错误'", workdir="/tmp/issue-1", background=true, pty=true)
 terminal(command="blackbox --prompt '为认证添加单元测试'", workdir="/tmp/issue-2", background=true, pty=true)
 
-# 监控所有任务
+# 监控所有实例
 process(action="list")
 ```
 

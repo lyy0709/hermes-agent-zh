@@ -17,11 +17,11 @@ description: "通过 delegate_task 子代理执行计划（两阶段评审）"
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/software-development/subagent-driven-development` |
 | 版本 | `1.1.0` |
-| 作者 | Hermes Agent (adapted from obra/superpowers) |
+| 作者 | Hermes Agent（改编自 obra/superpowers） |
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `delegation`, `subagent`, `implementation`, `workflow`, `parallel` |
-| 相关技能 | [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
+| 相关技能 | [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/user-guide/skills/bundled/software-development/software-development-requesting-code-review), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
 
 ## 参考：完整的 SKILL.md
 
@@ -39,13 +39,13 @@ description: "通过 delegate_task 子代理执行计划（两阶段评审）"
 
 ## 何时使用
 
-在以下情况下使用此技能：
+在以下情况使用此技能：
 - 你有一个实施计划（来自 writing-plans 技能或用户需求）
 - 任务大多是独立的
 - 质量和规范符合性很重要
 - 你希望在任务之间进行自动化评审
 
-**与手动执行相比：**
+**与手动执行对比：**
 - 每个任务都有新的上下文（不会因累积状态而产生混淆）
 - 自动化评审流程能及早发现问题
 - 所有任务都有一致的质量检查
@@ -63,45 +63,45 @@ read_file("docs/plans/feature-plan.md")
 
 # 创建包含所有任务的待办事项列表
 todo([
-    {"id": "task-1", "content": "Create User model with email field", "status": "pending"},
-    {"id": "task-2", "content": "Add password hashing utility", "status": "pending"},
-    {"id": "task-3", "content": "Create login endpoint", "status": "pending"},
+    {"id": "task-1", "content": "创建带有 email 字段的 User 模型", "status": "pending"},
+    {"id": "task-2", "content": "添加密码哈希工具", "status": "pending"},
+    {"id": "task-3", "content": "创建登录端点", "status": "pending"},
 ])
 ```
 
-**关键点：** 只读取计划**一次**。提取所有内容。不要让子代理读取计划文件——直接在上下文中提供完整的任务文本。
+**关键：** 只读取计划**一次**。提取所有内容。不要让子代理读取计划文件——直接在上下文中提供完整的任务文本。
 
 ### 2. 每个任务的工作流
 
 对于计划中的**每个**任务：
 
-#### 步骤 1：分派实施者子代理
+#### 步骤 1：分派实现者子代理
 
-使用 `delegate_task` 并提供完整的上下文：
+使用 `delegate_task` 并提供完整上下文：
 
 ```python
 delegate_task(
-    goal="Implement Task 1: Create User model with email and password_hash fields",
+    goal="实现任务 1：创建带有 email 和 password_hash 字段的 User 模型",
     context="""
-    TASK FROM PLAN:
-    - Create: src/models/user.py
-    - Add User class with email (str) and password_hash (str) fields
-    - Use bcrypt for password hashing
-    - Include __repr__ for debugging
+    计划中的任务：
+    - 创建：src/models/user.py
+    - 添加带有 email (str) 和 password_hash (str) 字段的 User 类
+    - 使用 bcrypt 进行密码哈希
+    - 包含用于调试的 __repr__
 
-    FOLLOW TDD:
-    1. Write failing test in tests/models/test_user.py
-    2. Run: pytest tests/models/test_user.py -v (verify FAIL)
-    3. Write minimal implementation
-    4. Run: pytest tests/models/test_user.py -v (verify PASS)
-    5. Run: pytest tests/ -q (verify no regressions)
-    6. Commit: git add -A && git commit -m "feat: add User model with password hashing"
+    遵循 TDD：
+    1. 在 tests/models/test_user.py 中编写失败的测试
+    2. 运行：pytest tests/models/test_user.py -v（验证失败）
+    3. 编写最小实现
+    4. 运行：pytest tests/models/test_user.py -v（验证通过）
+    5. 运行：pytest tests/ -q（验证没有回归）
+    6. 提交：git add -A && git commit -m "feat: add User model with password hashing"
 
-    PROJECT CONTEXT:
-    - Python 3.11, Flask app in src/app.py
-    - Existing models in src/models/
-    - Tests use pytest, run from project root
-    - bcrypt already in requirements.txt
+    项目上下文：
+    - Python 3.11，Flask 应用在 src/app.py
+    - 现有模型在 src/models/
+    - 测试使用 pytest，从项目根目录运行
+    - bcrypt 已在 requirements.txt 中
     """,
     toolsets=['terminal', 'file']
 )
@@ -109,26 +109,26 @@ delegate_task(
 
 #### 步骤 2：分派规范符合性评审员
 
-实施者完成后，对照原始规范进行验证：
+在实现者完成后，对照原始规范进行验证：
 
 ```python
 delegate_task(
-    goal="Review if implementation matches the spec from the plan",
+    goal="评审实现是否符合计划中的规范",
     context="""
-    ORIGINAL TASK SPEC:
-    - Create src/models/user.py with User class
-    - Fields: email (str), password_hash (str)
-    - Use bcrypt for password hashing
-    - Include __repr__
+    原始任务规范：
+    - 创建带有 User 类的 src/models/user.py
+    - 字段：email (str), password_hash (str)
+    - 使用 bcrypt 进行密码哈希
+    - 包含 __repr__
 
-    CHECK:
-    - [ ] All requirements from spec implemented?
-    - [ ] File paths match spec?
-    - [ ] Function signatures match spec?
-    - [ ] Behavior matches expected?
-    - [ ] Nothing extra added (no scope creep)?
+    检查：
+    - [ ] 规范中的所有要求都实现了吗？
+    - [ ] 文件路径符合规范吗？
+    - [ ] 函数签名符合规范吗？
+    - [ ] 行为符合预期吗？
+    - [ ] 没有额外添加内容（没有范围蔓延）？
 
-    OUTPUT: PASS or list of specific spec gaps to fix.
+    输出：PASS 或需要修复的具体规范差距列表。
     """,
     toolsets=['file']
 )
@@ -138,29 +138,29 @@ delegate_task(
 
 #### 步骤 3：分派代码质量评审员
 
-规范符合性通过后：
+在规范符合性通过后：
 
 ```python
 delegate_task(
-    goal="Review code quality for Task 1 implementation",
+    goal="评审任务 1 实现的代码质量",
     context="""
-    FILES TO REVIEW:
+    要评审的文件：
     - src/models/user.py
     - tests/models/test_user.py
 
-    CHECK:
-    - [ ] Follows project conventions and style?
-    - [ ] Proper error handling?
-    - [ ] Clear variable/function names?
-    - [ ] Adequate test coverage?
-    - [ ] No obvious bugs or missed edge cases?
-    - [ ] No security issues?
+    检查：
+    - [ ] 遵循项目约定和风格吗？
+    - [ ] 有适当的错误处理吗？
+    - [ ] 变量/函数名称清晰吗？
+    - [ ] 测试覆盖率足够吗？
+    - [ ] 没有明显的错误或遗漏的边缘情况吗？
+    - [ ] 没有安全问题吗？
 
-    OUTPUT FORMAT:
-    - Critical Issues: [must fix before proceeding]
-    - Important Issues: [should fix]
-    - Minor Issues: [optional]
-    - Verdict: APPROVED or REQUEST_CHANGES
+    输出格式：
+    - 关键问题：[必须在继续之前修复]
+    - 重要问题：[应该修复]
+    - 次要问题：[可选]
+    - 裁决：APPROVED 或 REQUEST_CHANGES
     """,
     toolsets=['file']
 )
@@ -171,22 +171,22 @@ delegate_task(
 #### 步骤 4：标记完成
 
 ```python
-todo([{"id": "task-1", "content": "Create User model with email field", "status": "completed"}], merge=True)
+todo([{"id": "task-1", "content": "创建带有 email 字段的 User 模型", "status": "completed"}], merge=True)
 ```
 
 ### 3. 最终评审
 
-**所有**任务完成后，分派一个最终的集成评审员：
+在**所有**任务完成后，分派一个最终的集成评审员：
 
 ```python
 delegate_task(
-    goal="Review the entire implementation for consistency and integration issues",
+    goal="评审整个实现的一致性和集成问题",
     context="""
-    All tasks from the plan are complete. Review the full implementation:
-    - Do all components work together?
-    - Any inconsistencies between tasks?
-    - All tests passing?
-    - Ready for merge?
+    计划中的所有任务都已完成。评审完整实现：
+    - 所有组件能协同工作吗？
+    - 任务之间有任何不一致吗？
+    - 所有测试都通过吗？
+    - 准备好合并了吗？
     """,
     toolsets=['terminal', 'file']
 )
@@ -198,10 +198,10 @@ delegate_task(
 # 运行完整的测试套件
 pytest tests/ -q
 
-# 审查所有更改
+# 评审所有更改
 git diff --stat
 
-# 如有需要，进行最终提交
+# 如果需要，进行最终提交
 git add -A && git commit -m "feat: complete [feature name] implementation"
 ```
 
@@ -213,26 +213,26 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 - "实现用户认证系统"
 
 **大小合适：**
-- "创建包含电子邮件和密码字段的 User 模型"
+- "创建带有 email 和 password 字段的 User 模型"
 - "添加密码哈希函数"
 - "创建登录端点"
-- "添加 JWT Token 生成"
+- "添加 JWT token 生成"
 - "创建注册端点"
 
 ## 危险信号 — 切勿做这些事
 
-- 没有计划就开始实施
+- 没有计划就开始实现
 - 跳过评审（规范符合性或代码质量）
 - 在未修复关键/重要问题的情况下继续
-- 为涉及相同文件的任务分派多个实施者子代理
+- 为涉及相同文件的任务分派多个实现者子代理
 - 让子代理读取计划文件（改为在上下文中提供完整文本）
-- 忽略场景设置上下文（子代理需要理解任务所处的位置）
+- 跳过场景设置上下文（子代理需要理解任务所处的位置）
 - 忽略子代理的问题（在让他们继续之前回答）
 - 在规范符合性上接受"差不多就行"
-- 跳过评审循环（评审员发现问题 → 实施者修复 → 再次评审）
-- 让实施者自我评审代替实际评审（两者都需要）
+- 跳过评审循环（评审员发现问题 → 实现者修复 → 再次评审）
+- 让实现者自我评审代替实际评审（两者都需要）
 - **在规范符合性为 PASS 之前开始代码质量评审**（顺序错误）
-- 在任一评审仍有未解决问题时，就移动到下一个任务
+- 在任一评审有未解决问题时移动到下一个任务
 
 ## 处理问题
 
@@ -240,19 +240,19 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 - 清晰完整地回答
 - 如果需要，提供额外的上下文
-- 不要催促他们进入实施阶段
+- 不要催促他们进入实现
 
 ### 如果评审员发现问题
 
-- 实施者子代理（或一个新的）修复它们
+- 实现者子代理（或一个新的）修复它们
 - 评审员再次评审
 - 重复直到批准
 - 不要跳过重新评审
 
 ### 如果子代理任务失败
 
-- 分派一个新的修复子代理，并附上关于出错原因的具体说明
-- 不要尝试在控制器会话中手动修复（避免上下文污染）
+- 分派一个新的修复子代理，并附带关于出错的具体说明
+- 不要尝试在控制器会话中手动修复（上下文污染）
 
 ## 效率说明
 
@@ -263,11 +263,11 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 **为什么需要两阶段评审：**
 - 规范评审能及早发现构建不足或过度构建
-- 质量评审确保实现是构建良好的
-- 在问题跨任务复合之前发现问题
+- 质量评审确保实现构建良好
+- 在问题在任务间复合之前发现问题
 
 **成本权衡：**
-- 更多的子代理调用（每个任务：实施者 + 2 个评审员）
+- 更多的子代理调用（每个任务：实现者 + 2 个评审员）
 - 但能及早发现问题（比以后调试复合问题更便宜）
 
 ## 与其他技能的集成
@@ -280,25 +280,25 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 ### 与 test-driven-development
 
-实施者子代理应遵循 TDD：
+实现者子代理应遵循 TDD：
 1. 首先编写失败的测试
-2. 实现最少的代码
+2. 实现最小代码
 3. 验证测试通过
 4. 提交
 
-在每个实施者上下文中包含 TDD 说明。
+在每个实现者上下文中包含 TDD 说明。
 
 ### 与 requesting-code-review
 
-两阶段评审过程**就是**代码评审。对于最终的集成评审，使用 requesting-code-review 技能的评审维度。
+两阶段评审流程**就是**代码评审。对于最终的集成评审，使用 requesting-code-review 技能的评审维度。
 
 ### 与 systematic-debugging
 
-如果子代理在实施过程中遇到错误：
+如果子代理在实现过程中遇到错误：
 1. 遵循 systematic-debugging 流程
 2. 在修复前找到根本原因
 3. 编写回归测试
-4. 恢复实施
+4. 恢复实现
 
 ## 示例工作流
 
@@ -307,13 +307,13 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 [创建包含 5 个任务的待办事项列表]
 
 --- 任务 1：创建 User 模型 ---
-[分派实施者子代理]
-  实施者："电子邮件是否应该唯一？"
-  你："是的，电子邮件必须唯一"
-  实施者：已实施，3/3 测试通过，已提交。
+[分派实现者子代理]
+  实现者："email 应该是唯一的吗？"
+  你："是的，email 必须是唯一的"
+  实现者：已实现，3/3 测试通过，已提交。
 
 [分派规范评审员]
-  规范评审员：✅ PASS — 所有要求均已满足
+  规范评审员：✅ PASS — 所有要求都已满足
 
 [分派质量评审员]
   质量评审员：✅ APPROVED — 代码清晰，测试良好
@@ -321,26 +321,26 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 [标记任务 1 完成]
 
 --- 任务 2：密码哈希 ---
-[分派实施者子代理]
-  实施者：没有问题，已实施，5/5 测试通过。
+[分派实现者子代理]
+  实现者：没有问题，已实现，5/5 测试通过。
 
 [分派规范评审员]
   规范评审员：❌ 缺失：密码强度验证（规范要求"最少 8 个字符"）
 
-[实施者修复]
-  实施者：添加了验证，7/7 测试通过。
+[实现者修复]
+  实现者：添加了验证，7/7 测试通过。
 
 [再次分派规范评审员]
   规范评审员：✅ PASS
 
 [分派质量评审员]
   质量评审员：重要：魔法数字 8，提取为常量
-  实施者：提取了 MIN_PASSWORD_LENGTH 常量
+  实现者：提取了 MIN_PASSWORD_LENGTH 常量
   质量评审员：✅ APPROVED
 
 [标记任务 2 完成]
 
-... (继续所有任务)
+...（继续所有任务）
 
 [所有任务完成后：分派最终集成评审员]
 [运行完整测试套件：全部通过]
@@ -362,9 +362,9 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 
 ## 延伸阅读（相关时加载）
 
-当编排涉及大量上下文使用、长评审循环或复杂的验证检查点时，为特定规程加载这些参考资料：
+当编排涉及大量上下文使用、长评审循环或复杂的验证检查点时，为特定规程加载这些参考：
 
-- **`references/context-budget-discipline.md`** — 四级上下文退化模型（PEAK / GOOD / DEGRADING / POOR）、随上下文窗口大小扩展的阅读深度规则，以及无声退化的早期预警信号。当运行显然会消耗大量上下文时加载（多阶段计划、许多子代理、大型工件）。
-- **`references/gates-taxonomy.md`** — 四种规范的门类型（Pre-flight, Revision, Escalation, Abort），包含行为、恢复和示例。在设计或评审任何具有验证检查点的工作流时加载——明确使用该词汇表，以便每个门都有定义的进入条件、失败行为和恢复规则。
+- **`references/context-budget-discipline.md`** — 四层上下文退化模型（PEAK / GOOD / DEGRADING / POOR）、随上下文窗口大小扩展的读取深度规则，以及无声退化的早期预警信号。当运行显然会消耗大量上下文时加载（多阶段计划、许多子代理、大型工件）。
+- **`references/gates-taxonomy.md`** — 四种规范门类型（Pre-flight, Revision, Escalation, Abort），包含行为、恢复和示例。在设计或评审任何具有验证检查点的工作流时加载——明确使用该词汇表，以便每个门都有定义的入口、失败行为和恢复规则。
 
-两份参考资料均改编自 gsd-build/get-shit-done (MIT © 2025 Lex Christopherson)。
+两个参考均改编自 gsd-build/get-shit-done (MIT © 2025 Lex Christopherson)。

@@ -21,7 +21,7 @@ description: "通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Issues`, `Project-Management`, `Bug-Tracking`, `Triage` |
-| 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow) |
+| 相关技能 | [`github-auth`](/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/user-guide/skills/bundled/github/github-github-pr-workflow) |
 
 ## 参考：完整的 SKILL.md
 
@@ -357,7 +357,7 @@ gh issue list --label "wontfix" --json number --jq '.[].number' | \
 **使用 curl：**
 
 ```bash
-# 列出带有标签的 issue 编号，然后逐个关闭
+# 列出带有某个标签的 issue 编号，然后逐个关闭
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/repos/$OWNER/$REPO/issues?labels=wontfix&state=open" \

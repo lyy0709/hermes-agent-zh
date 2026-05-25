@@ -21,17 +21,17 @@ GitHub 认证设置：HTTPS 令牌、SSH 密钥、gh CLI 登录。
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Authentication`, `Git`, `gh-cli`, `SSH`, `Setup` |
-| 相关技能 | [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-code-review`](/docs/user-guide/skills/bundled/github/github-github-code-review), [`github-issues`](/docs/user-guide/skills/bundled/github/github-github-issues), [`github-repo-management`](/docs/user-guide/skills/bundled/github/github-github-repo-management) |
+| 相关技能 | [`github-pr-workflow`](/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-code-review`](/user-guide/skills/bundled/github/github-github-code-review), [`github-issues`](/user-guide/skills/bundled/github/github-github-issues), [`github-repo-management`](/user-guide/skills/bundled/github/github-github-repo-management) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # GitHub 认证设置
 
-此技能用于设置认证，以便 Agent 能够处理 GitHub 仓库、PR、问题和 CI。它涵盖两种路径：
+此技能用于设置认证，以便 Agent 能够处理 GitHub 仓库、PR、Issue 和 CI。它涵盖两种路径：
 
 - **`git`（始终可用）** — 使用 HTTPS 个人访问令牌或 SSH 密钥
 - **`gh` CLI（如果已安装）** — 通过更简单的认证流程提供更丰富的 GitHub API 访问
@@ -82,7 +82,7 @@ git config --global credential.helper 2>/dev/null || echo "no git credential hel
 
 ```bash
 # 设置凭证助手来缓存凭证
-# "store" 将凭证以明文保存到 ~/.git-credentials（简单、持久）
+# "store" 将凭证以明文形式保存到 ~/.git-credentials（简单、持久）
 git config --global credential.helper store
 
 # 现在执行一个会触发认证的测试操作 — git 将提示输入凭证
@@ -206,12 +206,12 @@ gh auth status
 
 ## 在没有 gh 的情况下使用 GitHub API
 
-当 `gh` 不可用时，你仍然可以使用 `curl` 和个人访问令牌访问完整的 GitHub API。其他 GitHub 技能就是这样实现其备用方案的。
+当 `gh` 不可用时，你仍然可以使用 `curl` 和个人访问令牌访问完整的 GitHub API。其他 GitHub 技能正是通过这种方式实现其回退机制。
 
 ### 为 API 调用设置令牌
 
 ```bash
-# 选项 1：导出为环境变量（首选 — 避免出现在命令中）
+# 选项 1：导出为环境变量（推荐 — 避免出现在命令中）
 export GITHUB_TOKEN="<令牌>"
 
 # 然后在 curl 调用中使用：
@@ -260,6 +260,6 @@ fi
 | `remote: Permission to X denied` | 令牌可能缺少 `repo` 权限范围 — 使用正确的权限范围重新生成 |
 | `fatal: Authentication failed` | 缓存的凭证可能已过期 — 运行 `git credential reject` 然后重新认证 |
 | `ssh: connect to host github.com port 22: Connection refused` | 尝试通过 HTTPS 端口使用 SSH：在 `~/.ssh/config` 中添加 `Host github.com`，并设置 `Port 443` 和 `Hostname ssh.github.com` |
-| 凭证不持久 | 检查 `git config --global credential.helper` — 必须是 `store` 或 `cache` |
+| 凭证未持久化 | 检查 `git config --global credential.helper` — 必须为 `store` 或 `cache` |
 | 多个 GitHub 账户 | 在 `~/.ssh/config` 中为每个主机别名使用不同的 SSH 密钥，或使用按仓库的凭证 URL |
 | `gh: command not found` + 无 sudo | 使用上面的仅 Git 方法 1 — 无需安装 |

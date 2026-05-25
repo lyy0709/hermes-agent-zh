@@ -21,29 +21,29 @@ description: "通过 Yahoo 获取股票报价、历史数据、搜索、对比�
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Stocks`, `Finance`, `Market`, `Crypto`, `Investing` |
-| 相关技能 | [`dcf-model`](/docs/user-guide/skills/optional/finance/finance-dcf-model), [`comps-analysis`](/docs/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/docs/user-guide/skills/optional/finance/finance-lbo-model) |
+| 相关技能 | [`dcf-model`](/user-guide/skills/optional/finance/finance-dcf-model), [`comps-analysis`](/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/user-guide/skills/optional/finance/finance-lbo-model) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Stocks 技能
 
-通过 Yahoo Finance 获取只读市场数据。包含五个命令：`quote`、`search`、`history`、`compare`、`crypto`。仅使用 Python 标准库 — 无需 API 密钥，无需 pip 安装。Yahoo 的端点是非官方的，可能会限速或变更。
+通过 Yahoo Finance 获取只读市场数据。包含五个命令：`quote`、`search`、`history`、`compare`、`crypto`。仅使用 Python 标准库 — 无需 API 密钥，无需 pip 安装。Yahoo 的端点是非官方的，可能会进行速率限制或发生变更。
 
 ## 使用场景
 
-- 用户询问当前股价（AAPL、TSLA、MSFT 等）
-- 用户想通过公司名称查找股票代码
-- 用户想要特定日期范围内的 OHLCV 历史数据或表现
-- 用户想并排比较多个股票代码
+- 用户询问当前股票价格（AAPL、TSLA、MSFT 等）
+- 用户希望通过公司名称查找股票代码
+- 用户需要特定日期范围内的 OHLCV 历史数据或表现
+- 用户希望并排比较多个股票代码
 - 用户询问加密货币价格（BTC、ETH、SOL 等）
 
 ## 先决条件
 
-仅需 Python 3.8+ 标准库。可选：设置 `ALPHA_VANTAGE_KEY` 环境变量，以便在 Yahoo 受 crumb 保护的字段返回 null 时，补充 `market_cap`、`pe_ratio` 和 52 周高低点数据。免费密钥：https://www.alphavantage.co/support/#api-key
+仅需 Python 3.8+ 标准库。可选：设置 `ALPHA_VANTAGE_KEY` 环境变量，以便在 Yahoo 受 crumb 保护的字段返回空值时，补充 `market_cap`、`pe_ratio` 和 52 周高低点数据。免费密钥：https://www.alphavantage.co/support/#api-key
 
 ## 如何运行
 
@@ -87,13 +87,13 @@ python3 $SCRIPT crypto BTC ETH SOL
 
 ### `crypto SYMBOL [SYMBOL2 ...]`
 
-获取加密货币价格。传入 `BTC`（脚本会自动追加 `-USD`）。
+获取加密货币价格。传递 `BTC`（脚本会自动追加 `-USD`）。
 
 ## 注意事项
 
-- Yahoo Finance 的 API 是非官方的。端点可能未经通知就变更或限速 — 如果请求开始失败，这就是原因。
-- 当 Yahoo 的 crumb 会话未建立时，`quote` 命令的 `market_cap` 和 `pe_ratio` 可能返回 null。设置 `ALPHA_VANTAGE_KEY` 以补充数据。
-- 批量请求之间添加少量延迟，以避免触发限速。
+- Yahoo Finance 的 API 是非官方的。端点可能未经通知就发生变更或进行速率限制 — 如果请求开始失败，这就是原因。
+- 当 Yahoo 的 crumb 会话未建立时，`quote` 命令的 `market_cap` 和 `pe_ratio` 可能返回空值。设置 `ALPHA_VANTAGE_KEY` 以进行数据回填。
+- 批量请求之间请添加少量延迟，以避免速率限制。
 - 此为只读技能 — 无下单功能，无账户集成。
 
 ## 验证

@@ -13,23 +13,23 @@ Hermes Agent 会自动发现并加载用于塑造其行为的上下文文件。�
 | 文件 | 用途 | 发现方式 |
 |------|---------|-----------|
 | **.hermes.md** / **HERMES.md** | 项目指令（最高优先级） | 向上遍历到 git 根目录 |
-| **AGENTS.md** | 项目指令、约定、架构 | 启动时的 CWD + 逐步遍历子目录 |
-| **CLAUDE.md** | Claude Code 上下文文件（同样会被检测） | 启动时的 CWD + 逐步遍历子目录 |
-| **SOUL.md** | 此 Hermes 实例的全局个性和语气自定义 | 仅从 `HERMES_HOME/SOUL.md` |
+| **AGENTS.md** | 项目指令、约定、架构 | 启动时的 CWD + 逐步发现子目录 |
+| **CLAUDE.md** | Claude Code 上下文文件（也会被检测到） | 启动时的 CWD + 逐步发现子目录 |
+| **SOUL.md** | 此 Hermes 实例的全局个性和语气自定义 | 仅 `HERMES_HOME/SOUL.md` |
 | **.cursorrules** | Cursor IDE 编码约定 | 仅 CWD |
 | **.cursor/rules/*.mdc** | Cursor IDE 规则模块 | 仅 CWD |
 
 :::info 优先级系统
-每个会话只加载**一种**项目上下文类型（首次匹配优先）：`.hermes.md` → `AGENTS.md` → `CLAUDE.md` → `.cursorrules`。**SOUL.md** 总是作为 Agent 身份（槽位 #1）独立加载。
+每个会话只加载**一种**项目上下文类型（首次匹配优先）：`.hermes.md` → `AGENTS.md` → `CLAUDE.md` → `.cursorrules`。**SOUL.md** 始终作为 Agent 身份（槽位 #1）独立加载。
 :::
 
 ## AGENTS.md
 
-`AGENTS.md` 是主要的项目上下文文件。它告诉 Agent 你的项目是如何构建的，需要遵循哪些约定，以及任何特殊指令。
+`AGENTS.md` 是主要的项目上下文文件。它告诉 Agent 你的项目结构、需要遵循的约定以及任何特殊指令。
 
 ### 渐进式子目录发现
 
-在会话开始时，Hermes 会将你工作目录中的 `AGENTS.md` 加载到系统提示词中。当 Agent 在会话期间（通过 `read_file`、`terminal`、`search_files` 等）导航到子目录时，它会**逐步发现**这些目录中的上下文文件，并在它们变得相关时立即将其注入到对话中。
+在会话开始时，Hermes 会将工作目录中的 `AGENTS.md` 加载到系统提示词中。当 Agent 在会话期间导航到子目录时（通过 `read_file`、`terminal`、`search_files` 等），它会**逐步发现**这些目录中的上下文文件，并在它们变得相关时立即将其注入到对话中。
 
 ```
 my-project/
@@ -43,10 +43,10 @@ my-project/
 ```
 
 与在启动时加载所有内容相比，这种方法有两个优点：
-- **避免系统提示词臃肿** — 子目录提示仅在需要时出现
+- **避免系统提示词膨胀** — 子目录提示仅在需要时出现
 - **保持提示词缓存** — 系统提示词在多轮对话中保持稳定
 
-每个子目录在每个会话中最多检查一次。发现过程也会向上遍历父目录，因此读取 `backend/src/main.py` 会发现 `backend/AGENTS.md`，即使 `backend/src/` 本身没有上下文文件。
+每个子目录在每次会话中最多检查一次。发现过程也会向上遍历父目录，因此读取 `backend/src/main.py` 会发现 `backend/AGENTS.md`，即使 `backend/src/` 本身没有上下文文件。
 
 :::info
 子目录上下文文件会经过与启动上下文文件相同的[安全扫描](#security-prompt-injection-protection)。恶意文件会被阻止。
@@ -68,7 +68,7 @@ my-project/
 ## 约定
 - 所有前端代码使用 TypeScript 严格模式
 - Python 代码遵循 PEP 8，处处使用类型提示
-- 所有 API 端点返回 `{data, error, meta}` 格式的 JSON
+- 所有 API 端点返回 JSON，格式为 `{data, error, meta}`
 - 测试放在 `__tests__/` 目录（前端）或 `tests/` 目录（后端）
 
 ## 重要说明
@@ -79,7 +79,7 @@ my-project/
 
 ## SOUL.md
 
-`SOUL.md` 控制 Agent 的个性、语气和沟通风格。完整详情请参阅[个性](/docs/user-guide/features/personality)页面。
+`SOUL.md` 控制 Agent 的个性、语气和沟通风格。完整详情请参阅[个性](/user-guide/features/personality)页面。
 
 **位置：**
 
@@ -122,7 +122,7 @@ Hermes 兼容 Cursor IDE 的 `.cursorrules` 文件和 `.cursor/rules/*.mdc` 规�
 3.  **提示加载** — 如果找到 `AGENTS.md`、`CLAUDE.md` 或 `.cursorrules`，则加载它（每个目录首次匹配）
 4.  **安全扫描** — 与启动文件相同的提示词注入扫描
 5.  **截断** — 每个文件限制在 8,000 个字符以内
-6.  **注入** — 附加到工具结果中，因此模型可以在上下文中自然地看到它
+6.  **注入** — 附加到工具结果中，因此模型会在上下文中自然地看到它
 
 最终的提示词部分大致如下：
 
@@ -164,7 +164,7 @@ Hermes 兼容 Cursor IDE 的 `.cursorrules` 文件和 `.cursor/rules/*.mdc` 规�
 ```
 
 :::warning
-此扫描器可防范常见的注入模式，但它不能替代审查共享仓库中的上下文文件。请务必验证非你本人创建的项目中的 AGENTS.md 内容。
+此扫描器可防范常见的注入模式，但不能替代审查共享仓库中的上下文文件。请务必验证非你创建的项目中的 AGENTS.md 内容。
 :::
 
 ## 大小限制
@@ -182,18 +182,18 @@ Hermes 兼容 Cursor IDE 的 `.cursorrules` 文件和 `.cursor/rules/*.mdc` 规�
 [...已截断 AGENTS.md：保留了 25000 个字符中的 14000+4000 个。使用文件工具读取完整文件。]
 ```
 
-## 创建有效上下文文件的技巧
+## 有效上下文文件的技巧
 
 :::tip AGENTS.md 最佳实践
 1.  **保持简洁** — 远低于 20K 字符；Agent 每轮都会读取它
-2.  **使用标题结构化** — 使用 `##` 部分表示架构、约定、重要说明
+2.  **使用标题结构** — 使用 `##` 部分表示架构、约定、重要说明
 3.  **包含具体示例** — 展示首选的代码模式、API 结构、命名约定
 4.  **提及不应做的事情** — "切勿直接修改迁移文件"
-5.  **列出关键路径和端口** — Agent 在终端命令中使用这些信息
+5.  **列出关键路径和端口** — Agent 在终端命令中使用这些
 6.  **随着项目发展而更新** — 过时的上下文比没有上下文更糟糕
 :::
 
-### 按子目录设置上下文
+### 每个子目录的上下文
 
 对于单体仓库，将特定于子目录的指令放在嵌套的 AGENTS.md 文件中：
 

@@ -4,7 +4,7 @@ sidebar_label: "Qmd"
 description: "使用 qmd 在本地搜索个人知识库、笔记、文档和会议记录——这是一个结合了 BM25、向量搜索和 LLM 重排序的混合检索引擎"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。*/}
 
 # Qmd
 
@@ -21,7 +21,7 @@ description: "使用 qmd 在本地搜索个人知识库、笔记、文档和会�
 | 许可证 | MIT |
 | 平台 | macos, linux |
 | 标签 | `Search`, `Knowledge-Base`, `RAG`, `Notes`, `MCP`, `Local-AI` |
-| 相关技能 | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian), [`native-mcp`](/docs/user-guide/skills/bundled/mcp/mcp-native-mcp), [`arxiv`](/docs/user-guide/skills/bundled/research/research-arxiv) |
+| 相关技能 | [`obsidian`](/user-guide/skills/bundled/note-taking/note-taking-obsidian), [`native-mcp`](/user-guide/skills/bundled/mcp/mcp-native-mcp), [`arxiv`](/user-guide/skills/bundled/research/research-arxiv) |
 
 ## 参考：完整的 SKILL.md
 
@@ -35,7 +35,7 @@ description: "使用 qmd 在本地搜索个人知识库、笔记、文档和会�
 
 由 [Tobi Lütke](https://github.com/tobi/qmd) 创建。MIT 许可证。
 
-## 使用时机
+## 何时使用
 
 - 用户要求搜索其笔记、文档、知识库或会议记录
 - 用户希望在大量 Markdown/文本文件集合中查找内容
@@ -105,7 +105,7 @@ qmd status
 | `qmd collection add <path> --name <n>` | 将目录添加为集合 | 即时 |
 | `qmd context add <path> "description"` | 添加上下文元数据以改进检索 | 即时 |
 | `qmd embed` | 生成/更新向量嵌入 | 视情况而定 |
-| `qmd status` | 显示索引健康状况和集合信息 | 即时 |
+| `qmd status` | 显示索引状态和集合信息 | 即时 |
 | `qmd mcp` | 启动 MCP 服务器（stdio） | 持久运行 |
 | `qmd mcp --http --daemon` | 启动 MCP 服务器（HTTP，预热模型） | 持久运行 |
 
@@ -150,7 +150,7 @@ qmd embed
 ### 4. 验证
 
 ```bash
-qmd status   # 显示索引健康状况、集合统计信息和模型信息
+qmd status   # 显示索引状态、集合统计信息和模型信息
 ```
 
 ## 搜索模式
@@ -175,7 +175,7 @@ qmd vsearch "how does the rate limiter handle burst traffic"
 qmd vsearch "ideas for improving onboarding flow"
 ```
 
-### 带重排序的混合搜索（最佳质量）
+### 带重排序的混合搜索 (最佳质量)
 
 最适合：质量至关重要的关键查询。
 使用全部 3 个模型——查询扩展、并行 BM25+向量、重排序。
@@ -186,7 +186,7 @@ qmd query "what decisions were made about the database migration"
 
 ### 结构化多模式查询
 
-在单个查询中结合不同的搜索类型以提高精度：
+在单个查询中结合不同的搜索类型以提高精确度：
 
 ```bash
 # 精确术语用 BM25 + 概念用向量
@@ -336,7 +336,7 @@ systemctl --user status qmd-daemon
 
 连接后，以下工具以 `mcp_qmd_*` 形式可用：
 
-| MCP 工具 | 对应命令 | 描述 |
+| MCP 工具 | 映射到 | 描述 |
 |----------|---------|-------------|
 | `mcp_qmd_search` | `qmd search` | BM25 关键词搜索 |
 | `mcp_qmd_vsearch` | `qmd vsearch` | 语义向量搜索 |
@@ -380,7 +380,7 @@ terminal(command="qmd status")
 
 1.  **查询扩展** — 一个经过微调的 1.7B 模型生成 2 个替代查询。原始查询在融合中获得 2 倍权重。
 2.  **并行检索** — BM25（SQLite FTS5）和向量搜索在所有查询变体上同时运行。
-3.  **RRF 融合** — 倒数排名融合（k=60）合并结果。排名奖励：第 1 名 +0.05，第 2-3 名 +0.02。
+3.  **RRF 融合** — 倒数排名融合（k=60）合并结果。排名奖励：第 1 名获得 +0.05，第 2-3 名获得 +0.02。
 4.  **LLM 重排序** — qwen3-reranker 对前 30 个候选进行评分（0.0-1.0）。
 5.  **位置感知混合** — 排名 1-3：75% 检索 / 25% 重排序器。排名 4-10：60/40。排名 11+：40/60（对于长尾结果更信任重排序器）。
 
@@ -391,20 +391,20 @@ terminal(command="qmd status")
 1.  **始终添加上下文描述** — `qmd context add` 能显著提高检索准确性。描述每个集合包含的内容。
 2.  **添加文档后重新嵌入** — 当新文件添加到集合时，必须重新运行 `qmd embed`。
 3.  **使用 `qmd search` 追求速度** — 当你需要快速关键词查找（代码标识符、确切名称）时，BM25 是即时的且不需要模型。
-4.  **使用 `qmd query` 追求质量** — 当问题是概念性的或用户需要尽可能好的结果时，使用混合搜索。
+4.  **使用 `qmd query` 追求质量** — 当问题是概念性的或用户需要最佳可能结果时，使用混合搜索。
 5.  **优先使用 MCP 集成** — 一旦配置完成，Agent 会获得原生工具，无需每次加载此技能。
 6.  **重度用户使用守护进程模式** — 如果用户定期搜索其知识库，推荐 HTTP 守护进程设置。
 7.  **结构化搜索中的第一个查询获得 2 倍权重** — 当结合 lex 和 vec 时，将最重要/最确定的查询放在第一位。
 ## 故障排除
 
 ### "首次运行时下载模型"
-正常现象 — qmd 在首次使用时自动下载约 2GB 的 GGUF 模型。
+正常现象 — qmd 在首次使用时会自动下载约 2GB 的 GGUF 模型。
 这是一次性操作。
 
 ### 冷启动延迟（约 19 秒）
 当模型未加载到内存时会发生此情况。解决方案：
 - 使用 HTTP 守护进程模式 (`qmd mcp --http --daemon`) 以保持预热状态
-- 当不需要模型时，使用 `qmd search`（仅限 BM25）
+- 当不需要模型时，使用 `qmd search`（仅 BM25）
 - MCP stdio 模式在首次搜索时加载模型，并在会话期间保持预热
 
 ### macOS: "无法加载扩展"
@@ -412,7 +412,7 @@ terminal(command="qmd status")
 然后确保它在系统 SQLite 之前位于 PATH 中。
 
 ### "未找到集合"
-运行 `qmd collection add <路径> --name <名称>` 来添加目录，
+运行 `qmd collection add <path> --name <name>` 来添加目录，
 然后运行 `qmd embed` 来索引它们。
 
 ### 嵌入模型覆盖（CJK/多语言）

@@ -9,13 +9,13 @@ description: "通过 WebSocket 消息网关将 Hermes Agent 连接到 Yuanbao �
 将 Hermes 连接到腾讯的企业通讯平台 [Yuanbao](https://yuanbao.tencent.com/)。该适配器使用 WebSocket 消息网关进行实时消息传递，并支持直接（C2C）和群组会话。
 
 :::info
-Yuanbao 是一个主要在企业内部使用的企业通讯平台。它使用 WebSocket 进行实时通信，基于 HMAC 进行身份验证，并支持包括图片、文件和语音消息在内的富媒体。
+Yuanbao 是一个企业通讯平台，主要在腾讯内部和企业环境中使用。它使用 WebSocket 进行实时通信，基于 HMAC 的身份验证，并支持包括图片、文件和语音消息在内的富媒体。
 :::
 
 ## 前提条件
 
 - 具有机器人创建权限的 Yuanbao 账户
-- Yuanbao 的 APP_ID 和 APP_SECRET（来自平台管理员）
+- Yuanbao APP_ID 和 APP_SECRET（来自平台管理员）
 - Python 包：`websockets` 和 `httpx`
 - 如需媒体支持：`aiofiles`
 
@@ -35,7 +35,7 @@ pip install websockets httpx aiofiles
 
 ### 2. 运行设置向导
 
-配置 Yuanbao 最简单的方法是通过交互式设置：
+配置 Yuanbao 最简单的方式是通过交互式设置：
 
 ```bash
 hermes gateway setup
@@ -48,7 +48,7 @@ hermes gateway setup
 3. 自动保存配置
 
 :::tip
-WebSocket URL 和 API 域名已内置合理的默认值。您只需要提供 APP_ID 和 APP_SECRET 即可开始使用。
+WebSocket URL 和 API 域名已内置了合理的默认值。您只需要提供 APP_ID 和 APP_SECRET 即可开始使用。
 :::
 
 ### 3. 配置环境变量
@@ -72,7 +72,7 @@ YUANBAO_API_DOMAIN=https://api.yuanbao.example.com
 YUANBAO_HOME_CHANNEL=direct:bot_account_id
 YUANBAO_HOME_CHANNEL_NAME="Bot Notifications"
 
-# 可选：限制访问（旧方式，有关细粒度策略请参阅下面的访问控制）
+# 可选：限制访问（旧版，请参阅下方的访问控制以了解细粒度策略）
 YUANBAO_ALLOWED_USERS=user_account_1,user_account_2
 ```
 
@@ -124,7 +124,7 @@ Yuanbao 适配器通过 COS（腾讯云对象存储）自动处理媒体上传�
 
 ## 主频道
 
-在任何 Yuanbao 聊天（私聊或群聊）中使用 `/sethome` 命令将其指定为**主频道**。定时任务（cron jobs）的结果将发送到此频道。
+在任何 Yuanbao 聊天（私聊或群聊）中使用 `/sethome` 命令将其指定为**主频道**。定时任务（cron 作业）会将结果发送到此频道。
 
 :::tip 自动设置主频道
 如果未配置主频道，第一个向机器人发送消息的用户将被自动设为主频道所有者。如果当前主频道是群聊，第一个私聊将把它升级为直接频道。
@@ -141,10 +141,10 @@ YUANBAO_HOME_CHANNEL_NAME="My Bot Updates"
 
 ### 示例：设置主频道
 
-1. 在 Yuanbao 中与机器人开始对话
-2. 发送命令：`/sethome`
-3. 机器人回复：“主频道已设置为 [chat_name]，ID 为 [chat_id]。定时任务将发送到此位置。”
-4. 未来的定时任务和通知将发送到此频道
+1.  在 Yuanbao 中与机器人开始对话
+2.  发送命令：`/sethome`
+3.  机器人响应：“主频道已设置为 [chat_name]，ID 为 [chat_id]。定时任务将发送到此位置。”
+4.  未来的定时任务和通知将发送到此频道
 
 ### 示例：定时任务交付
 
@@ -184,7 +184,7 @@ hello
 
 要向机器人发送文件，只需直接在 Yuanbao 聊天中附加文件。机器人将自动下载并处理文件附件。
 
-您也可以附带一条消息：
+您也可以随附件附带一条消息：
 
 ```
 请分析这份文档
@@ -196,55 +196,55 @@ hello
 
 ## 故障排除
 
-### 机器人已在线但不回复消息
+### 机器人已在线但不响应消息
 
 **原因**：WebSocket 握手期间身份验证失败。
 
 **解决方法**：
-1. 验证 APP_ID 和 APP_SECRET 是否正确
-2. 检查 WebSocket URL 是否可访问
-3. 确保机器人账户具有适当的权限
-4. 查看消息网关日志：`tail -f ~/.hermes/logs/gateway.log`
+1.  验证 APP_ID 和 APP_SECRET 是否正确
+2.  检查 WebSocket URL 是否可访问
+3.  确保机器人账户具有适当的权限
+4.  查看消息网关日志：`tail -f ~/.hermes/logs/gateway.log`
 
 ### “连接被拒绝”错误
 
 **原因**：WebSocket URL 无法访问或不正确。
 
 **解决方法**：
-1. 验证 WebSocket URL 格式（应以 `wss://` 开头）
-2. 检查到 Yuanbao API 域名的网络连接
-3. 确认防火墙允许 WebSocket 连接
-4. 使用以下命令测试 URL：`curl -I https://[YUANBAO_API_DOMAIN]`
+1.  验证 WebSocket URL 格式（应以 `wss://` 开头）
+2.  检查到 Yuanbao API 域名的网络连接
+3.  确认防火墙允许 WebSocket 连接
+4.  使用以下命令测试 URL：`curl -I https://[YUANBAO_API_DOMAIN]`
 
 ### 媒体上传失败
 
 **原因**：COS 凭据无效或媒体服务器无法访问。
 
 **解决方法**：
-1. 验证 API_DOMAIN 是否正确
-2. 检查您的机器人是否启用了媒体上传权限
-3. 确保媒体文件可访问且未损坏
-4. 与平台管理员检查 COS 存储桶配置
+1.  验证 API_DOMAIN 是否正确
+2.  检查您的机器人是否启用了媒体上传权限
+3.  确保媒体文件可访问且未损坏
+4.  与平台管理员检查 COS 存储桶配置
 
 ### 消息未发送到主频道
 
 **原因**：主频道 ID 格式不正确或定时任务未触发。
 
 **解决方法**：
-1. 验证 YUANBAO_HOME_CHANNEL 格式是否正确
-2. 使用 `/sethome` 命令测试以自动检测正确格式
-3. 使用 `/status` 检查定时任务计划
-4. 验证机器人在目标聊天中具有发送权限
+1.  验证 YUANBAO_HOME_CHANNEL 格式是否正确
+2.  使用 `/sethome` 命令测试以自动检测正确格式
+3.  使用 `/status` 检查定时任务计划
+4.  验证机器人在目标聊天中具有发送权限
 
 ### 频繁断开连接
 
 **原因**：WebSocket 连接不稳定或网络不可靠。
 
 **解决方法**：
-1. 检查消息网关日志中的错误模式
-2. 增加连接设置中的心跳超时时间
-3. 确保到 Yuanbao API 的网络连接稳定
-4. 考虑启用详细日志记录：`HERMES_LOG_LEVEL=debug`
+1.  检查消息网关日志中的错误模式
+2.  增加连接设置中的心跳超时时间
+3.  确保到 Yuanbao API 的网络连接稳定
+4.  考虑启用详细日志记录：`HERMES_LOG_LEVEL=debug`
 
 ## 访问控制
 
@@ -336,6 +336,6 @@ hermes chat -q "Send 'Hello from CLI' to yuanbao:group:group_code"
 ## 相关文档
 
 - [消息网关概述](./index.md)
-- [斜杠命令参考](/docs/reference/slash-commands.md)
-- [定时任务](/docs/user-guide/features/cron.md)
-- [后台会话](/docs/user-guide/cli#background-sessions)
+- [斜杠命令参考](/reference/slash-commands)
+- [定时任务](/user-guide/features/cron)
+- [后台会话](/user-guide/cli#background-sessions)

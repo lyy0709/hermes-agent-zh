@@ -21,7 +21,7 @@ description: "使用 ComfyUI 生成图像、视频和音频 — 安装、启动�
 | 许可证 | MIT |
 | 平台 | macos, linux, windows |
 | 标签 | `comfyui`, `image-generation`, `stable-diffusion`, `flux`, `sd3`, `wan-video`, `hunyuan-video`, `creative`, `generative-ai`, `video-generation` |
-| 相关技能 | [`stable-diffusion-image-generation`](/docs/user-guide/skills/optional/mlops/mlops-stable-diffusion), `image_gen` |
+| 相关技能 | [`stable-diffusion-image-generation`](/user-guide/skills/optional/mlops/mlops-stable-diffusion), `image_gen` |
 
 ## 参考：完整的 SKILL.md
 
@@ -39,8 +39,8 @@ description: "使用 ComfyUI 生成图像、视频和音频 — 安装、启动�
 
 - `official-cli.md` — 每个 `comfy ...` 命令及其标志
 - `rest-api.md` — REST + WebSocket 端点（本地 + 云端）、负载模式
-- `workflow-format.md` — API 格式的 JSON、常见节点类型、参数映射
-- `template-integrity.md` — 将 `comfyui-workflow-templates` 从编辑器格式转换为 API 格式：重路由绕过、带点的动态输入键（`values.a`、`resize_type.width`）、云端特性（302 重定向、1 个并发免费层任务、1080p VRAM 上限）、Discord 兼容的 ffmpeg 拼接。由 [@purzbeats](https://github.com/purzbeats) 编写。每当您从官方模板开始时，请加载此文档。
+- `workflow-format.md` — API 格式 JSON、常见节点类型、参数映射
+- `template-integrity.md` — 将 `comfyui-workflow-templates` 从编辑器格式转换为 API 格式：Reroute 旁路、带点的动态输入键（`values.a`、`resize_type.width`）、云端特性（302 重定向、1 个并发免费层作业、1080p VRAM 上限）、Discord 兼容的 ffmpeg 拼接。由 [@purzbeats](https://github.com/purzbeats) 编写。每当您从官方模板开始时，请加载此文档。
 
 **脚本 (`scripts/`):**
 
@@ -51,23 +51,23 @@ description: "使用 ComfyUI 生成图像、视频和音频 — 安装、启动�
 | `comfyui_setup.sh` | 硬件检查 + comfy-cli + ComfyUI 安装 + 启动 + 验证 |
 | `extract_schema.py` | 读取工作流 → 列出可控参数和模型依赖 |
 | `check_deps.py` | 根据运行中的服务器检查工作流 → 列出缺失的节点/模型 |
-| `auto_fix_deps.py` | 运行 check_deps，然后执行 `comfy node install` / `comfy model download` |
+| `auto_fix_deps.py` | 运行 check_deps 然后执行 `comfy node install` / `comfy model download` |
 | `run_workflow.py` | 注入参数、提交、监控、下载输出（HTTP 或 WS） |
-| `run_batch.py` | 使用参数扫描将工作流提交 N 次，并行数量取决于您的层级 |
-| `ws_monitor.py` | 用于执行任务的实时 WebSocket 查看器（实时进度） |
-| `health_check.py` | 验证检查清单运行器 — comfy-cli + 服务器 + 模型 + 冒烟测试 |
+| `run_batch.py` | 使用扫描参数提交工作流 N 次，并行数量取决于您的套餐等级 |
+| `ws_monitor.py` | 用于执行作业的实时 WebSocket 查看器（实时进度） |
+| `health_check.py` | 验证清单运行器 — comfy-cli + 服务器 + 模型 + 冒烟测试 |
 | `fetch_logs.py` | 提取给定 prompt_id 的回溯 / 状态消息 |
 
-**示例工作流 (`workflows/`):** SD 1.5, SDXL, Flux Dev, SDXL img2img, SDXL inpaint, ESRGAN upscale, AnimateDiff video, Wan T2V。请参阅 `workflows/README.md`。
+**示例工作流 (`workflows/`):** SD 1.5, SDXL, Flux Dev, SDXL img2img, SDXL inpaint, ESRGAN upscale, AnimateDiff video, Wan T2V。参见 `workflows/README.md`。
 
 ## 使用时机
 
 - 用户要求使用 Stable Diffusion、SDXL、Flux、SD3 等生成图像。
 - 用户想要运行特定的 ComfyUI 工作流文件。
 - 用户想要链接生成步骤（txt2img → 放大 → 面部修复）。
-- 用户需要 ControlNet、局部重绘、图生图或其他高级流水线。
+- 用户需要 ControlNet、inpainting、img2img 或其他高级流水线。
 - 用户要求管理 ComfyUI 队列、检查模型或安装自定义节点。
-- 用户希望通过 AnimateDiff、Hunyuan、Wan、AudioCraft 等进行视频/音频/3D 生成。
+- 用户想要通过 AnimateDiff、Hunyuan、Wan、AudioCraft 等进行视频/音频/3D 生成。
 
 ## 架构：两层
 
@@ -103,7 +103,7 @@ curl -s http://127.0.0.1:8188/system_stats 2>/dev/null && echo "server: running"
 python3 scripts/hardware_check.py
 ```
 
-如果什么都没安装，请参阅下面的 **设置与入门** — 但务必先运行硬件检查。
+如果什么都没安装，请参阅下面的 **设置与入门** — 但请务必先运行硬件检查。
 
 ### 一行式健康检查
 
@@ -118,7 +118,7 @@ python3 scripts/health_check.py
 
 工作流必须是 API 格式（每个节点都有 `class_type`）。它们来自：
 
-- ComfyUI 网页界面 → **Workflow → Export (API)**（较新的 UI）或旧的 "Save (API Format)" 按钮（较旧的 UI）
+- ComfyUI 网页 UI → **Workflow → Export (API)**（较新的 UI）或旧的 "Save (API Format)" 按钮（较旧的 UI）
 - 此技能的 `workflows/` 目录（可直接运行的示例）
 - 社区下载（civitai, Reddit, Discord）— 通常是编辑器格式，必须加载到 ComfyUI 中然后重新导出
 
@@ -156,7 +156,7 @@ python3 scripts/run_workflow.py \
   --args '{"prompt": "..."}' \
   --ws
 
-# img2img / 修复：传递 --input-image 以自动上传和引用
+# img2img / 修复：传递 --input-image 来自动上传并引用
 python3 scripts/run_workflow.py \
   --workflow sdxl_img2img.json \
   --input-image image=./photo.png \
@@ -170,9 +170,9 @@ python3 scripts/run_batch.py \
   --output-dir ./outputs/batch
 ```
 
-`seed` 设置为 `-1`（或使用 `--randomize-seed` 并省略该参数）会在每次运行时生成一个新的随机种子。
+`seed` 设为 `-1`（或在 `--randomize-seed` 时省略）会为每次运行生成一个新的随机种子。
 
-### 步骤 4：呈现结果
+### 步骤 4：展示结果
 
 脚本会向标准输出发送 JSON，描述每个输出文件：
 
@@ -200,15 +200,15 @@ python3 scripts/run_batch.py \
 | "列出已安装的模型" | comfy-cli | `comfy model list` |
 | "列出已安装的节点" | comfy-cli | `comfy node show installed` |
 | **执行（使用脚本）** | | |
-| "一切就绪了吗？" | script | `health_check.py`（可选 `--workflow X --smoke-test`） |
-| "这个工作流里我能改什么？" | script | `extract_schema.py W.json` |
-| "检查 W 的依赖项是否满足" | script | `check_deps.py W.json` |
-| "修复缺失的依赖项" | script | `auto_fix_deps.py W.json` |
-| "生成一张图片" | script | `run_workflow.py --workflow W --args '{...}'` |
-| "使用这张图片" (img2img) | script | `run_workflow.py --input-image image=./x.png ...` |
-| "8 个带随机种子的变体" | script | `run_batch.py --count 8 --randomize-seed ...` |
-| "给我看实时进度" | script | `ws_monitor.py --prompt-id <id>` |
-| "获取作业 X 的错误信息" | script | `fetch_logs.py <prompt_id>` |
+| "一切就绪了吗？" | 脚本 | `health_check.py`（可选 `--workflow X --smoke-test`） |
+| "这个工作流里我能改什么？" | 脚本 | `extract_schema.py W.json` |
+| "检查 W 的依赖项是否满足" | 脚本 | `check_deps.py W.json` |
+| "修复缺失的依赖项" | 脚本 | `auto_fix_deps.py W.json` |
+| "生成一张图片" | 脚本 | `run_workflow.py --workflow W --args '{...}'` |
+| "使用这张图片"（img2img） | 脚本 | `run_workflow.py --input-image image=./x.png ...` |
+| "8 个带随机种子的变体" | 脚本 | `run_batch.py --count 8 --randomize-seed ...` |
+| "给我看实时进度" | 脚本 | `ws_monitor.py --prompt-id <id>` |
+| "获取作业 X 的错误信息" | 脚本 | `fetch_logs.py <prompt_id>` |
 | **直接 REST** | | |
 | "队列里有什么？" | REST | `curl http://HOST:8188/queue`（本地）或 `--host https://cloud.comfy.org` |
 | "取消那个" | REST | `curl -X POST http://HOST:8188/interrupt` |
@@ -216,7 +216,7 @@ python3 scripts/run_batch.py \
 
 ## 设置与入门
 
-当用户要求设置 ComfyUI 时，**首先要做的是询问他们想要 Comfy Cloud（托管、零安装、需要 API 密钥）还是 Local（在本地机器上安装 ComfyUI）**。在他们回答之前，不要开始运行安装命令或硬件检查。
+当用户要求设置 ComfyUI 时，**首先要做的是询问他们想要 Comfy Cloud（托管、零安装、需要 API 密钥）还是 Local（在他们的机器上安装 ComfyUI）**。在他们回答之前，不要开始运行安装命令或硬件检查。
 
 **官方文档：** https://docs.comfy.org/installation
 **CLI 文档：** https://docs.comfy.org/comfy-cli/getting-started
@@ -230,21 +230,21 @@ python3 scripts/run_batch.py \
 > "您想在本地机器上运行 ComfyUI，还是使用 Comfy Cloud？
 >
 > - **Comfy Cloud** — 托管在 RTX 6000 Pro GPU 上，所有常见模型已预安装，零设置。需要 API 密钥（实际运行工作流需要付费订阅；免费套餐是只读的）。如果您没有合适的 GPU，这是最佳选择。
-> - **Local** — 免费，但您的机器**必须**满足硬件要求：
+> - **Local** — 免费，但您的机器必须满足硬件要求：
 >   - **≥6 GB VRAM** 的 NVIDIA GPU（SDXL 需要 ≥8 GB，Flux/视频需要 ≥12 GB），或
 >   - 支持 ROCm 的 AMD GPU（Linux），或
 >   - **≥16 GB 统一内存**的 Apple Silicon Mac（M1+）（推荐 ≥32 GB）。
->   - Intel Mac 和没有 GPU 的机器将**无法工作** — 请改用 Cloud。
+>   - Intel Mac 和没有 GPU 的机器将无法工作 — 请改用 Cloud。
 >
 > 您想要哪种？"
 
 路由：
 
-- **Cloud** → 跳转到**路径 A**。
-- **Local** → 首先运行硬件检查，然后根据检查结果从路径 B–E 中选择一个。
-- **不确定** → 运行硬件检查，让检查结果决定。
+- **Cloud** → 跳转到 **路径 A**。
+- **Local** → 首先运行硬件检查，然后根据结果从路径 B–E 中选择一个。
+- **不确定** → 运行硬件检查，让结果决定。
 
-### 步骤 1：验证硬件（仅当用户选择本地时）
+### 步骤 1：验证硬件（仅在用户选择本地时）
 
 ```bash
 python3 scripts/hardware_check.py --json
@@ -252,25 +252,25 @@ python3 scripts/hardware_check.py --json
 python3 scripts/hardware_check.py --json --check-pytorch
 ```
 
-| 检查结果 | 含义 | 操作 |
+| 结果 | 含义 | 操作 |
 |------------|---------------------------------------------------------------|--------|
 | `ok` | ≥8 GB VRAM（独立显卡）或 ≥32 GB 统一内存（Apple Silicon） | 本地安装 — 使用报告中的 `comfy_cli_flag` |
-| `marginal` | SD1.5 可用；SDXL 勉强；Flux/视频不太可能 | 对于轻量级工作流本地可用，否则选择**路径 A (Cloud)** |
+| `marginal` | SD1.5 可用；SDXL 勉强；Flux/视频不太可能 | 轻量级工作流可以本地运行，否则选择 **路径 A（Cloud）** |
 | `cloud` | 没有可用的 GPU，<6 GB VRAM，<16 GB Apple 统一内存，Intel Mac，Rosetta Python | **切换到 Cloud**，除非用户明确强制本地安装 |
 
-脚本还会显示 `wsl: true`（WSL2 与 NVIDIA 透传）和 `rosetta: true`（Apple Silicon 上的 x86_64 Python — 必须重新安装为 ARM64）。
+脚本还会显示 `wsl: true`（WSL2 与 NVIDIA 直通）和 `rosetta: true`（Apple Silicon 上的 x86_64 Python — 必须重新安装为 ARM64）。
 
-如果检查结果是 `cloud` 但用户想要本地安装，请不要静默继续。逐字显示 `notes` 数组，并询问用户是否想要 (a) 切换到 Cloud 或 (b) 强制进行本地安装（在现代模型上会导致内存不足或速度慢到无法使用）。
+如果结果是 `cloud` 但用户想要本地安装，不要静默继续。逐字显示 `notes` 数组，并询问他们是否想 (a) 切换到 Cloud 或 (b) 强制本地安装（在现代模型上会导致内存不足或慢得无法使用）。
 ### 选择安装路径
 
-首先使用硬件检查。下表是用户已告知硬件配置时的备选方案：
+首先使用硬件检查。下表是当用户已告知其硬件配置时的备选方案：
 
 | 情况 | 推荐路径 |
 |-----------|------------------|
 | 硬件检查结果为 `verdict: cloud` | **路径 A：Comfy Cloud** |
 | 无 GPU / 想无负担试用 | **路径 A：Comfy Cloud** |
 | Windows + NVIDIA + 非技术用户 | **路径 B：ComfyUI Desktop** |
-| Windows + NVIDIA + 技术用户 | **路径 C：Portable** 或 **路径 D：comfy-cli** |
+| Windows + NVIDIA + 技术用户 | **路径 C：便携版** 或 **路径 D：comfy-cli** |
 | Linux + 任意 GPU | **路径 D：comfy-cli**（最简单） |
 | macOS + Apple Silicon | **路径 B：Desktop** 或 **路径 D：comfy-cli** |
 | 无头模式 / 服务器 / CI / Agent | **路径 D：comfy-cli** |
@@ -283,7 +283,7 @@ bash scripts/comfyui_setup.sh
 bash scripts/comfyui_setup.sh --m-series --port=8190 --workspace=/data/comfy
 ```
 
-它内部运行 `hardware_check.py`，当结果为 `cloud` 时拒绝本地安装（除非使用 `--force-cloud-override`），选择正确的 `comfy-cli` 标志，并优先使用 `pipx`/`uvx` 而非全局 `pip` 以避免污染系统 Python 环境。
+它在内部运行 `hardware_check.py`，当判定结果为 `cloud` 时拒绝本地安装（除非使用 `--force-cloud-override`），选择正确的 `comfy-cli` 标志，并优先使用 `pipx`/`uvx` 而非全局 `pip` 以避免污染系统 Python。
 
 ---
 
@@ -309,7 +309,7 @@ bash scripts/comfyui_setup.sh --m-series --port=8190 --workspace=/data/comfy
     ```
 
 **定价：** https://www.comfy.org/cloud/pricing
-**并发任务数：** 免费/标准版 1，创作者版 3，专业版 5。免费版**无法通过 API 运行工作流**——只能浏览模型。需要付费订阅才能使用 `/api/prompt`、`/api/upload/*`、`/api/view` 等接口。
+**并发任务数：** 免费版/标准版 1，创作者版 3，专业版 5。免费版**无法通过 API 运行工作流**——仅能浏览模型。需要付费订阅才能使用 `/api/prompt`、`/api/upload/*`、`/api/view` 等接口。
 
 ---
 
@@ -321,15 +321,15 @@ bash scripts/comfyui_setup.sh --m-series --port=8190 --workspace=/data/comfy
 - **Windows (NVIDIA)：** https://download.comfy.org/windows/nsis/x64
 - **macOS (Apple Silicon)：** https://comfy.org
 
-Linux **不支持** Desktop 版本——请使用路径 D。
+Linux **不支持** Desktop 版——请使用路径 D。
 
 ---
 
-### 路径 C：ComfyUI Portable（仅限 Windows）
+### 路径 C：ComfyUI 便携版（仅限 Windows）
 
 **文档：** https://docs.comfy.org/installation/comfyui_portable_windows
 
-从 https://github.com/comfyanonymous/ComfyUI/releases 下载，解压，运行 `run_nvidia_gpu.bat`。通过 `update/update_comfyui_stable.bat` 更新。
+从 https://github.com/comfyanonymous/ComfyUI/releases 下载，解压后运行 `run_nvidia_gpu.bat`。通过 `update/update_comfyui_stable.bat` 更新。
 
 ---
 
@@ -411,7 +411,7 @@ comfy model download \
   --url "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors" \
   --relative-path models/checkpoints
 
-# CivitAI（需先设置 Token）：
+# CivitAI（先设置 Token）：
 comfy model download \
   --url "https://civitai.com/api/download/models/128713" \
   --relative-path models/checkpoints \
@@ -423,7 +423,7 @@ comfy model download \
 ### 安装后：安装自定义节点
 
 ```bash
-comfy node install comfyui-impact-pack             # 流行的工具包
+comfy node install comfyui-impact-pack             # 流行的实用工具包
 comfy node install comfyui-animatediff-evolved     # 视频生成
 comfy node install comfyui-controlnet-aux          # ControlNet 预处理器
 comfy node install comfyui-essentials              # 常用辅助工具
@@ -438,7 +438,7 @@ python3 scripts/health_check.py
 # → comfy_cli 在 PATH 中？服务器可达？检查点？冒烟测试？
 
 python3 scripts/check_deps.py my_workflow.json
-# → 此工作流的节点/模型/嵌入是否已安装？
+# → 此工作流所需的节点/模型/嵌入是否已安装？
 
 python3 scripts/run_workflow.py \
   --workflow workflows/sd15_txt2img.json \
@@ -456,7 +456,7 @@ python3 scripts/run_workflow.py \
   --args '{"prompt": "make it cyberpunk", "denoise": 0.6}'
 ```
 
-该标志会上传 `photo.png`，然后将其服务器端文件名注入到名为 `image` 的 schema 参数中。对于局部重绘，需要同时传递两个参数：
+该标志会上传 `photo.png`，然后将其服务器端文件名注入到名为 `image` 的模式参数中。对于局部重绘，需要同时传递两个参数：
 
 ```bash
 python3 scripts/run_workflow.py \
@@ -483,14 +483,14 @@ curl -X POST "https://cloud.comfy.org/api/upload/image" \
 - **基础 URL：** `https://cloud.comfy.org`
 - **认证：** `X-API-Key` 请求头（或 WebSocket 使用 `?token=KEY`）
 - **API 密钥：** 设置一次 `$COMFY_CLOUD_API_KEY` 环境变量，脚本会自动获取
-- **输出下载：** `/api/view` 返回一个指向签名 URL 的 302 重定向；脚本会跟随重定向，并在从存储后端获取前移除 `X-API-Key` 请求头（避免将 API 密钥泄露给 S3/CloudFront）。
+- **输出下载：** `/api/view` 返回一个 302 重定向到签名 URL；脚本会跟随重定向，并在从存储后端获取前移除 `X-API-Key` 请求头（防止 API 密钥泄露给 S3/CloudFront）。
 - **与本地 ComfyUI 的端点差异：**
   - `/api/object_info`、`/api/queue`、`/api/userdata` — **免费套餐返回 403**；仅限付费用户。
   - `/history` 在云端重命名为 `/history_v2`（脚本会自动路由）。
   - `/models/<folder>` 在云端重命名为 `/experiment/models/<folder>`（脚本会自动路由）。
-  - WebSocket 中的 `clientId` 当前被忽略 — 用户的所有连接接收相同的广播。请在客户端根据 `prompt_id` 进行过滤。
+  - WebSocket 中的 `clientId` 目前被忽略 — 用户的所有连接接收相同的广播。请在客户端根据 `prompt_id` 进行过滤。
   - 上传时接受 `subfolder` 参数但会被忽略 — 云端使用扁平命名空间。
-- **并发任务数：** 免费/标准版：1，创作者版：3，专业版：5。额外任务会自动排队。使用 `run_batch.py --parallel N` 来充分利用您的套餐额度。
+- **并发任务数：** 免费/标准版：1，创作者版：3，专业版：5。额外任务会自动排队。使用 `run_batch.py --parallel N` 来充分利用你的套餐额度。
 
 ## 队列与系统管理
 
@@ -509,13 +509,13 @@ python3 scripts/fetch_logs.py --tail-queue --host https://cloud.comfy.org
 
 ## 常见问题
 
-1.  **需要 API 格式** — 每个脚本和 `/api/prompt` 端点都期望 API 格式的工作流 JSON。脚本会检测编辑器格式（顶层的 `nodes` 和 `links` 数组）并提示您通过 "Workflow → Export (API)"（新版 UI）或 "Save (API Format)"（旧版 UI）重新导出。
+1.  **需要 API 格式** — 每个脚本和 `/api/prompt` 端点都期望 API 格式的工作流 JSON。脚本会检测编辑器格式（顶层的 `nodes` 和 `links` 数组）并提示你通过 "Workflow → Export (API)"（新版 UI）或 "Save (API Format)"（旧版 UI）重新导出。
 
-2.  **服务器必须正在运行** — 所有执行都需要一个活动的服务器。使用 `comfy launch --background` 启动一个。使用 `curl http://127.0.0.1:8188/system_stats` 验证。
+2.  **服务器必须正在运行** — 所有执行都需要一个活动的服务器。使用 `comfy launch --background` 启动一个。通过 `curl http://127.0.0.1:8188/system_stats` 验证。
 
 3.  **模型名称必须精确** — 区分大小写，包含文件扩展名。`check_deps.py` 会进行模糊匹配（带/不带扩展名和文件夹前缀），但工作流本身必须使用规范名称。使用 `comfy model list` 来发现已安装的模型。
 
-4.  **缺少自定义节点** — "class_type not found" 意味着缺少必需的节点。`check_deps.py` 会报告需要安装哪个包；`auto_fix_deps.py` 会为您运行安装。
+4.  **缺少自定义节点** — "class_type not found" 意味着所需的节点未安装。`check_deps.py` 会报告需要安装哪个包；`auto_fix_deps.py` 会为你运行安装。
 
 5.  **工作目录** — `comfy-cli` 会自动检测 ComfyUI 工作空间。如果命令因 "no workspace found" 而失败，请使用 `comfy --workspace /path/to/ComfyUI <command>` 或 `comfy set-default /path/to/ComfyUI`。
 
@@ -523,13 +523,13 @@ python3 scripts/fetch_logs.py --tail-queue --host https://cloud.comfy.org
 
 7.  **视频/音频工作流的超时设置** — 当输出节点是 `VHS_VideoCombine`、`SaveVideo` 等时，会自动检测；默认超时从 300 秒增加到 900 秒。可以使用 `--timeout 1800` 显式覆盖。
 
-8.  **输出文件名中的路径遍历** — 服务器提供的文件名会经过 `safe_path_join` 处理，以防止任何路径逃逸出 `--output-dir`。请保持此保护开启 — 带有自定义保存节点的工作流可能会产生任意路径。
+8.  **输出文件名中的路径遍历** — 服务器提供的文件名会通过 `safe_path_join` 处理，以防止任何路径逃逸出 `--output-dir`。请保持此保护开启 — 使用自定义保存节点的工作流可能会产生任意路径。
 
-9.  **工作流 JSON 是任意代码** — 自定义节点运行 Python 代码，因此提交未知工作流与 `eval` 具有相同的信任风险。在运行前请检查来自不受信任来源的工作流。
+9.  **工作流 JSON 是任意代码** — 自定义节点运行 Python 代码，因此提交未知工作流与使用 `eval` 具有相同的信任风险。在运行来自不受信任来源的工作流之前，请先检查。
 
-10. **自动随机种子** — 在 `--args` 中传递 `seed: -1`（或使用 `--randomize-seed` 并省略种子参数）以获得每次运行的新种子。实际种子会记录到 stderr。
+10. **自动随机种子** — 在 `--args` 中传递 `seed: -1`（或使用 `--randomize-seed` 并省略种子参数）以在每次运行时获得新的种子。实际种子会记录到 stderr。
 
-11. **`tracking` 提示** — `comfy` 的首次运行可能会提示分析数据收集。使用 `comfy --skip-prompt tracking disable` 以非交互方式跳过。`comfyui_setup.sh` 会为您执行此操作。
+11. **`tracking` 提示** — 首次运行 `comfy` 可能会提示进行数据分析。使用 `comfy --skip-prompt tracking disable` 以非交互方式跳过。`comfyui_setup.sh` 会为你执行此操作。
 
 ## 验证清单
 

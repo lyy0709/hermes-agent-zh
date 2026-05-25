@@ -9,7 +9,7 @@ description: "如何为 Hermes Agent 构建图像生成后端插件"
 图像生成提供商插件注册一个后端，用于处理每个 `image_generate` 工具调用——DALL·E、gpt-image、Grok、Flux、Imagen、Stable Diffusion、fal、Replicate、本地 ComfyUI 设备，任何后端。内置的提供商（OpenAI、OpenAI-Codex、xAI）都以插件形式提供。你可以通过将目录放入 `plugins/image_gen/<name>/` 来添加新的提供商，或覆盖捆绑的提供商。
 
 :::tip
-图像生成是 Hermes 支持的几种**后端插件**之一。其他（具有更专业 ABC 的）插件包括：[记忆提供商插件](/docs/developer-guide/memory-provider-plugin)、[上下文引擎插件](/docs/developer-guide/context-engine-plugin) 和 [模型提供商插件](/docs/developer-guide/model-provider-plugin)。通用工具/钩子/CLI 插件位于 [构建 Hermes 插件](/docs/guides/build-a-hermes-plugin)。
+图像生成是 Hermes 支持的几种**后端插件**之一。其他（具有更专业 ABC 的）插件包括[记忆提供商插件](/developer-guide/memory-provider-plugin)、[上下文引擎插件](/developer-guide/context-engine-plugin)和[模型提供商插件](/developer-guide/model-provider-plugin)。通用工具/钩子/CLI 插件位于[构建 Hermes 插件](/guides/build-a-hermes-plugin)。
 :::
 
 ## 发现机制如何工作
@@ -20,23 +20,23 @@ Hermes 在三个位置扫描图像生成后端：
 2. **用户插件** — `~/.hermes/plugins/image_gen/<name>/`（通过 `plugins.enabled` 选择启用）
 3. **Pip 包** — 声明了 `hermes_agent.plugins` 入口点的包
 
-每个插件的 `register(ctx)` 函数调用 `ctx.register_image_gen_provider(...)` —— 这将其放入 `agent/image_gen_registry.py` 中的注册表。活动提供商由 `config.yaml` 中的 `image_gen.provider` 选择；`hermes tools` 引导用户完成选择。
+每个插件的 `register(ctx)` 函数调用 `ctx.register_image_gen_provider(...)`——这会将插件注册到 `agent/image_gen_registry.py` 中的注册表。活动提供商由 `config.yaml` 中的 `image_gen.provider` 选择；`hermes tools` 会引导用户完成选择。
 
-`image_generate` 工具包装器向注册表请求活动提供商并分派到那里。如果没有注册提供商，该工具会显示一个有用的错误，指向 `hermes tools`。
+`image_generate` 工具包装器向注册表请求活动提供商并分派到那里。如果没有注册任何提供商，该工具会显示一个有用的错误，指向 `hermes tools`。
 
 ## 目录结构
 
 ```
 plugins/image_gen/my-backend/
 ├── __init__.py      # ImageGenProvider 子类 + register()
-└── plugin.yaml      # 包含 kind: backend 的清单
+└── plugin.yaml      # 清单，包含 kind: backend
 ```
 
 捆绑插件到此为止就完成了。位于 `~/.hermes/plugins/image_gen/<name>/` 的用户插件需要添加到 `config.yaml` 中的 `plugins.enabled`（或运行 `hermes plugins enable <name>`）。
 
 ## ImageGenProvider ABC
 
-子类化 `agent.image_gen_provider.ImageGenProvider`。唯一必需的成员是 `name` 属性和 `generate()` 方法 —— 其他所有内容都有合理的默认值：
+子类化 `agent.image_gen_provider.ImageGenProvider`。唯一必需的成员是 `name` 属性和 `generate()` 方法——其他所有内容都有合理的默认值：
 
 ```python
 # plugins/image_gen/my-backend/__init__.py
@@ -66,7 +66,7 @@ class MyBackendImageGenProvider(ImageGenProvider):
 
     def is_available(self) -> bool:
         # 如果凭据或依赖项缺失，则返回 False。
-        # 工具的可用性检查门在分派前调用此方法。
+        # 工具的可用性检查在分派前调用此方法。
         if not os.environ.get("MY_BACKEND_API_KEY"):
             return False
         try:
@@ -98,7 +98,7 @@ class MyBackendImageGenProvider(ImageGenProvider):
         return "my-model-fast"
 
     def get_setup_schema(self) -> Dict[str, Any]:
-        # `hermes tools` 选择器的元数据 —— 设置时需要提示的键。
+        # `hermes tools` 选择器的元数据——设置时需要提示的键。
         return {
             "name": "My Backend",
             "badge": "paid",        # 可选；在选择器中显示为短标签
@@ -175,7 +175,7 @@ class MyBackendImageGenProvider(ImageGenProvider):
 
 
 def register(ctx) -> None:
-    """插件入口点 —— 在加载时调用一次。"""
+    """插件入口点——在加载时调用一次。"""
     ctx.register_image_gen_provider(MyBackendImageGenProvider())
 ```
 
@@ -191,21 +191,21 @@ requires_env:
   - MY_BACKEND_API_KEY
 ```
 
-`kind: backend` 是将插件路由到图像生成注册路径的原因。`requires_env` 在 `hermes plugins install` 期间会提示。
+`kind: backend` 是将插件路由到图像生成注册路径的关键。`requires_env` 在 `hermes plugins install` 期间会提示。
 
 ## ABC 参考
 
 完整契约在 `agent/image_gen_provider.py` 中。你通常需要重写的方法：
 
-| 成员 | 必需 | 默认值 | 目的 |
+| 成员 | 必需 | 默认值 | 用途 |
 |---|---|---|---|
 | `name` | ✅ | — | 在 `image_gen.provider` 配置中使用的稳定 ID |
 | `display_name` | — | `name.title()` | 在 `hermes tools` 中显示的标签 |
-| `is_available()` | — | `True` | 用于检查缺失凭据/依赖项的门 |
+| `is_available()` | — | `True` | 用于检查缺失凭据/依赖项的门控 |
 | `list_models()` | — | `[]` | 用于 `hermes tools` 模型选择器的目录 |
-| `default_model()` | — | `list_models()` 中的第一个 | 未配置模型时的后备 |
+| `default_model()` | — | `list_models()` 中的第一个 | 未配置模型时的后备选项 |
 | `get_setup_schema()` | — | 最小化 | 选择器元数据 + 环境变量提示 |
-| `generate(prompt, aspect_ratio, **kwargs)` | ✅ | — | 调用 |
+| `generate(prompt, aspect_ratio, **kwargs)` | ✅ | — | 调用方法 |
 
 ## 响应格式
 
@@ -219,7 +219,7 @@ success_response(
     prompt=<echoed-prompt>,
     aspect_ratio="landscape" | "square" | "portrait",
     provider=<your-provider-name>,
-    extra={...},  # 可选的后端特定字段
+    extra={...},  # 可选的特定于后端的字段
 )
 ```
 
@@ -235,15 +235,15 @@ error_response(
 )
 ```
 
-工具包装器将字典 JSON 序列化并交给 LLM。错误作为工具结果显示；LLM 决定如何向用户解释它们。
+工具包装器将字典 JSON 序列化并交给 LLM。错误作为工具结果呈现；LLM 决定如何向用户解释它们。
 
 ## 处理 base64 与 URL 输出
 
-一些后端返回图像 URL（fal、Replicate）；另一些返回 base64 负载（OpenAI gpt-image-2）。对于 base64 情况，使用 `save_b64_image()` —— 它将写入 `$HERMES_HOME/cache/images/<prefix>_<timestamp>_<uuid>.<ext>` 并返回绝对 `Path`。将该路径（作为 `str`）作为 `success_response()` 中的 `image=` 传递。消息网关传递（Telegram 照片气泡、Discord 附件）能识别 URL 和绝对路径。
+一些后端返回图像 URL（fal、Replicate）；另一些返回 base64 负载（OpenAI gpt-image-2）。对于 base64 情况，使用 `save_b64_image()`——它会写入 `$HERMES_HOME/cache/images/<prefix>_<timestamp>_<uuid>.<ext>` 并返回绝对 `Path`。将该路径（作为 `str`）作为 `image=` 传递给 `success_response()`。消息网关传递（Telegram 照片气泡、Discord 附件）能识别 URL 和绝对路径。
 
 ## 用户覆盖
 
-将用户插件放在 `~/.hermes/plugins/image_gen/<name>/`，其 `name` 属性与捆绑插件相同，并通过 `hermes plugins enable <name>` 启用 —— 注册表遵循“后写优先”原则，因此你的版本会替换内置版本。这对于将 `openai` 插件指向私有代理，或换入自定义模型目录很有用。
+将用户插件放在 `~/.hermes/plugins/image_gen/<name>/`，其 `name` 属性与捆绑插件相同，并通过 `hermes plugins enable <name>` 启用它——注册表遵循“后写优先”原则，因此你的版本会替换内置版本。这对于将 `openai` 插件指向私有代理，或换入自定义模型目录很有用。
 
 ## 测试
 
@@ -267,9 +267,9 @@ hermes -z "Generate an image of a corgi in a spacesuit"
 
 ## 参考实现
 
-- **`plugins/image_gen/openai/__init__.py`** — gpt-image-2 的低/中/高等级作为三个虚拟模型 ID，共享一个具有不同 `quality` 参数的 API 模型。在单一后端下分层模型 + config.yaml 优先级链的良好示例。
+- **`plugins/image_gen/openai/__init__.py`** — gpt-image-2 的低/中/高等级作为三个虚拟模型 ID，共享一个具有不同 `quality` 参数的 API 模型。这是单一后端下分层模型 + config.yaml 优先级链的良好示例。
 - **`plugins/image_gen/xai/__init__.py`** — 通过 xAI 的 Grok Imagine。不同的格式（URL 输出，更简单的目录）。
-- **`plugins/image_gen/openai-codex/__init__.py`** — Codex 风格的 Responses API 变体，重用 OpenAI SDK 但使用不同的路由基础 URL。
+- **`plugins/image_gen/openai-codex/__init__.py`** — Codex 风格的 Responses API 变体，重用 OpenAI SDK，但使用不同的路由基础 URL。
 
 ## 通过 pip 分发
 
@@ -279,10 +279,10 @@ hermes -z "Generate an image of a corgi in a spacesuit"
 my-backend-imggen = "my_backend_imggen_package"
 ```
 
-`my_backend_imggen_package` 必须公开一个顶层的 `register` 函数。有关完整设置，请参阅通用插件指南中的 [通过 pip 分发](/docs/guides/build-a-hermes-plugin#distribute-via-pip)。
+`my_backend_imggen_package` 必须公开一个顶层的 `register` 函数。有关完整设置，请参阅通用插件指南中的[通过 pip 分发](/guides/build-a-hermes-plugin#distribute-via-pip)。
 
 ## 相关页面
 
-- [图像生成](/docs/user-guide/features/image-generation) —— 面向用户的功能文档
-- [插件概述](/docs/user-guide/features/plugins) —— 所有插件类型一览
-- [构建 Hermes 插件](/docs/guides/build-a-hermes-plugin) —— 通用工具/钩子/斜杠命令指南
+- [图像生成](/user-guide/features/image-generation) — 面向用户的功能文档
+- [插件概述](/user-guide/features/plugins) — 所有插件类型概览
+- [构建 Hermes 插件](/guides/build-a-hermes-plugin) — 通用工具/钩子/斜杠命令指南

@@ -4,11 +4,11 @@ sidebar_label: "Hermes Agent 技能编写"
 description: "编写仓库内技能"
 ---
 
-{/* 此页面由技能目录下的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Hermes Agent 技能编写
 
-编写仓库内 SKILL.md：前置元数据、验证器、结构。
+编写仓库内 SKILL.md：frontmatter、验证器、结构。
 
 ## 技能元数据
 
@@ -21,12 +21,12 @@ description: "编写仓库内技能"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `skills`, `authoring`, `hermes-agent`, `conventions`, `skill-md` |
-| 相关技能 | [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
+| 相关技能 | [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # 编写 Hermes-Agent 技能（仓库内）
@@ -40,22 +40,22 @@ SKILL.md 可以存在于两个位置：
 
 ## 何时使用
 
-- 用户要求你在“此分支/仓库/提交”中添加一个技能
+- 用户要求你“在此分支/仓库/提交中添加一个技能”
 - 你正在提交一个应随 hermes-agent 分发的可复用工作流
-- 你正在编辑 `/home/bb/hermes-agent/skills/` 下的现有技能（小修改用 `patch`，重写用 `write_file`；`skill_manage` 仍可用于仓库内技能的 `patch` 操作，但不能用于 `create`）
+- 你正在编辑 `/home/bb/hermes-agent/skills/` 下的现有技能（小修改用 `patch`，重写用 `write_file`；`skill_manage` 仍可用于仓库内技能的 `patch`，但不能用于 `create`）
 
-## 必需的前置元数据
+## 必需的 Frontmatter
 
 权威来源：`tools/skill_manager_tool.py::_validate_frontmatter`。硬性要求：
 
-- 以 `---` 作为前几个字节开始（前面不能有空行）。
+- 以 `---` 作为开头字节（前面不能有空行）。
 - 在正文前以 `\n---\n` 结束。
 - 解析为 YAML 映射。
 - 存在 `name` 字段。
-- 存在 `description` 字段，≤ **1024 个字符**（`MAX_DESCRIPTION_LENGTH`）。
+- 存在 `description` 字段，长度 ≤ **1024 个字符**（`MAX_DESCRIPTION_LENGTH`）。
 - 结束的 `---` 之后有非空正文。
 
-`skills/software-development/` 下每个技能都使用的对等匹配格式：
+`skills/software-development/` 下每个技能使用的对等匹配格式：
 
 ```yaml
 ---
@@ -77,24 +77,24 @@ metadata:
 
 - 描述：≤ 1024 个字符（强制执行）。
 - 完整的 SKILL.md：≤ 100,000 个字符（强制执行，即 `MAX_SKILL_CONTENT_CHARS`，约 36k Token）。
-- `software-development/` 中的对等技能大小在 **8-14k 字符** 之间。请以此为目标范围。如果超过 20k，请拆分为 `references/*.md` 并从 SKILL.md 中引用它们。
+- `software-development/` 中的对等技能大小在 **8-14k 个字符**。请以此为目标范围。如果超过 20k，请拆分为 `references/*.md` 并在 SKILL.md 中引用它们。
 
 ## 对等匹配的结构
 
-每个仓库内技能大致遵循：
+每个仓库内技能大致遵循以下结构：
 
 ```
 # <标题>
 
 ## 概述
-一两个段落：是什么以及为什么。
+一两段话：是什么以及为什么。
 
 ## 何时使用
 - 项目符号形式的触发条件
-- "不适用于：" 反触发条件
+- “不要用于：” 反触发条件
 
 ## <特定于技能的主题部分>
-- 快速参考表很常见
+- 常见快速参考表
 - 包含确切命令的代码块
 - Hermes 特定配方（通过 scripts/run_tests.sh 测试，ui-tui 路径等）
 
@@ -116,9 +116,9 @@ metadata:
 skills/<category>/<skill-name>/SKILL.md
 ```
 
-仓库中当前的类别（通过 `ls skills/` 确认）：`autonomous-ai-agents`, `creative`, `data-science`, `devops`, `dogfood`, `email`, `gaming`, `github`, `leisure`, `mcp`, `media`, `mlops/*`, `note-taking`, `productivity`, `red-teaming`, `research`, `smart-home`, `social-media`, `software-development`。
+仓库中当前的类别（用 `ls skills/` 确认）：`autonomous-ai-agents`, `creative`, `data-science`, `devops`, `dogfood`, `email`, `gaming`, `github`, `leisure`, `mcp`, `media`, `mlops/*`, `note-taking`, `productivity`, `red-teaming`, `research`, `smart-home`, `social-media`, `software-development`。
 
-选择最接近的现有类别。不要随意发明新的顶级类别。
+选择最接近的现有类别。不要随意创建新的顶级类别。
 
 ## 工作流
 
@@ -127,8 +127,8 @@ skills/<category>/<skill-name>/SKILL.md
     ls skills/<category>/
     ```
     阅读 2-3 个对等技能的 SKILL.md 文件以匹配语气和结构。
-2.  **如果不确定，检查 `tools/skill_manager_tool.py` 中的验证器约束。**
-3.  **使用 `write_file` 草稿到 `skills/<category>/<name>/SKILL.md`。**
+2.  如果不确定，**检查验证器约束**（位于 `tools/skill_manager_tool.py`）。
+3.  **使用 `write_file` 草拟** `skills/<category>/<name>/SKILL.md`。
 4.  **本地验证：**
     ```python
     import yaml, re, pathlib
@@ -140,18 +140,18 @@ skills/<category>/<skill-name>/SKILL.md
     assert len(fm["description"]) <= 1024
     assert len(content) <= 100_000
     ```
-5.  **在活动分支上执行 `git add` + `git commit`。**
-6.  **注意：** 当前会话的技能加载器是缓存的 — 在新会话之前，`skill_view` / `skills_list` 将看不到新技能。这是预期行为，不是错误。
+5.  **在活动分支上执行 `git add` + `git commit`**。
+6.  **注意：** 当前会话的技能加载器是缓存的 — 在新会话开始之前，`skill_view` / `skills_list` 将看不到新技能。这是预期行为，不是错误。
 
 ## 交叉引用其他技能
 
-`metadata.hermes.related_skills` 在加载时合并两个目录树（仓库内的 `skills/` 和 `~/.hermes/skills/`）。你**可以**从仓库内技能引用用户本地技能，但对于全新克隆仓库的其他用户来说，这将无法解析。建议仅从仓库内技能引用仓库内技能。如果一个经常被引用的技能仅存在于 `~/.hermes/skills/` 中，请考虑将其提升到仓库中。
+`metadata.hermes.related_skills` 在加载时合并两个目录树（仓库内的 `skills/` 和 `~/.hermes/skills/`）。你可以从仓库内技能引用用户本地技能，但对于全新克隆仓库的其他用户来说，这将无法解析。建议仅从仓库内技能引用仓库内技能。如果一个经常被引用的技能仅存在于 `~/.hermes/skills/` 中，请考虑将其提升到仓库中。
 
 ## 编辑现有的仓库内技能
 
 -   **小修复（拼写错误、添加陷阱、收紧触发条件）：** `skill_manage(action='patch', name=..., old_string=..., new_string=...)` 在仓库内技能上工作正常。
 -   **重大重写：** 使用 `write_file` 重写整个 SKILL.md。`skill_manage(action='edit')` 也有效，但需要提供完整的新内容。
--   **添加支持文件：** 使用 `write_file` 到 `skills/<category>/<name>/references/<file>.md`, `templates/<file>`, 或 `scripts/<file>`。`skill_manage(action='write_file')` 也有效，并强制执行 references/templates/scripts/assets 子目录白名单。
+-   **添加支持文件：** 使用 `write_file` 写入 `skills/<category>/<name>/references/<file>.md`、`templates/<file>` 或 `scripts/<file>`。`skill_manage(action='write_file')` 也有效，并强制执行 references/templates/scripts/assets 子目录白名单。
 -   **始终提交**编辑 — 仓库内技能是源代码，不是运行时状态。
 
 ## 常见陷阱
@@ -162,7 +162,7 @@ skills/<category>/<skill-name>/SKILL.md
 
 3.  **描述过于笼统。** 对等技能的描述以 "Use when ..." 开头，并描述*触发类别*，而不是单一任务。"Use when debugging X" 优于 "Debug X"。
 
-4.  **忘记 author/license/metadata 块。** 验证器不强制执行，但每个对等技能都有；省略会使技能看起来半成品。
+4.  **忘记 author/license/metadata 块。** 验证器不强制执行，但每个对等技能都有；省略会使技能看起来未完成。
 
 5.  **编写与对等技能重复的技能。** 在创建之前，先 `ls skills/<category>/` 并打开 2-3 个对等技能。优先扩展现有技能，而不是创建一个狭窄的兄弟技能。
 
@@ -173,10 +173,10 @@ skills/<category>/<skill-name>/SKILL.md
 ## 验证清单
 
 - [ ] 文件位于 `skills/<category>/<name>/SKILL.md`（不在 `~/.hermes/skills/` 中）
-- [ ] 前置元数据以字节 0 的 `---` 开始，以 `\n---\n` 结束
-- [ ] `name`, `description`, `version`, `author`, `license`, `metadata.hermes.{tags, related_skills}` 全部存在
+- [ ] Frontmatter 从字节 0 开始，以 `---` 开头，以 `\n---\n` 结束
+- [ ] `name`、`description`、`version`、`author`、`license`、`metadata.hermes.{tags, related_skills}` 全部存在
 - [ ] 名称 ≤ 64 个字符，小写 + 连字符
-- [ ] 描述 ≤ 1024 个字符并以 "Use when ..." 开头
+- [ ] 描述 ≤ 1024 个字符，并以 "Use when ..." 开头
 - [ ] 总文件大小 ≤ 100,000 个字符（目标 8-15k）
 - [ ] 结构：`# 标题` → `## 概述` → `## 何时使用` → 正文 → `## 常见陷阱` → `## 验证清单`
 - [ ] `related_skills` 引用在仓库内可解析（或明确允许为用户本地）

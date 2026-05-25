@@ -21,7 +21,7 @@ GitHub PR 生命周期：分支、提交、打开、CI、合并。
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Pull-Requests`, `CI/CD`, `Git`, `Automation`, `Merge` |
-| 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-code-review`](/docs/user-guide/skills/bundled/github/github-github-code-review) |
+| 相关技能 | [`github-auth`](/user-guide/skills/bundled/github/github-github-auth), [`github-code-review`](/user-guide/skills/bundled/github/github-github-code-review) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,7 +31,7 @@ GitHub PR 生命周期：分支、提交、打开、CI、合并。
 
 # GitHub Pull Request 工作流
 
-管理 PR 生命周期的完整指南。每个部分首先展示 `gh` 方式，然后是为没有 `gh` 的机器准备的 `git` + `curl` 备用方案。
+管理 PR 生命周期的完整指南。每个部分首先展示 `gh` 方式，然后是没有 `gh` 的机器使用的 `git` + `curl` 备用方案。
 
 ## 先决条件
 
@@ -46,7 +46,7 @@ if command -v gh &>/dev/null && gh auth status &>/dev/null; then
   AUTH="gh"
 else
   AUTH="git"
-  # 确保我们拥有用于 API 调用的 Token
+  # 确保我们拥有用于 API 调用的 token
   if [ -z "$GITHUB_TOKEN" ]; then
     if [ -f ~/.hermes/.env ] && grep -q "^GITHUB_TOKEN=" ~/.hermes/.env; then
       GITHUB_TOKEN=$(grep "^GITHUB_TOKEN=" ~/.hermes/.env | head -1 | cut -d= -f2 | tr -d '\n\r')
@@ -58,7 +58,7 @@ fi
 echo "Using: $AUTH"
 ```
 
-### 从 Git 远程仓库提取所有者/仓库信息
+### 从 Git 远程仓库提取 Owner/Repo
 
 许多 `curl` 命令需要 `owner/repo`。从 git 远程仓库提取：
 
@@ -163,7 +163,7 @@ curl -s -X POST \
   }"
 ```
 
-响应 JSON 包含 PR `number` — 保存它以供后续命令使用。
+响应 JSON 包含 PR `number` — 保存它供后续命令使用。
 
 要创建为草稿，请在 JSON 主体中添加 `"draft": true`。
 
@@ -279,7 +279,7 @@ git push
 
 ### 步骤 3：验证
 
-使用上面第 4 节中的命令重新检查 CI 状态。
+使用上面第 4 节的命令重新检查 CI 状态。
 
 ### 自动修复循环模式
 
@@ -354,7 +354,7 @@ git checkout main && git pull origin main
 # 2. 分支
 git checkout -b fix/login-redirect-bug
 
-# 3. （Agent 使用文件工具进行代码更改）
+# 3. (Agent 使用文件工具进行代码更改)
 
 # 4. 提交
 git add src/auth/login.py tests/test_login.py
@@ -366,11 +366,11 @@ Preserves the ?next= parameter instead of always redirecting to /dashboard."
 git push -u origin HEAD
 
 # 6. 创建 PR（根据可用性选择 gh 或 curl）
-# ... （参见第 3 节）
+# ... (参见第 3 节)
 
-# 7. 监控 CI（参见第 4 节）
+# 7. 监控 CI (参见第 4 节)
 
-# 8. 当状态为绿色时合并（参见第 6 节）
+# 8. 当状态为绿色时合并 (参见第 6 节)
 ```
 
 ## 有用的 PR 命令参考
@@ -378,7 +378,7 @@ git push -u origin HEAD
 | 操作 | gh | git + curl |
 |--------|-----|-----------|
 | 列出我的 PR | `gh pr list --author @me` | `curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$OWNER/$REPO/pulls?state=open"` |
-| 查看 PR 差异 | `gh pr diff` | `git diff main...HEAD`（本地）或 `curl -H "Accept: application/vnd.github.diff" ...` |
+| 查看 PR 差异 | `gh pr diff` | `git diff main...HEAD` (本地) 或 `curl -H "Accept: application/vnd.github.diff" ...` |
 | 添加评论 | `gh pr comment N --body "..."` | `curl -X POST .../issues/N/comments -d '{"body":"..."}'` |
 | 请求审查 | `gh pr edit N --add-reviewer user` | `curl -X POST .../pulls/N/requested_reviewers -d '{"reviewers":["user"]}'` |
 | 关闭 PR | `gh pr close N` | `curl -X PATCH .../pulls/N -d '{"state":"closed"}'` |

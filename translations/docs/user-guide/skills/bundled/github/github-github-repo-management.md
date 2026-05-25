@@ -21,7 +21,7 @@ description: "克隆/创建/分叉仓库；管理远程仓库、发布"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Repositories`, `Git`, `Releases`, `Secrets`, `Configuration` |
-| 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-issues`](/docs/user-guide/skills/bundled/github/github-github-issues) |
+| 相关技能 | [`github-auth`](/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-issues`](/user-guide/skills/bundled/github/github-github-issues) |
 
 ## 参考：完整的 SKILL.md
 
@@ -61,7 +61,7 @@ else
 fi
 ```
 
-如果你已在一个仓库内：
+如果你已经在某个仓库内：
 
 ```bash
 REMOTE_URL=$(git remote get-url origin)
@@ -74,7 +74,7 @@ REPO=$(echo "$OWNER_REPO" | cut -d/ -f2)
 
 ## 1. 克隆仓库
 
-克隆是纯粹的 `git` 操作——两种方式效果相同：
+克隆是纯 `git` 操作 — 两种方式效果相同：
 
 ```bash
 # 通过 HTTPS 克隆（适用于凭证助手或嵌入 Token 的 URL）
@@ -89,7 +89,7 @@ git clone --depth 1 https://github.com/owner/repo-name.git
 # 克隆特定分支
 git clone --branch develop https://github.com/owner/repo-name.git
 
-# 通过 SSH 克隆（如果已配置 SSH）
+# 通过 SSH 克隆（如果配置了 SSH）
 git clone git@github.com:owner/repo-name.git
 ```
 
@@ -201,7 +201,7 @@ git remote add upstream https://github.com/owner/repo-name.git
 ### 保持分叉同步
 
 ```bash
-# 纯 git 操作——适用于所有情况
+# 纯 git — 适用于所有情况
 git fetch upstream
 git checkout main
 git merge upstream/main
@@ -521,9 +521,9 @@ for g in json.load(sys.stdin):
 
 | 操作 | gh | git + curl |
 |--------|-----|-----------|
-| 克隆 | `gh repo clone o/r` | `git clone https://github.com/o/r.git` |
+| 克隆仓库 | `gh repo clone o/r` | `git clone https://github.com/o/r.git` |
 | 创建仓库 | `gh repo create name --public` | `curl POST /user/repos` |
-| 复刻 | `gh repo fork o/r --clone` | `curl POST /repos/o/r/forks` + `git clone` |
+| 复刻仓库 | `gh repo fork o/r --clone` | `curl POST /repos/o/r/forks` + `git clone` |
 | 仓库信息 | `gh repo view o/r` | `curl GET /repos/o/r` |
 | 编辑设置 | `gh repo edit --...` | `curl PATCH /repos/o/r` |
 | 创建发布 | `gh release create v1.0` | `curl POST /repos/o/r/releases` |

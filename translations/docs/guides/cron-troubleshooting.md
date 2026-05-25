@@ -1,12 +1,12 @@
 ---
 sidebar_position: 12
 title: "定时任务故障排除"
-description: "诊断和修复常见的 Hermes 定时任务问题——任务未触发、交付失败、技能加载错误和性能问题"
+description: "诊断和修复常见的 Hermes 定时任务问题——任务未触发、投递失败、技能加载错误和性能问题"
 ---
 
 # 定时任务故障排除
 
-当定时任务未按预期运行时，请按顺序进行以下检查。大多数问题属于以下四类之一：时间安排、交付、权限或技能加载。
+当定时任务未按预期运行时，请按顺序进行以下检查。大多数问题属于以下四类之一：时间安排、投递、权限或技能加载。
 
 ---
 
@@ -18,7 +18,7 @@ description: "诊断和修复常见的 Hermes 定时任务问题——任务未�
 hermes cron list
 ```
 
-查找任务并确认其状态为 `[active]`（不是 `[paused]` 或 `[completed]`）。如果显示 `[completed]`，则可能重复次数已用完——编辑任务以重置它。
+查找任务并确认其状态为 `[active]`（而不是 `[paused]` 或 `[completed]`）。如果显示 `[completed]`，则可能重复次数已耗尽——编辑任务以重置它。
 
 ### 检查 2：确认时间表正确
 
@@ -32,7 +32,7 @@ hermes cron list
 | `30m` | 从现在起 30 分钟后 |
 | `2025-06-01T09:00:00` | 2025 年 6 月 1 日 9:00 AM UTC |
 
-如果任务触发一次后从列表中消失，那它是一个一次性时间表（`30m`、`1d` 或 ISO 时间戳）——这是预期行为。
+如果任务触发一次后从列表中消失，那么它是一个一次性时间表（`30m`、`1d` 或 ISO 时间戳）——这是预期行为。
 
 ### 检查 3：消息网关是否在运行？
 
@@ -51,11 +51,11 @@ hermes cron list   # 将 next_run 时间与本地时间进行比较
 
 ---
 
-## 交付失败
+## 投递失败
 
-### 检查 1：验证交付目标是否正确
+### 检查 1：验证投递目标正确
 
-交付目标区分大小写，并且需要配置正确的平台。配置错误的目标会静默地丢弃响应。
+投递目标区分大小写，并且需要配置正确的平台。配置错误的目标会静默丢弃响应。
 
 | 目标 | 要求 |
 |--------|----------|
@@ -68,23 +68,23 @@ hermes cron list   # 将 next_run 时间与本地时间进行比较
 | `email` | 在 `config.yaml` 中配置了 SMTP |
 | `sms` | 已配置 SMS 提供商 |
 | `local` | 对 `~/.hermes/cron/output/` 有写入权限 |
-| `origin` | 交付到创建任务的聊天 |
+| `origin` | 投递到创建任务的聊天会话 |
 
-其他支持的平台包括 `mattermost`、`homeassistant`、`dingtalk`、`feishu`、`wecom`、`weixin`、`bluebubbles`、`qqbot` 和 `webhook`。你也可以使用 `platform:chat_id` 语法（例如 `telegram:-1001234567890`）定位到特定的聊天。
+其他支持的平台包括 `mattermost`、`homeassistant`、`dingtalk`、`feishu`、`wecom`、`weixin`、`bluebubbles`、`qqbot` 和 `webhook`。你也可以使用 `platform:chat_id` 语法（例如，`telegram:-1001234567890`）定位到特定的聊天会话。
 
-如果交付失败，任务仍会运行——只是不会发送到任何地方。检查 `hermes cron list` 中更新的 `last_error` 字段（如果可用）。
+如果投递失败，任务仍会运行——只是不会发送到任何地方。检查 `hermes cron list` 中更新的 `last_error` 字段（如果有）。
 
 ### 检查 2：检查 `[SILENT]` 的使用
 
-如果你的定时任务没有产生输出，或者 Agent 以 `[SILENT]` 响应，则交付会被抑制。这对于监控任务是故意的——但要确保你的提示词没有意外地抑制所有内容。
+如果你的定时任务没有产生输出，或者 Agent 以 `[SILENT]` 响应，则投递会被抑制。这对于监控任务是故意的——但要确保你的提示词没有意外地抑制所有内容。
 
-提示词如果说“如果没有变化，请用 [SILENT] 响应”，也会静默地吞掉非空响应。检查你的条件逻辑。
+提示词如果说“如果没有变化，请用 [SILENT] 响应”，那么它也会静默地吞掉非空响应。检查你的条件逻辑。
 
 ### 检查 3：平台 Token 权限
 
-每个消息平台机器人需要特定的权限才能接收消息。如果交付静默失败：
+每个消息平台机器人需要特定的权限才能接收消息。如果投递静默失败：
 
-- **Telegram**：机器人必须是目标群组/频道中的管理员
+- **Telegram**：机器人必须是目标群组/频道的管理员
 - **Discord**：机器人必须拥有在目标频道发送消息的权限
 - **Slack**：机器人必须已添加到工作区并拥有 `chat:write` 作用域
 
@@ -115,7 +115,7 @@ hermes skills list
 
 ### 检查 3：需要交互式工具的技能
 
-定时任务运行时禁用了 `cronjob`、`messaging` 和 `clarify` 工具集。这可以防止递归创建定时任务、直接发送消息（交付由调度程序处理）和交互式提示。如果某个技能依赖这些工具集，它将无法在定时任务上下文中工作。
+定时任务运行时，`cronjob`、`messaging` 和 `clarify` 工具集被禁用。这可以防止递归创建定时任务、直接发送消息（投递由调度器处理）和交互式提示。如果一个技能依赖这些工具集，它将无法在定时任务上下文中工作。
 
 检查技能的文档，确认它可以在非交互式（无头）模式下工作。
 
@@ -127,7 +127,7 @@ hermes skills list
 /cron add "0 9 * * *" "..." --skill context-skill --skill target-skill
 ```
 
-在此示例中，`context-skill` 在 `target-skill` 之前加载。
+在这个例子中，`context-skill` 在 `target-skill` 之前加载。
 
 ---
 
@@ -135,33 +135,33 @@ hermes skills list
 
 ### 检查 1：查看最近的任务输出
 
-如果任务运行并失败，你可能会在以下位置看到错误上下文：
+如果一个任务运行并失败，你可能会在以下位置看到错误上下文：
 
-1. 任务交付的聊天（如果交付成功）
-2. `~/.hermes/logs/agent.log` 中的调度程序消息（或 `errors.log` 中的警告）
-3. 通过 `hermes cron list` 获取的任务 `last_run` 元数据
+1. 任务投递到的聊天会话（如果投递成功）
+2. `~/.hermes/logs/agent.log` 中的调度器消息（或 `errors.log` 中的警告）
+3. 通过 `hermes cron list` 查看任务的 `last_run` 元数据
 
 ### 检查 2：常见错误模式
 
-**脚本的“没有那个文件或目录”**
+**脚本的“No such file or directory”错误**
 `script` 路径必须是绝对路径（或相对于 Hermes 配置目录）。验证：
 ```bash
 ls ~/.hermes/scripts/your-script.py   # 必须存在
 hermes cron edit <job_id> --script ~/.hermes/scripts/your-script.py
 ```
 
-**任务执行时的“未找到技能”**
-技能必须安装在运行调度程序的机器上。如果你在多台机器之间移动，技能不会自动同步——请使用 `hermes skills install <skill-name>` 重新安装它们。
+**任务执行时的“Skill not found”错误**
+技能必须安装在运行调度器的机器上。如果你在不同机器之间移动，技能不会自动同步——使用 `hermes skills install <skill-name>` 重新安装它们。
 
-**任务运行但未交付任何内容**
-可能是交付目标问题（参见上面的“交付失败”）或静默抑制的响应（`[SILENT]`）。
+**任务运行但未投递任何内容**
+可能是投递目标问题（见上面的“投递失败”）或响应被静默抑制（`[SILENT]`）。
 
 **任务挂起或超时**
-调度程序使用基于不活动的超时（默认为 600 秒，可通过 `HERMES_CRON_TIMEOUT` 环境变量配置，`0` 表示无限制）。只要 Agent 在主动调用工具，它就可以一直运行——计时器仅在持续不活动后触发。长时间运行的任务应使用脚本来处理数据收集，并仅交付结果。
+调度器使用基于不活动的超时设置（默认为 600 秒，可通过 `HERMES_CRON_TIMEOUT` 环境变量配置，`0` 表示无限制）。只要 Agent 在主动调用工具，它就可以一直运行——计时器仅在持续不活动后触发。长时间运行的任务应使用脚本来处理数据收集，并只投递结果。
 
 ### 检查 3：锁争用
 
-调度程序使用基于文件的锁定来防止重叠的计时。如果运行了两个消息网关实例（或者 CLI 会话与消息网关冲突），任务可能会延迟或跳过。
+调度器使用基于文件的锁定来防止重叠的计时。如果运行了两个消息网关实例（或者 CLI 会话与消息网关冲突），任务可能会被延迟或跳过。
 
 终止重复的消息网关进程：
 ```bash
@@ -171,7 +171,7 @@ ps aux | grep hermes
 
 ### 检查 4：jobs.json 的权限
 
-任务存储在 `~/.hermes/cron/jobs.json` 中。如果你的用户无法读取/写入此文件，调度程序将静默失败：
+任务存储在 `~/.hermes/cron/jobs.json` 中。如果你的用户无法读取/写入此文件，调度器将静默失败：
 
 ```bash
 ls -la ~/.hermes/cron/jobs.json
@@ -188,7 +188,7 @@ chmod 600 ~/.hermes/cron/jobs.json   # 你的用户应该拥有它
 
 ### 太多重叠的任务
 
-调度程序在每个计时内按顺序执行任务。如果多个任务在同一时间到期，它们会一个接一个地运行。考虑错开时间表（例如，使用 `0 9 * * *` 和 `5 9 * * *`，而不是两者都在 `0 9 * * *`）以避免延迟。
+调度器在每个计时内按顺序执行任务。如果多个任务在同一时间到期，它们会一个接一个地运行。考虑错开时间表（例如，使用 `0 9 * * *` 和 `5 9 * * *`，而不是都在 `0 9 * * *`）以避免延迟。
 
 ### 脚本输出过大
 
@@ -213,13 +213,13 @@ hermes skills list                  # 验证已安装的技能
 如果你已经按照本指南操作但问题仍然存在：
 
 1. 使用 `hermes cron run <job_id>` 运行任务（在下一个消息网关计时时触发），并观察聊天输出中的错误
-2. 检查 `~/.hermes/logs/agent.log` 中的调度程序消息和 `~/.hermes/logs/errors.log` 中的警告
-3. 在 [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) 提交问题，包含：
+2. 检查 `~/.hermes/logs/agent.log` 中的调度器消息和 `~/.hermes/logs/errors.log` 中的警告
+3. 在 [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) 提交问题，并提供：
    - 任务 ID 和时间表
-   - 交付目标
+   - 投递目标
    - 你的预期与实际发生的情况
    - 日志中的相关错误消息
 
 ---
 
-*有关完整的定时任务参考，请参阅[使用定时任务自动化一切](/docs/guides/automate-with-cron)和[定时任务](/docs/user-guide/features/cron)。*
+*有关完整的定时任务参考，请参阅[使用定时任务自动化一切](/guides/automate-with-cron)和[定时任务](/user-guide/features/cron)。*

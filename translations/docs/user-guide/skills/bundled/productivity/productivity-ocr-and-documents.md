@@ -1,12 +1,12 @@
 ---
-title: "OCR 与文档处理 — 从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
-sidebar_label: "OCR 与文档处理"
+title: "OCR 与文档 — 从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
+sidebar_label: "OCR 与文档"
 description: "从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# OCR 与文档处理
+# OCR 与文档
 
 从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)。
 
@@ -21,7 +21,7 @@ description: "从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `PDF`, `Documents`, `Research`, `Arxiv`, `Text-Extraction`, `OCR` |
-| 相关技能 | [`powerpoint`](/docs/user-guide/skills/bundled/productivity/productivity-powerpoint) |
+| 相关技能 | [`powerpoint`](/user-guide/skills/bundled/productivity/productivity-powerpoint) |
 
 ## 参考：完整的 SKILL.md
 
@@ -37,7 +37,7 @@ description: "从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
 
 ## 步骤 1：是否有远程 URL？
 
-如果文档有 URL，**始终先尝试 `web_extract`**：
+如果文档有 URL，**始终首先尝试 `web_extract`**：
 
 ```
 web_extract(urls=["https://arxiv.org/pdf/2402.03300"])
@@ -70,7 +70,7 @@ web_extract(urls=["https://example.com/report.pdf"])
 **决策**：除非需要 OCR、公式、表单或复杂的布局分析，否则使用 pymupdf。
 
 如果用户需要 marker 的功能但系统缺少约 5GB 的可用磁盘空间：
-> "此文档需要 OCR/高级提取 (marker-pdf)，这需要约 5GB 的空间来安装 PyTorch 和模型。您的系统有 [X]GB 可用空间。选项：释放空间、提供一个 URL 以便我使用 web_extract，或者我可以尝试 pymupdf，它适用于基于文本的 PDF，但不适用于扫描文档或公式。"
+> "此文档需要 OCR/高级提取 (marker-pdf)，这需要约 5GB 的空间用于 PyTorch 和模型。您的系统有 [X]GB 可用空间。选项：释放空间、提供一个 URL 以便我使用 web_extract，或者我可以尝试 pymupdf，它适用于基于文本的 PDF，但不适用于扫描文档或公式。"
 
 ---
 
@@ -123,7 +123,7 @@ python scripts/extract_marker.py document.pdf --use_llm      # LLM 增强的准�
 **CLI** (随 marker-pdf 安装)：
 ```bash
 marker_single document.pdf --output_dir ./output
-marker /path/to/folder --workers 4    # 批量处理
+marker /path/to/folder --workers 4    # 批量
 ```
 
 ---

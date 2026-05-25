@@ -1,7 +1,7 @@
 ---
 sidebar_position: 8
 title: "MCP 配置参考"
-description: "Hermes Agent MCP 配置键、过滤语义和实用工具策略的参考"
+description: "Hermes Agent MCP 配置键、过滤语义和实用工具策略的参考文档"
 ---
 
 # MCP 配置参考
@@ -9,8 +9,8 @@ description: "Hermes Agent MCP 配置键、过滤语义和实用工具策略的�
 本页是主要 MCP 文档的简明参考伴侣。
 
 有关概念性指导，请参阅：
-- [MCP（模型上下文协议）](/docs/user-guide/features/mcp)
-- [在 Hermes 中使用 MCP](/docs/guides/use-mcp-with-hermes)
+- [MCP（模型上下文协议）](/user-guide/features/mcp)
+- [在 Hermes 中使用 MCP](/guides/use-mcp-with-hermes)
 
 ## 根配置结构
 
@@ -38,7 +38,7 @@ mcp_servers:
 
 ## 服务器键
 
-| 键 | 类型 | 适用于 | 含义 |
+| 键 | 类型 | 适用对象 | 含义 |
 |---|---|---|---|
 | `command` | 字符串 | stdio | 要启动的可执行文件 |
 | `args` | 列表 | stdio | 子进程的参数 |
@@ -59,8 +59,8 @@ mcp_servers:
 |---|---|---|
 | `include` | 字符串或列表 | 白名单服务器原生 MCP 工具 |
 | `exclude` | 字符串或列表 | 黑名单服务器原生 MCP 工具 |
-| `resources` | 类布尔值 | 启用/禁用 `list_resources` + `read_resource` |
-| `prompts` | 类布尔值 | 启用/禁用 `list_prompts` + `get_prompt` |
+| `resources` | 布尔类 | 启用/禁用 `list_resources` + `read_resource` |
+| `prompts` | 布尔类 | 启用/禁用 `list_prompts` + `get_prompt` |
 
 ## 过滤语义
 
@@ -75,7 +75,7 @@ tools:
 
 ### `exclude`
 
-如果设置了 `exclude` 且未设置 `include`，则注册除这些名称外的所有服务器原生 MCP 工具。
+如果设置了 `exclude` 且未设置 `include`，则注册除指定名称外的所有服务器原生 MCP 工具。
 
 ```yaml
 tools:
@@ -122,11 +122,11 @@ tools:
   prompts: false
 ```
 
-### 能力感知注册
+### 基于能力的注册
 
 即使 `resources: true` 或 `prompts: true`，Hermes 也只在 MCP 会话实际暴露相应能力时才注册那些实用工具。
 
-因此这是正常情况：
+因此这是正常的：
 - 你启用了提示词
 - 但没有出现提示词实用工具
 - 因为服务器不支持提示词
@@ -144,11 +144,11 @@ mcp_servers:
 - 不尝试连接
 - 不进行发现
 - 不注册工具
-- 配置保留以供后续重用
+- 配置保留以备后续重用
 
 ## 空结果行为
 
-如果过滤移除了所有服务器原生工具，并且没有注册任何实用工具，Hermes 不会为该服务器创建空的 MCP 运行时工具集。
+如果过滤移除了所有服务器原生工具且没有注册实用工具，Hermes 不会为该服务器创建空的 MCP 运行时工具集。
 
 ## 配置示例
 
@@ -244,6 +244,6 @@ mcp_servers:
 行为：
 - Hermes 使用 MCP SDK 的 OAuth 2.1 PKCE 流程（元数据发现、动态客户端注册、令牌交换和刷新）
 - 首次连接时，会打开浏览器窗口进行授权
-- 令牌持久化到 `~/.hermes/mcp-tokens/<server>.json`，并在会话间重用
+- 令牌持久化到 `~/.hermes/mcp-tokens/<server>.json` 并在会话间重用
 - 令牌刷新是自动的；仅当刷新失败时才需要重新授权
 - 仅适用于 HTTP/StreamableHTTP 传输（基于 `url` 的服务器）

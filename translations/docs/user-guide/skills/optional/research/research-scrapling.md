@@ -21,19 +21,19 @@ description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Web Scraping`, `Browser`, `Cloudflare`, `Stealth`, `Crawling`, `Spider` |
-| 相关技能 | [`duckduckgo-search`](/docs/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/docs/user-guide/skills/optional/research/research-domain-intel) |
+| 相关技能 | [`duckduckgo-search`](/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/user-guide/skills/optional/research/research-domain-intel) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # Scrapling
 
 [Scrapling](https://github.com/D4Vinci/Scrapling) 是一个具有反机器人绕过、隐身浏览器自动化和蜘蛛框架的网页抓取框架。它提供三种获取策略（HTTP、动态 JS、隐身/Cloudflare）和一个完整的 CLI。
 
-**此技能仅用于教育和研究目的。** 用户必须遵守本地/国际数据抓取法律并尊重网站的《服务条款》。
+**此技能仅用于教育和研究目的。** 用户必须遵守本地/国际数据抓取法律并尊重网站服务条款。
 
 ## 何时使用
 
@@ -70,7 +70,7 @@ scrapling install
 | 隐身 | `StealthyFetcher` / `StealthySession` | Cloudflare、受反机器人保护的网站 |
 | 蜘蛛 | `Spider` | 带链接跟随的多页面爬取 |
 
-## CLI 使用
+## CLI 用法
 
 ### 提取静态页面
 
@@ -79,7 +79,6 @@ scrapling extract get 'https://example.com' output.md
 ```
 
 使用 CSS 选择器和浏览器模拟：
-
 ```bash
 scrapling extract get 'https://example.com' output.md \
   --css-selector '.content' \
@@ -180,7 +179,7 @@ page = DynamicFetcher.fetch(
 )
 ```
 
-### 禁用资源以提升速度
+### 禁用资源以提高速度
 
 阻止字体、图片、媒体、样式表（约快 25%）：
 
@@ -210,7 +209,7 @@ results = page.css('.extra-results .item::text').getall()
 
 ## Python：隐身模式（反机器人绕过）
 
-对于受 Cloudflare 保护或指纹识别严格的网站：
+对于受 Cloudflare 保护或指纹检测严格的网站：
 
 ```python
 from scrapling.fetchers import StealthyFetcher
@@ -338,7 +337,7 @@ class SmartSpider(Spider):
 
 ```python
 spider = QuotesSpider(crawldir="./crawl_checkpoint")
-spider.start()  # Ctrl+C 暂停，重新运行以从检查点恢复
+spider.start()  # Ctrl+C 暂停，重新运行可从检查点恢复
 ```
 
 ## 注意事项
@@ -347,5 +346,5 @@ spider.start()  # Ctrl+C 暂停，重新运行以从检查点恢复
 - **超时**：DynamicFetcher/StealthyFetcher 的超时单位为**毫秒**（默认 30000），Fetcher 的超时单位为**秒**
 - **Cloudflare 绕过**：`solve_cloudflare=True` 会增加 5-15 秒的获取时间 — 仅在需要时启用
 - **资源使用**：StealthyFetcher 运行真实浏览器 — 限制并发使用
-- **法律**：抓取前务必检查 robots.txt 和网站《服务条款》。此库仅用于教育和研究目的
+- **法律**：抓取前始终检查 robots.txt 和网站服务条款。此库仅用于教育和研究目的
 - **Python 版本**：需要 Python 3.10+

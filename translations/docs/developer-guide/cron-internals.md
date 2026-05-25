@@ -6,16 +6,16 @@ description: "Hermes 如何存储、调度、编辑、暂停、加载技能以�
 
 # 定时任务内部机制
 
-定时任务子系统提供计划任务执行功能——从简单的一次性延迟任务，到具有技能注入和跨平台交付功能的、基于 cron 表达式的重复性任务。
+定时任务子系统提供计划任务执行功能——从简单的一次性延迟任务，到具有技能注入和跨平台交付功能的、基于 cron 表达式的周期性任务。
 
 ## 关键文件
 
 | 文件 | 用途 |
 |------|---------|
 | `cron/jobs.py` | 任务模型、存储、对 `jobs.json` 的原子读写 |
-| `cron/scheduler.py` | 调度器循环——检测到期任务、执行、跟踪重复 |
+| `cron/scheduler.py` | 调度器循环——检测到期任务、执行、重复跟踪 |
 | `tools/cronjob_tools.py` | 面向模型的 `cronjob` 工具注册和处理程序 |
-| `gateway/run.py` | 消息网关集成——在长期运行循环中进行定时任务触发 |
+| `gateway/run.py` | 消息网关集成——在长运行循环中执行定时任务 |
 | `hermes_cli/cron.py` | CLI `hermes cron` 子命令 |
 
 ## 调度模型
@@ -25,21 +25,21 @@ description: "Hermes 如何存储、调度、编辑、暂停、加载技能以�
 | 格式 | 示例 | 行为 |
 |--------|---------|----------|
 | **相对延迟** | `30m`, `2h`, `1d` | 一次性，在指定持续时间后触发 |
-| **时间间隔** | `every 2h`, `every 30m` | 重复性，以固定时间间隔触发 |
+| **时间间隔** | `every 2h`, `every 30m` | 周期性，以固定间隔触发 |
 | **Cron 表达式** | `0 9 * * *` | 标准的 5 字段 cron 语法（分钟、小时、日、月、星期几） |
 | **ISO 时间戳** | `2025-01-15T09:00:00` | 一次性，在精确时间触发 |
 
-面向模型的接口是一个单独的 `cronjob` 工具，具有操作式命令：`create`、`list`、`update`、`pause`、`resume`、`run`、`remove`。
+面向模型的接口是一个单一的 `cronjob` 工具，具有操作式命令：`create`、`list`、`update`、`pause`、`resume`、`run`、`remove`。
 
 ## 任务存储
 
-任务存储在 `~/.hermes/cron/jobs.json` 中，具有原子写入语义（写入临时文件，然后重命名）。每个任务记录包含：
+任务存储在 `~/.hermes/cron/jobs.json` 中，具有原子写语义（写入临时文件，然后重命名）。每个任务记录包含：
 
 ```json
 {
   "id": "a1b2c3d4e5f6",
   "name": "每日简报",
-  "prompt": "总结今天的 AI 新闻和融资轮次",
+  "prompt": "总结今日 AI 新闻和融资轮次",
   "schedule": {
     "kind": "cron",
     "expr": "0 9 * * *",
@@ -68,8 +68,8 @@ description: "Hermes 如何存储、调度、编辑、暂停、加载技能以�
 | 状态 | 含义 |
 |-------|---------|
 | `scheduled` | 活跃，将在下一个计划时间触发 |
-| `paused` | 已暂停——在恢复前不会触发 |
-| `completed` | 重复次数已耗尽或已触发的一次性任务 |
+| `paused` | 已暂停——恢复前不会触发 |
+| `completed` | 重复次数已耗尽或一次性任务已触发 |
 | `running` | 当前正在执行（临时状态） |
 
 ### 向后兼容性
@@ -78,13 +78,13 @@ description: "Hermes 如何存储、调度、编辑、暂停、加载技能以�
 
 ## 调度器运行时
 
-### 触发周期
+### 滴答周期
 
-调度器以固定周期（默认：每 60 秒）运行：
+调度器以固定周期运行（默认：每 60 秒）：
 
 ```text
 tick()
-  1. 获取调度器锁（防止重叠触发）
+  1. 获取调度器锁（防止滴答周期重叠）
   2. 从 jobs.json 加载所有任务
   3. 筛选出到期任务 (next_run <= now AND state == "scheduled")
   4. 对于每个到期任务：
@@ -104,14 +104,14 @@ tick()
 
 在消息网关模式下，调度器在一个专用的后台线程中运行（`gateway/run.py` 中的 `_start_cron_ticker`），该线程每 60 秒调用一次 `scheduler.tick()`，同时处理消息。
 
-在 CLI 模式下，定时任务仅在运行 `hermes cron` 命令期间或在活跃的 CLI 会话中触发。
+在 CLI 模式下，定时任务仅在运行 `hermes cron` 命令期间或活跃的 CLI 会话中触发。
 
 ### 全新会话隔离
 
 每个定时任务都在一个全新的 Agent 会话中运行：
 
 - 没有之前运行的对话历史
-- 不记得之前的定时任务执行（除非持久化到记忆/文件中）
+- 不记得之前的定时任务执行（除非持久化到记忆/文件）
 - 提示词必须是自包含的——定时任务不能询问澄清性问题
 - `cronjob` 工具集被禁用（递归防护）
 
@@ -119,10 +119,10 @@ tick()
 
 定时任务可以通过 `skills` 字段附加一个或多个技能。在执行时：
 
-1.  技能按指定顺序加载
-2.  每个技能的 SKILL.md 内容作为上下文被注入
-3.  任务的提示词作为任务指令被追加
-4.  Agent 处理组合的技能上下文 + 提示词
+1. 技能按指定顺序加载
+2. 每个技能的 SKILL.md 内容作为上下文注入
+3. 任务的提示词作为任务指令追加
+4. Agent 处理组合后的技能上下文 + 提示词
 
 这使得无需将完整指令粘贴到定时任务提示词中，即可实现可重用、经过测试的工作流。例如：
 
@@ -137,25 +137,25 @@ tick()
 ```python
 # ~/.hermes/scripts/check_competitors.py
 import requests, json
-# 获取竞争对手的发布说明，与上次运行进行差异比较
+# 获取竞争对手发布说明，与上次运行进行差异比较
 # 将摘要打印到标准输出 —— Agent 分析并报告
 ```
 
-脚本超时时间默认为 120 秒。`_get_script_timeout()` 通过三层链解析超时限制：
+脚本超时默认为 120 秒。`_get_script_timeout()` 通过三层链解析超时限制：
 
-1.  **模块级覆盖** — `_SCRIPT_TIMEOUT`（用于测试/猴子补丁）。仅在其与默认值不同时使用。
+1.  **模块级覆盖** — `_SCRIPT_TIMEOUT`（用于测试/猴子补丁）。仅在与默认值不同时使用。
 2.  **环境变量** — `HERMES_CRON_SCRIPT_TIMEOUT`
 3.  **配置** — `config.yaml` 中的 `cron.script_timeout_seconds`（通过 `load_config()` 读取）
 4.  **默认值** — 120 秒
 
 ### 提供商恢复
 
-`run_job()` 将用户配置的备用提供商和凭据池传递给 `AIAgent` 实例：
+`run_job()` 将用户配置的备用提供商和凭证池传递给 `AIAgent` 实例：
 
--   **备用提供商** — 从 `config.yaml` 读取 `fallback_providers`（列表）或 `fallback_model`（旧版字典），匹配消息网关的 `_load_fallback_model()` 模式。作为 `fallback_model=` 传递给 `AIAgent.__init__`，后者将两种格式都规范化为备用链。
--   **凭据池** — 使用解析出的运行时提供商名称，通过 `agent.credential_pool` 中的 `load_pool(provider)` 加载。仅在池中有凭据时传递（`pool.has_credentials()`）。使得在 429/速率限制错误时能够进行同提供商密钥轮换。
+-   **备用提供商** — 从 `config.yaml` 读取 `fallback_providers`（列表）或 `fallback_model`（旧版字典），与消息网关的 `_load_fallback_model()` 模式匹配。作为 `fallback_model=` 传递给 `AIAgent.__init__`，后者将两种格式都规范化为备用链。
+-   **凭证池** — 使用解析出的运行时提供商名称，通过 `agent.credential_pool` 中的 `load_pool(provider)` 加载。仅在池中有凭证时传递（`pool.has_credentials()`）。支持在 429/速率限制错误时进行同提供商密钥轮换。
 
-这反映了消息网关的行为——没有它，定时任务 Agent 在遇到速率限制时会失败，而不会尝试恢复。
+这镜像了消息网关的行为——没有它，定时任务 Agent 在遇到速率限制时会失败，而不会尝试恢复。
 
 ## 交付模型
 
@@ -171,14 +171,14 @@ import requests, json
 | WhatsApp | `whatsapp` | 交付到 WhatsApp 主聊天 |
 | Signal | `signal` | 交付到 Signal |
 | Matrix | `matrix` | 交付到 Matrix 主房间 |
-| Mattermost | `mattermost` | 交付到 Mattermost 主聊天 |
+| Mattermost | `mattermost` | 交付到 Mattermost 主频道 |
 | Email | `email` | 通过电子邮件交付 |
 | SMS | `sms` | 通过短信交付 |
 | Home Assistant | `homeassistant` | 交付到 HA 对话 |
-| DingTalk | `dingtalk` | 交付到钉钉 |
-| Feishu | `feishu` | 交付到飞书 |
-| WeCom | `wecom` | 交付到企业微信 |
-| Weixin | `weixin` | 交付到微信 |
+| 钉钉 | `dingtalk` | 交付到钉钉 |
+| 飞书 | `feishu` | 交付到飞书 |
+| 企业微信 | `wecom` | 交付到企业微信 |
+| 微信 | `weixin` | 交付到微信 |
 | BlueBubbles | `bluebubbles` | 通过 BlueBubbles 交付到 iMessage |
 | QQ Bot | `qqbot` | 通过官方 API v2 交付到 QQ |
 
@@ -187,25 +187,25 @@ import requests, json
 ### 响应包装
 
 默认情况下（`cron.wrap_response: true`），定时任务交付会包装以下内容：
--   标识定时任务名称和任务的标题
--   注明 Agent 无法在对话中看到已交付消息的页脚
+- 标识定时任务名称和任务的标题
+- 注明 Agent 在对话中看不到已交付消息的页脚
 
 定时任务响应中的 `[SILENT]` 前缀会完全抑制交付——适用于只需要写入文件或执行副作用的任务。
 
 ### 会话隔离
 
-定时任务交付**不会**镜像到消息网关会话的对话历史中。它们只存在于定时任务自己的会话中。这防止了目标聊天对话中出现消息交替违规。
+定时任务交付**不会**镜像到消息网关会话的对话历史中。它们仅存在于定时任务自己的会话中。这防止了目标聊天对话中出现消息交替违规。
 
 ## 递归防护
 
 定时任务运行的会话禁用了 `cronjob` 工具集。这防止了：
--   计划任务创建新的定时任务
--   可能导致 Token 使用量激增的递归调度
--   从任务内部意外修改任务计划
+- 计划任务创建新的定时任务
+- 可能导致 Token 使用量激增的递归调度
+- 从任务内部意外修改任务计划
 
 ## 锁定
 
-调度器使用跨进程的基于文件的锁定（Unix 上使用 `fcntl.flock`，Windows 上使用 `msvcrt.locking`），以防止重叠的触发两次执行同一批到期任务——即使在消息网关的进程内触发器和独立的 `hermes cron` / 手动 `tick()` 调用之间也是如此。如果无法获取锁，`tick()` 会立即返回 0。
+调度器使用跨进程的基于文件的锁定（Unix 上使用 `fcntl.flock`，Windows 上使用 `msvcrt.locking`），以防止重叠的滴答周期两次执行同一批到期任务——即使在消息网关的进程内滴答器和独立的 `hermes cron` / 手动 `tick()` 调用之间也是如此。如果无法获取锁，`tick()` 会立即返回 0。
 
 ## CLI 接口
 
@@ -223,6 +223,6 @@ hermes cron remove <job_id>         # 删除任务
 
 ## 相关文档
 
--   [定时任务功能指南](/docs/user-guide/features/cron)
--   [消息网关内部机制](./gateway-internals.md)
--   [Agent 循环内部机制](./agent-loop.md)
+- [定时任务功能指南](/user-guide/features/cron)
+- [消息网关内部机制](./gateway-internals.md)
+- [Agent 循环内部机制](./agent-loop.md)

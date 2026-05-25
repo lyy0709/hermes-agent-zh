@@ -6,17 +6,17 @@ description: "在 CLI、Telegram、Discord 和 Discord 语音频道中设置和�
 
 # 使用 Hermes 的语音模式
 
-本指南是[语音模式功能参考](/docs/user-guide/features/voice-mode)的实用伴侣。
+本指南是[语音模式功能参考](/user-guide/features/voice-mode)的实用伴侣。
 
 如果说功能页面解释了语音模式能做什么，那么本指南则展示了如何实际用好它。
 
-## 语音模式适合的场景
+## 语音模式的适用场景
 
-语音模式在以下场景特别有用：
+语音模式在以下情况下特别有用：
 - 你想要免提的 CLI 工作流
 - 你希望在 Telegram 或 Discord 中获得语音回复
 - 你希望 Hermes 驻留在 Discord 语音频道中进行实时对话
-- 你想在走动时快速捕捉想法、调试或进行来回对话，而不是打字
+- 你希望在走动时快速捕捉想法、调试或进行来回对话，而不是打字
 
 ## 选择你的语音模式设置
 
@@ -31,14 +31,14 @@ Hermes 中实际上有三种不同的语音体验。
 一个好的路径是：
 1. 首先让文本模式正常工作
 2. 其次启用语音回复
-3. 最后，如果你想要完整体验，再转向 Discord 语音频道
+3. 如果你想要完整体验，最后再尝试 Discord 语音频道
 
 ## 步骤 1：首先确保普通 Hermes 正常工作
 
 在接触语音模式之前，请验证：
 - Hermes 可以启动
 - 你的提供商已配置
-- Agent 可以正常回答文本提示词
+- Agent 可以正常回答文本提示
 
 ```bash
 hermes
@@ -84,7 +84,7 @@ python -m pip install -U neutts[all]
 pip install "hermes-agent[all]"
 ```
 
-## 步骤 3：安装系统依赖
+## 步骤 3：安装系统依赖项
 
 ### macOS
 
@@ -108,7 +108,7 @@ sudo apt install espeak-ng
 
 ## 步骤 4：选择 STT 和 TTS 提供商
 
-Hermes 支持本地和云端语音栈。
+Hermes 支持本地和云端语音堆栈。
 
 ### 最简单/最便宜的设置
 
@@ -149,7 +149,7 @@ ELEVENLABS_API_KEY=***
 
 ### 如果你使用 `hermes setup`
 
-如果你在设置向导中选择 NeuTTS，Hermes 会检查 `neutts` 是否已安装。如果缺失，向导会告诉你 NeuTTS 需要 Python 包 `neutts` 和系统包 `espeak-ng`，并为你提供安装选项，使用你的平台包管理器安装 `espeak-ng`，然后运行：
+如果你在设置向导中选择 NeuTTS，Hermes 会检查是否已安装 `neutts`。如果缺失，向导会告诉你 NeuTTS 需要 Python 包 `neutts` 和系统包 `espeak-ng`，并为你提供安装选项，使用你的平台包管理器安装 `espeak-ng`，然后运行：
 
 ```bash
 python -m pip install -U neutts[all]
@@ -214,13 +214,13 @@ hermes
 默认按键：
 - `Ctrl+B`
 
-工作流：
+工作流程：
 1. 按下 `Ctrl+B`
 2. 说话
 3. 等待静音检测自动停止录音
 4. Hermes 转录并回复
 5. 如果 TTS 开启，它会说出答案
-6. 循环可以自动重启以持续使用
+6. 循环可以自动重新开始以进行连续使用
 
 ### 有用的命令
 
@@ -250,13 +250,13 @@ I keep getting a docker permission error. Help me debug it.
 #### 研究/头脑风暴
 
 非常适合：
-- 边走动边思考
+- 思考时四处走动
 - 口述不成熟的想法
 - 要求 Hermes 实时组织你的思路
 
 #### 无障碍/低打字会话
 
-如果打字不方便，语音模式是保持在完整 Hermes 循环中的最快方式之一。
+如果打字不方便，语音模式是保持完整 Hermes 循环的最快方式之一。
 
 ## 调整 CLI 行为
 
@@ -273,7 +273,7 @@ voice:
 
 ### 静音持续时间
 
-如果你在句子间停顿较多，请增加：
+如果你在句子之间停顿很多，请增加：
 
 ```yaml
 voice:
@@ -293,7 +293,7 @@ voice:
 
 此模式比完整的语音频道更简单。
 
-Hermes 保持为普通聊天机器人，但可以说出回复。
+Hermes 保持为普通的聊天机器人，但可以说出回复。
 
 ### 启动消息网关
 
@@ -325,21 +325,21 @@ hermes gateway
 
 ### 何时使用哪种模式
 
-- 如果你只希望为源自语音的消息提供语音回复，使用 `/voice on`
-- 如果你希望一直有一个完整的语音助手，使用 `/voice tts`
+- 如果你只希望针对源自语音的消息进行语音回复，请使用 `/voice on`
+- 如果你希望始终有一个完整的语音助手，请使用 `/voice tts`
 
 ### 良好的消息传递工作流
 
 #### 手机上的 Telegram 助手
 
-在以下情况使用：
+在以下情况下使用：
 - 你不在机器旁
 - 你想发送语音笔记并获得快速的语音回复
 - 你希望 Hermes 像一个便携式研究或运维助手
 
 #### 带有语音输出的 Discord 私信
 
-当你想要私密互动，而不需要服务器频道的提及行为时很有用。
+当你想要私密互动而不涉及服务器频道提及行为时很有用。
 
 ## 用例 3：Discord 语音频道
 
@@ -374,14 +374,14 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 - 用户在语音频道中说话
 - Hermes 检测语音边界
 - 转录内容发布在关联的文本频道中
-- Hermes 以文本和音频回复
+- Hermes 以文本和音频形式回复
 - 文本频道是发出 `/voice join` 命令的那个
 
 ### Discord 语音频道使用的最佳实践
 
 - 保持 `DISCORD_ALLOWED_USERS` 严格限制
 - 首先使用专用的机器人/测试频道
-- 在尝试语音频道模式之前，先在普通文本聊天语音模式中验证 STT 和 TTS 是否工作
+- 在尝试语音频道模式之前，先在普通文本聊天语音模式中验证 STT 和 TTS 是否正常工作
 
 ## 语音质量推荐
 
@@ -409,12 +409,12 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 ### "机器人加入但听不到任何声音"
 
 检查：
-- 你的 Discord 用户 ID 在 `DISCORD_ALLOWED_USERS` 中
-- 你没有静音
-- 特权意图已启用
-- 机器人拥有连接/说话权限
+- 你的 Discord 用户 ID 是否在 `DISCORD_ALLOWED_USERS` 中
+- 你是否未被静音
+- 特权意图是否已启用
+- 机器人是否拥有连接/说话权限
 
-### "它能转录但不说话"
+### "它能转录但不会说话"
 
 检查：
 - TTS 提供商配置
@@ -429,11 +429,11 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 - 不同的 STT 提供商/模型
 - 更短、更清晰的发音
 
-### "它在私信中工作，但在服务器频道中不工作"
+### "它在私信中有效，但在服务器频道中无效"
 
 这通常是提及策略问题。
 
-默认情况下，除非另行配置，否则机器人在 Discord 服务器文本频道中需要 `@mention`。
+默认情况下，除非另有配置，否则机器人在 Discord 服务器文本频道中需要 `@mention`。
 
 ## 建议的第一周设置
 
@@ -441,7 +441,7 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 
 1. 让文本 Hermes 正常工作
 2. 安装 `hermes-agent[voice]`
-3. 使用本地 STT + Edge TTS 的 CLI 语音模式
+3. 使用 CLI 语音模式，配合本地 STT + Edge TTS
 4. 然后在 Telegram 或 Discord 中启用 `/voice on`
 5. 之后，再尝试 Discord 语音频道模式
 
@@ -449,8 +449,8 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 
 ## 接下来阅读什么
 
-- [语音模式功能参考](/docs/user-guide/features/voice-mode)
-- [消息网关](/docs/user-guide/messaging)
-- [Discord 设置](/docs/user-guide/messaging/discord)
-- [Telegram 设置](/docs/user-guide/messaging/telegram)
-- [配置](/docs/user-guide/configuration)
+- [语音模式功能参考](/user-guide/features/voice-mode)
+- [消息网关](/user-guide/messaging)
+- [Discord 设置](/user-guide/messaging/discord)
+- [Telegram 设置](/user-guide/messaging/telegram)
+- [配置](/user-guide/configuration)

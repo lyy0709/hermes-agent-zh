@@ -21,12 +21,12 @@ description: "使用 Imbue 的进化循环进化提示词/正则表达式/SQL/�
 | 许可证 | MIT |
 | 平台 | linux, macos |
 | 标签 | `evolution`, `optimization`, `prompt-engineering`, `research` |
-| 相关技能 | [`arxiv`](/docs/user-guide/skills/bundled/research/research-arxiv), [`jupyter-live-kernel`](/docs/user-guide/skills/bundled/data-science/data-science-jupyter-live-kernel) |
+| 相关技能 | [`arxiv`](/user-guide/skills/bundled/research/research-arxiv), [`jupyter-live-kernel`](/user-guide/skills/bundled/data-science/data-science-jupyter-live-kernel) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
 :::
 
 # 达尔文进化器
@@ -37,15 +37,15 @@ description: "使用 Imbue 的进化循环进化提示词/正则表达式/SQL/�
 
 **许可证：** 上游工具是 **AGPL-3.0**。该技能**仅**通过上游 CLI 或 `subprocess`/`uv run` 调用（仅为聚合）来调用它。**请勿**将上游类导入到 Hermes 本身中。
 
-## 何时使用
+## 使用时机
 
 - 用户说“优化这个提示词”、“为 X 进化一个正则表达式”、“自动改进这段代码/SQL”、“搜索更好的指令”。
 - 你有一个评分器（精确匹配、正则表达式通过率、单元测试、LLM 评判、运行时指标）**并且**有一个起始候选（organism）。如果你没有评分器，请先停下来定义一个 — 这是困难的部分。
-- 成本可以接受：一次典型运行需要 50–500 次 LLM 调用。对于 gpt-4o-mini 来说只需几美分；对于 Claude Sonnet 可能几美元。
+- 成本可以接受：一次典型运行需要 50–500 次 LLM 调用。对于 gpt-4o-mini 来说只需几美分；对于 Claude Sonnet 可能需要几美元。
 
 在以下情况下**不要**使用此技能：
 - 优化目标是可微分的（使用梯度下降 / DSPy）。
-- 你只需要尝试 2–3 个变体 — 手动编写即可。
+- 你只需要尝试 2–3 个变体 — 直接手动编写即可。
 - 适应度信号纯粹是主观的，没有可衡量的标准。
 
 ## 先决条件
@@ -54,7 +54,7 @@ description: "使用 Imbue 的进化循环进化提示词/正则表达式/SQL/�
 - `git`, `uv` (或 `pip`)
 - 以下之一：`OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, 或 `OPENAI_API_KEY`
 
-该技能附带一个小的 `parrot_openrouter.py` 驱动程序，它通过 OpenAI SDK 使用 `OPENROUTER_API_KEY`，因此 OpenRouter 上的任何模型都有效。上游 CLI 本身硬编码了 Anthropic 并需要 `ANTHROPIC_API_KEY`。
+该技能附带一个小的 `parrot_openrouter.py` 驱动程序，它通过 OpenAI SDK 使用 `OPENROUTER_API_KEY`，因此 OpenRouter 上的任何模型都适用。上游 CLI 本身硬编码了 Anthropic 并需要 `ANTHROPIC_API_KEY`。
 
 ## 安装（一次性）
 
@@ -94,7 +94,7 @@ uv run darwinian_evolver parrot \
 
 ## 快速开始 — OpenRouter 驱动程序（无需 Anthropic 密钥）
 
-该技能附带 `scripts/parrot_openrouter.py` — 相同的 parrot 问题，但 LLM 调用通过 OpenRouter 进行，因此任何提供商都有效。
+该技能附带 `scripts/parrot_openrouter.py` — 相同的 parrot 问题，但 LLM 调用通过 OpenRouter 进行，因此任何提供商都适用。
 
 ```bash
 # 从技能安装的位置：
@@ -122,16 +122,16 @@ uv run --with openai python "$SKILL_DIR/scripts/show_snapshot.py" \
 该技能附带 `templates/custom_problem_template.py` — 复制、编辑、运行。
 你必须定义三件事：
 
-1.  **`Organism`** — 一个 Pydantic `BaseModel` 子类，持有正在进化的工件（`prompt_template: str`, `regex_pattern: str`, `sql_query: str`, `code_block: str` 等）。添加一个 `run(*args)` 方法来执行它。
+1.  **`Organism`** — 一个 Pydantic `BaseModel` 子类，保存正在进化的工件（`prompt_template: str`, `regex_pattern: str`, `sql_query: str`, `code_block: str` 等）。添加一个 `run(*args)` 方法来运行它。
 
 2.  **`Evaluator`** — `.evaluate(organism) -> EvaluationResult(score=..., trainable_failure_cases=[...], holdout_failure_cases=[...], is_viable=True)`。
     - **`score`** 在 `[0, 1]` 范围内。越高越好。
     - **`trainable_failure_cases`** — mutator 看到的内容。包含足够的上下文（输入、预期、实际）供 LLM 诊断。
     - **`holdout_failure_cases`** — 对 mutator 隐藏。使用这些来检测过拟合。
-    - **`is_viable=True`** — 除非 organism 完全损坏（抛出异常、返回 None 等）。得分为 0 的可行 organism 没问题 — 它只是在父代选择中被降权。
+    - **`is_viable=True`** — 除非 organism 完全损坏（引发异常、返回 None 等）。得分为 0 的可行 organism 是可以的 — 它只是在父代选择中被降权。
 
 3.  **`Mutator`** — `.mutate(organism, failure_cases, learning_log_entries) -> list[Organism]`。
-    通常：构建一个 LLM 提示词，包含当前 organism + 一个失败案例 + 要求提出修复方案；解析 LLM 的响应；返回一个新的 `Organism`。解析失败时返回 `[]` — 循环会处理它。
+    通常：构建一个 LLM 提示词，包含当前 organism + 一个失败案例 + 请求提出修复方案；解析 LLM 的响应；返回一个新的 `Organism`。解析失败时返回 `[]` — 循环会处理它。
 
 然后编写一个驱动程序脚本，将 `Problem(initial_organism, evaluator, [mutators])` 连接到 `EvolveProblemLoop` 并迭代 `loop.run(num_iterations=N)` — 附带的 `scripts/parrot_openrouter.py` 是参考。
 
@@ -139,29 +139,29 @@ uv run --with openai python "$SKILL_DIR/scripts/show_snapshot.py" \
 
 | 标志 | 默认值 | 何时更改 |
 |---|---|---|
-| `--num_iterations` | 5 | 一旦信任 evaluator，增加到 10–20 |
-| `--num_parents_per_iteration` | 4 | 为了廉价探索，降至 2 |
-| `--mutator_concurrency` | 10 | 为避免速率限制，降至 2–4 |
-| `--evaluator_concurrency` | 10 | 同上；evaluator 也会调用 LLM |
-| `--batch_size` | 1 | 一旦你的 mutator 能处理多个失败，提高到 3–5 |
+| `--num_iterations` | 5 | 一旦信任评分器，可增加到 10–20 |
+| `--num_parents_per_iteration` | 4 | 为了廉价探索，可降至 2 |
+| `--mutator_concurrency` | 10 | 为避免速率限制，可降至 2–4 |
+| `--evaluator_concurrency` | 10 | 同上；评分器也会调用 LLM |
+| `--batch_size` | 1 | 一旦你的 mutator 能处理多个失败，可提高到 3–5 |
 | `--verify_mutations` | 关闭 | 一旦 mutator 浪费严重（根据 Imbue，后期运行可节省 >10 倍成本）时开启 |
 | `--midpoint_score` | `p75` | 除非分数聚集，否则保持不动 |
 | `--sharpness` | 10 | 保持不动 |
 
 ## 陷阱
 
-1.  **`初始 organism 必须是可行的`** — 即使在 0 分种子上，也要在你的 `EvaluationResult` 中设置 `is_viable=True`。循环拒绝不可行的 organism，因为它们意味着循环没有进化起点。
+1.  **`初始 organism 必须是可行的`** — 即使在 0 分种子上，也要在你的 `EvaluationResult` 中设置 `is_viable=True`。循环会拒绝不可行的 organism，因为它们意味着循环没有进化的起点。
 2.  **提供商的内容过滤器会终止运行。** Azure 支持的 OpenRouter 模型会拒绝类似“忽略先前指令”的短语，并返回 HTTP 400。将 LLM 调用包装在 `try/except` 中并返回 `f"<LLM_ERROR: {e}>"` — 进化器只会给该 organism 打 0 分并继续。
-3.  **`loop.run()` 是一个生成器** — 调用它直到你迭代才会运行任何东西。使用 `for snap in loop.run(num_iterations=N):`。
-4.  **快照是嵌套的 pickle。** `iteration_N.pkl` 包含一个带有 `population_snapshot`（更多 pickle 字节）的字典。要反序列化，你必须拥有 `Organism` 类，并且其导入的点路径与序列化时相同。
-5.  **并发默认值很激进。** 10/10 会在大多数提供商处触发速率限制。从 2/2 开始。
+3.  **`loop.run()` 是一个生成器** — 调用它不会运行任何东西，直到你迭代。使用 `for snap in loop.run(num_iterations=N):`。
+4.  **快照是嵌套的 pickle。** `iteration_N.pkl` 包含一个字典，其中有 `population_snapshot`（更多 pickle 字节）。要反序列化，你必须让 `Organism` 类在与其被序列化时相同的点路径下可导入。
+5.  **并发默认值很激进。** 10/10 会触发大多数提供商的速率限制。从 2/2 开始。
 6.  **CLI 硬编码为 Anthropic。** `uv run darwinian_evolver <problem>` 会寻找 `ANTHROPIC_API_KEY` 并使用 Claude Sonnet。要使用任何其他提供商，请编写像 `parrot_openrouter.py` 这样的驱动程序。
 7.  **AGPL。** 切勿在 Hermes 核心中 `from darwinian_evolver import ...`。`~/.hermes/skills/...` 下的自定义驱动程序脚本是用户侧的，没问题。
 8.  **没有 PyPI 包。** `pip install darwinian-evolver` 会拉取错误的东西。始终从 GitHub 仓库安装。
 
 ## 验证
 
-安装 + 运行 parrot 示例后，以下命令退出码为 0 即表示成功：
+安装 + 运行 parrot 示例后，以下命令退出代码为 0 即表示成功：
 
 ```bash
 DE_DIR=~/.hermes/cache/darwinian-evolver/darwinian_evolver

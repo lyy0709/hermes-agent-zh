@@ -21,7 +21,7 @@ description: "调试 Python：pdb REPL + debugpy 远程调试 (DAP)"
 | 许可证 | MIT |
 | 平台 | linux, macos |
 | 标签 | `debugging`, `python`, `pdb`, `debugpy`, `breakpoints`, `dap`, `post-mortem` |
-| 相关技能 | [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`node-inspect-debugger`](/docs/user-guide/skills/bundled/software-development/software-development-node-inspect-debugger), [`debugging-hermes-tui-commands`](/docs/user-guide/skills/bundled/software-development/software-development-debugging-hermes-tui-commands) |
+| 相关技能 | [`systematic-debugging`](/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`node-inspect-debugger`](/user-guide/skills/bundled/software-development/software-development-node-inspect-debugger), [`debugging-hermes-tui-commands`](/user-guide/skills/bundled/software-development/software-development-debugging-hermes-tui-commands) |
 
 ## 参考：完整的 SKILL.md
 
@@ -45,13 +45,13 @@ description: "调试 Python：pdb REPL + debugpy 远程调试 (DAP)"
 
 ## 何时使用
 
-- 测试失败，且堆栈跟踪未揭示值错误的原因
+- 测试失败，且堆栈跟踪无法揭示值错误的原因
 - 需要单步执行函数并观察集合的变更
 - 长时运行进程（hermes 消息网关、tui_gateway）行为异常且无法重启
 - 事后调试：生产类代码中发生异常，需要检查崩溃点的局部变量
 - 子进程 / 子任务（Python `_SlashWorker`、PTY 桥接工作进程）是实际的错误发生点
 
-**不适用于：** 用 `print()` / `logging.debug` 一分钟内就能解决的问题，或者 `pytest -vv --tb=long --showlocals` 已经揭示的问题。
+**不适用于：** `print()` / `logging.debug` 能在一分钟内解决的问题，或 `pytest -vv --tb=long --showlocals` 已能揭示的问题。
 
 ## pdb 快速参考
 
@@ -81,7 +81,7 @@ description: "调试 Python：pdb REPL + debugpy 远程调试 (DAP)"
 | `interact` | 在当前作用域中进入完整的 Python REPL（按 Ctrl+D 退出） |
 | `q` | 退出 |
 
-`interact` 命令功能最强大——你可以导入任何模块、检查复杂对象，甚至调用会改变状态的方法。默认情况下局部变量是只读的；在 `(Pdb)` 提示符下使用 `!x = 42` 来修改变量。
+`interact` 命令功能最强大——可以导入任何模块、检查复杂对象，甚至调用会改变状态的方法。默认情况下局部变量是只读的；在 `(Pdb)` 提示符下使用 `!x = 42` 来修改变量。
 
 ## 方法 1：本地断点
 
@@ -115,7 +115,7 @@ python -m pdb path/to/script.py arg1 arg2
 hermes 测试运行器和 pytest 都支持此功能：
 
 ```bash
-# 在测试失败（或任何引发异常时）进入 pdb：
+# 在测试失败（或任何引发的异常）时进入 pdb：
 scripts/run_tests.sh tests/path/to/test_file.py::test_name --pdb
 
 # 在测试开始时进入 pdb：
@@ -125,11 +125,11 @@ scripts/run_tests.sh tests/path/to/test_file.py::test_name --trace
 scripts/run_tests.sh tests/path/to/test_file.py --showlocals --tb=long
 ```
 
-注意：`scripts/run_tests.sh` 默认使用 xdist (`-n 4`)，而 pdb 在 xdist 下**不**工作。添加 `-p no:xdist` 或使用 `-n 0` 运行单个测试：
+注意：`scripts/run_tests.sh` 默认使用 xdist (`-n 4`)，而 pdb 在 xdist 下**无法**工作。添加 `-p no:xdist` 或使用 `-n 0` 运行单个测试：
 
 ```bash
 scripts/run_tests.sh tests/foo_test.py::test_bar --pdb -p no:xdist
-# 或者
+# 或
 source .venv/bin/activate
 python -m pytest tests/foo_test.py::test_bar --pdb
 ```
@@ -173,7 +173,7 @@ source /home/bb/hermes-agent/.venv/bin/activate
 pip install debugpy
 ```
 
-### 模式 A：源代码编辑——进程在启动时等待调试器
+### 模式 A：编辑源代码——进程在启动时等待调试器
 
 在入口点顶部附近（或要调试的函数内部）添加：
 ```python
@@ -181,7 +181,7 @@ import debugpy
 debugpy.listen(("127.0.0.1", 5678))
 print("debugpy listening on 5678, waiting for client...", flush=True)
 debugpy.wait_for_client()
-debugpy.breakpoint()       # 可选：一旦连接立即暂停
+debugpy.breakpoint()       # 可选：连接后立即暂停
 ```
 
 启动进程；它会在 `wait_for_client()` 处阻塞。
@@ -216,7 +216,7 @@ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 
 最简单的终端端 DAP 客户端是 VS Code CLI 或一个小脚本。在 Hermes 内部，你有两个实用的选择：
 
-**选项 1：`debugpy` 自带的 CLI REPL** — 这不是官方功能，但有一个小型的 DAP 客户端脚本：
+**选项 1：`debugpy` 自带的 CLI REPL** — 这不是官方功能，而是一个微小的 DAP 客户端脚本：
 
 ```python
 # /tmp/dap_client.py
@@ -250,7 +250,7 @@ send({"type": "request", "command": "setBreakpoints",
                     "breakpoints": [{"line": int(sys.argv[2])}]}})
 print(recv())
 send({"type": "request", "command": "configurationDone"})
-# ... 循环读取事件并发送 continue/stepIn 等命令。
+# ... 循环读取事件并发送 continue/stepIn/等命令。
 ```
 
 这对于一次性自动化来说没问题，但作为交互式用户体验会很痛苦。
@@ -288,7 +288,7 @@ nc 127.0.0.1 4444
 # 你会得到一个 (Pdb) 提示符，就像在本地调试一样。
 ```
 
-当 `debugpy` 的 DAP 协议显得过于复杂时，`remote-pdb` 是最简洁、对 Agent 友好的选择。只有在你确实需要 IDE 集成时才使用 `debugpy`。
+当 `debugpy` 的 DAP 协议过于复杂时，`remote-pdb` 是最简洁、对 Agent 友好的选择。只有在你确实需要 IDE 集成时才使用 `debugpy`。
 
 ## 调试 Hermes 特定进程
 
@@ -318,18 +318,18 @@ set_trace(host="127.0.0.1", port=4444)   # 放在你想要捕获的 RPC 处理�
 从 TUI 触发匹配的斜杠命令，然后在另一个终端中执行 `nc 127.0.0.1 4444`。
 
 ### `_SlashWorker` 子进程
-模式相同 — 在 worker 的 `exec` 路径内部使用 `remote-pdb` 和 `set_trace()`。该 worker 在多个斜杠命令之间是持久化的，因此第一次触发会阻塞直到你连接；后续的斜杠命令会正常通过，除非你重新设置断点。
+模式相同 — 在 worker 的 `exec` 路径内部使用 `remote-pdb` 的 `set_trace()`。该 worker 在多个斜杠命令之间是持久化的，因此第一次触发会阻塞直到你连接；后续的斜杠命令会正常通过，除非你重新设置断点。
 
 ### 消息网关 (`gateway/run.py`)
 长生命周期进程。在处理器处使用 `remote-pdb`，或者如果你无论如何都要重启消息网关，可以使用带 `--wait-for-client` 的 `debugpy`。
 
 ## 常见陷阱
 
-1.  **pdb 在 pytest-xdist 下静默地不执行任何操作。** 你不会看到提示符，测试只是挂起。始终使用 `-p no:xdist` 或 `-n 0`。
+1.  **pdb 在 pytest-xdist 下静默失效。** 你不会看到提示符，测试只会挂起。始终使用 `-p no:xdist` 或 `-n 0`。
 
 2.  **CI / 非 TTY 环境中的 `breakpoint()` 会挂起进程。** 在本地是安全的；切勿提交它。添加一个 pre-commit grep 作为安全网。
 
-3.  **`PYTHONBREAKPOINT=0`** 会禁用所有 `breakpoint()` 调用。如果你的断点没有命中，请检查环境变量：
+3.  **`PYTHONBREAKPOINT=0`** 会禁用所有 `breakpoint()` 调用。如果你的断点没有触发，请检查环境变量：
    ```bash
    echo $PYTHONBREAKPOINT
    ```
@@ -349,8 +349,8 @@ set_trace(host="127.0.0.1", port=4444)   # 放在你想要捕获的 RPC 处理�
 
 - [ ] 在 `pip install debugpy` 之后，确认：`python -c "import debugpy; print(debugpy.__version__)"`
 - [ ] 对于远程调试，确认端口确实在监听：`ss -tlnp | grep 5678`
-- [ ] 第一个断点确实命中了（如果没有，很可能你设置了 `PYTHONBREAKPOINT=0`，或者你在 xdist 模式下，或者执行在附加前已完成）
-- [ ] `where` / `w` 显示预期的调用栈
+- [ ] 第一个断点确实命中了（如果没有，很可能你设置了 `PYTHONBREAKPOINT=0`，或者你在 xdist 下运行，或者执行在附加前就结束了）
+- [ ] `where` / `w` 显示了预期的调用栈
 - [ ] 调试后清理：提交的代码中没有残留的 `breakpoint()` / `set_trace()`
   ```bash
   rg -n 'breakpoint\(\)|set_trace\(|debugpy\.listen' --type py
@@ -387,5 +387,5 @@ import remote_pdb; remote_pdb.set_trace(host="127.0.0.1", port=4444)
 **"对 Ink 子进程 / 子进程中崩溃的事后分析。"**
 ```bash
 PYTHONFAULTHANDLER=1 python -m pdb -c continue path/to/entrypoint.py
-# 崩溃时，pdb 会停留在异常的帧上，并带有完整的局部变量
+# 崩溃时，pdb 会定位到异常的帧，并带有完整的局部变量
 ```

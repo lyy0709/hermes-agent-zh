@@ -1,18 +1,18 @@
 ---
 sidebar_position: 1
 title: "消息网关"
-description: "通过 Telegram、Discord、Slack、WhatsApp、Signal、SMS、Email、Home Assistant、Mattermost、Matrix、钉钉、元宝、Microsoft Teams、LINE、Webhooks 或任何 OpenAI 兼容的前端经由 API 服务器与 Hermes 聊天 — 架构与设置概述"
+description: "通过 Telegram、Discord、Slack、WhatsApp、Signal、SMS、Email、Home Assistant、Mattermost、Matrix、钉钉、元宝、Microsoft Teams、LINE、Webhooks 或任何 OpenAI 兼容的前端（通过 API 服务器）与 Hermes 聊天 —— 架构与设置概述"
 ---
 
 # 消息网关
 
 通过 Telegram、Discord、Slack、WhatsApp、Signal、SMS、Email、Home Assistant、Mattermost、Matrix、钉钉、飞书/Lark、企业微信、微信、BlueBubbles (iMessage)、QQ、元宝、Microsoft Teams、LINE、ntfy 或您的浏览器与 Hermes 聊天。网关是一个单一的后台进程，连接到所有已配置的平台，处理会话，运行定时任务，并传递语音消息。
 
-要获得完整的语音功能集 — 包括 CLI 麦克风模式、消息中的语音回复以及 Discord 语音频道对话 — 请参阅 [语音模式](/docs/user-guide/features/voice-mode) 和 [与 Hermes 使用语音模式](/docs/guides/use-voice-mode-with-hermes)。
+要获得完整的语音功能集 —— 包括 CLI 麦克风模式、消息中的语音回复以及 Discord 语音频道对话 —— 请参阅[语音模式](/user-guide/features/voice-mode)和[使用 Hermes 的语音模式](/guides/use-voice-mode-with-hermes)。
 
-## 平台对比
+## 平台功能对比
 
-| 平台 | 语音 | 图片 | 文件 | 线程 | 反应 | 输入中 | 流式传输 |
+| 平台 | 语音 | 图片 | 文件 | 线程 | 反应 | 输入指示 | 流式传输 |
 |----------|:-----:|:------:|:-----:|:-------:|:---------:|:------:|:---------:|
 | Telegram | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | Discord | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -37,13 +37,13 @@ description: "通过 Telegram、Discord、Slack、WhatsApp、Signal、SMS、Emai
 | LINE | — | ✅ | ✅ | — | — | ✅ | — |
 | ntfy | — | — | — | — | — | — | — |
 
-**语音** = TTS 音频回复和/或语音消息转录。**图片** = 发送/接收图片。**文件** = 发送/接收文件附件。**线程** = 线程化对话。**反应** = 消息上的表情符号反应。**输入中** = 处理时显示输入指示器。**流式传输** = 通过编辑进行渐进式消息更新。
+**语音** = TTS 语音回复和/或语音消息转录。**图片** = 发送/接收图片。**文件** = 发送/接收文件附件。**线程** = 线程化对话。**反应** = 消息上的表情符号反应。**输入指示** = 处理时显示正在输入指示。**流式传输** = 通过编辑进行渐进式消息更新。
 
 ## 架构
 
 ```mermaid
 flowchart TB
-    subgraph Gateway["Hermes 消息网关"]
+    subgraph Gateway["Hermes Gateway"]
         subgraph Adapters["平台适配器"]
             tg[Telegram]
             dc[Discord]
@@ -56,21 +56,21 @@ flowchart TB
             ha[Home Assistant]
             mm[Mattermost]
             mx[Matrix]
-            dt[钉钉]
-    fs[飞书/Lark]
-    wc[企业微信]
-    wcb[企业微信回调]
-    wx[微信]
+            dt[DingTalk]
+    fs[Feishu/Lark]
+    wc[WeCom]
+    wcb[WeCom Callback]
+    wx[Weixin]
     bb[BlueBubbles]
     qq[QQ]
-    yb[元宝]
+    yb[Yuanbao]
     ms[Microsoft Teams]
-    api["API 服务器<br/>(OpenAI 兼容)"]
+    api["API Server<br/>(OpenAI-compatible)"]
     wh[Webhooks]
         end
 
         store["会话存储<br/>每个聊天"]
-        agent["AI Agent<br/>run_agent.py"]
+        agent["AIAgent<br/>run_agent.py"]
         cron["定时任务调度器<br/>每 60 秒触发一次"]
     end
 
@@ -100,7 +100,7 @@ flowchart TB
     cron --> store
 ```
 
-每个平台适配器接收消息，通过每个聊天的会话存储进行路由，并将其分派给 AI Agent 进行处理。网关还运行定时任务调度器，每 60 秒触发一次以执行任何到期的任务。
+每个平台适配器接收消息，通过每个聊天的会话存储路由它们，并将其分派给 AIAgent 进行处理。网关还运行定时任务调度器，每 60 秒触发一次以执行任何到期的任务。
 
 ## 快速设置
 
@@ -110,7 +110,7 @@ flowchart TB
 hermes gateway setup        # 为所有消息平台进行交互式设置
 ```
 
-这将引导您通过箭头键选择配置每个平台，显示哪些平台已配置，并在完成后提供启动/重启网关的选项。
+这将引导您使用方向键选择来配置每个平台，显示哪些平台已配置，并在完成后提供启动/重启网关的选项。
 
 ## 网关命令
 
@@ -131,7 +131,7 @@ hermes gateway status --system         # 仅限 Linux：显式检查系统服务
 |---------|-------------|
 | `/new` 或 `/reset` | 开始新的对话 |
 | `/model [provider:model]` | 显示或更改模型（支持 `provider:model` 语法） |
-| `/personality [name]` | 设置人格 |
+| `/personality [name]` | 设置人格（灵魂） |
 | `/retry` | 重试上一条消息 |
 | `/undo` | 移除最后一次交互 |
 | `/status` | 显示会话信息 |
@@ -155,9 +155,9 @@ hermes gateway status --system         # 仅限 Linux：显式检查系统服务
 | `/<skill-name>` | 调用任何已安装的技能 |
 ## 会话管理
 
-### 会话持久性
+### 会话持久化
 
-会话在消息之间持续存在，直到被重置。Agent 会记住你的对话上下文。
+会话在消息之间持续存在，直到被重置。Agent 会记住您的对话上下文。
 
 ### 重置策略
 
@@ -182,7 +182,7 @@ hermes gateway status --system         # 仅限 Linux：显式检查系统服务
 
 ## 安全性
 
-**默认情况下，消息网关会拒绝所有不在允许列表中或未通过私信配对的用户。** 对于具有终端访问权限的机器人来说，这是安全的默认设置。
+**默认情况下，消息网关会拒绝所有不在允许列表或未通过私信配对的用户。** 对于具有终端访问权限的机器人来说，这是安全的默认设置。
 
 ```bash
 # 限制为特定用户（推荐）：
@@ -206,13 +206,13 @@ GATEWAY_ALLOWED_USERS=123456789,987654321
 GATEWAY_ALLOW_ALL_USERS=true
 ```
 
-### 私信配对（替代允许列表）
+### 私信配对（允许列表的替代方案）
 
 无需手动配置用户 ID，未知用户向机器人发送私信时会收到一个一次性配对码：
 
 ```bash
 # 用户看到："配对码：XKGH5N7P"
-# 你可以通过以下命令批准他们：
+# 您可以通过以下命令批准他们：
 hermes pairing approve telegram XKGH5N7P
 
 # 其他配对命令：
@@ -224,18 +224,18 @@ hermes pairing revoke telegram 123456789  # 移除访问权限
 
 ### 管理员与普通用户
 
-允许列表回答的是“这个人能否联系到机器人？”而**管理员/用户划分**回答的是“既然他们能联系到，他们被允许做什么？”
+允许列表回答的是"这个人能否接触到机器人？" **管理员/用户划分**回答的是"既然他们进来了，他们被允许做什么？"
 
 每个被允许的用户在每个作用域（私信 vs 群组/频道）下都属于以下两个层级之一：
 
 - **管理员** — 完全访问权限。可以运行每个已注册的斜杠命令（内置 + 插件）并使用每个受限制的功能。
-- **普通用户** — 受限访问权限。可以正常与 Agent 聊天，但只能运行你明确启用的斜杠命令。始终允许的最低权限是 `/help` 和 `/whoami`。
+- **普通用户** — 受限访问权限。可以正常与 Agent 聊天，但只能运行您明确启用的斜杠命令。始终允许的最低权限是 `/help` 和 `/whoami`。
 
-层级按平台和作用域进行配置。私信管理员状态并不意味着群组/频道管理员状态 — 每个作用域都有自己的管理员列表。
+层级按平台和作用域配置。私信管理员状态并不意味着群组/频道管理员状态 — 每个作用域都有自己的管理员列表。
 
-**当前层级限制的内容：** 斜杠命令。这种划分贯穿于实时命令注册表，因此它涵盖了内置命令和插件注册的命令，无需为每个功能单独配置。普通聊天不受影响 — 非管理员仍然可以与 Agent 交谈。
+**当前层级限制的内容：** 斜杠命令。该划分贯穿实时命令注册表，因此无需为每个功能单独配置，即可覆盖内置命令和插件注册的命令。普通聊天不受影响 — 非管理员仍然可以与 Agent 对话。
 
-**未来可能限制的内容：** 更多的功能层面（工具访问、模型切换、高成本操作）将挂载在相同的管理员/用户区分之下，随着我们添加它们。现在配置这种划分意味着未来的限制将清晰落地，而无需你重新定义谁是管理员。
+**未来可能限制的内容：** 更多功能层面（工具访问、模型切换、昂贵操作）将挂载在相同的管理员/用户区分之下，随着我们添加它们。现在配置好划分意味着未来的限制可以清晰地落地，而无需您重新建模谁是管理员。
 
 #### 配置
 
@@ -252,11 +252,11 @@ gateway:
         group_user_allowed_commands: [status]
 ```
 
-**向后兼容性：** 如果某个作用域未设置 `allow_admin_from`，则该作用域的层级划分将被禁用，每个被允许的用户都拥有完全访问权限。现有安装无需更改即可继续工作 — 当你需要这种区分时选择启用。
+**向后兼容性：** 如果某个作用域未设置 `allow_admin_from`，则该作用域的层级划分将被禁用，每个被允许的用户都拥有完全访问权限。现有安装无需更改即可继续工作 — 当您需要区分时再选择启用。
 
-#### 检查你的访问权限
+#### 检查您的访问权限
 
-在任何平台使用 `/whoami` 来查看当前作用域、你的层级（管理员 / 用户 / 无限制）以及你可以运行的斜杠命令。请参阅 [Telegram](/docs/user-guide/messaging/telegram#slash-command-access-control) 和 [Discord](/docs/user-guide/messaging/discord#slash-command-access-control) 页面以获取特定于平台的示例。
+在任何平台使用 `/whoami` 来查看当前作用域、您的层级（管理员 / 用户 / 无限制）以及您可以运行哪些斜杠命令。请参阅 [Telegram](/user-guide/messaging/telegram#slash-command-access-control) 和 [Discord](/user-guide/messaging/discord#slash-command-access-control) 页面以获取特定于平台的示例。
 
 ## 中断 Agent
 
@@ -272,25 +272,25 @@ gateway:
 默认情况下，向忙碌的 Agent 发送消息会中断它。另外还有两种模式可用：
 
 - `queue` — 后续消息会等待，并在当前任务完成后作为下一个回合运行。
-- `steer` — 后续消息通过 `/steer` 注入到当前运行中，在下一次工具调用后到达 Agent。没有中断，没有新回合。如果 Agent 尚未开始，则回退到 `queue` 行为。
+- `steer` — 后续消息通过 `/steer` 注入到当前运行中，在下一次工具调用后到达 Agent。不中断，不开始新回合。如果 Agent 尚未开始运行，则回退到 `queue` 行为。
 
 ```yaml
 display:
   busy_input_mode: steer   # 或 queue，或 interrupt（默认）
-  busy_ack_enabled: true   # 设置为 false 以完全抑制 ⚡/⏳/⏩ 聊天回复
+  busy_ack_enabled: true   # 设置为 false 以完全抑制聊天回复中的 ⚡/⏳/⏩
 ```
 
-在任何平台上第一次向忙碌的 Agent 发送消息时，Hermes 会在忙碌确认消息后追加一行提示，解释此设置（`"💡 首次提示 — …"`）。该提示在每个安装中只出现一次 — `onboarding.seen.busy_input_prompt` 下的一个标志会锁定它。删除该键可以再次看到提示。
+在任何平台上第一次向忙碌的 Agent 发送消息时，Hermes 会在忙碌确认消息后附加一行提示，解释此设置（`"💡 首次提示 — …"`）。该提示在每个安装中只出现一次 — `onboarding.seen.busy_input_prompt` 下的一个标志会将其锁定。删除该键可以再次看到提示。
 
-如果你觉得忙碌确认消息很烦人 — 尤其是在语音输入或快速连续发送消息时 — 请设置 `display.busy_ack_enabled: false`。你的输入仍然会正常排队/引导/中断，只是聊天回复被静音了。
+如果您觉得忙碌确认消息很烦人 — 尤其是在语音输入或快速连续发送消息时 — 请设置 `display.busy_ack_enabled: false`。您的输入仍然会正常排队/引导/中断，只是聊天回复被静音了。
 
 ## 工具进度通知
-在 `~/.hermes/config.yaml` 中控制工具活动显示的详细程度：
 
+在 `~/.hermes/config.yaml` 中控制工具活动的显示程度：
 ```yaml
 display:
   tool_progress: all    # off | new | all | verbose
-  tool_progress_command: false  # 设置为 true 以在消息传递中启用 /verbose 命令
+  tool_progress_command: false  # 设置为 true 以在消息传递中启用 /verbose
 ```
 
 启用后，机器人会在工作时发送状态消息：
@@ -314,35 +314,35 @@ Hermes 会立即确认：
 
 ```
 🔄 后台任务已启动："检查集群中的所有服务器..."
-   任务 ID: bg_143022_a1b2c3
+   任务 ID：bg_143022_a1b2c3
 ```
 
 ### 工作原理
 
 每个 `/background` 提示词都会生成一个**独立的 Agent 实例**，该实例异步运行：
 
-- **隔离的会话** — 后台 Agent 拥有自己的会话和对话历史。它不了解您当前聊天的上下文，只接收您提供的提示词。
-- **相同的配置** — 继承您当前的网关设置，包括模型、提供商、工具集、推理设置和提供商路由。
-- **非阻塞** — 您的主聊天会话保持完全交互性。在后台任务运行时，您可以发送消息、运行其他命令或启动更多后台任务。
-- **结果交付** — 任务完成后，结果会发送回**您发出命令的同一聊天或频道**，并带有“✅ 后台任务完成”前缀。如果失败，您会看到“❌ 后台任务失败”以及错误信息。
+- **隔离的会话** — 后台 Agent 拥有自己的会话和对话历史。它不了解你当前的聊天上下文，只接收你提供的提示词。
+- **相同的配置** — 继承当前消息网关设置中的模型、提供商、工具集、推理设置和提供商路由。
+- **非阻塞** — 你的主聊天会话保持完全交互性。在后台任务运行时，你可以发送消息、运行其他命令或启动更多后台任务。
+- **结果传递** — 任务完成后，结果会发送回**你发出命令的同一聊天或频道**，并带有“✅ 后台任务完成”前缀。如果失败，你会看到“❌ 后台任务失败”以及错误信息。
 
 ### 后台进程通知
 
-当运行后台会话的 Agent 使用 `terminal(background=true)` 启动长时间运行的进程（服务器、构建等）时，网关可以向您的聊天推送状态更新。通过 `~/.hermes/config.yaml` 中的 `display.background_process_notifications` 来控制此行为：
+当运行后台会话的 Agent 使用 `terminal(background=true)` 启动长时间运行的进程（服务器、构建等）时，消息网关可以将状态更新推送到你的聊天中。通过 `~/.hermes/config.yaml` 中的 `display.background_process_notifications` 来控制此行为：
 
 ```yaml
 display:
   background_process_notifications: all    # all | result | error | off
 ```
 
-| 模式 | 您将收到的内容 |
+| 模式 | 接收内容 |
 |------|-----------------|
-| `all` | 运行中的输出更新**以及**最终的完成消息（默认） |
-| `result` | 仅最终的完成消息（无论退出代码如何） |
+| `all` | 运行中输出更新**以及**最终完成消息（默认） |
+| `result` | 仅最终完成消息（无论退出代码如何） |
 | `error` | 仅当退出代码非零时的最终消息 |
 | `off` | 完全不接收进程监视器消息 |
 
-您也可以通过环境变量设置：
+你也可以通过环境变量设置：
 
 ```bash
 HERMES_BACKGROUND_NOTIFICATIONS=result
@@ -351,12 +351,12 @@ HERMES_BACKGROUND_NOTIFICATIONS=result
 ### 使用场景
 
 - **服务器监控** — "/background 检查所有服务的健康状况，如果有任何服务宕机则提醒我"
-- **长时间构建** — "/background 构建并部署预发布环境"，同时您可以继续聊天
+- **长时间构建** — "/background 构建并部署预发布环境"，同时你可以继续聊天
 - **研究任务** — "/background 研究竞争对手的定价并以表格形式总结"
 - **文件操作** — "/background 按日期将 ~/Downloads 中的照片整理到文件夹中"
 
 :::tip
-消息传递平台上的后台任务是“发射后不管”的 — 您无需等待或检查它们。任务完成后，结果会自动到达同一聊天中。
+消息平台上的后台任务是“发射后不管”的 — 你无需等待或检查它们。任务完成后，结果会自动到达同一聊天中。
 :::
 
 ## 服务管理
@@ -370,22 +370,22 @@ hermes gateway stop                  # 停止服务
 hermes gateway status                # 检查状态
 journalctl --user -u hermes-gateway -f  # 查看日志
 
-# 启用 linger（在注销后保持运行）
+# 启用 lingering（注销后保持运行）
 sudo loginctl enable-linger $USER
 
-# 或者安装一个启动时运行的系统服务，但仍以您的用户身份运行
+# 或者安装一个启动时运行的系统服务，但仍以你的用户身份运行
 sudo hermes gateway install --system
 sudo hermes gateway start --system
 sudo hermes gateway status --system
 journalctl -u hermes-gateway -f
 ```
 
-在笔记本电脑和开发机上使用用户服务。在 VPS 或无头主机上使用系统服务，以确保在启动时恢复运行，而不依赖 systemd linger。
+在笔记本电脑和开发机上使用用户服务。在 VPS 或无头主机上使用系统服务，这些主机应在启动时恢复运行，而不依赖于 systemd linger。
 
-除非确实需要，否则避免同时安装用户和系统网关单元。如果 Hermes 检测到两者，它会发出警告，因为启动/停止/状态行为会变得不明确。
+除非确实需要，否则避免同时安装用户和系统消息网关单元。如果 Hermes 检测到两者，它会发出警告，因为启动/停止/状态行为会变得不明确。
 
 :::info 多个安装
-如果您在同一台机器上运行多个 Hermes 安装（使用不同的 `HERMES_HOME` 目录），每个安装都会有自己的 systemd 服务名称。默认的 `~/.hermes` 使用 `hermes-gateway`；其他安装使用 `hermes-gateway-<hash>`。`hermes gateway` 命令会自动针对您当前 `HERMES_HOME` 的正确服务。
+如果你在同一台机器上运行多个 Hermes 安装（使用不同的 `HERMES_HOME` 目录），每个安装都有自己的 systemd 服务名称。默认的 `~/.hermes` 使用 `hermes-gateway`；其他安装使用 `hermes-gateway-<hash>`。`hermes gateway` 命令会自动针对你当前 `HERMES_HOME` 的正确服务。
 :::
 
 ### macOS (launchd)
@@ -400,12 +400,12 @@ tail -f ~/.hermes/logs/gateway.log   # 查看日志
 
 生成的 plist 文件位于 `~/Library/LaunchAgents/ai.hermes.gateway.plist`。它包含三个环境变量：
 
-- **PATH** — 安装时您的完整 shell PATH，并预先添加了 venv 的 `bin/` 和 `node_modules/.bin`。这确保用户安装的工具（Node.js、ffmpeg 等）对网关子进程（如 WhatsApp 桥接器）可用。
+- **PATH** — 安装时你的完整 shell PATH，并预先添加了 venv `bin/` 和 `node_modules/.bin`。这确保用户安装的工具（Node.js、ffmpeg 等）对消息网关子进程（如 WhatsApp 桥接器）可用。
 - **VIRTUAL_ENV** — 指向 Python 虚拟环境，以便工具可以正确解析包。
-- **HERMES_HOME** — 将网关范围限定到您的 Hermes 安装。
+- **HERMES_HOME** — 将消息网关范围限定到你的 Hermes 安装。
 
-:::tip 安装后的 PATH 变更
-launchd plist 是静态的 — 如果您在设置网关后安装了新工具（例如，通过 nvm 安装新的 Node.js 版本，或通过 Homebrew 安装 ffmpeg），请再次运行 `hermes gateway install` 以捕获更新后的 PATH。网关将检测到过时的 plist 并自动重新加载。
+:::tip 安装后的 PATH 更改
+launchd plist 是静态的 — 如果你在设置消息网关后安装了新工具（例如通过 nvm 安装新的 Node.js 版本，或通过 Homebrew 安装 ffmpeg），请再次运行 `hermes gateway install` 以捕获更新后的 PATH。消息网关将检测到过时的 plist 并自动重新加载。
 :::
 
 :::info 多个安装
@@ -455,13 +455,13 @@ launchd plist 是静态的 — 如果您在设置网关后安装了新工具（�
 /platform resume <name>         # 重新启用已暂停的适配器
 ```
 
-`/platform list` 会显示每个适配器是 `running`（运行中）、`paused`（手动暂停）还是 `paused-by-breaker`（断路器暂停，见下文）。暂停操作会保持适配器已加载且其后台循环存活——传入的消息会被丢弃，但连接本身保持打开状态，因此恢复是即时的。
+`/platform list` 会显示每个适配器是处于 `running`（运行中）、`paused`（手动暂停）还是 `paused-by-breaker`（断路器暂停，见下文）状态。暂停操作会保持适配器已加载且其后台循环存活——传入的消息会被丢弃，但连接本身保持打开，因此恢复是即时的。
 
 另请参阅更广泛的状态摘要命令 [`/platforms`](../../reference/slash-commands.md#info)。
 
 ### 自动断路器
 
-每个适配器都包装在一个断路器中。重复的可重试故障（网络波动、速率限制响应、上游 5xx 响应、WebSocket 断开连接）会导致断路器跳闸——适配器会自动暂停，当配置了其他活动平台时，会向该平台的主频道发送操作员通知，并输出一条结构化日志行。
+每个适配器都包装在一个断路器中。可重试的重复故障（网络波动、速率限制响应、上游 5xx 响应、WebSocket 断开连接）会导致断路器跳闸——适配器会自动暂停，当配置了其他活动平台时，会向该平台的主频道发送操作员通知，并输出一条结构化日志行。
 
 断路器**不会**自动恢复——它会保持打开状态，直到您手动运行 `/platform resume <name>`。这是有意为之的：如果某个平台持续中断，您不会希望消息网关反复尝试重新连接。
 
@@ -469,11 +469,11 @@ launchd plist 是静态的 — 如果您在设置网关后安装了新工具（�
 
 当适配器暂停时，请检查：
 
-1.  **消息网关日志** (`~/.hermes/logs/gateway.log` 或 systemd / launchd 单元日志)。搜索平台名称以及 `circuit breaker`、`paused` 或 `disabled`。跳闸事件包含故障计数和最后一条错误信息。
+1.  **消息网关日志**（`~/.hermes/logs/gateway.log` 或 systemd / launchd 单元日志）。搜索平台名称以及 `circuit breaker`、`paused` 或 `disabled`。跳闸事件包含故障计数和最后一个错误。
 2.  **`/platform list`** 输出——显示当前状态和最后原因。
 3.  **提供商的状态页面**（Telegram Bot API 状态、Discord 状态等）。断路器跳闸是因为平台不健康；在其恢复之前不要尝试恢复。
 
-一旦上游服务恢复健康，运行 `/platform resume <name>` 将清除断路器并重新激活适配器。
+一旦上游服务恢复健康，运行 `/platform resume <name>` 即可清除断路器并重新激活适配器。
 
 ### 重启通知
 
@@ -494,7 +494,7 @@ gateway:
 
 ### 跨消息网关重启的会话恢复
 
-当消息网关在工具调用或生成正在进行时关闭，受影响的会话会被标记为 `restart_interrupted`。在下一次启动时，消息网关会为每个此类会话安排自动恢复——用户会在聊天中收到一个简短的提示（"重启后发送任何消息，我将尝试从您离开的地方恢复。"），当他们回复时，会话会从最后提交的轮次继续。
+当消息网关关闭时，如果有正在进行的工具调用或生成，受影响的会话会被标记为 `restart_interrupted`。在下一次启动时，消息网关会为每个此类会话安排自动恢复——用户会在聊天中收到一个简短的提示（"重启后发送任何消息，我将尝试从您离开的地方继续。"），当他们回复时，会话会从最后提交的回合处继续。
 
 此行为默认启用，并在消息网关启动时记录：
 
@@ -502,7 +502,7 @@ gateway:
 Scheduled auto-resume for N restart-interrupted session(s)
 ```
 
-无需配置。如果您不希望出现提示，请在平台上设置 `gateway_restart_notification: false`。
+无需配置。如果您不想要提示，请在平台上设置 `gateway_restart_notification: false`。
 
 ### 进度气泡清理（可选）
 

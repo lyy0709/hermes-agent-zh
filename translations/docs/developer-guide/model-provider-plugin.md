@@ -6,21 +6,21 @@ description: "如何为 Hermes Agent 构建模型提供商（推理后端）插�
 
 # 构建模型提供商插件
 
-模型提供商插件声明一个推理后端 —— 一个 OpenAI 兼容的端点、一个 Anthropic Messages 服务器、一个 Codex 风格的 Responses API，或者一个原生的 Bedrock 接口 —— Hermes 可以通过它路由 `AIAgent` 调用。每个内置的提供商（OpenRouter、Anthropic、GMI、DeepSeek、Nvidia……）都作为这些插件之一提供。第三方可以通过在 `$HERMES_HOME/plugins/model-providers/` 下放置一个目录来添加自己的插件，无需对仓库进行任何更改。
+模型提供商插件声明一个推理后端——一个 OpenAI 兼容的端点、一个 Anthropic Messages 服务器、一个 Codex 风格的 Responses API，或者一个 Bedrock 原生接口——Hermes 可以通过它路由 `AIAgent` 调用。每个内置提供商（OpenRouter、Anthropic、GMI、DeepSeek、Nvidia……）都作为这些插件之一提供。第三方可以通过在 `$HERMES_HOME/plugins/model-providers/` 下放置一个目录来添加自己的插件，无需对仓库进行任何更改。
 
 :::tip
-模型提供商插件是第三种**提供商插件**。其他两种是[记忆提供商插件](/docs/developer-guide/memory-provider-plugin)（跨会话知识）和[上下文引擎插件](/docs/developer-guide/context-engine-plugin)（上下文压缩策略）。这三种都遵循相同的“放置目录、声明配置文件、无需仓库编辑”的模式。
+模型提供商插件是第三种**提供商插件**。其他两种是[记忆提供商插件](/developer-guide/memory-provider-plugin)（跨会话知识）和[上下文引擎插件](/developer-guide/context-engine-plugin)（上下文压缩策略）。所有这三种都遵循相同的“放置目录、声明配置文件、无需仓库编辑”的模式。
 :::
 
 ## 发现机制如何工作
 
 `providers/__init__.py._discover_providers()` 在首次有任何代码调用 `get_provider_profile()` 或 `list_providers()` 时惰性运行。发现顺序：
 
-1.  **捆绑插件** — `<repo>/plugins/model-providers/<name>/` — 随 Hermes 一起发布
+1.  **捆绑插件** — `<repo>/plugins/model-providers/<name>/` — 随 Hermes 一起提供
 2.  **用户插件** — `$HERMES_HOME/plugins/model-providers/<name>/` — 放置在任何目录；后续会话无需重启
 3.  **遗留单文件** — `<repo>/providers/<name>.py` — 用于树外可编辑安装的向后兼容
 
-**同名用户插件会覆盖捆绑插件**，因为 `register_provider()` 遵循后写优先原则。放置一个 `$HERMES_HOME/plugins/model-providers/gmi/` 目录即可在不接触仓库的情况下替换内置的 GMI 配置文件。
+**同名用户插件会覆盖捆绑插件**，因为 `register_provider()` 遵循最后写入者胜出的原则。放置一个 `$HERMES_HOME/plugins/model-providers/gmi/` 目录即可替换内置的 GMI 配置文件，而无需触及仓库。
 
 ## 目录结构
 
@@ -31,7 +31,7 @@ plugins/model-providers/my-provider/
 └── README.md         # 设置说明（可选）
 ```
 
-唯一必需的文件是 `__init__.py`。`plugin.yaml` 被 `hermes plugins` 用于内省，并被通用的 PluginManager 用于将插件路由到正确的加载器；如果没有它，通用加载器会回退到源文本启发式方法。
+唯一必需的文件是 `__init__.py`。`plugin.yaml` 被 `hermes plugins` 用于内省，并被通用 PluginManager 用于将插件路由到正确的加载器；如果没有它，通用加载器会回退到源文本启发式方法。
 
 ## 最小示例 —— 一个简单的 API 密钥提供商
 
@@ -71,7 +71,7 @@ author: Your Name
 
 就是这样。放置这两个文件后，以下内容将**自动连接**，无需其他编辑：
 
-| 集成点 | 位置 | 获取的内容 |
+| 集成点 | 位置 | 获取内容 |
 |---|---|---|
 | 凭据解析 | `hermes_cli/auth.py` | `PROVIDER_REGISTRY["acme-inference"]` 从配置文件填充 |
 | `--provider` CLI 标志 | `hermes_cli/main.py` | 接受 `acme-inference` |
@@ -79,7 +79,7 @@ author: Your Name
 | `hermes doctor` | `hermes_cli/doctor.py` | 对 `ACME_API_KEY` 的健康检查 + `{base_url}/models` 探测 |
 | `hermes setup` | `hermes_cli/config.py` | `ACME_API_KEY` 出现在 `OPTIONAL_ENV_VARS` 和设置向导中 |
 | URL 反向映射 | `agent/model_metadata.py` | 主机名 → 提供商名称，用于自动检测 |
-| 辅助模型 | `agent/auxiliary_client.py` | 使用 `default_aux_model` 进行压缩/摘要 |
+| 辅助模型 | `agent/auxiliary_client.py` | 使用 `default_aux_model` 进行压缩 / 摘要 |
 | 运行时解析 | `hermes_cli/runtime_provider.py` | 返回正确的 `base_url`、`api_key`、`api_mode` |
 | 传输层 | `agent/transports/chat_completions.py` | 配置文件路径通过 `prepare_messages` / `build_extra_body` / `build_api_kwargs_extras` 生成 kwargs |
 
@@ -94,20 +94,20 @@ author: Your Name
 | `api_mode` | str | `chat_completions` \| `codex_responses` \| `anthropic_messages` \| `bedrock_converse` |
 | `display_name` | str | 在 `hermes model` 选择器中显示的人类可读标签 |
 | `description` | str | 选择器副标题 |
-| `signup_url` | str | 首次运行设置时显示（“在此获取 API 密钥”） |
+| `signup_url` | str | 首次运行设置时显示（“在此处获取 API 密钥”） |
 | `env_vars` | `tuple[str, ...]` | API 密钥环境变量，按优先级顺序；最后一个 `*_BASE_URL` 条目用作用户基础 URL 覆盖 |
 | `base_url` | str | 默认推理端点 |
 | `models_url` | str | 显式目录 URL（回退到 `{base_url}/models`） |
 | `auth_type` | str | `api_key` \| `oauth_device_code` \| `oauth_external` \| `copilot` \| `aws_sdk` \| `external_process` |
-| `fallback_models` | `tuple[str, ...]` | 当实时目录获取失败时显示的精选列表 |
+| `fallback_models` | `tuple[str, ...]` | 实时目录获取失败时显示的精选列表 |
 | `default_headers` | `dict[str, str]` | 每个请求都发送（例如 Copilot 的 `Editor-Version`） |
-| `fixed_temperature` | Any | `None` = 使用调用者的值；`OMIT_TEMPERATURE` 标记 = 完全不发送 temperature（Kimi） |
+| `fixed_temperature` | Any | `None` = 使用调用者的值；`OMIT_TEMPERATURE` 哨兵 = 完全不发送 temperature（Kimi） |
 | `default_max_tokens` | `int \| None` | 提供商级别的 max_tokens 上限（Nvidia: 16384） |
 | `default_aux_model` | str | 用于辅助任务（压缩、视觉、摘要）的廉价模型 |
 
 ## 可覆盖的钩子
 
-对于非平凡的怪癖，可以子类化 `ProviderProfile`：
+对于非平凡的怪癖，请子类化 `ProviderProfile`：
 
 ```python
 from typing import Any
@@ -128,7 +128,7 @@ class AcmeProfile(ProviderProfile):
         return {}
 
     def build_api_kwargs_extras(self, *, reasoning_config=None, **context):
-        """返回 (extra_body_additions, top_level_kwargs)。当某些字段需要放在顶层（Kimi 的 reasoning_effort）而某些需要放在 extra_body 中（OpenRouter 的 reasoning 字典）时需要。默认：({}, {})."""
+        """返回 (extra_body_additions, top_level_kwargs)。当某些字段需要放在顶层（Kimi 的 reasoning_effort）而某些字段需要放在 extra_body 中（OpenRouter 的 reasoning 字典）时需要。默认：({}, {})。"""
         return {}, {}
 
     def fetch_models(self, *, api_key=None, timeout=8.0) -> list[str] | None:
@@ -138,11 +138,11 @@ class AcmeProfile(ProviderProfile):
 ```
 ## 钩子参考示例
 
-查看这些内置插件以了解惯用法：
+查看这些内置插件以了解惯用写法：
 
 | 插件 | 查看原因 |
 |---|---|
-| `plugins/model-providers/openrouter/` | 带有提供商偏好的聚合器，公共模型目录 |
+| `plugins/model-providers/openrouter/` | 带提供商偏好的聚合器，公共模型目录 |
 | `plugins/model-providers/gemini/` | `thinking_config` 转换（原生 + OpenAI 兼容嵌套形式） |
 | `plugins/model-providers/kimi-coding/` | `OMIT_TEMPERATURE`、`extra_body.thinking`、顶层 `reasoning_effort` |
 | `plugins/model-providers/qwen-oauth/` | 消息规范化、`cache_control` 注入、VL 高分辨率 |
@@ -172,7 +172,7 @@ register_provider(ProviderProfile(
 
 ## api_mode 选择
 
-识别四种值。Hermes 基于以下条件选择：
+识别四种值。Hermes 根据以下规则选择：
 
 1. 用户显式覆盖（当设置时，`config.yaml` 中的 `model.api_mode`）
 2. OpenCode 的按模型分发（Zen 和 Go 的 `opencode_model_api_mode`）
@@ -184,7 +184,7 @@ register_provider(ProviderProfile(
 
 ## 认证类型
 
-| `auth_type` | 含义 | 使用者 |
+| `auth_type` | 含义 | 谁使用它 |
 |---|---|---|
 | `api_key` | 单个环境变量携带静态 API 密钥 | 大多数提供商 |
 | `oauth_device_code` | 设备码 OAuth 流程 | — |
@@ -193,11 +193,11 @@ register_provider(ProviderProfile(
 | `aws_sdk` | AWS SDK 凭证链（IAM 角色、配置文件、环境变量） | 仅 `bedrock` 插件 |
 | `external_process` | 认证由 Agent 生成的子进程处理 | 仅 `copilot-acp` 插件 |
 
-`auth_type` 控制哪些代码路径将你的提供商视为"简单 API 密钥提供商" — 如果不是 `api_key`，PluginManager 仍会记录清单，但 Hermes 的 CLI 级自动化（doctor 检查、`--provider` 标志、设置向导委派）可能会跳过它。
+`auth_type` 控制哪些代码路径将你的提供商视为"简单的 API 密钥提供商" — 如果不是 `api_key`，PluginManager 仍会记录清单，但 Hermes 的 CLI 级自动化（doctor 检查、`--provider` 标志、设置向导委派）可能会跳过它。
 
 ## 发现时机
 
-提供商发现是**惰性**的 — 由进程中的第一次 `get_provider_profile()` 或 `list_providers()` 调用触发。实际上，这在启动时很早发生（`auth.py` 模块加载会急切地扩展 `PROVIDER_REGISTRY`）。如果你需要验证你的插件已加载，运行：
+提供商发现是**惰性**的 — 由进程中的第一次 `get_provider_profile()` 或 `list_providers()` 调用触发。实际上，这在启动时很早发生（`auth.py` 模块加载会急切地扩展 `PROVIDER_REGISTRY`）。如果你需要验证插件是否加载，运行：
 
 ```bash
 hermes doctor
@@ -215,7 +215,7 @@ for p in list_providers():
 
 ## 测试你的插件
 
-将 `HERMES_HOME` 指向一个临时目录，以免污染你的真实配置：
+将 `HERMES_HOME` 指向临时目录，以免污染真实配置：
 
 ```bash
 export HERMES_HOME=/tmp/hermes-plugin-test
@@ -237,7 +237,7 @@ hermes -z "hello" --provider my-provider -m some-model
 
 ## 通用 PluginManager 集成
 
-通用的 `PluginManager`（`hermes plugins` 操作的对象）**能看到**模型提供商插件但不会导入它们 — `providers/__init__.py` 拥有它们的生命周期。管理器记录清单以供内省，并按 `kind: model-provider` 分类。当你将一个未标记的用户插件放入 `$HERMES_HOME/plugins/` 中，而它恰好使用 `ProviderProfile` 调用了 `register_provider` 时，管理器会通过源代码启发式方法自动将其强制转换为 `kind: model-provider` — 因此即使没有 `plugin.yaml`，插件仍能正确路由。
+通用的 `PluginManager`（`hermes plugins` 操作的对象）**能看到**模型提供商插件，但不会导入它们 — `providers/__init__.py` 拥有它们的生命周期。管理器记录清单用于内省，并按 `kind: model-provider` 分类。当你将一个未标记的用户插件放入 `$HERMES_HOME/plugins/`，而它恰好使用 `ProviderProfile` 调用了 `register_provider` 时，管理器会通过源代码启发式方法自动将其强制转换为 `kind: model-provider` — 因此即使没有 `plugin.yaml`，插件仍能正确路由。
 
 ## 通过 pip 分发
 
@@ -250,12 +250,12 @@ acme-inference = "acme_hermes_plugin:register"
 
 …其中 `acme_hermes_plugin:register` 是一个调用 `register_provider(profile)` 的函数。通用 PluginManager 在 `discover_and_load()` 期间拾取入口点插件。对于 `kind: model-provider` 的 pip 插件，你仍然需要在清单中声明 kind（或依赖源代码启发式方法）。
 
-完整入口点设置请参阅[构建 Hermes 插件](/docs/guides/build-a-hermes-plugin#distribute-via-pip)。
+完整入口点设置请参阅[构建 Hermes 插件](/guides/build-a-hermes-plugin#distribute-via-pip)。
 
 ## 相关页面
 
-- [提供商运行时](/docs/developer-guide/provider-runtime) — 解析优先级 + 每层读取配置文件的位置
-- [添加提供商](/docs/developer-guide/adding-providers) — 新推理后端端到端清单（涵盖快速插件路径和完整 CLI/认证集成）
-- [记忆提供商插件](/docs/developer-guide/memory-provider-plugin)
-- [上下文引擎插件](/docs/developer-guide/context-engine-plugin)
-- [构建 Hermes 插件](/docs/guides/build-a-hermes-plugin) — 通用插件编写
+- [Provider Runtime](/developer-guide/provider-runtime) — 解析优先级 + 每层读取配置文件的位置
+- [添加提供商](/developer-guide/adding-providers) — 新推理后端端到端清单（涵盖快速插件路径和完整 CLI/认证集成）
+- [Memory Provider 插件](/developer-guide/memory-provider-plugin)
+- [Context Engine 插件](/developer-guide/context-engine-plugin)
+- [构建 Hermes 插件](/guides/build-a-hermes-plugin) — 通用插件编写

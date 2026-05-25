@@ -6,10 +6,10 @@ description: "如何为 Hermes Agent 构建视频生成后端插件"
 
 # 构建视频生成提供商插件
 
-视频生成提供商插件注册一个后端，用于处理每个 `video_generate` 工具调用。内置的提供商（xAI、FAL）以插件形式提供。通过将目录放入 `plugins/video_gen/<name>/` 来添加新的提供商，或覆盖捆绑的提供商。
+视频生成提供商插件注册一个后端，用于处理每个 `video_generate` 工具调用。内置的提供商（xAI、FAL）以插件形式提供。通过将目录放入 `plugins/video_gen/<name>/` 来添加新的提供商插件，或覆盖捆绑的插件。
 
 :::tip
-视频生成插件几乎逐行镜像了[图像生成提供商插件](/docs/developer-guide/image-gen-provider-plugin) —— 如果你已经构建过图像生成后端，那么你已经了解其结构。主要区别在于：一个用于声明模态/宽高比/时长的 `capabilities()` 方法，以及一个路由约定（传递 `image_url` 以使用图像到视频，省略它则使用文本到视频 —— 提供商在内部选择正确的端点）。
+视频生成插件几乎逐行镜像了[图像生成提供商插件](/developer-guide/image-gen-provider-plugin) —— 如果你已经构建过图像生成后端，那么你已经了解了其结构。主要区别在于：一个用于声明模态/宽高比/时长的 `capabilities()` 方法，以及一个路由约定（传递 `image_url` 以使用图像到视频，省略它则使用文本到视频 —— 提供商在内部选择正确的端点）。
 :::
 
 ## 统一接口（一个工具，两种模态）
@@ -21,7 +21,7 @@ description: "如何为 Hermes Agent 构建视频生成后端插件"
 
 编辑和扩展功能被有意排除在范围之外。大多数后端不支持这些功能，这种不一致性将迫使每个后端的描述性文字进入 Agent 的工具描述中。
 
-## 发现机制的工作原理
+## 发现机制如何工作
 
 Hermes 在三个位置扫描视频生成后端：
 
@@ -29,7 +29,7 @@ Hermes 在三个位置扫描视频生成后端：
 2. **用户的** —— `~/.hermes/plugins/video_gen/<name>/`（通过 `plugins.enabled` 选择启用）
 3. **Pip 安装的** —— 声明了 `hermes_agent.plugins` 入口点的包
 
-每个插件的 `register(ctx)` 函数会调用 `ctx.register_video_gen_provider(...)`。活动的提供商由 `config.yaml` 中的 `video_gen.provider` 选择；`hermes tools` → 视频生成会引导用户完成选择。与 `image_generate` 不同，没有内置的遗留后端 —— 每个提供商都是一个插件。
+每个插件的 `register(ctx)` 函数调用 `ctx.register_video_gen_provider(...)`。活动的提供商由 `config.yaml` 中的 `video_gen.provider` 选择；`hermes tools` → Video Generation 会引导用户完成选择。与 `image_generate` 不同，没有内置的遗留后端 —— 每个提供商都是一个插件。
 
 ## 目录结构
 
@@ -180,7 +180,7 @@ requires_env:
 | `seed` | 可重现性 |
 | `model` | 覆盖活动模型/系列 |
 
-提供商的 `capabilities()` 会声明支持哪些参数。Agent 在工具描述中看到活动后端的能力，当用户通过 `hermes tools` 更改后端时，描述会动态重建。
+提供商的 `capabilities()` 声明了支持哪些参数。Agent 在工具描述中看到活动后端的支持能力，当用户通过 `hermes tools` 更改后端时，描述会动态重建。
 
 ## 模型系列和端点路由（FAL 模式）
 
@@ -223,7 +223,7 @@ def generate(self, prompt, *, image_url=None, model=None, **kwargs):
 
 ## 保存生成物件的路径
 
-如果你的后端返回 base64，使用 `save_b64_video()` 将其写入 `$HERMES_HOME/cache/videos/`。对于通过后续 HTTP 获取的原始字节，使用 `save_bytes_video()`。否则直接返回上游 URL —— 消息网关在交付时会解析远程 URL。
+如果你的后端返回 base64，使用 `save_b64_video()` 将其写入 `$HERMES_HOME/cache/videos/` 下。对于通过后续 HTTP 获取的原始字节，使用 `save_bytes_video()`。否则直接返回上游 URL —— 消息网关在交付时会解析远程 URL。
 
 ## 测试
 
