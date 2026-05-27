@@ -240,13 +240,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/faq.md": {
-    "source_hash": "sha256:81a226819cbf0535c1a3e790e70d511838cdc64bbe900b709d3f74b80244d0fc",
-    "translated_at": "2026-05-26T06:05:27.010537+00:00",
+    "source_hash": "sha256:3fed6b5adbc332016855f9cdfea31779df6e136188a4f10695c1838e3b151ffb",
+    "translated_at": "2026-05-27T06:18:20.758131+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/cli-commands.md": {
-    "source_hash": "sha256:8f457053a0a8e064849b603a49095fe55a38ea4b27f6c39e40ff635d5a93c3d1",
-    "translated_at": "2026-05-25T06:51:48.326678+00:00",
+    "source_hash": "sha256:a0c08060e4c45ae7e7d56991f8ee54d24d7bccf2515adaa68c44f49ddb30afa1",
+    "translated_at": "2026-05-27T06:22:44.525395+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/environment-variables.md": {
@@ -255,8 +255,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/slash-commands.md": {
-    "source_hash": "sha256:a00c1dc4dc9d69685604369edacbcf2d1b5d00f69aac0d02d3debcbbd71cae52",
-    "translated_at": "2026-05-25T06:48:51.668924+00:00",
+    "source_hash": "sha256:d914cd73af6fb7036a1b8bff774557b868bf02edcd7e7ca452c15f6e16a2446f",
+    "translated_at": "2026-05-27T06:16:10.936562+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/toolsets-reference.md": {
@@ -285,8 +285,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/docker.md": {
-    "source_hash": "sha256:3b401603a36d7cf9bd9668932428d0acf317ab85cea33e1aac303b2fb40dc12b",
-    "translated_at": "2026-05-25T06:56:16.224128+00:00",
+    "source_hash": "sha256:47e376f218bff38604a47ced36e0556762f8a77febcb8b49fa9ebbd52b2f8ce0",
+    "translated_at": "2026-05-27T06:16:53.603824+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/cli.md": {
@@ -365,8 +365,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/mcp.md": {
-    "source_hash": "sha256:6324481cafc49816204aa0ae336195931909c6171c59200e5479cc9c76a30f84",
-    "translated_at": "2026-05-26T06:05:16.283314+00:00",
+    "source_hash": "sha256:21b41ae2019ec188f1d7e6126fc55944fbb986e2ab34a0c7006d23f7671c46eb",
+    "translated_at": "2026-05-27T06:17:05.146797+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/overview.md": {
@@ -455,8 +455,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/voice-mode.md": {
-    "source_hash": "sha256:10052128475dce1ebd23e074cd13a4d49f8c7ae8655ea73c0bc23243f90b7333",
-    "translated_at": "2026-05-25T07:14:46.875684+00:00",
+    "source_hash": "sha256:6ba3e77faef85482f0ac8c46aa4cf4603f1ad603f972ec680a48e24f6a8d9ddb",
+    "translated_at": "2026-05-27T06:20:13.732442+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/messaging/homeassistant.md": {
@@ -615,8 +615,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/setup.py": {
-    "source_hash": "sha256:b6aaf83f018fbc2bc8dc07b420063e3d46cd648451ee705ea058cc88476eef11",
-    "translated_at": "2026-05-26T06:38:55.968104+00:00",
+    "source_hash": "sha256:d7b8cd3e84a21fcab667ef48f0ccd32d703e0097e6cf6e1c5aa1f98773e6daf6",
+    "translated_at": "2026-05-27T06:45:00.772104+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/automation-templates.md": {
@@ -650,8 +650,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/tui.md": {
-    "source_hash": "sha256:b00322b6526cd78111da059c934f2bb4efd2985b6cd4950f00bafd2921cd712f",
-    "translated_at": "2026-05-22T06:02:06.866324+00:00",
+    "source_hash": "sha256:dd52c7ed81d814d6382c5fbc072e2440aca18bfc0012354257ff9cbadc21d24a",
+    "translated_at": "2026-05-27T06:23:31.639981+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/github-pr-review-agent.md": {
@@ -735,8 +735,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md": {
-    "source_hash": "sha256:210690c8d0d872216e29fa8032866e27d4d4877be85b308d7d54a71a1a1eebc5",
-    "translated_at": "2026-05-25T07:33:56.622699+00:00",
+    "source_hash": "sha256:f4dbaa8375f260ab0d10aecbc8029fde6e983320a7ca1827e8bebdb7c1a12102",
+    "translated_at": "2026-05-27T06:25:36.420053+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/skills/bundled/creative/creative-creative-ideation.md": {
@@ -1030,8 +1030,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/skills/bundled/social-media/social-media-xurl.md": {
-    "source_hash": "sha256:43f4ef284d9c237a875262ea45462584ef9c139b46e2c8c1350df21cd4347314",
-    "translated_at": "2026-04-30T06:38:30.418266+00:00",
+    "source_hash": "sha256:e87e6b1f3f04879595511185d25db757192c7679eb5210fc852c779a6c8f4fa8",
+    "translated_at": "2026-05-27T06:20:41.602013+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development.md": {
@@ -1680,13 +1680,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/subscription-proxy.md": {
-    "source_hash": "sha256:ca1f32908a5310fdbe1e9cde58a1cfc6beae0055983d0ebfd16a4485ec2b1e76",
-    "translated_at": "2026-05-15T06:05:44.060392+00:00",
+    "source_hash": "sha256:d311677c5d1e1608954addecfb6994be1002b292ddc89d606a7712776fae62eb",
+    "translated_at": "2026-05-27T06:17:16.358739+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/developer-guide/programmatic-integration.md": {
-    "source_hash": "sha256:910e2352093510cf61c7635acfe024c9d68ac58c7286ad5d9095d7bd16ebb160",
-    "translated_at": "2026-05-16T05:22:36.160733+00:00",
+    "source_hash": "sha256:bdb65f45325e5700d5861f6b7b80e1a8b009efff8c1b5cd4d37904b73d94c332",
+    "translated_at": "2026-05-27T06:13:04.106431+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/oauth-over-ssh.md": {
