@@ -6,7 +6,7 @@ description: "Hermes Agent 内部结构 — 主要子系统、执行路径、数
 
 # 架构
 
-本页是 Hermes Agent 内部结构的顶层地图。您可以通过它来了解代码库的整体布局，然后深入阅读特定子系统的文档以获取实现细节。
+本页是 Hermes Agent 内部结构的顶层地图。你可以用它来熟悉代码库，然后深入特定子系统的文档以了解实现细节。
 
 ## 系统概览
 
@@ -90,7 +90,7 @@ hermes-agent/
 │   ├── tools_config.py       # hermes tools — 按平台启用/禁用
 │   ├── plugins.py            # PluginManager — 发现、加载、钩子
 │   ├── callbacks.py          # 终端回调（澄清、sudo、批准）
-│   └── gateway.py            # hermes gateway 启动/停止
+│   └── gateway.py            # hermes gateway start/stop
 │
 ├── tools/                    # 工具实现（每个工具一个文件）
 │   ├── registry.py           # 中央工具注册表
@@ -115,8 +115,8 @@ hermes-agent/
 │   ├── pairing.py            # DM 配对授权
 │   ├── hooks.py              # 钩子发现和生命周期事件
 │   ├── mirror.py             # 跨会话消息镜像
-│   ├── status.py             # Token 锁，配置文件作用域进程跟踪
-│   ├── builtin_hooks/        # 始终注册的钩子的扩展点（未预装）
+│   ├── status.py             # Token 锁，配置文件作用域的进程跟踪
+│   ├── builtin_hooks/        # 始终注册的钩子的扩展点（未附带）
 │   └── platforms/            # 20 个适配器：telegram, discord, slack, whatsapp,
 │                             #   signal, matrix, mattermost, email, sms,
 │                             #   dingtalk, feishu, wecom, wecom_callback, weixin,
@@ -155,17 +155,17 @@ hermes-agent/
     → 解析会话密钥
     → 使用会话历史创建 AIAgent
     → AIAgent.run_conversation()
-    → 通过适配器返回响应
+    → 通过适配器将响应传递回去
 ```
 
 ### 定时任务
 
 ```text
 调度器触发 → 从 jobs.json 加载到期任务
-  → 创建新的 AIAgent（无历史记录）
+  → 创建全新的 AIAgent（无历史记录）
   → 注入附加技能作为上下文
   → 运行任务提示词
-  → 将响应发送到目标平台
+  → 将响应传递到目标平台
   → 更新任务状态和下次运行时间
 ```
 
@@ -173,9 +173,9 @@ hermes-agent/
 
 如果你是代码库的新手：
 
-1. **本页** — 了解整体情况
-2. **[Agent 循环内部机制](./agent-loop.md)** — AIAgent 如何工作
-3. **[提示词组装](./prompt-assembly.md)** — 系统提示词构建
+1. **本页面** — 了解整体情况
+2. **[Agent 循环内部机制](./agent-loop.md)** — AIAgent 的工作原理
+3. **[提示词组装](./prompt-assembly.md)** — 系统提示词的构建
 4. **[提供商运行时解析](./provider-runtime.md)** — 提供商如何被选择
 5. **[添加提供商](./adding-providers.md)** — 添加新提供商的实用指南
 6. **[工具运行时](./tools-runtime.md)** — 工具注册表、分发、执行环境
@@ -196,9 +196,9 @@ hermes-agent/
 
 在整个会话生命周期中构建和维护提示词：
 
-- **`prompt_builder.py`** — 从以下部分组装系统提示词：人格（SOUL.md）、记忆（MEMORY.md、USER.md）、技能、上下文文件（AGENTS.md、.hermes.md）、工具使用指南和模型特定指令
-- **`prompt_caching.py`** — 应用 Anthropic 缓存断点进行前缀缓存
-- **`context_compressor.py`** — 当上下文超过阈值时，总结中间的对话轮次
+- **`prompt_builder.py`** — 从以下部分组装系统提示词：人格（SOUL.md）、记忆（MEMORY.md, USER.md）、技能、上下文文件（AGENTS.md, .hermes.md）、工具使用指南以及模型特定指令
+- **`prompt_caching.py`** — 应用 Anthropic 缓存断点以实现前缀缓存
+- **`context_compressor.py`** — 当上下文超过阈值时，总结中间会话轮次
 
 → [提示词组装](./prompt-assembly.md), [上下文压缩与提示词缓存](./context-compression-and-caching.md)
 
@@ -210,7 +210,7 @@ hermes-agent/
 
 ### 工具系统
 
-中心工具注册表（`tools/registry.py`），包含约 28 个工具集中的 70+ 个注册工具。每个工具文件在导入时自行注册。注册表处理模式收集、分发、可用性检查和错误包装。终端工具支持 7 个后端（本地、Docker、SSH、Daytona、Modal、Singularity、Vercel Sandbox）。
+中央工具注册表（`tools/registry.py`），包含约 28 个工具集中的 70+ 个注册工具。每个工具文件在导入时自行注册。注册表处理模式收集、分发、可用性检查和错误包装。终端工具支持 6 种后端（本地、Docker、SSH、Daytona、Modal、Singularity）。
 
 → [工具运行时](./tools-runtime.md)
 
@@ -222,7 +222,7 @@ hermes-agent/
 
 ### 消息网关
 
-长运行进程，包含 20 个平台适配器、统一的会话路由、用户授权（允许列表 + DM 配对）、斜杠命令分发、钩子系统、定时任务触发和后台维护。
+长期运行的进程，包含 20 个平台适配器、统一的会话路由、用户授权（允许列表 + DM 配对）、斜杠命令分发、钩子系统、定时任务触发和后台维护。
 
 → [网关内部机制](./gateway-internals.md)
 
@@ -234,7 +234,7 @@ hermes-agent/
 
 ### 定时任务
 
-一流的 Agent 任务（非 shell 任务）。任务存储在 JSON 中，支持多种调度格式，可以附加技能和脚本，并发送到任何平台。
+一流的 Agent 任务（非 shell 任务）。任务存储在 JSON 中，支持多种调度格式，可以附加技能和脚本，并传递到任何平台。
 
 → [定时任务内部机制](./cron-internals.md)
 
@@ -252,13 +252,13 @@ hermes-agent/
 
 ## 设计原则
 
-| 原则 | 实际含义 |
+| 原则 | 实践中的含义 |
 |-----------|--------------------------|
 | **提示词稳定性** | 系统提示词在会话中途不会改变。除了明确的用户操作（`/model`）外，没有破坏缓存的变更。 |
-| **可观察的执行** | 每次工具调用都通过回调对用户可见。CLI（旋转器）和网关（聊天消息）中都有进度更新。 |
+| **可观察的执行** | 每个工具调用都通过回调对用户可见。CLI（旋转器）和网关（聊天消息）中都有进度更新。 |
 | **可中断** | API 调用和工具执行可以在进行中被用户输入或信号取消。 |
-| **平台无关的核心** | 一个 AIAgent 类服务于 CLI、网关、ACP、批处理和 API 服务器。平台差异存在于入口点，而不是 Agent 中。 |
-| **松耦合** | 可选的子系统（MCP、插件、记忆提供商、RL 环境）使用注册模式和 check_fn 门控，而不是硬依赖。 |
+| **平台无关的核心** | 一个 AIAgent 类服务于 CLI、网关、ACP、批处理和 API 服务器。平台差异存在于入口点，而非 Agent 本身。 |
+| **松耦合** | 可选的子系统（MCP、插件、记忆提供商、RL 环境）使用注册模式和 check_fn 门控，而非硬依赖。 |
 | **配置文件隔离** | 每个配置文件（`hermes -p <name>`）都有自己的 HERMES_HOME、配置、记忆、会话和网关 PID。多个配置文件可以并发运行。 |
 
 ## 文件依赖链
@@ -272,4 +272,4 @@ model_tools.py  （导入 tools/registry 并触发工具发现）
 run_agent.py, cli.py, batch_runner.py, environments/
 ```
 
-这个链条意味着工具注册发生在导入时，在任何 Agent 实例创建之前。任何在顶层调用 `registry.register()` 的 `tools/*.py` 文件都会被自动发现 — 无需手动维护导入列表。
+这个链意味着工具注册发生在导入时，在任何 Agent 实例创建之前。任何包含顶层 `registry.register()` 调用的 `tools/*.py` 文件都会被自动发现 — 无需手动维护导入列表。
