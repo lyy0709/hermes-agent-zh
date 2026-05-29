@@ -6,19 +6,19 @@ description: "详细解析 AIAgent 的执行过程、API 模式、工具、回�
 
 # Agent 循环内部机制
 
-核心编排引擎是 `run_agent.py` 中的 `AIAgent` 类——一个庞大的文件（超过 15,000 行），负责处理从提示词组装到工具调度再到提供商故障转移的一切事务。
+核心编排引擎是 `run_agent.py` 中的 `AIAgent` 类 —— 一个庞大的文件（约 4400 行），负责处理从提示词组装到工具分发再到提供商故障转移的一切事务。
 
 ## 核心职责
 
 `AIAgent` 负责：
 
 - 通过 `prompt_builder.py` 组装有效的系统提示词和工具模式
-- 选择正确的提供商/API 模式（`chat_completions`、`codex_responses`、`anthropic_messages`）
+- 选择正确的提供商/API 模式（chat_completions、codex_responses、anthropic_messages）
 - 发起可中断的模型调用（支持取消）
 - 执行工具调用（通过线程池顺序或并发执行）
 - 以 OpenAI 消息格式维护对话历史
 - 处理压缩、重试和回退模型切换
-- 跟踪父 Agent 和子 Agent 之间的迭代预算
+- 跟踪父 Agent 和子 Agent 的迭代预算
 - 在上下文丢失前刷新持久化记忆
 
 ## 两个入口点
@@ -36,7 +36,7 @@ result = agent.run_conversation(
 )
 ```
 
-`chat()` 是 `run_conversation()` 的一个薄包装，它从结果字典中提取 `final_response` 字段。
+`chat()` 是 `run_conversation()` 的一个薄包装，从结果字典中提取 `final_response` 字段。
 
 ## API 模式
 
@@ -74,7 +74,7 @@ run_conversation()
   7. 如果在 Anthropic 上，则应用提示词缓存标记
   8. 发起可中断的 API 调用（_interruptible_api_call）
   9. 解析响应：
-     - 如果有 tool_calls：执行它们，追加结果，循环回到步骤 5
+     - 如果包含 tool_calls：执行它们，追加结果，循环回到步骤 5
      - 如果是文本响应：持久化会话，如果需要则刷新记忆，返回
 ```
 
@@ -112,7 +112,7 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 │  主线程                    API 线程                │
 │                                                    │
 │   等待：                     HTTP POST             │
-│     - 响应就绪      ───▶    发送给提供商           │
+│     - 响应就绪      ───▶    发送到提供商           │
 │     - 中断事件                                     │
 │     - 超时                                         │
 └────────────────────────────────────────────────────┘
@@ -149,7 +149,7 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 
 ### Agent 级工具
 
-有些工具在到达 `handle_function_call()` 之前就被 `run_agent.py` **拦截**：
+有些工具在到达 `handle_function_call()` *之前* 被 `run_agent.py` 拦截：
 
 | 工具 | 为何被拦截 |
 |------|--------------------|
@@ -164,7 +164,7 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 
 `AIAgent` 支持特定于平台的回调，这些回调能够在 CLI、消息网关和 ACP 集成中实现实时进度更新：
 
-| 回调 | 何时触发 | 使用者 |
+| 回调 | 何时触发 | 被谁使用 |
 |----------|-----------|---------|
 | `tool_progress_callback` | 每次工具执行前/后 | CLI 旋转器、消息网关进度消息 |
 | `thinking_callback` | 模型开始/停止思考时 | CLI "thinking..." 指示器 |
@@ -179,10 +179,10 @@ API 请求被包装在 `_interruptible_api_call()` 中，该函数在后台线�
 
 ### 迭代预算
 
-Agent 通过 `IterationBudget` 跟踪迭代：
+Agent 通过 `IterationBudget` 跟踪迭代次数：
 
 - 默认：90 次迭代（可通过 `agent.max_turns` 配置）
-- 每个 Agent 都有自己的预算。子 Agent 获得独立的预算，上限为 `delegation.max_iterations`（默认 50）——父 Agent 和子 Agent 的总迭代次数可以超过父 Agent 的上限
+- 每个 Agent 都有自己的预算。子 Agent 获得独立的预算，上限为 `delegation.max_iterations`（默认 50）—— 父 Agent 和子 Agent 的总迭代次数可以超过父 Agent 的上限
 - 达到 100% 时，Agent 停止并返回已完成工作的摘要
 
 ### 回退模型
@@ -194,7 +194,7 @@ Agent 通过 `IterationBudget` 跟踪迭代：
 3. 成功后，使用新的提供商继续对话
 4. 遇到 401/403 时，在故障转移前尝试刷新凭据
 
-回退系统也独立覆盖辅助任务——视觉、压缩和网页提取各自都有可通过 `auxiliary.*` 配置部分配置的回退链。
+回退系统也独立覆盖辅助任务 —— 视觉、压缩和网页提取各自都有可通过 `auxiliary.*` 配置部分配置的回退链。
 
 ## 压缩和持久化
 
@@ -209,11 +209,11 @@ Agent 通过 `IterationBudget` 跟踪迭代：
 2. 中间的对话轮次被总结成一个紧凑的摘要
 3. 最后 N 条消息被完整保留（`compression.protect_last_n`，默认：20）
 4. 工具调用/结果消息对被保持在一起（永不拆分）
-5. 生成新的会话谱系 ID（压缩会创建一个“子”会话）
+5. 生成一个新的会话谱系 ID（压缩会创建一个“子”会话）
 
 ### 会话持久化
 
-每次轮次后：
+每次轮次之后：
 - 消息被保存到会话存储（通过 `hermes_state.py` 的 SQLite）
 - 记忆变更被刷新到 `MEMORY.md` / `USER.md`
 - 会话稍后可以通过 `/resume` 或 `hermes chat --resume` 恢复
@@ -228,7 +228,7 @@ Agent 通过 `IterationBudget` 跟踪迭代：
 | `agent/context_compressor.py` | 默认引擎 —— 有损摘要算法 |
 | `agent/prompt_caching.py` | Anthropic 提示词缓存标记和缓存指标 |
 | `agent/auxiliary_client.py` | 用于辅助任务的辅助 LLM 客户端（视觉、摘要） |
-| `model_tools.py` | 工具模式收集、`handle_function_call()` 调度 |
+| `model_tools.py` | 工具模式收集、`handle_function_call()` 分发 |
 
 ## 相关文档
 

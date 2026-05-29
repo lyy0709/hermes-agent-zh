@@ -20,7 +20,7 @@ description: "调试 REST/GraphQL API：状态码、认证、模式、复现"
 | 作者 | eren-karakus0 |
 | 许可证 | MIT |
 | 标签 | `api`, `rest`, `graphql`, `http`, `debugging`, `testing`, `curl`, `integration` |
-| 相关技能 | [`systematic-debugging`](/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
+| 相关技能 | [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
 
 ## 参考：完整的 SKILL.md
 
@@ -36,23 +36,23 @@ description: "调试 REST/GraphQL API：状态码、认证、模式、复现"
 
 - API 返回意外的状态码或响应体
 - 认证失败（令牌刷新后出现 401/403、OAuth、API 密钥问题）
-- 在 Postman 中工作正常但在代码中失败
+- 在 Postman 中工作但在代码中失败
 - Webhook / 回调集成调试
 - 构建或审查 API 集成测试
 - 速率限制或分页问题
 
-对于 UI 渲染、数据库查询调优或 DNS/防火墙基础设施问题，请跳过（并升级处理）。
+对于 UI 渲染、数据库查询调优或 DNS/防火墙基础设施问题，请跳过（并上报）。
 
 ## 核心原则
 
-**先隔离层，再修复。** 一个 200 OK 可能隐藏着损坏的数据。一个 500 错误可能掩盖了一个单字符的认证拼写错误。按顺序检查链路；切勿跳过任何步骤。
+**先隔离层，再修复。** 一个 200 OK 可能隐藏着损坏的数据。一个 500 错误可能掩盖了一个字符的认证拼写错误。按顺序检查链路；切勿跳过任何步骤。
 
 ```
 1. 连通性   → 我们能否访问到主机？
 1.5 超时    → 是连接慢还是读取慢？
 2. TLS/SSL  → 证书是否有效且受信任？
 3. 认证     → 凭据是否正确且未过期？
-4. 请求格式 → 负载格式是否符合服务器预期？
+4. 请求格式 → 负载结构是否符合服务器预期？
 5. 响应解析 → 我们的代码是否接受返回的内容？
 6. 语义     → 数据的含义是否符合我们的假设？
 ```
@@ -71,7 +71,7 @@ terminal("""curl -X POST https://api.example.com/users \\
   -H "Authorization: Bearer $TOKEN" \\
   -d '{"name":"test","email":"test@example.com"}'""")
 
-# 仅获取头部信息
+# 仅获取响应头
 terminal('curl -sI https://api.example.com/health')
 
 # 美化打印 JSON
@@ -114,7 +114,7 @@ import requests
 resp = requests.get(
     "https://api.example.com/users/1",
     headers={"Authorization": "Bearer <TOKEN>"},
-    timeout=(3.05, 30),  # (connect, read)
+    timeout=(3.05, 30),  # (连接超时, 读取超时)
 )
 print(resp.status_code, dict(resp.headers))
 print(resp.text[:500])
@@ -152,11 +152,11 @@ try:
 except ConnectTimeout:
     print("无法连接到主机 — DNS、防火墙、VPN 问题")
 except ReadTimeout:
-    print("已连接但服务器响应慢")
+    print("已连接但服务器响应缓慢")
 ''')
 ```
 
-诊断：`time_connect` 高是网络/防火墙问题；`time_starttransfer` 高但 `time_connect` 低是服务器慢。
+诊断：`time_connect` 高是网络/防火墙问题；`time_starttransfer` 高而 `time_connect` 低是服务器慢。
 
 ### 步骤 2 — TLS/SSL
 
@@ -186,7 +186,7 @@ print(json.dumps(json.loads(base64.urlsafe_b64decode(payload)), indent=2))
 - 令牌是否过期？（JWT 中的 `exp` 声明）
 - 方案是否正确？Bearer vs Basic vs Token vs `X-Api-Key`
 - 环境是否正确？在 prod 环境使用 staging 密钥是经典错误
-- API 密钥在头部还是查询参数中？（`?api_key=…`）
+- API 密钥在请求头中还是查询参数中？（`?api_key=…`）
 ### 步骤 4 — 请求格式
 
 ```python
@@ -198,16 +198,16 @@ terminal("""curl -v -X POST https://api.example.com/endpoint \\
 **Content-Type / 正文不匹配 — 静默的 415/400 错误：**
 
 ```python
-# 错误 — data= 发送表单编码数据，但头部信息撒谎了
+# 错误 — data= 发送表单编码，但头部信息撒谎了
 requests.post(url, data='{"k":"v"}', headers={"Content-Type": "application/json"})
 
 # 正确 — json= 自动设置头部并序列化
 requests.post(url, json={"k": "v"})
 
-# 错误 — Accept 头部要求 XML，代码却调用 .json()
+# 错误 — Accept 头部声明 XML，代码却调用 .json()
 requests.get(url, headers={"Accept": "text/xml"})
 
-# 正确 — 让 requests 自动构建带边界的 multipart 数据
+# 正确 — 让 requests 自动构建带边界的 multipart 请求
 requests.post(url, files={"file": open("doc.pdf", "rb")})
 ```
 
@@ -231,7 +231,7 @@ else:
 ''')
 ```
 
-常见失败原因：预期是 JSON 却返回了 HTML 错误页面、空响应体、错误的字符集。
+常见失败情况：预期是 JSON 却返回了 HTML 错误页面、空响应体、错误的字符集。
 
 ### 步骤 6 — 语义验证
 
@@ -240,11 +240,11 @@ else:
 - `"status": "active"` 的含义和你的代码理解一致吗？
 - 响应中的 ID 是否与请求的 ID 匹配？
 - 时间戳是否在预期的时区？
-- 分页是返回了所有结果，还是只返回了第一页？
+- 分页返回了所有结果，还是只返回了第一页？
 
-## HTTP 状态码速查手册
+## HTTP 状态码处理手册
 
-### 401 Unauthorized — 凭据缺失或无效
+### 401 Unauthorized — 凭证缺失或无效
 
 1.  `Authorization` 头部确实存在吗？（用 `curl -v` 确认）
 2.  Token 是否正确且未过期？
@@ -253,7 +253,7 @@ else:
 
 ### 403 Forbidden — 已认证但未授权
 
-1.  Token 是否具有所需的权限/作用域？
+1.  Token 是否具有所需的权限/范围？
 2.  资源是否属于其他账户？
 3.  IP 白名单是否阻止了你？
 4.  浏览器中的 CORS 问题？（检查 `Access-Control-Allow-Origin`）
@@ -269,13 +269,13 @@ else:
 
 1.  资源已存在（重复创建）？
 2.  过期的 `ETag` / `If-Match`？
-3.  其他进程的并发修改？
+3.  其他进程并发修改？
 
 ### 422 Unprocessable Entity — JSON 格式有效，但数据无效
 
-错误正文通常会指出有问题的字段。检查：
+错误响应体通常会指出问题字段。检查：
 - 字段类型（字符串 vs 整数，日期格式）
-- 必填项 vs 可选项
+- 必填 vs 可选
 - 枚举值是否在允许的集合内
 
 ### 429 Too Many Requests — 超出速率限制
@@ -299,17 +299,17 @@ def with_backoff(method, url, **kwargs):
 
 ### 5xx — 服务器端错误，通常不是你的问题
 
--   **500** — 服务器 Bug。捕获关联 ID，向提供商提交工单。
--   **502** — 上游服务宕机。退避 + 重试。
--   **503** — 过载 / 维护。检查状态页面。
--   **504** — 上游超时。减少负载或提高超时时间。
+-   **500** — 服务器内部错误。记录关联 ID，向提供商提交问题。
+-   **502** — 上游服务不可用。退避 + 重试。
+-   **503** — 服务过载 / 维护中。检查状态页面。
+-   **504** — 上游服务超时。减少负载或增加超时时间。
 
-对于所有 5xx 错误：使用抖动退避，持续出现则告警。
+对于所有 5xx 错误：使用抖动退避，持续出现时发出警报。
 
 ## 分页与幂等性
 
 **分页。** 验证你获取了*所有*结果。查找 `next_cursor`、`next_page`、`total_count`。两种模式：
-- 偏移量（`?limit=100&offset=200`） — 简单，但如果数据移动可能会跳过项目。
+- 偏移量（`?limit=100&offset=200`） — 简单，但如果数据变动可能会跳过项目。
 - 游标（`?cursor=abc123`） — 对于实时或大型数据集更推荐。
 
 **幂等性。** 对于非幂等操作（POST），发送 `Idempotency-Key: <uuid>`，以便重试不会导致重复扣款/重复创建。对于支付和订单是强制性的。
@@ -339,11 +339,11 @@ if issues:
 ''')
 ```
 
-在 API 升级后、集成新的第三方时，或在 CI 冒烟测试中运行。
+在 API 升级后、集成新的第三方服务时，或在 CI 冒烟测试中运行。
 
 ## 关联 ID
 
-始终捕获提供商的请求 ID — 这是联系供应商支持的最快途径：
+始终记录提供商的请求 ID — 这是联系供应商支持的最快途径：
 
 ```python
 execute_code('''
@@ -359,16 +359,16 @@ if resp.status_code >= 400:
 ''')
 ```
 
-**供应商 Bug 报告模板：**
+**供应商错误报告模板：**
 
 ```
-端点：      POST /api/v1/orders
-请求 ID：   req_abc123xyz
-时间戳：    2026-03-17T14:30:00Z
-状态码：    500
-预期：      201 并返回订单对象
-实际：      500 {"error":"internal server error"}
-复现步骤：  curl -X POST … (auth: <REDACTED>)
+端点:      POST /api/v1/orders
+请求 ID:   req_abc123xyz
+时间戳:    2026-03-17T14:30:00Z
+状态码:    500
+预期:      201 并返回订单对象
+实际:      500 {"error":"internal server error"}
+复现步骤:  curl -X POST … (auth: <REDACTED>)
 ```
 
 ## 回归测试模板
@@ -412,7 +412,7 @@ class TestAPISmoke:
 
 ### Token 处理
 - 切勿记录完整的 Token。进行脱敏处理：`Bearer <REDACTED>`。
-- 切勿在脚本中硬编码 Token。从环境变量（`os.environ["API_TOKEN"]`）或 `~/.hermes/.env` 文件中读取。
+- 切勿在脚本中硬编码 Token。应从环境变量（`os.environ["API_TOKEN"]`）或 `~/.hermes/.env` 文件中读取。
 - 如果 Token 出现在日志、错误信息或 git 历史记录中，请立即轮换。
 
 ### 安全日志记录
@@ -434,7 +434,7 @@ def redact_auth(headers: dict) -> dict:
 
 ## Hermes 工具模式
 
-### terminal — 用于 curl, dig, openssl
+### terminal — 用于 curl、dig、openssl
 
 ```python
 terminal('curl -sI https://api.example.com')
@@ -492,7 +492,7 @@ delegate_task(
 对于每个 HTTP 方法 (POST, GET, PATCH, DELETE):
   - 正常路径: 断言状态码 + 响应模式
   - 错误情况: 400, 404, 422
-  - 记录任何失败的复现 curl 命令（脱敏 Token）
+  - 为任何失败记录一个可复现的 curl 命令（脱敏 Token）
 
 输出: 每个端点的通过/失败状态 + 失败的相关 ID。
 """,

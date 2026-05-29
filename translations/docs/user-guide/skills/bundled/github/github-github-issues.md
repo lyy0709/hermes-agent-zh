@@ -21,7 +21,7 @@ description: "通过 gh 或 REST 创建、分类、标记、分配 GitHub Issues
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Issues`, `Project-Management`, `Bug-Tracking`, `Triage` |
-| 相关技能 | [`github-auth`](/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/user-guide/skills/bundled/github/github-github-pr-workflow) |
+| 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow) |
 
 ## 参考：完整的 SKILL.md
 
@@ -161,38 +161,38 @@ curl -s -X POST \
 ### Bug 报告模板
 
 ```
-## Bug Description
+## Bug 描述
 <发生了什么>
 
-## Steps to Reproduce
+## 重现步骤
 1. <步骤>
 2. <步骤>
 
-## Expected Behavior
+## 预期行为
 <应该发生什么>
 
-## Actual Behavior
+## 实际行为
 <实际发生了什么>
 
-## Environment
-- OS: <操作系统>
-- Version: <版本>
+## 环境
+- 操作系统: <os>
+- 版本: <version>
 ```
 
 ### 功能请求模板
 
 ```
-## Feature Description
+## 功能描述
 <你想要什么>
 
-## Motivation
+## 动机
 <为什么这会有用>
 
-## Proposed Solution
+## 建议的解决方案
 <它如何工作>
 
-## Alternatives Considered
-<其他考虑的方法>
+## 考虑过的替代方案
+<其他方法>
 ```
 
 ## 3. 管理 Issues
@@ -318,9 +318,9 @@ git checkout -b fix/issue-42-login-redirect
 
 ## 4. Issue 分类工作流
 
-当被要求分类 issues 时：
+当被要求对 issues 进行分类时：
 
-1.  **列出未分类的 issues：**
+1. **列出未分类的 issues：**
 
 ```bash
 # 使用 gh
@@ -337,10 +337,13 @@ for i in json.load(sys.stdin):
         print(f\"#{i['number']}  {i['title']}\")"
 ```
 
-2.  **阅读并分类**每个 issue（查看详情，理解 bug/功能）
-3.  **应用标签和优先级**（参见上面的“管理 Issues”）
-4.  **分配**如果负责人明确
-5.  **如有需要，评论分类说明**
+2. **阅读并分类**每个 issue（查看详情，理解 bug/功能）
+
+3. **应用标签和优先级**（参见上面的“管理 Issues”）
+
+4. **分配**（如果负责人明确）
+
+5. **如有需要，评论分类说明**
 
 ## 5. 批量操作
 
@@ -349,7 +352,7 @@ for i in json.load(sys.stdin):
 **使用 gh：**
 
 ```bash
-# 关闭所有带有特定标签的 issues
+# 关闭所有具有特定标签的 issues
 gh issue list --label "wontfix" --json number --jq '.[].number' | \
   xargs -I {} gh issue close {} --reason "not planned"
 ```
@@ -357,7 +360,7 @@ gh issue list --label "wontfix" --json number --jq '.[].number' | \
 **使用 curl：**
 
 ```bash
-# 列出带有某个标签的 issue 编号，然后逐个关闭
+# 列出具有某个标签的 issue 编号，然后逐个关闭
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   "https://api.github.com/repos/$OWNER/$REPO/issues?labels=wontfix&state=open" \

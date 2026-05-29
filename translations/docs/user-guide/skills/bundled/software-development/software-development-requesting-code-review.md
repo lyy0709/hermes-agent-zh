@@ -21,28 +21,28 @@ description: "预提交审查：安全扫描、质量门禁、自动修复"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `code-review`, `security`, `verification`, `quality`, `pre-commit`, `auto-fix` |
-| 相关技能 | [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`github-code-review`](/user-guide/skills/bundled/github/github-github-code-review) |
+| 相关技能 | [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`github-code-review`](/docs/user-guide/skills/bundled/github/github-github-code-review) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
+以下是 Hermes 在触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # 预提交代码验证
 
-代码落地前的自动化验证流水线。包括静态扫描、基线感知的质量门禁、独立的审查者子代理以及自动修复循环。
+代码落地前的自动化验证流水线。包含静态扫描、基线感知的质量门禁、独立的审查者子 Agent 以及自动修复循环。
 
 **核心原则：** 任何 Agent 都不应验证自己的工作。全新的上下文能发现你遗漏的问题。
 
 ## 使用时机
 
-- 实现功能或修复 bug 后，在 `git commit` 或 `git push` 之前
-- 当用户说“commit”、“push”、“ship”、“done”、“verify”或“review before merge”时
-- 在 git 仓库中完成涉及 2 个以上文件编辑的任务后
-- 在 subagent-driven-development 中每个任务完成后（两阶段审查）
+- 在实现功能或修复错误后，执行 `git commit` 或 `git push` 之前
+- 当用户说“提交”、“推送”、“发布”、“完成”、“验证”或“合并前审查”时
+- 在 Git 仓库中完成涉及 2 个以上文件编辑的任务后
+- 在子 Agent 驱动开发的每个任务之后（两阶段审查）
 
-**跳过场景：** 仅文档变更、纯配置调整，或当用户说“skip verification”时。
+**跳过场景：** 仅文档变更、纯配置调整，或当用户说“跳过验证”时。
 
 **此技能与 github-code-review 的区别：** 此技能在提交前验证**你的**变更。`github-code-review` 则是在 GitHub 上审查**他人**的 PR 并添加行内评论。
 
@@ -85,7 +85,7 @@ git diff --cached | grep "^+" | grep -E "execute\(f\"|\.format\(.*SELECT|\.forma
 
 ## 步骤 3 — 基线测试和代码检查
 
-检测项目语言并运行相应的工具。将你的变更**之前**的失败计数捕获为 **baseline_failures**（暂存变更、运行、弹出）。只有你的变更引入的**新**失败才会阻止提交。
+检测项目语言并运行相应的工具。将你的变更**之前**的失败次数捕获为 **baseline_failures**（暂存变更、运行、弹出）。只有你的变更引入的**新**失败才会阻止提交。
 
 **测试框架**（通过项目文件自动检测）：
 ```bash
@@ -126,17 +126,17 @@ which go && go vet ./... 2>&1 | tail -10
 在派发审查者之前快速扫描：
 
 - [ ] 没有硬编码的密钥、API 密钥或凭据
-- [ ] 对用户提供的数据进行了输入验证
+- [ ] 对用户提供的数据进行输入验证
 - [ ] SQL 查询使用参数化语句
-- [ ] 文件操作验证了路径（无遍历）
+- [ ] 文件操作验证路径（无遍历漏洞）
 - [ ] 外部调用有错误处理（try/catch）
 - [ ] 没有遗留调试打印/console.log
 - [ ] 没有注释掉的代码
 - [ ] 新代码有测试（如果存在测试套件）
 
-## 步骤 5 — 独立的审查者子代理
+## 步骤 5 — 独立的审查者子 Agent
 
-直接调用 `delegate_task` — 它在 execute_code 或脚本中**不可用**。
+直接调用 `delegate_task` — 它在 `execute_code` 或脚本中**不可用**。
 
 审查者**只**获得差异和静态扫描结果。不与实现者共享上下文。故障关闭：无法解析的响应 = 失败。
 
@@ -279,10 +279,10 @@ element.textContent = userInput;
 ## 常见问题
 
 - **空差异** — 检查 `git status`，告知用户无需验证
-- **不是 git 仓库** — 跳过并告知用户
+- **不是 Git 仓库** — 跳过并告知用户
 - **差异过大 (>15k 字符)** — 按文件拆分，分别审查
-- **delegate_task 返回非 JSON** — 用更严格的提示词重试一次，然后视为 FAIL
-- **误报** — 如果审查者标记了有意为之的内容，在修复提示词中注明
+- **delegate_task 返回非 JSON** — 使用更严格的提示词重试一次，然后视为失败
+- **误报** — 如果审查者标记了有意为之的内容，请在修复提示词中注明
 - **未找到测试框架** — 跳过回归检查，审查者裁决仍会运行
 - **未安装代码检查工具** — 静默跳过该检查，不视为失败
-- **自动修复引入新问题** — 计为新的失败，循环继续
+- **自动修复引入新问题** — 计为新失败，循环继续

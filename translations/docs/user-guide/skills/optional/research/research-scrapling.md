@@ -4,7 +4,7 @@ sidebar_label: "Scrapling"
 description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现 HTTP 获取、隐身浏览器自动化、Cloudflare 绕过和蜘蛛爬取"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能目录中的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Scrapling
 
@@ -21,7 +21,7 @@ description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Web Scraping`, `Browser`, `Cloudflare`, `Stealth`, `Crawling`, `Spider` |
-| 相关技能 | [`duckduckgo-search`](/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/user-guide/skills/optional/research/research-domain-intel) |
+| 相关技能 | [`duckduckgo-search`](/docs/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/docs/user-guide/skills/optional/research/research-domain-intel) |
 
 ## 参考：完整的 SKILL.md
 
@@ -35,7 +35,7 @@ description: "使用 Scrapling 进行网页抓取 - 通过 CLI 和 Python 实现
 
 **此技能仅用于教育和研究目的。** 用户必须遵守本地/国际数据抓取法律并尊重网站服务条款。
 
-## 何时使用
+## 使用时机
 
 - 抓取静态 HTML 页面（比浏览器工具更快）
 - 抓取需要真实浏览器渲染的 JS 页面
@@ -63,7 +63,7 @@ scrapling install
 
 ## 快速参考
 
-| 方法 | 类 | 使用场景 |
+| 方法 | 类 | 使用时机 |
 |----------|-------|----------|
 | HTTP | `Fetcher` / `FetcherSession` | 静态页面、API、快速批量请求 |
 | 动态 | `DynamicFetcher` / `DynamicSession` | JS 渲染内容、SPA |
@@ -79,6 +79,7 @@ scrapling extract get 'https://example.com' output.md
 ```
 
 使用 CSS 选择器和浏览器模拟：
+
 ```bash
 scrapling extract get 'https://example.com' output.md \
   --css-selector '.content' \
@@ -209,7 +210,7 @@ results = page.css('.extra-results .item::text').getall()
 
 ## Python：隐身模式（反机器人绕过）
 
-对于受 Cloudflare 保护或指纹检测严格的网站：
+对于受 Cloudflare 保护或指纹识别严格的网站：
 
 ```python
 from scrapling.fetchers import StealthyFetcher
@@ -346,5 +347,5 @@ spider.start()  # Ctrl+C 暂停，重新运行可从检查点恢复
 - **超时**：DynamicFetcher/StealthyFetcher 的超时单位为**毫秒**（默认 30000），Fetcher 的超时单位为**秒**
 - **Cloudflare 绕过**：`solve_cloudflare=True` 会增加 5-15 秒的获取时间 — 仅在需要时启用
 - **资源使用**：StealthyFetcher 运行真实浏览器 — 限制并发使用
-- **法律**：抓取前始终检查 robots.txt 和网站服务条款。此库仅用于教育和研究目的
+- **法律**：在抓取前始终检查 robots.txt 和网站服务条款。此库仅用于教育和研究目的
 - **Python 版本**：需要 Python 3.10+

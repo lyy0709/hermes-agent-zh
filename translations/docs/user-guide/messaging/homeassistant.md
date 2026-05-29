@@ -17,7 +17,7 @@ Hermes Agent 通过两种方式与 [Home Assistant](https://www.home-assistant.i
 ### 1. 创建长期访问令牌
 
 1.  打开您的 Home Assistant 实例
-2.  转到您的**个人资料**（点击侧边栏中的您的名字）
+2.  进入您的**个人资料**（点击侧边栏中的您的名字）
 3.  滚动到**长期访问令牌**
 4.  点击**创建令牌**，为其命名，例如 "Hermes Agent"
 5.  复制令牌
@@ -35,7 +35,7 @@ HASS_URL=http://192.168.1.100:8123
 ```
 
 :::info
-当设置了 `HASS_TOKEN` 时，`homeassistant` 工具集会自动启用。消息网关平台和设备控制工具都会通过这个单一令牌激活。
+当设置了 `HASS_TOKEN` 时，`homeassistant` 工具集会自动启用。消息网关平台和设备控制工具都将通过此单一令牌激活。
 :::
 
 ### 3. 启动消息网关
@@ -55,8 +55,8 @@ Hermes Agent 注册了四个用于智能家居控制的工具：
 列出 Home Assistant 实体，可按域或区域筛选。
 
 **参数：**
-- `domain` *(可选)* — 按实体域筛选：`light`、`switch`、`climate`、`sensor`、`binary_sensor`、`cover`、`fan`、`media_player` 等。
-- `area` *(可选)* — 按区域/房间名称筛选（匹配友好名称）：`living room`、`kitchen`、`bedroom` 等。
+- `domain` *（可选）* — 按实体域筛选：`light`、`switch`、`climate`、`sensor`、`binary_sensor`、`cover`、`fan`、`media_player` 等。
+- `area` *（可选）* — 按区域/房间名称筛选（匹配友好名称）：`living room`、`kitchen`、`bedroom` 等。
 
 **示例：**
 ```
@@ -70,7 +70,7 @@ Hermes Agent 注册了四个用于智能家居控制的工具：
 获取单个实体的详细状态，包括所有属性（亮度、颜色、温度设定点、传感器读数等）。
 
 **参数：**
-- `entity_id` *(必需)* — 要查询的实体，例如 `light.living_room`、`climate.thermostat`、`sensor.temperature`
+- `entity_id` *（必需）* — 要查询的实体，例如 `light.living_room`、`climate.thermostat`、`sensor.temperature`
 
 **示例：**
 ```
@@ -84,7 +84,7 @@ climate.thermostat 的当前状态是什么？
 列出可用于设备控制的服务（操作）。显示每种设备类型可以执行哪些操作以及它们接受哪些参数。
 
 **参数：**
-- `domain` *(可选)* — 按域筛选，例如 `light`、`climate`、`switch`
+- `domain` *（可选）* — 按域筛选，例如 `light`、`climate`、`switch`
 
 **示例：**
 ```
@@ -96,10 +96,10 @@ climate 设备有哪些可用服务？
 调用 Home Assistant 服务来控制设备。
 
 **参数：**
-- `domain` *(必需)* — 服务域：`light`、`switch`、`climate`、`cover`、`media_player`、`fan`、`scene`、`script`
-- `service` *(必需)* — 服务名称：`turn_on`、`turn_off`、`toggle`、`set_temperature`、`set_hvac_mode`、`open_cover`、`close_cover`、`set_volume_level`
-- `entity_id` *(可选)* — 目标实体，例如 `light.living_room`
-- `data` *(可选)* — 作为 JSON 对象的附加参数
+- `domain` *（必需）* — 服务域：`light`、`switch`、`climate`、`cover`、`media_player`、`fan`、`scene`、`script`
+- `service` *（必需）* — 服务名称：`turn_on`、`turn_off`、`toggle`、`set_temperature`、`set_hvac_mode`、`open_cover`、`close_cover`、`set_volume_level`
+- `entity_id` *（可选）* — 目标实体，例如 `light.living_room`
+- `data` *（可选）* — 作为 JSON 对象的附加参数
 
 **示例：**
 
@@ -109,7 +109,7 @@ climate 设备有哪些可用服务？
 ```
 
 ```
-将恒温器设置为制热模式，温度 22 度
+将恒温器设置为 22 度，模式为制热
 → ha_call_service(domain="climate", service="set_temperature",
     entity_id="climate.thermostat", data={"temperature": 22, "hvac_mode": "heat"})
 ```
@@ -122,7 +122,7 @@ climate 设备有哪些可用服务？
 
 ## 消息网关平台：实时事件
 
-Home Assistant 消息网关适配器通过 WebSocket 连接并订阅 `state_changed` 事件。当设备状态发生变化且符合您的筛选条件时，它会作为消息转发给 Agent。
+Home Assistant 网关适配器通过 WebSocket 连接并订阅 `state_changed` 事件。当设备状态发生变化且符合您的筛选条件时，它会作为消息转发给 Agent。
 
 ### 事件筛选
 
@@ -153,10 +153,10 @@ platforms:
 
 | 设置 | 默认值 | 描述 |
 |---------|---------|-------------|
-| `watch_domains` | *(无)* | 仅监视这些实体域（例如 `climate`、`light`、`binary_sensor`） |
-| `watch_entities` | *(无)* | 仅监视这些特定的实体 ID |
+| `watch_domains` | *（无）* | 仅监视这些实体域（例如 `climate`、`light`、`binary_sensor`） |
+| `watch_entities` | *（无）* | 仅监视这些特定的实体 ID |
 | `watch_all` | `false` | 设置为 `true` 以接收**所有**状态更改（不建议用于大多数设置） |
-| `ignore_entities` | *(无)* | 始终忽略这些实体（在域/实体筛选器之前应用） |
+| `ignore_entities` | *（无）* | 始终忽略这些实体（在域/实体筛选器之前应用） |
 | `cooldown_seconds` | `30` | 同一实体事件之间的最小秒数间隔 |
 
 :::tip
@@ -174,18 +174,18 @@ platforms:
 | `binary_sensor` | "已触发" / "已清除" |
 | `light`、`switch`、`fan` | "已打开" / "已关闭" |
 | `alarm_control_panel` | "警报状态从 'armed_away' 更改为 'triggered'" |
-| *(其他)* | "从 'old' 更改为 'new'" |
+| *（其他）* | "从 'old' 更改为 'new'" |
 
 ### Agent 响应
 
-来自 Agent 的出站消息将作为 **Home Assistant 持久通知**（通过 `persistent_notification.create`）传递。这些通知会出现在 HA 通知面板中，标题为 "Hermes Agent"。
+来自 Agent 的出站消息将作为 **Home Assistant 持久通知**（通过 `persistent_notification.create`）发送。这些通知会出现在 HA 通知面板中，标题为 "Hermes Agent"。
 
 ### 连接管理
 
-- **WebSocket** 带有 30 秒心跳，用于实时事件
-- **自动重连** 并采用退避策略：5s → 10s → 30s → 60s
+- **WebSocket** 连接，带有 30 秒心跳，用于实时事件
+- **自动重连**，采用退避策略：5s → 10s → 30s → 60s
 - **REST API** 用于出站通知（单独的会话以避免 WebSocket 冲突）
-- **授权** — HA 事件始终经过授权（无需用户允许列表，因为 `HASS_TOKEN` 对连接进行身份验证）
+- **授权** — HA 事件始终经过授权（无需用户白名单，因为 `HASS_TOKEN` 会对连接进行身份验证）
 
 ## 安全性
 
@@ -208,10 +208,10 @@ Home Assistant 工具强制执行安全限制：
 
 ## 自动化示例
 
-### 早晨例行程序
+### 早晨例程
 
 ```
-用户：开始我的早晨例行程序
+用户：开始我的早晨例程
 
 Agent：
 1. ha_call_service(domain="light", service="turn_on",
@@ -250,3 +250,14 @@ Agent 自动：
      entity_id="light.hallway")
 3. 发送通知："前门已打开。走廊灯已打开。"
 ```
+
+## 故障排除
+
+**环境变量未被识别。**
+适配器从 `~/.hermes/.env`（启动时自动合并）或从 `config.yaml` 读取凭据。请仔细检查文件是否位于活动的 Hermes 配置文件主目录下，并且 URL/令牌周围没有多余的引号。编辑后重启消息网关 — 环境变量更改仅在进程启动时应用。
+
+**`conversation entity not found` / Agent 从不回复。**
+Home Assistant 的对话 API 需要一个已配置的 *Assist* 对话 Agent。在 HA 中，打开 **设置 → 语音助手 → 添加助手** 并记下生成的实体 ID（看起来像 `conversation.home_assistant` 或 `conversation.openai_<name>`）。在适配器的 `conversation_entity` 设置中设置该实体 ID；默认值在您的实例上可能不存在。
+
+**REST 身份验证失败（`401 Unauthorized`）。**
+令牌必须是*长期访问令牌*，从您的 HA 用户个人资料页面创建（**个人资料 → 安全 → 长期访问令牌**）。短期的 UI 会话令牌无效。同时验证基础 URL 是否包含方案和端口（例如 `http://homeassistant.local:8123`），并且可以从运行 Hermes 的主机访问 — `curl -H "Authorization: Bearer <token>" <url>/api/` 应返回 `{"message": "API running."}`。

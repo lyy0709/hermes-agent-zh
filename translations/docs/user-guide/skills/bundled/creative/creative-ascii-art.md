@@ -21,7 +21,7 @@ ASCII 艺术：pyfiglet、cowsay、boxes、image-to-ascii。
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `ASCII`, `Art`, `Banners`, `Creative`, `Unicode`, `Text-Art`, `pyfiglet`, `figlet`, `cowsay`, `boxes` |
-| 相关技能 | [`excalidraw`](/user-guide/skills/bundled/creative/creative-excalidraw) |
+| 相关技能 | [`excalidraw`](/docs/user-guide/skills/bundled/creative/creative-excalidraw) |
 
 ## 参考：完整的 SKILL.md
 
@@ -74,7 +74,7 @@ python3 -m pyfiglet --list_fonts             # 列出所有 571 种字体
 
 将文本转换为 ASCII 艺术的免费 REST API。包含 250+ 种 FIGlet 字体。直接返回纯文本——无需解析。当 pyfiglet 未安装或作为快速替代方案时使用此工具。
 
-### 用法 (通过终端 curl)
+### 用法（通过终端 curl）
 
 ```bash
 # 基本文本横幅（默认字体）
@@ -98,9 +98,9 @@ curl -s "https://asciified.thelicato.io/api/v2/fonts"
 - 字体名称区分大小写；使用 fonts 端点获取确切名称
 - 任何带有 curl 的终端均可使用——无需 Python 或 pip
 
-## 工具 3：Cowsay (消息艺术)
+## 工具 3：Cowsay（消息艺术）
 
-经典的 ASCII 字符说话气泡工具。
+经典工具，用 ASCII 字符将文本包裹在对话气泡中。
 
 ### 安装
 
@@ -142,9 +142,9 @@ cowsay -e "OO" "Msg"   # 自定义眼睛
 cowsay -T "U " "Msg"   # 自定义舌头
 ```
 
-## 工具 4：Boxes (装饰边框)
+## 工具 4：Boxes（装饰边框）
 
-为任何文本绘制装饰性 ASCII 艺术边框/框架。包含 70+ 种内置设计。
+在任何文本周围绘制装饰性 ASCII 艺术边框/框架。包含 70+ 种内置设计。
 
 ### 安装
 
@@ -162,7 +162,7 @@ echo "Hello World" | boxes -d parchment       # 羊皮纸卷轴
 echo "Hello World" | boxes -d cat             # 猫边框
 echo "Hello World" | boxes -d dog             # 狗边框
 echo "Hello World" | boxes -d unicornsay      # 独角兽
-echo "Hello World" | boxes -d diamonds        # 菱形图案
+echo "Hello World" | boxes -d diamonds        # 钻石图案
 echo "Hello World" | boxes -d c-cmt           # C 风格注释
 echo "Hello World" | boxes -d html-cmt        # HTML 注释
 echo "Hello World" | boxes -a c               # 文本居中
@@ -177,7 +177,7 @@ python3 -m pyfiglet "HERMES" -f slant | boxes -d stone
 curl -s "https://asciified.thelicato.io/api/v2/ascii?text=HERMES&font=Slant" | boxes -d stone
 ```
 
-## 工具 5：TOIlet (彩色文本艺术)
+## 工具 5：TOIlet（彩色文本艺术）
 
 类似于 pyfiglet，但具有 ANSI 颜色效果和视觉滤镜。非常适合终端美化。
 
@@ -211,7 +211,7 @@ toilet -F list                          # 列出可用滤镜
 
 将图像（PNG、JPEG、GIF、WEBP）转换为 ASCII 艺术。
 
-### 选项 A：ascii-image-converter (推荐，现代)
+### 选项 A：ascii-image-converter（推荐，现代）
 
 ```bash
 # 安装
@@ -229,7 +229,7 @@ ascii-image-converter https://url/image.jpg      # 直接 URL
 ascii-image-converter image.png --save-txt out   # 保存为文本
 ```
 
-### 选项 B：jp2a (轻量级，仅限 JPEG)
+### 选项 B：jp2a（轻量级，仅限 JPEG）
 
 ```bash
 sudo apt install jp2a -y
@@ -241,7 +241,7 @@ jp2a --colors image.jpg              # 彩色化
 
 从网络搜索精选的 ASCII 艺术。使用带有 `curl` 的 `terminal`。
 
-### 来源 A：ascii.co.uk (推荐用于预制艺术)
+### 来源 A：ascii.co.uk（推荐用于预制艺术）
 
 按主题组织的大型经典 ASCII 艺术收藏。艺术位于 HTML `<pre>` 标签内。使用 curl 获取页面，然后使用小型 Python 代码片段提取艺术。
 
@@ -268,7 +268,7 @@ for art in arts:
         print('\n---\n')
 ```
 
-**可用主题** (用作 URL 路径)：
+**可用主题**（用作 URL 路径）：
 - 动物：`cat`, `dog`, `horse`, `bird`, `fish`, `dragon`, `snake`, `rabbit`, `elephant`, `dolphin`, `butterfly`, `owl`, `wolf`, `bear`, `penguin`, `turtle`
 - 物体：`car`, `ship`, `airplane`, `rocket`, `guitar`, `computer`, `coffee`, `beer`, `cake`, `house`, `castle`, `sword`, `crown`, `key`
 - 自然：`tree`, `flower`, `sun`, `moon`, `star`, `mountain`, `ocean`, `rainbow`
@@ -277,18 +277,18 @@ for art in arts:
 
 **提示：**
 - 保留艺术家签名/首字母——重要的礼仪
-- 每页有多个艺术作品——为用户选择最好的一个
+- 每页有多件艺术作品——为用户选择最佳的一件
 - 通过 curl 可靠工作，无需 JavaScript
 
-### 来源 B：GitHub Octocat API (有趣的彩蛋)
+### 来源 B：GitHub Octocat API（有趣的彩蛋）
 
-返回一个带有智慧引语的随机 GitHub Octocat。无需认证。
+返回一个带有智慧引语的随机 GitHub Octocat。无需身份验证。
 
 ```bash
 curl -s https://api.github.com/octocat
 ```
 
-## 工具 8：有趣的 ASCII 实用程序 (通过 curl)
+## 工具 8：有趣的 ASCII 实用程序（通过 curl）
 
 这些免费服务直接返回 ASCII 艺术——非常适合有趣的附加内容。
 
@@ -307,7 +307,7 @@ curl -s "wttr.in/Moon"            # ASCII 艺术中的月相
 curl -s "v2.wttr.in/London"       # 详细版本
 ```
 
-## 工具 9：LLM 生成的自定义艺术 (备用方案)
+## 工具 9：LLM 生成的自定义艺术（备用方案）
 
 当上述工具没有所需内容时，直接使用这些 Unicode 字符生成 ASCII 艺术：
 
@@ -327,12 +327,12 @@ curl -s "v2.wttr.in/London"       # 详细版本
 
 ## 决策流程
 
-1.  **文本作为横幅** → 如果已安装则使用 pyfiglet，否则通过 curl 使用 asciified API
-2.  **用有趣的角色艺术包装消息** → cowsay
-3.  **添加装饰性边框/框架** → boxes (可与 pyfiglet/asciified 结合使用)
-4.  **特定事物的艺术** (猫、火箭、龙) → 通过 curl + 解析使用 ascii.co.uk
+1.  **文本作为横幅** → 如果已安装则使用 pyfiglet，否则使用 asciified API 通过 curl
+2.  **用有趣的角色艺术包裹消息** → cowsay
+3.  **添加装饰性边框/框架** → boxes（可与 pyfiglet/asciified 结合使用）
+4.  **特定事物的艺术**（猫、火箭、龙）→ ascii.co.uk 通过 curl + 解析
 5.  **将图像转换为 ASCII** → ascii-image-converter 或 jp2a
-6.  **二维码** → 通过 curl 使用 qrenco.de
-7.  **天气/月亮艺术** → 通过 curl 使用 wttr.in
-8.  **自定义/创意内容** → 使用 Unicode 调色板进行 LLM 生成
+6.  **二维码** → qrenco.de 通过 curl
+7.  **天气/月亮艺术** → wttr.in 通过 curl
+8.  **自定义/创意内容** → 使用 Unicode 调色板的 LLM 生成
 9.  **任何未安装的工具** → 安装它，或回退到下一个选项

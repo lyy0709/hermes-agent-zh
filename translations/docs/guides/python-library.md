@@ -44,7 +44,7 @@ hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git
 from run_agent import AIAgent
 
 agent = AIAgent(
-    model="anthropic/claude-sonnet-4",
+    model="anthropic/claude-sonnet-4.6",
     quiet_mode=True,
 )
 response = agent.chat("What is the capital of France?")
@@ -54,7 +54,7 @@ print(response)
 `chat()` 在内部处理完整的对话循环——工具调用、重试等所有操作——并仅返回最终的文本响应。
 
 :::warning
-将 Hermes 嵌入到您自己的代码中时，请始终设置 `quiet_mode=True`。如果不设置，Agent 会打印 CLI 旋转器、进度指示器和其他终端输出，这会干扰您应用程序的输出。
+在您自己的代码中嵌入 Hermes 时，请始终设置 `quiet_mode=True`。如果不设置，Agent 会打印 CLI 加载动画、进度指示器和其他终端输出，这会干扰您应用程序的输出。
 :::
 
 ---
@@ -65,7 +65,7 @@ print(response)
 
 ```python
 agent = AIAgent(
-    model="anthropic/claude-sonnet-4",
+    model="anthropic/claude-sonnet-4.6",
     quiet_mode=True,
 )
 
@@ -102,21 +102,21 @@ result = agent.run_conversation(
 ```python
 # 仅启用 Web 工具（浏览、搜索）
 agent = AIAgent(
-    model="anthropic/claude-sonnet-4",
+    model="anthropic/claude-sonnet-4.6",
     enabled_toolsets=["web"],
     quiet_mode=True,
 )
 
 # 启用除终端访问外的所有功能
 agent = AIAgent(
-    model="anthropic/claude-sonnet-4",
+    model="anthropic/claude-sonnet-4.6",
     disabled_toolsets=["terminal"],
     quiet_mode=True,
 )
 ```
 
 :::tip
-当您想要一个最小化、锁定的 Agent 时（例如，研究机器人仅使用网络搜索），请使用 `enabled_toolsets`。当您需要大部分功能但需要限制特定功能时（例如，在共享环境中禁止终端访问），请使用 `disabled_toolsets`。
+当您想要一个最小化、受限制的 Agent 时（例如，研究机器人仅使用网络搜索），请使用 `enabled_toolsets`。当您需要大部分功能但需要限制特定功能时（例如，在共享环境中禁止终端访问），请使用 `disabled_toolsets`。
 :::
 
 ---
@@ -127,7 +127,7 @@ agent = AIAgent(
 
 ```python
 agent = AIAgent(
-    model="anthropic/claude-sonnet-4",
+    model="anthropic/claude-sonnet-4.6",
     quiet_mode=True,
 )
 
@@ -143,17 +143,17 @@ result2 = agent.run_conversation(
 print(result2["final_response"])  # "Your name is Alice."
 ```
 
-`conversation_history` 参数接受先前结果中的 `messages` 列表。Agent 在内部复制它，因此您的原始列表永远不会被修改。
+`conversation_history` 参数接受先前结果中的 `messages` 列表。Agent 会在内部复制它，因此您的原始列表永远不会被修改。
 
 ---
 
 ## 保存轨迹
 
-启用轨迹保存，以 ShareGPT 格式捕获对话——对于生成训练数据或调试非常有用：
+启用轨迹保存，以 ShareGPT 格式捕获对话——这对于生成训练数据或调试非常有用：
 
 ```python
 agent = AIAgent(
-    model="anthropic/claude-sonnet-4",
+    model="anthropic/claude-sonnet-4.6",
     save_trajectories=True,
     quiet_mode=True,
 )
@@ -171,7 +171,7 @@ agent.chat("Write a Python function to sort a list")
 使用 `ephemeral_system_prompt` 设置自定义系统提示词，以指导 Agent 的行为，但**不会**保存到轨迹文件中（保持您的训练数据干净）：
 
 ```python
-agent = AIAgent(
+agent = AIgent(
     model="anthropic/claude-sonnet-4",
     ephemeral_system_prompt="You are a SQL expert. Only answer database questions.",
     quiet_mode=True,
@@ -181,7 +181,7 @@ response = agent.chat("How do I write a JOIN query?")
 print(response)
 ```
 
-这对于构建专门的 Agent 非常理想——代码审查员、文档编写器、SQL 助手——所有这些都使用相同的基础工具。
+这对于构建专门的 Agent 非常理想——代码审查员、文档编写员、SQL 助手——所有这些都使用相同的基础工具。
 
 ---
 
@@ -222,7 +222,7 @@ for prompt, result in zip(prompts, results):
 ```
 
 :::warning
-始终为每个线程或任务创建**一个新的 `AIAgent` 实例**。Agent 维护内部状态（对话历史、工具会话、迭代计数器），这些状态在共享时不是线程安全的。
+始终为每个线程或任务创建**一个新的 `AIAgent` 实例**。Agent 维护内部状态（对话历史、工具会话、迭代计数器），这些状态在线程间共享是不安全的。
 :::
 
 ---
@@ -311,11 +311,11 @@ print(review)
 
 | 参数 | 类型 | 默认值 | 描述 |
 |-----------|------|---------|-------------|
-| `model` | `str` | `"anthropic/claude-opus-4.6"` | OpenRouter 格式的模型 |
+| `model` | `str` | `""` | OpenRouter 格式的模型（默认为空；在运行时从您的 hermes 配置解析） |
 | `quiet_mode` | `bool` | `False` | 抑制 CLI 输出 |
-| `enabled_toolsets` | `List[str]` | `None` | 白名单特定工具集 |
-| `disabled_toolsets` | `List[str]` | `None` | 黑名单特定工具集 |
-| `save_trajectories` | `bool` | `False` | 将对话保存到 JSONL |
+| `enabled_toolsets` | `List[str]` | `None` | 白名单特定的工具集 |
+| `disabled_toolsets` | `List[str]` | `None` | 黑名单特定的工具集 |
+| `save_trajectories` | `bool` | `False` | 将对话保存为 JSONL |
 | `ephemeral_system_prompt` | `str` | `None` | 自定义系统提示词（不保存到轨迹） |
 | `max_iterations` | `int` | `90` | 每次对话的最大工具调用迭代次数 |
 | `skip_context_files` | `bool` | `False` | 跳过加载 AGENTS.md 文件 |
@@ -330,8 +330,8 @@ print(review)
 
 :::tip
 - 如果您不希望从工作目录加载 `AGENTS.md` 文件到系统提示词中，请设置 **`skip_context_files=True`**。
-- 设置 **`skip_memory=True`** 以防止 Agent 读取或写入持久化记忆——推荐用于无状态 API 端点。
-- `platform` 参数（例如 `"discord"`、`"telegram"`）会注入平台特定的格式化提示，以便 Agent 调整其输出样式。
+- 设置 **`skip_memory=True`** 以防止 Agent 读取或写入持久化记忆——推荐用于无状态的 API 端点。
+- `platform` 参数（例如 `"discord"`、`"telegram"`）会注入特定于平台的格式化提示，以便 Agent 调整其输出样式。
 :::
 
 :::warning

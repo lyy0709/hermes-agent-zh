@@ -21,7 +21,7 @@ description: "计划模式：将 Markdown 计划写入"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `planning`, `plan-mode`, `implementation`, `workflow` |
-| 相关技能 | [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
+| 相关技能 | [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
 
 ## 参考：完整的 SKILL.md
 
@@ -35,12 +35,12 @@ description: "计划模式：将 Markdown 计划写入"
 
 ## 核心行为
 
-在此回合中，你仅进行计划。
+本轮仅进行计划。
 
 - 不要实现代码。
 - 除了计划 Markdown 文件外，不要编辑项目文件。
 - 不要运行会修改状态的终端命令、提交、推送或执行外部操作。
-- 需要时，你可以使用只读命令/工具检查仓库或其他上下文。
+- 需要时，可以使用只读命令/工具检查仓库或其他上下文。
 - 你的交付物是一个保存在活动工作空间下 `.hermes/plans/` 内的 Markdown 计划。
 
 ## 输出要求

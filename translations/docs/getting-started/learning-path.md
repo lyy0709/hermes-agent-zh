@@ -12,23 +12,27 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 如果您尚未安装 Hermes Agent，请从[安装指南](/getting-started/installation)开始，然后运行[快速入门](/getting-started/quickstart)。以下所有内容均假设您已成功安装。
 :::
 
+:::tip 首次提供商设置
+首次用户几乎总是需要运行 `hermes setup --portal` —— 一次 OAuth 授权即可覆盖一个模型以及四个工具网关工具（搜索/图像/TTS/浏览器）。请参阅 [Nous Portal](/integrations/nous-portal)。
+:::
+
 ## 如何使用本页面
 
-- **了解自己的水平？** 跳转到[按经验水平划分](#by-experience-level)的表格，并按照您所在层级的阅读顺序进行。
-- **有特定目标？** 直接跳到[按使用场景划分](#by-use-case)部分，找到匹配的场景。
-- **只是随便看看？** 查看[核心功能概览](#key-features-at-a-glance)表格，快速了解 Hermes Agent 的所有功能。
+- **知道自己的水平？** 跳转到[按经验水平划分](#by-experience-level)的表格，并按照您所在层级的阅读顺序进行。
+- **有特定目标？** 直接跳到[按使用场景划分](#by-use-case)，找到匹配的场景。
+- **只是随便看看？** 查看[关键功能一览](#key-features-at-a-glance)表格，快速了解 Hermes Agent 的所有功能。
 
 ## 按经验水平划分
 
 | 水平 | 目标 | 推荐阅读 | 时间预估 |
 |---|---|---|---|
 | **初学者** | 启动并运行，进行基本对话，使用内置工具 | [安装](/getting-started/installation) → [快速入门](/getting-started/quickstart) → [CLI 使用](/user-guide/cli) → [配置](/user-guide/configuration) | ~1 小时 |
-| **中级** | 设置消息机器人，使用高级功能如记忆、定时任务和技能 | [会话](/user-guide/sessions) → [消息](/user-guide/messaging) → [工具](/user-guide/features/tools) → [技能](/user-guide/features/skills) → [记忆](/user-guide/features/memory) → [定时任务](/user-guide/features/cron) | ~2–3 小时 |
-| **高级** | 构建自定义工具，创建技能，使用 RL 训练模型，为项目做贡献 | [架构](/developer-guide/architecture) → [添加工具](/developer-guide/adding-tools) → [创建技能](/developer-guide/creating-skills) → [RL 训练](/user-guide/features/rl-training) → [贡献指南](/developer-guide/contributing) | ~4–6 小时 |
+| **中级** | 设置消息机器人，使用高级功能如记忆、定时任务和技能 | [会话](/user-guide/sessions) → [消息传递](/user-guide/messaging) → [工具](/user-guide/features/tools) → [技能](/user-guide/features/skills) → [记忆](/user-guide/features/memory) → [定时任务](/user-guide/features/cron) | ~2–3 小时 |
+| **高级** | 构建自定义工具，创建技能，使用 RL 训练模型，为项目做贡献 | [架构](/developer-guide/architecture) → [添加工具](/developer-guide/adding-tools) → [创建技能](/developer-guide/creating-skills) → [贡献指南](/developer-guide/contributing) | ~4–6 小时 |
 
 ## 按使用场景划分
 
-选择与您想做的事情相匹配的场景。每个场景都会按您应该阅读的顺序链接到相关文档。
+选择与您想做的事情相匹配的场景。每个场景都按阅读顺序链接到相关文档。
 
 ### "我想要一个 CLI 编码助手"
 
@@ -51,20 +55,20 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 
 1. [安装](/getting-started/installation)
 2. [配置](/user-guide/configuration)
-3. [消息概览](/user-guide/messaging)
+3. [消息传递概述](/user-guide/messaging)
 4. [Telegram 设置](/user-guide/messaging/telegram)
 5. [Discord 设置](/user-guide/messaging/discord)
 6. [语音模式](/user-guide/features/voice-mode)
-7. [在 Hermes 中使用语音模式](/guides/use-voice-mode-with-hermes)
-8. [安全](/user-guide/security)
+7. [与 Hermes 一起使用语音模式](/guides/use-voice-mode-with-hermes)
+8. [安全性](/user-guide/security)
 
-完整项目示例，请参见：
+完整项目示例，请参阅：
 - [每日简报机器人](/guides/daily-briefing-bot)
 - [团队 Telegram 助手](/guides/team-telegram-assistant)
 
 ### "我想要自动化任务"
 
-安排重复性任务、运行批量作业或将 Agent 操作串联起来。
+安排重复性任务、运行批量作业或将 Agent 操作链接在一起。
 
 1. [快速入门](/getting-started/quickstart)
 2. [定时任务调度](/user-guide/features/cron)
@@ -82,29 +86,29 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 
 1. [插件](/user-guide/features/plugins)
 2. [构建 Hermes 插件](/guides/build-a-hermes-plugin)
-3. [工具概览](/user-guide/features/tools)
-4. [技能概览](/user-guide/features/skills)
+3. [工具概述](/user-guide/features/tools)
+4. [技能概述](/user-guide/features/skills)
 5. [MCP (模型上下文协议)](/user-guide/features/mcp)
 6. [架构](/developer-guide/architecture)
 7. [添加工具](/developer-guide/adding-tools)
 8. [创建技能](/developer-guide/creating-skills)
 
 :::tip
-对于大多数自定义工具创建，请从插件开始。[添加工具](/developer-guide/adding-tools)页面适用于 Hermes 核心内置开发，而非通常的用户/自定义工具路径。
+对于大多数自定义工具创建，请从插件开始。[添加工具](/developer-guide/adding-tools)页面适用于内置的 Hermes 核心开发，而非通常的用户/自定义工具路径。
 :::
 
 ### "我想要训练模型"
 
-使用强化学习，通过 Hermes Agent 内置的 RL 训练流水线来微调模型行为。
+使用强化学习通过 Hermes Agent 的 RL 训练流水线（由 [Atropos](https://github.com/NousResearch/atropos) 驱动）来微调模型行为。
 
 1. [快速入门](/getting-started/quickstart)
 2. [配置](/user-guide/configuration)
-3. [RL 训练](/user-guide/features/rl-training)
+3. [Atropos RL 环境](https://github.com/NousResearch/atropos) (外部链接)
 4. [提供商路由](/user-guide/features/provider-routing)
 5. [架构](/developer-guide/architecture)
 
 :::tip
-当您已经了解 Hermes Agent 如何处理对话和工具调用的基础知识后，RL 训练效果最佳。如果您是新手，请先完成初学者路径。
+当您已经了解 Hermes Agent 如何处理对话和工具调用的基础知识时，RL 训练效果最佳。如果您是新手，请先完成初学者路径。
 :::
 
 ### "我想将其用作 Python 库"
@@ -118,7 +122,7 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 5. [工具](/user-guide/features/tools)
 6. [会话](/user-guide/sessions)
 
-## 核心功能概览
+## 关键功能一览
 
 不确定有哪些功能可用？以下是主要功能的快速目录：
 
@@ -127,7 +131,7 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 | **工具** | Agent 可以调用的内置工具（文件 I/O、搜索、Shell 等） | [工具](/user-guide/features/tools) |
 | **技能** | 可安装的插件包，用于添加新功能 | [技能](/user-guide/features/skills) |
 | **记忆** | 跨会话的持久化记忆 | [记忆](/user-guide/features/memory) |
-| **上下文文件** | 将文件和目录输入到对话中 | [上下文文件](/user-guide/features/context-files) |
+| **上下文文件** | 将文件和目录输入对话 | [上下文文件](/user-guide/features/context-files) |
 | **MCP** | 通过模型上下文协议连接到外部工具服务器 | [MCP](/user-guide/features/mcp) |
 | **定时任务** | 安排重复的 Agent 任务 | [定时任务](/user-guide/features/cron) |
 | **委派** | 生成子 Agent 进行并行工作 | [委派](/user-guide/features/delegation) |
@@ -135,7 +139,6 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 | **浏览器** | 网页浏览和抓取 | [浏览器](/user-guide/features/browser) |
 | **钩子** | 事件驱动的回调和中间件 | [钩子](/user-guide/features/hooks) |
 | **批量处理** | 批量处理多个输入 | [批量处理](/user-guide/features/batch-processing) |
-| **RL 训练** | 使用强化学习微调模型 | [RL 训练](/user-guide/features/rl-training) |
 | **提供商路由** | 跨多个 LLM 提供商路由请求 | [提供商路由](/user-guide/features/provider-routing) |
 
 ## 接下来阅读什么
@@ -143,12 +146,12 @@ Hermes Agent 功能强大 —— CLI 助手、Telegram/Discord 机器人、任�
 根据您当前所处的位置：
 
 - **刚完成安装？** → 前往[快速入门](/getting-started/quickstart)进行第一次对话。
-- **完成了快速入门？** → 阅读[CLI 使用](/user-guide/cli)和[配置](/user-guide/configuration)以自定义您的设置。
-- **对基础知识感到满意？** → 探索[工具](/user-guide/features/tools)、[技能](/user-guide/features/skills)和[记忆](/user-guide/features/memory)，以解锁 Agent 的全部能力。
-- **为团队设置？** → 阅读[安全](/user-guide/security)和[会话](/user-guide/sessions)以了解访问控制和对话管理。
+- **完成了快速入门？** → 阅读 [CLI 使用](/user-guide/cli) 和 [配置](/user-guide/configuration) 以自定义您的设置。
+- **对基础知识感到满意？** → 探索[工具](/user-guide/features/tools)、[技能](/user-guide/features/skills)和[记忆](/user-guide/features/memory)，以解锁 Agent 的全部功能。
+- **为团队设置？** → 阅读[安全性](/user-guide/security)和[会话](/user-guide/sessions)以了解访问控制和对话管理。
 - **准备好构建了？** → 跳转到[开发者指南](/developer-guide/architecture)以了解内部原理并开始贡献。
 - **想要实际例子？** → 查看[指南](/guides/tips)部分，了解真实世界的项目和技巧。
 
 :::tip
-您不需要阅读所有内容。选择与您目标匹配的路径，按顺序跟随链接，您很快就能上手。您可以随时返回此页面寻找下一步。
+您不需要阅读所有内容。选择与您目标匹配的路径，按顺序阅读链接，您很快就能上手。您可以随时回到此页面寻找下一步。
 :::

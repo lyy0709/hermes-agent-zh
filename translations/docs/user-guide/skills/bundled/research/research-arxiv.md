@@ -21,7 +21,7 @@ description: "通过关键词、作者、类别或 ID 搜索 arXiv 论文"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Research`, `Arxiv`, `Papers`, `Academic`, `Science`, `API` |
-| 相关技能 | [`ocr-and-documents`](/user-guide/skills/bundled/productivity/productivity-ocr-and-documents) |
+| 相关技能 | [`ocr-and-documents`](/docs/user-guide/skills/bundled/productivity/productivity-ocr-and-documents) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,7 +31,7 @@ description: "通过关键词、作者、类别或 ID 搜索 arXiv 论文"
 
 # arXiv 研究
 
-通过其免费的 REST API 搜索和检索 arXiv 上的学术论文。无需 API 密钥，无依赖 —— 只需 curl。
+通过其免费的 REST API 搜索和检索 arXiv 上的学术论文。无需 API 密钥，无需依赖项——只需 curl。
 
 ## 快速参考
 
@@ -44,7 +44,7 @@ description: "通过关键词、作者、类别或 ID 搜索 arXiv 论文"
 
 ## 搜索论文
 
-API 返回 Atom XML。使用 `grep`/`sed` 解析或通过 `python3` 管道传输以获得清晰输出。
+API 返回 Atom XML。使用 `grep`/`sed` 解析或通过 `python3` 管道传输以获得干净的输出。
 
 ### 基本搜索
 
@@ -89,7 +89,7 @@ for i, entry in enumerate(root.findall('a:entry', ns)):
 ### 布尔运算符
 
 ```
-# AND (使用 + 时的默认行为)
+# AND（使用 + 时的默认值）
 search_query=all:transformer+attention
 
 # OR
@@ -166,7 +166,7 @@ print('}')
 找到论文后，阅读它：
 
 ```
-# 摘要页面（快速，元数据 + 摘要）
+# 摘要页面（快速，包含元数据和摘要）
 web_extract(urls=["https://arxiv.org/abs/2402.03300"])
 
 # 全文（PDF → 通过 Firecrawl 转换为 markdown）
@@ -192,7 +192,7 @@ web_extract(urls=["https://arxiv.org/pdf/2402.03300"])
 
 ## 辅助脚本
 
-`scripts/search_arxiv.py` 脚本处理 XML 解析并提供清晰的输出：
+`scripts/search_arxiv.py` 脚本处理 XML 解析并提供干净的输出：
 
 ```bash
 python scripts/search_arxiv.py "GRPO reinforcement learning"
@@ -203,13 +203,13 @@ python scripts/search_arxiv.py --id 2402.03300
 python scripts/search_arxiv.py --id 2402.03300,2401.12345
 ```
 
-无依赖 —— 仅使用 Python 标准库。
+无依赖项——仅使用 Python 标准库。
 
 ---
 
 ## Semantic Scholar（引用、相关论文、作者档案）
 
-arXiv 不提供引用数据或推荐。为此请使用 **Semantic Scholar API** —— 免费，基本使用无需密钥（1 次请求/秒），返回 JSON。
+arXiv 不提供引用数据或推荐。使用 **Semantic Scholar API** 来实现——免费，基本使用无需密钥（1 次请求/秒），返回 JSON。
 
 ### 获取论文详情 + 引用
 
@@ -278,9 +278,9 @@ curl -s "https://api.semanticscholar.org/graph/v1/author/search?query=Yann+LeCun
 
 ## 注意事项
 
--   arXiv 返回 Atom XML —— 使用辅助脚本或解析片段以获得清晰输出
--   Semantic Scholar 返回 JSON —— 通过 `python3 -m json.tool` 管道传输以提高可读性
--   arXiv ID：旧格式 (`hep-th/0601001`) 与新格式 (`2402.03300`)
+-   arXiv 返回 Atom XML——使用辅助脚本或解析代码片段以获得干净的输出
+-   Semantic Scholar 返回 JSON——通过 `python3 -m json.tool` 管道传输以提高可读性
+-   arXiv ID：旧格式（`hep-th/0601001`）与新格式（`2402.03300`）
 -   PDF：`https://arxiv.org/pdf/{id}` —— 摘要：`https://arxiv.org/abs/{id}`
 -   HTML（如果可用）：`https://arxiv.org/html/{id}`
 -   对于本地 PDF 处理，请参阅 `ocr-and-documents` 技能
@@ -289,10 +289,10 @@ curl -s "https://api.semanticscholar.org/graph/v1/author/search?query=Yann+LeCun
 
 -   `arxiv.org/abs/1706.03762` 始终解析到**最新**版本
 -   `arxiv.org/abs/1706.03762v1` 指向一个**特定**的不可变版本
--   生成引用时，保留您实际阅读的版本后缀，以防止引用漂移（后续版本可能大幅更改内容）
+-   生成引用时，保留你实际阅读的版本后缀，以防止引用漂移（后续版本可能大幅更改内容）
 -   API 的 `<id>` 字段返回带版本的 URL（例如，`http://arxiv.org/abs/1706.03762v7`）
 
-## 撤回的论文
+## 已撤回的论文
 
 论文在提交后可能被撤回。发生这种情况时：
 -   `<summary>` 字段包含撤回通知（查找 "withdrawn" 或 "retracted"）

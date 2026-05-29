@@ -10,13 +10,17 @@ description: "在 CLI、Telegram、Discord 和 Discord 语音频道中设置和�
 
 如果说功能页面解释了语音模式能做什么，那么本指南则展示了如何实际用好它。
 
+:::tip
+[Nous Portal](/integrations/nous-portal) 通过一次 OAuth 捆绑了 LLM 和 TTS —— 语音模式可以端到端工作，无需额外凭证。
+:::
+
 ## 语音模式的适用场景
 
 语音模式在以下情况下特别有用：
 - 你想要免提的 CLI 工作流
 - 你希望在 Telegram 或 Discord 中获得语音回复
 - 你希望 Hermes 驻留在 Discord 语音频道中进行实时对话
-- 你希望在走动时快速捕捉想法、调试或进行来回对话，而不是打字
+- 你想在走动时快速捕捉想法、调试或进行来回交流，而不是打字
 
 ## 选择你的语音模式设置
 
@@ -47,7 +51,7 @@ hermes
 问一些简单的问题：
 
 ```text
-What tools do you have available?
+你有什么可用的工具？
 ```
 
 如果这还不稳定，请先修复文本模式。
@@ -78,7 +82,7 @@ pip install "hermes-agent[tts-premium]"
 python -m pip install -U neutts[all]
 ```
 
-### 所有组件
+### 全部安装
 
 ```bash
 pip install "hermes-agent[all]"
@@ -108,7 +112,7 @@ sudo apt install espeak-ng
 
 ## 步骤 4：选择 STT 和 TTS 提供商
 
-Hermes 支持本地和云端语音堆栈。
+Hermes 支持本地和云端语音栈。
 
 ### 最简单/最便宜的设置
 
@@ -141,7 +145,7 @@ ELEVENLABS_API_KEY=***
 
 #### 文本转语音
 
-- `edge` → 免费且对大多数用户来说足够好
+- `edge` → 免费，对大多数用户来说足够好
 - `neutts` → 免费的本地/设备上 TTS
 - `elevenlabs` → 最佳质量
 - `openai` → 良好的中间选择
@@ -220,7 +224,7 @@ hermes
 3. 等待静音检测自动停止录音
 4. Hermes 转录并回复
 5. 如果 TTS 开启，它会说出答案
-6. 循环可以自动重新开始以进行连续使用
+6. 循环可以自动重启以持续使用
 
 ### 有用的命令
 
@@ -239,7 +243,7 @@ hermes
 说：
 
 ```text
-I keep getting a docker permission error. Help me debug it.
+我一直遇到 docker 权限错误。帮我调试一下。
 ```
 
 然后继续免提操作：
@@ -325,7 +329,7 @@ hermes gateway
 
 ### 何时使用哪种模式
 
-- 如果你只希望针对源自语音的消息进行语音回复，请使用 `/voice on`
+- 如果你只希望为源自语音的消息提供语音回复，请使用 `/voice on`
 - 如果你希望始终有一个完整的语音助手，请使用 `/voice tts`
 
 ### 良好的消息传递工作流
@@ -339,7 +343,7 @@ hermes gateway
 
 #### 带有语音输出的 Discord 私信
 
-当你想要私密互动而不涉及服务器频道提及行为时很有用。
+当你想要私密互动，而不需要服务器频道的提及行为时很有用。
 
 ## 用例 3：Discord 语音频道
 
@@ -374,7 +378,7 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 - 用户在语音频道中说话
 - Hermes 检测语音边界
 - 转录内容发布在关联的文本频道中
-- Hermes 以文本和音频形式回复
+- Hermes 以文本和音频回复
 - 文本频道是发出 `/voice join` 命令的那个
 
 ### Discord 语音频道使用的最佳实践
@@ -409,10 +413,10 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 ### "机器人加入但听不到任何声音"
 
 检查：
-- 你的 Discord 用户 ID 是否在 `DISCORD_ALLOWED_USERS` 中
-- 你是否未被静音
-- 特权意图是否已启用
-- 机器人是否拥有连接/说话权限
+- 你的 Discord 用户 ID 在 `DISCORD_ALLOWED_USERS` 中
+- 你没有静音
+- 特权意图已启用
+- 机器人拥有连接/说话权限
 
 ### "它能转录但不会说话"
 
@@ -427,7 +431,7 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 - 更安静的环境
 - 更高的 `silence_threshold`
 - 不同的 STT 提供商/模型
-- 更短、更清晰的发音
+- 更短、更清晰的表达
 
 ### "它在私信中有效，但在服务器频道中无效"
 
@@ -441,7 +445,7 @@ Hermes 加入 Discord 语音频道，监听用户语音，转录它，运行正�
 
 1. 让文本 Hermes 正常工作
 2. 安装 `hermes-agent[voice]`
-3. 使用 CLI 语音模式，配合本地 STT + Edge TTS
+3. 使用本地 STT + Edge TTS 的 CLI 语音模式
 4. 然后在 Telegram 或 Discord 中启用 `/voice on`
 5. 之后，再尝试 Discord 语音频道模式
 

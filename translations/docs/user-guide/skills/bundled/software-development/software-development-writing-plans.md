@@ -4,7 +4,7 @@ sidebar_label: "编写计划"
 description: "编写实现计划：小任务、路径、代码"
 ---
 
-{/* 此页面由技能目录中的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由 website/scripts/generate-skill-docs.py 从技能的 SKILL.md 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # 编写计划
 
@@ -17,11 +17,11 @@ description: "编写实现计划：小任务、路径、代码"
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/software-development/writing-plans` |
 | 版本 | `1.1.0` |
-| 作者 | Hermes Agent (adapted from obra/superpowers) |
+| 作者 | Hermes Agent (改编自 obra/superpowers) |
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `planning`, `design`, `implementation`, `workflow`, `documentation` |
-| 相关技能 | [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
+| 相关技能 | [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
 
 ## 参考：完整的 SKILL.md
 
@@ -33,11 +33,11 @@ description: "编写实现计划：小任务、路径、代码"
 
 ## 概述
 
-编写全面的实现计划，假设实施者对代码库零了解且品味存疑。记录他们所需的一切：要修改的文件、完整代码、测试命令、要查阅的文档、如何验证。给他们小任务。DRY。YAGNI。TDD。频繁提交。
+编写全面的实现计划，假设实施者对代码库零了解且品味存疑。记录他们需要的一切：要修改哪些文件、完整代码、测试命令、要检查的文档、如何验证。给他们小任务。DRY。YAGNI。TDD。频繁提交。
 
 假设实施者是一名熟练的开发人员，但对工具集或问题领域几乎一无所知。假设他们不太了解良好的测试设计。
 
-**核心原则：** 一个好的计划让实现变得显而易见。如果有人需要猜测，那么计划就是不完整的。
+**核心原则：** 一个好的计划让实现变得显而易见。如果有人需要猜测，那么计划就不完整。
 
 ## 何时使用
 
@@ -47,7 +47,7 @@ description: "编写实现计划：小任务、路径、代码"
 - 通过 subagent-driven-development 委派给子 Agent
 
 **在以下情况下不要跳过：**
-- 功能看似简单（假设会导致错误）
+- 功能看起来很简单（假设会导致错误）
 - 你计划自己实现（未来的你需要指导）
 - 独自工作（文档很重要）
 
@@ -57,14 +57,14 @@ description: "编写实现计划：小任务、路径、代码"
 
 每个步骤都是一个动作：
 - "编写失败的测试" — 步骤
-- "运行它以确认失败" — 步骤
+- "运行它以确保失败" — 步骤
 - "实现使测试通过的最少代码" — 步骤
-- "运行测试并确认通过" — 步骤
+- "运行测试并确保通过" — 步骤
 - "提交" — 步骤
 
 **太大：**
 ```markdown
-### 任务 1：构建认证系统
+### 任务 1：构建身份验证系统
 [5 个文件中的 50 行代码]
 ```
 
@@ -198,12 +198,12 @@ read_file("src/app.py")
 - **确切的文件路径**（不是"配置文件"而是 `src/config/settings.py`）
 - **完整的代码示例**（不是"添加验证"而是实际的代码）
 - **确切的命令**及预期输出
-- **验证步骤**以证明任务有效
+- **验证步骤**，证明任务有效
 
 ### 步骤 6：审查计划
 
 检查：
-- [ ] 任务顺序合理且逻辑清晰
+- [ ] 任务顺序合理且符合逻辑
 - [ ] 每个任务都是小任务（2-5 分钟）
 - [ ] 文件路径确切
 - [ ] 代码示例完整（可复制粘贴）
@@ -224,7 +224,7 @@ git commit -m "docs: add implementation plan for [feature]"
 
 ### DRY（不要重复自己）
 
-**不好：** 在 3 个地方复制粘贴验证代码
+**不好：** 在 3 个地方复制粘贴验证
 **好：** 提取验证函数，到处使用
 
 ### YAGNI（你不会需要它）
@@ -250,7 +250,7 @@ class User:
 
 ### TDD（测试驱动开发）
 
-每个产生代码的任务都应包含完整的 TDD 循环：
+每个产生代码的任务都应包含完整的 TDD 周期：
 1. 编写失败的测试
 2. 运行以验证失败
 3. 编写最少代码
@@ -270,7 +270,7 @@ git commit -m "type: description"
 
 ### 模糊的任务
 
-**不好：** "添加认证"
+**不好：** "添加身份验证"
 **好：** "创建带有 email 和 password_hash 字段的 User 模型"
 
 ### 不完整的代码
@@ -280,7 +280,7 @@ git commit -m "type: description"
 
 ### 缺少验证
 
-**不好：** "步骤 3：测试它是否工作"
+**不好：** "步骤 3：测试它是否有效"
 **好：** "步骤 3：运行 `pytest tests/test_auth.py -v`，预期：3 个通过"
 
 ### 缺少文件路径
@@ -295,10 +295,10 @@ git commit -m "type: description"
 **"计划已完成并保存。准备使用 subagent-driven-development 执行 — 我将为每个任务分派一个新的子 Agent，并进行两阶段审查（规范符合性审查，然后是代码质量审查）。我可以继续吗？"**
 
 执行时，使用 `subagent-driven-development` 技能：
-- 每个任务使用新的 `delegate_task` 并附带完整上下文
+- 每个任务使用全新的 `delegate_task` 并附带完整上下文
 - 每个任务后进行规范符合性审查
 - 规范通过后进行代码质量审查
-- 仅在两项审查都批准后继续
+- 仅在两次审查都批准后才继续
 
 ## 记住
 

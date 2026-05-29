@@ -2,6 +2,8 @@
 
 [SimpleX Chat](https://simplex.chat/) 是一个私密、去中心化的消息平台，用户拥有自己的联系人和群组。与其他平台不同，SimpleX 不分配持久的用户 ID —— 每个联系人通过连接时生成的不透明内部 ID 来识别，这使其成为目前最私密的即时通讯工具之一。
 
+> 运行 `hermes gateway setup` 并选择 **SimpleX** 以获取引导式设置。
+
 ## 先决条件
 
 - 已安装 **simplex-chat** CLI 并作为守护进程运行
@@ -9,7 +11,7 @@
 
 ## 安装 simplex-chat
 
-从 [simplex-chat GitHub 发布页面](https://github.com/simplex-chat/simplex-chat/releases) 下载最新版本：
+从 [simplex-chat GitHub releases](https://github.com/simplex-chat/simplex-chat/releases) 页面下载最新版本：
 
 ```bash
 # Linux / macOS 二进制文件
@@ -17,7 +19,7 @@ curl -L https://github.com/simplex-chat/simplex-chat/releases/latest/download/si
 chmod +x simplex-chat
 ```
 
-SimpleX Chat 项目没有为聊天客户端发布预构建的 Docker 镜像；要在 Docker 下运行，请从 [simplex-chat 仓库](https://github.com/simplex-chat/simplex-chat) 从源代码构建。
+SimpleX Chat 项目不提供聊天客户端的预构建 Docker 镜像；要在 Docker 下运行，请从 [simplex-chat 仓库](https://github.com/simplex-chat/simplex-chat) 从源代码构建。
 
 ## 启动守护进程
 
@@ -66,7 +68,7 @@ SIMPLEX_HOME_CHANNEL=<contact-id>
 1. 将 `SIMPLEX_ALLOWED_USERS` 设置为逗号分隔的联系人 ID 列表，或者
 2. 使用 **私信配对** —— 向机器人发送任何消息，它将回复一个配对码。通过 `hermes gateway pair` 输入该代码。
 
-## 将 SimpleX 与定时任务一起使用
+## 将 SimpleX 与定时任务结合使用
 
 ```python
 cronjob(
@@ -86,13 +88,13 @@ send_message(target="simplex:<contact-id>", message="Done!")
 ## 隐私说明
 
 - SimpleX 从不透露电话号码或电子邮件地址 —— 联系人使用不透明的 ID
-- Hermes 和守护进程之间的连接是本地的 WebSocket (`ws://127.0.0.1:5225`) —— 数据不会离开您的机器
+- Hermes 与守护进程之间的连接是本地的 WebSocket (`ws://127.0.0.1:5225`) —— 数据不会离开您的机器
 - 消息在到达守护进程之前已通过 SimpleX 协议进行端到端加密
 
 ## 故障排除
 
 **"无法连接到守护进程"** —— 确保 `simplex-chat -p 5225` 正在运行，并且端口与 `SIMPLEX_WS_URL` 匹配。
 
-**"未安装 websockets"** —— 运行 `pip install websockets`。
+**"websockets 未安装"** —— 运行 `pip install websockets`。
 
-**"未收到消息"** —— 检查联系人的 ID 是否在 `SIMPLEX_ALLOWED_USERS` 中，或通过私信配对批准他们。
+**未收到消息** —— 检查联系人的 ID 是否在 `SIMPLEX_ALLOWED_USERS` 中，或通过私信配对批准他们。

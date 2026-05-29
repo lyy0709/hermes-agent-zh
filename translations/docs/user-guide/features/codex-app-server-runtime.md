@@ -5,39 +5,43 @@ sidebar_label: Codex App-Server Runtime
 
 # Codex App-Server Runtime
 
-Hermes 可以选择性地将 `openai/*` 和 `openai-codex/*` 轮次交给 [Codex CLI app-server](https://github.com/openai/codex) 处理，而不是运行其自身的工具循环。启用此功能后，终端命令、文件编辑、沙盒化和 MCP 工具调用都将在 Codex 的运行时内执行 —— Hermes 则成为其外围的“外壳”（负责会话数据库、斜杠命令、消息网关、记忆和技能回顾）。
+Hermes 可以选择性地将 `openai/*` 和 `openai-codex/*` 轮次交给 [Codex CLI app-server](https://github.com/openai/codex) 处理，而不是运行其自身的工具循环。启用此功能后，终端命令、文件编辑、沙盒化和 MCP 工具调用都将在 Codex 的运行时内执行——Hermes 则成为其外围的 Shell（会话数据库、斜杠命令、消息网关、记忆和技能审查）。
 
-此功能**仅限手动启用**。除非你切换标志，否则 Hermes 的默认行为保持不变。Hermes 永远不会自动将你路由到此运行时。
+这是**仅限手动选择加入**的。除非你切换标志，否则 Hermes 的默认行为保持不变。Hermes 永远不会自动将你路由到此运行时。
+
+:::tip
+不使用 OpenAI Codex？`hermes setup --portal` 可以一步配置一个非 Codex 后端，支持 Claude/Gemini 等。请参阅 [Nous Portal](/integrations/nous-portal)。
+:::
 
 ## 为什么使用它
 
 - 使用与 Codex CLI 相同的认证流程，针对你的 **ChatGPT 订阅**运行 OpenAI Agent 轮次（无需 API 密钥）。
-- 使用 **Codex 自身的工具集和沙盒** —— 用于终端/读/写/搜索的 `shell`，用于结构化编辑的 `apply_patch`，用于规划的 `update_plan`，所有这些都在 seatbelt/landlock 沙盒中运行。
-- **原生 Codex 插件** —— Linear、GitHub、Gmail、Calendar、Canva 等 —— 通过 `codex plugin` 安装的插件会自动迁移并在你的 Hermes 会话中激活。
-- **Hermes 更丰富的工具随之而来** —— web_search、web_extract、浏览器自动化、视觉、图像生成、技能和 TTS 通过 MCP 回调工作。Codex 会回调 Hermes 以使用其自身未内置的工具。
-- **记忆和技能提示继续工作** —— Codex 的事件被投影到 Hermes 的消息格式中，因此自我改进循环看到的是看起来正常的对话记录。
+- 使用 **Codex 自身的工具集和沙盒**——用于终端/读/写/搜索的 `shell`，用于结构化编辑的 `apply_patch`，用于规划的 `update_plan`，所有这些都在 seatbelt/landlock 沙盒中运行。
+- **原生 Codex 插件**——Linear、GitHub、Gmail、Calendar、Canva 等——通过 `codex plugin` 安装的插件会自动迁移并在你的 Hermes 会话中激活。
+- **Hermes 更丰富的工具随之而来**——web_search、web_extract、浏览器自动化、视觉、图像生成、技能和 TTS 通过 MCP 回调工作。Codex 会回调 Hermes 以使用其自身未内置的工具。
+- **记忆和技能提示继续工作**——Codex 的事件被投影到 Hermes 的消息格式中，因此自我改进循环看到的是看起来正常的对话记录。
 
-## 模型实际拥有哪些工具
+## 模型实际拥有的工具
 
-这是大多数用户首先想了解的部分。当此运行时启用时，运行你轮次的模型拥有三个独立的工具来源：
+这是大多数用户想提前了解的部分。当此运行时启用时，运行你轮次的模型拥有三个独立的工具来源：
 
-### 1. Codex 内置工具集（始终启用）
+### 1. Codex 的内置工具集（始终启用）
 
-这些随 `codex app-server` 本身提供 —— 无需 Hermes 参与，无需 MCP，无需插件。运行时启动时，所有五个工具立即可用：
+这些随 `codex app-server` 本身提供——无需 Hermes 参与，无需 MCP，无需插件。所有五个工具在运行时启动时即可用：
 
 - **`shell`** —— 在沙盒内运行任意 shell 命令。这是模型读取文件（`cat`、`head`、`tail`）、写入文件（`echo > foo`、heredocs）、搜索文件（`find`、`rg`、`grep`）、导航目录（`ls`、`cd`）、运行构建、管理进程以及你在 bash 中执行的任何其他操作的方式。
-- **`apply_patch`** —— 以 Codex 的补丁格式应用结构化的多文件差异。模型使用此工具进行非平凡的代码编辑（添加函数、跨文件重构）；shell heredocs 仍可用于一次性写入。
+- **`apply_patch`** —— 以 Codex 的补丁格式应用结构化的多文件差异。模型使用此工具进行重要的代码编辑（添加函数、跨文件重构）；shell heredocs 仍可用于一次性写入。
 - **`update_plan`** —— Codex 内部的待办事项/计划跟踪器。相当于 Hermes 的 `todo` 工具，但完全在 Codex 的运行时内管理。
 - **`view_image`** —— 将本地图像文件加载到对话中，以便模型可以查看。
-- **`web_search`** —— 配置后，Codex 拥有其自身内置的网络搜索功能。Hermes 也通过下面的回调暴露 `web_search`（基于 Firecrawl）；模型会选择其偏好的那个。
+- **`web_search`** —— 配置后，Codex 拥有其自身内置的网络搜索。Hermes 也通过下面的回调暴露了 `web_search`（基于 Firecrawl）；模型会选择它偏好的那个。
 
-因此，**任何你通过终端执行的操作 —— 读/写/搜索/查找/运行 —— Codex 都原生支持**。沙盒配置文件（启用运行时默认为 `:workspace`）控制哪些内容可写。
+因此，**任何你通过终端执行的操作——读/写/搜索/查找/运行——Codex 都能原生处理**。沙盒配置文件（启用运行时默认为 `:workspace`）控制哪些内容可写。
 
 ### 2. 原生 Codex 插件（从你的 `codex plugin` 安装自动迁移）
 
-当你启用运行时，Hermes 会查询 Codex 的 `plugin/list` RPC，并为每个已安装的插件写入一个 `[plugins."<name>@openai-curated"]` 条目。插件本身由 Codex 管理，并通过 Codex 自身的 UI 一次性授权。
+当你启用运行时，Hermes 会查询 Codex 的 `plugin/list` RPC，并为每个已安装的插件写入一个 `[plugins."<name>@openai-curated"]` 条目。插件本身由 Codex 管理，并通过 Codex 自身的 UI 授权一次。
 
-示例（OpenClaw 线程中强调为“值得制作 YouTube 视频”的那些）：
+示例（OpenClaw 线程强调为“值得制作 YouTube 视频”的那些）：
 
 - **Linear** —— 查找/更新问题
 - **GitHub** —— 搜索代码、查看 PR、评论
@@ -45,26 +49,26 @@ Hermes 可以选择性地将 `openai/*` 和 `openai-codex/*` 轮次交给 [Codex
 - **Google Calendar** —— 创建/查找事件
 - **Outlook calendar/email** —— 通过 Microsoft 连接器实现相同功能
 - **Canva** —— 设计生成
-- ……以及你通过 `codex plugin marketplace add openai-curated` + `codex plugin install ...` 安装的任何其他插件
+- ...以及你通过 `codex plugin marketplace add openai-curated` + `codex plugin install ...` 安装的任何其他插件
 
-**不迁移**的内容：
-- 你尚未安装的插件 —— 请先在 Codex 中安装它们。
-- ChatGPT 应用市场条目（`app/list`）—— 这些已经通过你的账户认证在 Codex 内部启用。
+**不迁移的内容**：
+- 你尚未安装的插件——先在 Codex 中安装它们。
+- ChatGPT 应用市场条目（`app/list`）——这些已经通过你的账户认证在 Codex 内部启用。
 
-### 3. Hermes 工具回调（MCP 服务器，注册在 `~/.codex/config.toml` 中）
+### 3. Hermes 工具回调（MCP 服务器，在 `~/.codex/config.toml` 中注册）
 
-Hermes 将自身注册为 MCP 服务器，以便 Codex 可以回调使用 Codex 未提供的工具。通过回调可用的工具：
+Hermes 将自身注册为 MCP 服务器，以便 Codex 可以回调使用 Codex 未提供的工具。通过回调可用：
 
 - **`web_search`** / **`web_extract`** —— 基于 Firecrawl；对于结构化内容，通常比网页抓取更清晰。
 - **`browser_navigate` / `browser_click` / `browser_type` / `browser_press` / `browser_snapshot` / `browser_scroll` / `browser_back` / `browser_get_images` / `browser_console` / `browser_vision`** —— 通过 Camofox 或 Browserbase 实现完整的浏览器自动化。
 - **`vision_analyze`** —— 调用单独的视觉模型来检查图像（与 Codex 的 `view_image` 不同，后者将图像加载到对话中）。
-- **`image_generate`** —— 通过 Hermes 的 image_gen 插件链生成图像。
+- **`image_generate`** —— 通过 Hermes 的 image_gen 插件链进行图像生成。
 - **`skill_view` / `skills_list`** —— 从 Hermes 的技能库中读取。
 - **`text_to_speech`** —— 通过 Hermes 配置的提供商进行 TTS。
 
 当模型需要这些工具之一时，Codex 通过 stdio MCP 生成 `hermes_tools_mcp_server` 子进程，调用通过 `model_tools.handle_function_call()` 分发（与 Hermes 默认运行时的代码路径相同），结果像任何其他 MCP 响应一样返回给 Codex。
 
-### 此运行时不可用的工具
+### 此运行时不可用的功能
 
 这四个 Hermes 工具需要运行中的 AIAgent 上下文（循环中状态）来分发，而无状态的 MCP 回调无法驱动它们。当你需要其中任何一个时，请切换回默认运行时（`/codex-runtime auto`）：
 
@@ -77,24 +81,24 @@ Hermes 将自身注册为 MCP 服务器，以便 Codex 可以回调使用 Codex 
 
 ### `/goal`（Ralph 循环）
 
-**在此运行时上工作。** 目标以会话 ID 为键持久化在 `state_meta` 中，延续提示作为普通用户消息通过 `run_conversation()` 反馈，Codex 原生执行下一个轮次。目标判断器通过辅助客户端运行（通过 config.yaml 中的 `auxiliary.goal_judge` 配置），与哪个运行时处于活动状态无关。如果 Codex 在审批上停滞，判断器的“受阻，需要用户输入”裁决是一个干净的退出方式。
-**需要注意的一点：** 每个续写提示词都是 Codex 的一次全新轮次，这意味着 Codex 会从头重新评估命令批准策略。如果你正在执行一个包含大量写入操作的长期目标，预计会比在单个会话内任务中看到更多的批准提示。设置 `default_permissions = ":workspace"`（Hermes 在启用运行时时会自动执行此操作），这样简单的 workspace 写入操作就不需要提示。
+**在此运行时上工作。** 目标以会话 ID 为键持久化在 `state_meta` 中，延续提示作为普通用户消息通过 `run_conversation()` 反馈，Codex 原生执行下一轮次。目标判断器通过辅助客户端运行（通过 config.yaml 中的 `auxiliary.goal_judge` 配置），与哪个运行时处于活动状态无关。如果 Codex 在审批上停滞，判断器的“受阻，需要用户输入”裁决是一个干净的退出方式。
+**需要注意的一点：** 每个续写提示词都是一次全新的 Codex 轮次，这意味着 Codex 会从头重新评估命令批准策略。如果你正在执行一个包含大量写入操作的长期目标，预计会比在单个会话内任务中看到更多的批准提示。设置 `default_permissions = ":workspace"`（当你启用此运行时，Hermes 会自动执行此操作），这样简单的 workspace 写入操作就不需要提示。
 
 ### 看板（多 Agent 工作树调度）
 
-**在此运行时上工作，有一个微妙的依赖。** 看板调度器将每个工作进程作为单独的 `hermes chat -q` 子进程启动，该子进程会读取用户的配置——这意味着如果全局设置了 `model.openai_runtime: codex_app_server`，工作进程也会在 Codex 运行时上启动。
+**在此运行时上工作，有一个微妙的依赖。** 看板调度器将每个工作进程作为一个独立的 `hermes chat -q` 子进程启动，该子进程会读取用户的配置——这意味着如果全局设置了 `model.openai_runtime: codex_app_server`，工作进程也会在 Codex 运行时上启动。
 
 在 Codex 运行时工作进程内部可用的功能：
-- Codex 的完整工具集（shell、apply_patch、update_plan、view_image、web_search）——工作进程原生执行其实际任务工作
+- Codex 的完整工具集（shell、apply_patch、update_plan、view_image、web_search）——工作进程原生执行其实际任务工作。
 - 已迁移的 Codex 插件——Linear、GitHub 等。
-- 用于 browser_*、vision、image_gen、skills、TTS 的 Hermes 工具回调
+- 用于 browser_*、vision、image_gen、skills、TTS 的 Hermes 工具回调。
 
 由于 MCP 回调暴露了它们，以下功能也可用：
-- **`kanban_complete` / `kanban_block` / `kanban_comment` / `kanban_heartbeat`** —— 工作进程交接工具。这些工具从环境变量（由调度器设置）中读取 `HERMES_KANBAN_TASK`，正确控制访问权限，并写入由 `HERMES_KANBAN_DB` 固定的每个看板的 SQLite 数据库。如果回调中没有这些工具，此运行时上的工作进程可以执行其任务但无法报告回来，直到调度器超时为止。
-- **`kanban_show` / `kanban_list`** —— 工作进程用于检查其自身上下文的只读看板查询。
-- **`kanban_create` / `kanban_unblock` / `kanban_link`** —— 仅限编排器使用的操作。适用于需要在 Codex 运行时上运行以调度新任务的编排器 Agent。
+- **`kanban_complete` / `kanban_block` / `kanban_comment` / `kanban_heartbeat`** —— 工作进程交接工具。这些工具从环境变量（由调度器设置）读取 `HERMES_KANBAN_TASK`，正确控制访问权限，并写入由 `HERMES_KANBAN_DB` 固定的每个看板的 SQLite 数据库。如果回调中没有这些工具，此运行时上的工作进程可以执行其任务但无法报告回来，直到调度器超时挂起。
+- **`kanban_show` / `kanban_list`** —— 工作进程用于检查自身上下文的只读看板查询。
+- **`kanban_create` / `kanban_unblock` / `kanban_link`** —— 仅限编排器的操作。适用于需要在 Codex 运行时上运行以分派新任务的编排器 Agent。
 
-看板工具由调度器设置的 `HERMES_KANBAN_TASK` 环境变量控制——该变量会传播到 Codex 子进程（Codex 继承环境变量），并从那里传播到生成的 `hermes-tools` MCP 服务器子进程。因此，工具能看到正确的任务 ID 并正确控制访问。对于 Codex app-server 工作进程，当存在 `HERMES_KANBAN_TASK` 时，Hermes 还会传递狭窄的 app-server 沙盒覆盖：保持 `workspace-write` 沙盒，并添加**看板数据库目录加上调度器固定的每个看板路径**作为额外的可写根目录（`HERMES_KANBAN_WORKSPACES_ROOT`、`HERMES_KANBAN_WORKSPACE`、旧的 `HERMES_KANBAN_ROOT`——去重后，数据库目录优先），并默认保持网络禁用。这避免了脆弱的 `:danger-no-sandbox` 变通方法，同时允许 `kanban_complete` / `kanban_block` 更新看板数据库**并且**允许工作进程在数据库目录之外的工作空间挂载下写入报告/工件（例如，在单独驱动器上的 `/media/.../kanban-workspaces/...` —— [issue #27941](https://github.com/NousResearch/hermes-agent/issues/27941)）。
+看板工具由调度器设置的 `HERMES_KANBAN_TASK` 环境变量控制——该变量会传播到 Codex 子进程（Codex 继承环境变量），并从那里传播到生成的 `hermes-tools` MCP 服务器子进程。因此，工具能看到正确的任务 ID 并正确控制访问。对于 Codex app-server 工作进程，当存在 `HERMES_KANBAN_TASK` 时，Hermes 还会传递狭窄的 app-server 沙盒覆盖：保持 `workspace-write` 沙盒，添加**看板数据库目录加上调度器固定的每个看板路径**作为额外的可写根目录（`HERMES_KANBAN_WORKSPACES_ROOT`、`HERMES_KANBAN_WORKSPACE`、旧的 `HERMES_KANBAN_ROOT`——去重后，数据库目录优先），并默认保持网络禁用。这避免了脆弱的 `:danger-no-sandbox` 变通方法，同时允许 `kanban_complete` / `kanban_block` 更新看板数据库**并且**允许工作进程在数据库目录外部的 workspace 挂载下写入报告/工件（例如，在单独驱动器上的 `/media/.../kanban-workspaces/...` —— [issue #27941](https://github.com/NousResearch/hermes-agent/issues/27941)）。
 
 ### 定时任务
 
@@ -136,9 +140,9 @@ Hermes 将自身注册为 MCP 服务器，以便 Codex 可以回调使用 Codex 
    ```
 2. **Codex OAuth 登录。** Codex 子进程读取 `~/.codex/auth.json`。有两种方式填充它：
    ```bash
-   codex login                  # 将令牌写入 ~/.codex/auth.json
+   codex login                  # 将 Token 写入 ~/.codex/auth.json
    ```
-   Hermes 自身的 `hermes auth login codex` 写入 `~/.hermes/auth.json` —— 那是单独的会话。**如果你还没有，请单独运行 `codex login`**。
+   Hermes 自己的 `hermes auth login codex` 写入 `~/.hermes/auth.json` —— 那是单独的会话。**如果你还没有，请单独运行 `codex login`**。
 
 3. **（可选）安装你想要的 Codex 插件。** 当你启用运行时，Hermes 会自动迁移你已通过 Codex CLI 安装的任何精选插件：
    ```bash
@@ -159,9 +163,9 @@ Hermes 将自身注册为 MCP 服务器，以便 Codex 可以回调使用 Codex 
 - 验证 `codex` CLI 是否已安装（如果未安装，会提示安装信息并阻止）。
 - 将 `model.openai_runtime: codex_app_server` 持久化到你的 config.yaml。
 - 将用户 MCP 服务器从 `~/.hermes/config.yaml` 迁移到 `~/.codex/config.toml`。
-- **发现并迁移已安装的原生 Codex 插件**（Linear、GitHub、Gmail、Calendar、Canva 等），通过查询 Codex 的 `plugin/list` RPC 实现。
+- **发现并迁移已安装的原生 Codex 插件**（Linear、GitHub、Gmail、Calendar、Canva 等），通过查询 Codex 的 `plugin/list` RPC。
 - **将 Hermes 自身的工具注册为 MCP 服务器**，以便 Codex 子进程可以回调 Codex 未内置的工具。
-- **写入 `default_permissions = ":workspace"`**，以便沙盒允许在 workspace 内进行写入操作，而无需为每个操作提示。
+- **写入 `default_permissions = ":workspace"`**，以便沙盒允许在 workspace 内写入，而无需为每个操作提示。
 - 告诉你迁移了什么。在**下一个**会话生效——当前缓存的 Agent 保持先前的运行时，以便提示词缓存保持有效。
 同义词：`/codex-runtime on`、`/codex-runtime off`、`/codex-runtime auto`。
 
@@ -173,33 +177,33 @@ Hermes 将自身注册为 MCP 服务器，以便 Codex 可以回调使用 Codex 
 你也可以在 `~/.hermes/config.yaml` 中手动设置：
 ```yaml
 model:
-  openai_runtime: codex_app_server   # 默认是 "auto" (= Hermes 运行时)
+  openai_runtime: codex_app_server   # 默认为 "auto" (= Hermes 运行时)
 ```
 
 ## 自我改进循环（记忆 + 技能提示）
 
 Hermes 的后台自我改进会在计数器达到阈值时触发：
 
-- 每 **10 条** 用户提示 → 一个分叉的审查 Agent 会查看对话，并决定是否应将任何内容保存到记忆。
-- 在单个回合内每 **10 次** 工具迭代 → 同样的逻辑，但针对技能（`skill_manage` 写入）。
+- 每 **10 条用户提示** → 一个分叉的审查 Agent 会查看对话，并决定是否应将任何内容保存到记忆。
+- 在单个回合内每 **10 次工具迭代** → 同样的逻辑，但针对技能（`skill_manage` 写入）。
 
-**两者都继续在 codex 运行时上工作。** codex 路径将每个已完成的 `commandExecution` / `fileChange` / `mcpToolCall` / `dynamicToolCall` 项投射为一个合成的 `assistant tool_call` + `tool` 结果消息，因此当审查运行时，它看到的是与默认 Hermes 运行时相同的结构。
+**两者都继续在 codex 运行时上工作。** codex 路径将每个已完成的 `commandExecution` / `fileChange` / `mcpToolCall` / `dynamicToolCall` 项投射为合成的 `assistant tool_call` + `tool` 结果消息，因此当审查运行时，它看到的是与默认 Hermes 运行时相同的结构。
 
 连接保持等效的方式：
 
 | | 默认运行时 | Codex 运行时 |
 |---|---|---|
-| `_turns_since_memory` 递增 | 在 `run_conversation` 预循环中，每条用户提示一次 | 在提前返回之前，通过相同的代码路径 |
-| `_iters_since_skill` 递增 | 在聊天补全循环中，每次工具迭代一次 | 在 codex 回合返回后，通过 `turn.tool_iterations` |
+| `_turns_since_memory` 递增 | 每次用户提示，在 `run_conversation` 预循环中 | 相同的代码路径，在提前返回之前 |
+| `_iters_since_skill` 递增 | 在聊天补全循环中每次工具迭代 | 在 codex 回合返回后，通过 `turn.tool_iterations` |
 | 记忆触发 (`_turns_since_memory >= _memory_nudge_interval`) | 在预循环中计算，在响应后触发 | 在预循环中计算，传递给 codex 辅助函数 |
 | 技能触发 (`_iters_since_skill >= _skill_nudge_interval`) | 在循环后计算 | 在 codex 回合后计算 |
 | `_spawn_background_review(messages_snapshot=..., review_memory=..., review_skills=...)` | 任一触发器触发时调用 | 任一触发器触发时以相同方式调用 |
 
-一个细节：审查分叉本身需要调用 Hermes 的 Agent 循环工具（`memory`、`skill_manage`），这需要 Hermes 自身的调度。因此，当父 Agent 在 `codex_app_server` 上时，审查分叉会被**降级到 `codex_responses`** —— 使用相同的 OAuth 凭证、相同的 `openai-codex` 提供商，但直接与 OpenAI 的 Responses API 通信，这样 Hermes 就拥有了循环控制权，Agent 循环工具可以正常工作。这对用户是不可见的。
+一个细节：审查分叉本身需要调用 Hermes 的 Agent 循环工具（`memory`、`skill_manage`），这需要 Hermes 自己的调度。因此，当父 Agent 在 `codex_app_server` 上时，审查分叉会被**降级到 `codex_responses`** —— 使用相同的 OAuth 凭证、相同的 `openai-codex` 提供商，但直接与 OpenAI 的 Responses API 通信，以便 Hermes 拥有循环且 Agent 循环工具可以工作。这对用户是不可见的。
 
 最终效果：启用 codex 运行时，你的记忆和技能提示会像往常一样继续触发。
 
-## 审批机制如何工作
+## 审批如何工作
 
 Codex 在执行命令或应用补丁之前会请求批准。这些请求会被转换为 Hermes 标准的“危险命令”提示：
 
@@ -213,7 +217,7 @@ Codex 在执行命令或应用补丁之前会请求批准。这些请求会被�
 │   2. 允许在此会话中                   │
 │   3. 拒绝                             │
 │                                       │
-│ Codex 请求在 /your/cwd 中执行         │
+│ Codex 请求在 /your/cwd 中执行        │
 ╰───────────────────────────────────────╯
 ```
 
@@ -221,7 +225,7 @@ Codex 在执行命令或应用补丁之前会请求批准。这些请求会被�
 - **允许在此会话中** → Codex 不会为类似命令再次提示。
 - **拒绝** → 命令被拒绝；Codex 继续以只读模式运行。
 
-对于 `apply_patch`（文件编辑）审批，当 codex 通过相应的 `fileChange` 项提供数据时，Hermes 会显示更改摘要（`1 处添加，1 处更新：/tmp/new.py, /tmp/old.py`）。
+对于 `apply_patch`（文件编辑）审批，当 codex 通过相应的 `fileChange` 项提供数据时，Hermes 会显示更改摘要（`1 处新增，1 处更新：/tmp/new.py, /tmp/old.py`）。
 
 ## 权限配置文件
 
@@ -236,15 +240,15 @@ Codex 有三个内置的权限配置文件：
 default_permissions = ":read-only"
 ```
 
-（只要你的覆盖设置在 `# managed by hermes-agent` 标记之外，Hermes 在重新迁移时会保留它。）
+（只要你的覆盖设置位于 `# managed by hermes-agent` 标记之外，Hermes 在重新迁移时会保留它。）
 
 ## 辅助任务和 ChatGPT 订阅 Token 成本
 
-当此运行时与 `openai-codex` 提供商一起启用时，**辅助任务（标题生成、上下文压缩、视觉自动检测、后台自我改进审查分叉）默认也会流经你的 ChatGPT 订阅**，因为当没有为每个任务设置覆盖时，Hermes 的辅助客户端会使用主要的提供商/模型。
+当此运行时与 `openai-codex` 提供商一起启用时，**辅助任务（标题生成、上下文压缩、视觉自动检测、后台自我改进审查分叉）默认也会通过你的 ChatGPT 订阅进行**，因为当没有为每个任务设置覆盖时，Hermes 的辅助客户端会使用主要的提供商/模型。
 
 这并非 `codex_app_server` 特有 —— 现有的 `codex_responses` 路径也是如此 —— 但在这里更明显，因为你明确选择了订阅计费。
 
-要将特定的辅助任务路由到更便宜/不同的模型，请在 `~/.hermes/config.yaml` 中设置明确的覆盖：
+要将特定的辅助任务路由到更便宜/不同的模型，请在 `~/.hermes/config.yaml` 中设置显式覆盖：
 
 ```yaml
 auxiliary:
@@ -262,11 +266,11 @@ auxiliary:
     model: google/gemini-3-flash-preview
 ```
 
-自我改进审查分叉通过 `_current_main_runtime()` 继承主运行时，并且 Hermes 会自动将其从 `codex_app_server` 降级到 `codex_responses`（这样分叉才能实际调用 `memory` 和 `skill_manage` —— Hermes 自身的 Agent 循环工具）。除非你将辅助任务路由到其他地方，否则该分叉仍会使用你的订阅认证。
+自我改进审查分叉通过 `_current_main_runtime()` 继承主运行时，并且 Hermes 会自动将其从 `codex_app_server` 降级到 `codex_responses`（以便分叉可以实际调用 `memory` 和 `skill_manage` —— Hermes 自己的 Agent 循环工具）。除非你将辅助任务路由到其他地方，否则该分叉仍会使用你的订阅认证。
 
 ## 安全地编辑 `~/.codex/config.toml`
 
-Hermes 将其管理的所有内容都包装在两个标记注释之间：
+Hermes 将其管理的所有内容包装在两个标记注释之间：
 
 ```toml
 # managed by hermes-agent — `hermes codex-runtime migrate` 重新生成此部分
@@ -278,10 +282,10 @@ default_permissions = ":workspace"
 # end hermes-agent managed section
 ```
 
-**该块之外**的任何内容都属于你。重新运行迁移（通过 `/codex-runtime codex_app_server` 或每当切换运行时开启时）会原地替换受管理的块，但会逐字保留其上下的用户内容。这意味着你可以：
+**该块之外**的任何内容都属于你。重新运行迁移（通过 `/codex-runtime codex_app_server` 或每当切换运行时）会替换受管理的块，但会逐字保留其上下的用户内容。这意味着你可以：
 
 - 添加 Hermes 不知道的自己的 MCP 服务器
-- 如果你更喜欢被提示，将 `default_permissions` 覆盖为 `:read-only`
+- 如果你希望被提示，将 `default_permissions` 覆盖为 `:read-only`
 - 配置仅限 codex 的选项（模型、提供商、otel 等）
 - 在 `[permissions.<name>]` 表中添加用户定义的权限配置文件
 在托管块内添加的任何内容都会在下一次迁移时被覆盖。如果你需要修改托管块，请提交 issue，我们会添加相应的配置项。
@@ -293,13 +297,13 @@ default_permissions = ":workspace"
 如果你希望每个配置文件都有独立的 Codex 隔离（独立的认证、独立的已安装插件、独立的配置），请为每个配置文件显式设置 `CODEX_HOME`。最简洁的方法是将其指向 `HERMES_HOME` 下的一个目录：
 
 ```bash
-# 在工作配置文件中，你可以这样包装 hermes 命令：
+# 在工作配置文件中，你可以包装 hermes 命令：
 CODEX_HOME=~/.hermes/profiles/work/codex hermes chat
 ```
 
 你需要在使用该 `CODEX_HOME` 设置的情况下重新运行一次 `codex login`，以便 OAuth Token 存储在配置文件作用域的位置。之后，`hermes -p work` 将在隔离的 Codex 状态下运行。
 
-我们不自动设置此作用域，因为移动现有用户的 `~/.codex/` 会静默地使其 Codex CLI 认证失效——任何已经运行过 `codex login` 的用户都必须重新认证。选择加入比让用户感到意外更安全。
+我们没有自动设置此作用域，因为移动现有用户的 `~/.codex/` 会静默地使其 Codex CLI 认证失效——任何已经运行过 `codex login` 的用户都必须重新认证。选择加入比让用户感到意外更安全。
 
 ## HOME 环境变量透传
 
@@ -308,7 +312,7 @@ Hermes 在生成 codex app-server 子进程时**不会**重写 `HOME`（我们�
 - Codex 通过其 `shell` 工具运行的命令可以看到真实的用户 `HOME`，并正确找到 `~/.gitconfig`、`~/.gh/`、`~/.aws/`、`~/.npmrc` 等。
 - Codex 的内部状态通过 `CODEX_HOME` 保持隔离（默认指向 `~/.codex/`）。
 
-这与 OpenClaw 在早期实验后确定的边界一致：隔离 Codex 的状态，不干扰用户的 home 目录。（参见 openclaw/openclaw#81562。）
+这与 OpenClaw 经过早期实验后确定的边界一致：隔离 Codex 的状态，不干扰用户的主目录。（参见 openclaw/openclaw#81562。）
 
 ## MCP 服务器迁移
 
@@ -341,7 +345,7 @@ Hermes 的 `mcp_servers` 配置会自动转换为 Codex 期望的 TOML 格式。
 
 ## Hermes 工具回调（新的 MCP 服务器）
 
-Codex 内置的工具集涵盖了 shell/文件操作/补丁，但没有网络搜索、浏览器自动化、视觉、图像生成等功能。为了在 codex 轮次中保持这些功能可用，Hermes 在 `~/.codex/config.toml` 中将自己注册为一个 MCP 服务器：
+Codex 的内置工具集涵盖了 shell/文件操作/补丁，但没有网络搜索、浏览器自动化、视觉、图像生成等功能。为了在 codex 回合中保持这些功能可用，Hermes 在 `~/.codex/config.toml` 中将自己注册为一个 MCP 服务器：
 
 ```toml
 [mcp_servers.hermes-tools]
@@ -354,9 +358,9 @@ tool_timeout_sec = 600.0
 
 当模型调用 `web_search`（或另一个暴露的 Hermes 工具）时，codex 通过 stdio 生成 `hermes_tools_mcp_server` 子进程，请求通过 `model_tools.handle_function_call()` 分发，结果像任何其他 MCP 响应一样投射回 codex。
 
-**通过回调可用的工具：** `web_search`, `web_extract`, `browser_navigate`, `browser_click`, `browser_type`, `browser_press`, `browser_snapshot`, `browser_scroll`, `browser_back`, `browser_get_images`, `browser_console`, `browser_vision`, `vision_analyze`, `image_generate`, `skill_view`, `skills_list`, `text_to_speech`.
+**通过回调可用的工具：** `web_search`、`web_extract`、`browser_navigate`、`browser_click`、`browser_type`、`browser_press`、`browser_snapshot`、`browser_scroll`、`browser_back`、`browser_get_images`、`browser_console`、`browser_vision`、`vision_analyze`、`image_generate`、`skill_view`、`skills_list`、`text_to_speech`。
 
-**不可用的工具：** `delegate_task`, `memory`, `session_search`, `todo`。这些需要运行中的 AIAgent 上下文来分发（循环中的状态），而无状态的 MCP 回调无法驱动它们。当你需要这些工具时，请使用默认的 Hermes 运行时（`/codex-runtime auto`）。
+**不可用的工具：** `delegate_task`、`memory`、`session_search`、`todo`。这些需要运行中的 AIAgent 上下文来分发（循环中的状态），而无状态的 MCP 回调无法驱动它们。当你需要这些工具时，请使用默认的 Hermes 运行时（`/codex-runtime auto`）。
 
 ## 禁用
 
@@ -384,10 +388,10 @@ tool_timeout_sec = 600.0
 已知限制：
 
 - **Hermes 认证和 codex 认证是独立的会话。** 为了获得最简洁的用户体验，你需要同时进行 `codex login` 和 `hermes auth login codex`（运行时使用 codex 的会话进行 LLM 调用）。这是 Hermes 的 `_import_codex_cli_tokens` 中的一个有意设计选择——Hermes 不会与 codex CLI 共享 OAuth 状态，以避免在 Token 刷新时相互覆盖。
-- **在此运行时上，`delegate_task`、`memory`、`session_search`、`todo` 不可用。** 它们需要运行中的 AIAgent 上下文，而无状态的 MCP 回调无法提供。当你需要这些工具时，请使用 `/codex-runtime auto`。
+- **`delegate_task`、`memory`、`session_search`、`todo` 在此运行时不可用。** 它们需要运行中的 AIAgent 上下文，而无状态的 MCP 回调无法提供。当你需要这些工具时，请使用 `/codex-runtime auto`。
 - **当 codex 不跟踪变更集时，审批提示中没有内联补丁预览。** Codex 的 `fileChange` 审批参数并不总是携带变更集。Hermes 在可能的情况下会缓存来自相应 `item/started` 通知的数据，但如果审批在项目流式传输之前到达，提示将回退到 codex 提供的任何 `reason`。
-- **不能保证亚秒级的取消。** 流式传输中的中断（当 codex 正在响应时按 Ctrl+C）通过 `turn/interrupt` 发送，但如果 codex 已经刷新了最终消息，你仍然会得到响应。
-如果发现 Bug，请[提交 issue](https://github.com/NousResearch/hermes-agent/issues)，并附上 `hermes logs --since 5m` 的输出。在标题中提及 `codex-runtime` 以便于分类处理。
+- **无法保证亚秒级取消。** 流式传输中的中断（当 codex 正在响应时按 Ctrl+C）通过 `turn/interrupt` 发送，但如果 codex 已经刷新了最终消息，你仍然会得到响应。
+如果发现 bug，请[提交 issue](https://github.com/NousResearch/hermes-agent/issues)，并附上 `hermes logs --since 5m` 的输出。在标题中提及 `codex-runtime` 以便于分类处理。
 
 ## 架构
 

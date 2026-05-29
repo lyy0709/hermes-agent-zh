@@ -21,7 +21,7 @@ description: "从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `PDF`, `Documents`, `Research`, `Arxiv`, `Text-Extraction`, `OCR` |
-| 相关技能 | [`powerpoint`](/user-guide/skills/bundled/productivity/productivity-powerpoint) |
+| 相关技能 | [`powerpoint`](/docs/user-guide/skills/bundled/productivity/productivity-powerpoint) |
 
 ## 参考：完整的 SKILL.md
 
@@ -37,7 +37,7 @@ description: "从 PDF/扫描件中提取文本 (pymupdf, marker-pdf)"
 
 ## 步骤 1：是否有远程 URL？
 
-如果文档有 URL，**始终首先尝试 `web_extract`**：
+如果文档有 URL，**始终先尝试 `web_extract`**：
 
 ```
 web_extract(urls=["https://arxiv.org/pdf/2402.03300"])
@@ -46,7 +46,7 @@ web_extract(urls=["https://example.com/report.pdf"])
 
 这通过 Firecrawl 处理 PDF 到 Markdown 的转换，无需本地依赖。
 
-仅在以下情况使用本地提取：文件是本地文件、web_extract 失败，或者您需要批量处理。
+仅在以下情况使用本地提取：文件是本地文件、web_extract 失败，或者您需要进行批量处理。
 
 ## 步骤 2：选择本地提取器
 
@@ -123,7 +123,7 @@ python scripts/extract_marker.py document.pdf --use_llm      # LLM 增强的准�
 **CLI** (随 marker-pdf 安装)：
 ```bash
 marker_single document.pdf --output_dir ./output
-marker /path/to/folder --workers 4    # 批量
+marker /path/to/folder --workers 4    # 批量处理
 ```
 
 ---

@@ -1,14 +1,14 @@
 ---
-title: "GitHub 代码审查 — 审查 PR：通过 gh 或 REST API 查看差异和行内评论"
-sidebar_label: "GitHub 代码审查"
-description: "审查 PR：通过 gh 或 REST API 查看差异和行内评论"
+title: "Github 代码审查 — 审查 PR：通过 gh 或 REST 查看差异、添加行内评论"
+sidebar_label: "Github 代码审查"
+description: "审查 PR：通过 gh 或 REST 查看差异、添加行内评论"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# GitHub 代码审查
+# Github 代码审查
 
-审查 PR：通过 gh 或 REST API 查看差异和行内评论。
+审查 PR：通过 gh 或 REST 查看差异、添加行内评论。
 
 ## 技能元数据
 
@@ -21,7 +21,7 @@ description: "审查 PR：通过 gh 或 REST API 查看差异和行内评论"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `GitHub`, `Code-Review`, `Pull-Requests`, `Git`, `Quality` |
-| 相关技能 | [`github-auth`](/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/user-guide/skills/bundled/github/github-github-pr-workflow) |
+| 相关技能 | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,7 +31,7 @@ description: "审查 PR：通过 gh 或 REST API 查看差异和行内评论"
 
 # GitHub 代码审查
 
-在推送前审查本地更改，或审查 GitHub 上开放的 PR。此技能大部分使用纯 `git` — `gh`/`curl` 的区分仅对 PR 级别的交互有影响。
+在推送前审查本地更改，或审查 GitHub 上开放的 PR。此技能大部分使用纯 `git` — `gh`/`curl` 的分工仅对 PR 级别的交互有影响。
 
 ## 先决条件
 
@@ -64,7 +64,7 @@ REPO=$(echo "$OWNER_REPO" | cut -d/ -f2)
 
 ## 1. 审查本地更改（推送前）
 
-这是纯 `git` 操作 — 随处可用，无需 API。
+这是纯 `git` — 随处可用，无需 API。
 
 ### 获取差异
 
@@ -117,7 +117,7 @@ git diff main...HEAD | grep -n "<<<<<<\|>>>>>>\|======="
 
 ### 审查输出格式
 
-审查本地更改时，按以下结构呈现发现：
+审查本地更改时，按此结构呈现发现：
 
 ```
 ## 代码审查摘要
@@ -132,7 +132,7 @@ git diff main...HEAD | grep -n "<<<<<<\|>>>>>>\|======="
 
 ### 建议
 - **src/utils/helpers.py:8** — 与 `src/core/utils.py:34` 的逻辑重复。建议合并。
-- **tests/test_auth.py** — 缺少边界情况：过期 Token 测试。
+- **tests/test_auth.py** — 缺少边界情况测试：过期 Token 测试。
 
 ### 良好之处
 - 中间件层关注点分离清晰
@@ -183,14 +183,14 @@ for f in json.load(sys.stdin):
 
 ### 在本地检出 PR 以进行全面审查
 
-这使用纯 `git` 即可 — 无需 `gh`：
+这适用于纯 `git` — 无需 `gh`：
 
 ```bash
 # 获取 PR 分支并检出
 git fetch origin pull/123/head:pr-123
 git checkout pr-123
 
-# 现在你可以使用 read_file、search_files、运行测试等。
+# 现在可以使用 read_file、search_files、运行测试等。
 
 # 查看与基础分支的差异
 git diff main...pr-123
@@ -221,7 +221,7 @@ curl -s -X POST \
 
 ### 留下行内审查评论
 
-**单行内评论 — 使用 gh（通过 API）：**
+**单个行内评论 — 使用 gh（通过 API）：**
 
 ```bash
 HEAD_SHA=$(gh pr view 123 --json headRefOid --jq '.headRefOid')
@@ -296,12 +296,12 @@ curl -s -X POST \
 
 ## 3. 评审清单
 
-执行代码评审（本地或 PR）时，请系统性地检查：
+执行代码评审（本地或 PR）时，系统性地检查：
 
 ### 正确性
 - 代码是否实现了其声称的功能？
-- 边界情况是否已处理（空输入、空值、大数据量、并发访问）？
-- 错误路径是否得到妥善处理？
+- 边界情况是否已处理（空输入、空值、大数据、并发访问）？
+- 错误路径是否优雅处理？
 
 ### 安全性
 - 没有硬编码的密钥、凭据或 API 密钥
@@ -312,7 +312,7 @@ curl -s -X POST \
 ### 代码质量
 - 命名清晰（变量、函数、类）
 - 没有不必要的复杂性或过早的抽象
-- DRY — 没有应该被提取的重复逻辑
+- DRY — 没有应该提取的重复逻辑
 - 函数职责单一
 
 ### 测试
@@ -322,7 +322,7 @@ curl -s -X POST \
 
 ### 性能
 - 没有 N+1 查询或不必要的循环
-- 在有益处的地方进行了适当的缓存
+- 在有益的地方进行适当的缓存
 - 在异步代码路径中没有阻塞操作
 
 ### 文档
@@ -334,14 +334,14 @@ curl -s -X POST \
 
 ## 4. 推送前评审工作流
 
-当用户要求你“评审代码”或“在推送前检查”时：
+当用户要求你“评审代码”或“推送前检查”时：
 
 1. `git diff main...HEAD --stat` — 查看变更范围
 2. `git diff main...HEAD` — 阅读完整的差异
 3. 对于每个更改的文件，如果需要更多上下文，请使用 `read_file`
 4. 应用上述清单
-5. 以结构化格式呈现发现的问题（关键问题 / 警告 / 建议 / 良好）
-6. 如果发现关键问题，建议用户在推送前修复它们
+5. 以结构化格式呈现发现（关键问题 / 警告 / 建议 / 良好）
+6. 如果发现关键问题，在用户推送前提供修复建议
 
 ---
 
@@ -358,7 +358,7 @@ source "${HERMES_HOME:-$HOME/.hermes}/skills/github/github-auth/scripts/gh-env.s
 
 ### 步骤 2：收集 PR 上下文
 
-在深入代码之前，获取 PR 元数据、描述和更改文件列表以了解范围。
+在深入研究代码之前，获取 PR 元数据、描述和更改文件列表以了解范围。
 
 **使用 gh：**
 ```bash
@@ -382,7 +382,7 @@ curl -s -H "Authorization: token $GITHUB_TOKEN" \
 
 ### 步骤 3：在本地检出 PR
 
-这让你可以完全访问 `read_file`、`search_files` 以及运行测试的能力。
+这使你能够完全访问 `read_file`、`search_files` 以及运行测试的能力。
 
 ```bash
 git fetch origin pull/$PR_NUMBER/head:pr-$PR_NUMBER
@@ -428,17 +428,17 @@ ruff check . 2>&1 | head -30
 # 如果没有问题 — 批准
 gh pr review $PR_NUMBER --approve --body "由 Hermes Agent 评审。代码看起来干净 — 测试覆盖良好，没有安全问题。"
 
-# 如果发现问题 — 请求更改并附带行内评论
+# 如果发现问题 — 请求更改并附上行内评论
 gh pr review $PR_NUMBER --request-changes --body "发现了一些问题 — 请查看行内评论。"
 ```
 
-**使用 curl — 包含多条行内评论的原子化评审：**
+**使用 curl — 包含多条行内评论的原子评审：**
 ```bash
 HEAD_SHA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$GH_OWNER/$GH_REPO/pulls/$PR_NUMBER \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['head']['sha'])")
 
-# 构建评审 JSON — event 可以是 APPROVE、REQUEST_CHANGES 或 COMMENT
+# 构建评审 JSON — 事件是 APPROVE、REQUEST_CHANGES 或 COMMENT
 curl -s -X POST \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$GH_OWNER/$GH_REPO/pulls/$PR_NUMBER/reviews \
@@ -475,7 +475,7 @@ gh pr comment $PR_NUMBER --body "$(cat <<'EOF'
 
 ### ✅ 良好之处
 - 清晰的 API 设计
-- 中间件层的良好错误处理
+- 中间件层良好的错误处理
 
 ---
 *由 Hermes Agent 审查*

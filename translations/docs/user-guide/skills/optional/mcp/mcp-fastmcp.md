@@ -21,7 +21,7 @@ description: "使用 FastMCP 在 Python 中构建、测试、检查、安装和�
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `MCP`, `FastMCP`, `Python`, `Tools`, `Resources`, `Prompts`, `Deployment` |
-| 相关技能 | [`native-mcp`](/user-guide/skills/bundled/mcp/mcp-native-mcp), [`mcporter`](/user-guide/skills/optional/mcp/mcp-mcporter) |
+| 相关技能 | [`native-mcp`](/docs/user-guide/skills/bundled/mcp/mcp-native-mcp), [`mcporter`](/docs/user-guide/skills/optional/mcp/mcp-mcporter) |
 
 ## 参考：完整的 SKILL.md
 
@@ -35,16 +35,16 @@ description: "使用 FastMCP 在 Python 中构建、测试、检查、安装和�
 
 ## 何时使用
 
-当任务涉及以下情况时，请使用此技能：
+当任务涉及以下情况时，使用此技能：
 
-- 在 Python 中创建新的 MCP 服务器
+- 在 Python 中创建一个新的 MCP 服务器
 - 将 API、数据库、CLI 或文件处理工作流包装为 MCP 工具
 - 除了工具之外，还暴露资源或提示词
-- 在将服务器连接到 Hermes 或其他客户端之前，使用 FastMCP CLI 进行冒烟测试
+- 在将其连接到 Hermes 或其他客户端之前，使用 FastMCP CLI 对服务器进行冒烟测试
 - 将服务器安装到 Claude Code、Claude Desktop、Cursor 或类似的 MCP 客户端中
 - 为 HTTP 部署准备 FastMCP 服务器仓库
 
-当服务器已存在且只需连接到 Hermes 时，请使用 `native-mcp`。当目标是临时通过 CLI 访问现有 MCP 服务器而非构建新服务器时，请使用 `mcporter`。
+当服务器已存在且仅需连接到 Hermes 时，使用 `native-mcp`。当目标是临时通过 CLI 访问现有 MCP 服务器而非构建新服务器时，使用 `mcporter`。
 
 ## 先决条件
 
@@ -84,9 +84,9 @@ pip install httpx
 首先选择最精简有用的功能范围：
 
 - API 包装器：从 1-3 个高价值端点开始，而非整个 API
-- 数据库服务器：暴露只读的元数据检查和受约束的查询路径
+- 数据库服务器：暴露只读的元数据查询和受约束的查询路径
 - 文件处理器：暴露具有明确路径参数的确定性操作
-- 提示词/资源：仅在客户端需要可重用的提示词模板或可发现的文档时添加
+- 提示词/资源：仅在客户端需要可复用的提示词模板或可发现的文档时添加
 
 优先选择具有良好命名、文档字符串和模式的精简服务器，而非功能繁多但定义模糊的大型服务器。
 
@@ -116,7 +116,7 @@ python ~/.hermes/skills/mcp/fastmcp/scripts/scaffold_fastmcp.py --list
 工具设计规则：
 
 - 为每个工具起一个具体的、基于动词的名称
-- 将文档字符串写成面向用户的工具描述
+- 将文档字符串编写为用户可见的工具描述
 - 保持参数明确且类型化
 - 尽可能返回结构化的 JSON 安全数据
 - 尽早验证不安全的输入
@@ -137,15 +137,15 @@ python ~/.hermes/skills/mcp/fastmcp/scripts/scaffold_fastmcp.py --list
 
 ### 4. 仅在有益时添加资源和提示词
 
-当客户端受益于获取稳定的只读内容（如模式、策略文档或生成的报告）时，添加 `@mcp.resource`。
+当客户端需要获取稳定的只读内容（如模式、策略文档或生成的报告）时，添加 `@mcp.resource`。
 
-当服务器应为已知工作流提供可重用的提示词模板时，添加 `@mcp.prompt`。
+当服务器应为已知工作流提供可复用的提示词模板时，添加 `@mcp.prompt`。
 
 不要将每个文档都变成提示词。优先选择：
 
 - 工具用于操作
 - 资源用于数据/文档检索
-- 提示词用于可重用的 LLM 指令
+- 提示词用于可复用的 LLM 指令
 
 ### 5. 在集成到任何地方之前测试服务器
 
@@ -171,7 +171,7 @@ fastmcp list http://127.0.0.1:8000/mcp --json
 fastmcp call http://127.0.0.1:8000/mcp search_resources query=router --json
 ```
 
-在声称服务器正常工作之前，务必对每个新工具至少运行一次真实的 `fastmcp call`。
+在声称服务器工作之前，务必对每个新工具至少运行一次真实的 `fastmcp call`。
 
 ### 6. 本地验证通过后安装到客户端
 
@@ -190,9 +190,9 @@ fastmcp install cursor acme_server.py -e .
 - 使用 `native-mcp` 技能在 `~/.hermes/config.yaml` 中配置服务器，或者
 - 在开发期间继续使用 FastMCP CLI 命令，直到接口稳定
 
-### 7. 本地合约稳定后进行部署
+### 7. 本地接口稳定后进行部署
 
-对于托管部署，Prefect Horizon 是 FastMCP 文档最直接推荐的路径。部署前：
+对于托管部署，Prefect Horizon 是 FastMCP 文档最直接支持的路径。部署前：
 
 ```bash
 fastmcp inspect acme_server.py:mcp
@@ -212,7 +212,7 @@ fastmcp inspect acme_server.py:mcp
 
 当将 REST 或 HTTP API 暴露为 MCP 工具时使用。
 
-推荐的初始功能范围：
+推荐的初始功能切片：
 
 - 一个读取路径
 - 一个列表/搜索路径
@@ -221,7 +221,7 @@ fastmcp inspect acme_server.py:mcp
 实现注意事项：
 
 - 将认证信息保存在环境变量中，而非硬编码
-- 在一个辅助函数中集中处理请求逻辑
+- 将请求逻辑集中在一个辅助函数中
 - 用简洁的上下文信息呈现 API 错误
 - 在返回之前，将不一致的上游负载规范化
 
@@ -231,7 +231,7 @@ fastmcp inspect acme_server.py:mcp
 
 当暴露安全的查询和检查功能时使用。
 
-推荐的初始功能范围：
+推荐的初始功能切片：
 
 - `list_tables`
 - `describe_table`
@@ -250,7 +250,7 @@ fastmcp inspect acme_server.py:mcp
 
 当服务器需要按需检查或转换文件时使用。
 
-推荐的初始功能范围：
+推荐的初始功能切片：
 
 - 总结文件内容
 - 在文件内搜索
@@ -274,7 +274,7 @@ fastmcp inspect acme_server.py:mcp
 - `fastmcp list <server spec> --json` 成功
 - 每个新工具至少有一个真实的 `fastmcp call`
 - 环境变量已记录
-- 工具功能范围足够小，无需猜测即可理解
+- 工具接口足够小，无需猜测即可理解
 
 ## 故障排除
 
@@ -295,7 +295,7 @@ fastmcp version
 - FastMCP 实例在 `<file.py:object>` 中命名正确
 - 模板所需的可选依赖项已安装
 
-### 工具在 Python 中工作但通过 CLI 不工作
+### 工具在 Python 中工作，但通过 CLI 不工作
 
 运行：
 

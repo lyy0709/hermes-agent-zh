@@ -7,9 +7,13 @@ sidebar_position: 7
 
 # 提供商路由
 
-当使用 [OpenRouter](https://openrouter.ai) 作为你的 LLM 提供商时，Hermes Agent 支持**提供商路由**——对哪个底层 AI 提供商处理你的请求以及它们的优先级进行细粒度控制。
+当使用 [OpenRouter](https://openrouter.ai) 作为你的 LLM 提供商时，Hermes Agent 支持**提供商路由**——对哪些底层 AI 提供商处理你的请求以及它们的优先级进行细粒度控制。
 
-OpenRouter 将请求路由到许多提供商（例如，Anthropic、Google、AWS Bedrock、Together AI）。提供商路由允许你针对成本、速度、质量进行优化，或强制执行特定的提供商要求。
+OpenRouter 将请求路由到许多提供商（例如，Anthropic、Google、AWS Bedrock、Together AI）。提供商路由让你可以针对成本、速度、质量进行优化，或强制执行特定的提供商要求。
+
+:::tip
+通过 [Nous Portal](/integrations/nous-portal) 路由的流量仍然遵循每个模型的路由和优先级配置——并且 Portal 订阅者在按 Token 计费的提供商上可享受 10% 的折扣。
+:::
 
 ## 配置
 
@@ -19,14 +23,14 @@ OpenRouter 将请求路由到许多提供商（例如，Anthropic、Google、AWS
 provider_routing:
   sort: "price"           # 如何对提供商进行排序
   only: []                # 白名单：仅使用这些提供商
-  ignore: []              # 黑名单：永不使用这些提供商
+  ignore: []              # 黑名单：绝不使用这些提供商
   order: []               # 明确的提供商优先级顺序
   require_parameters: false  # 仅使用支持所有参数的提供商
   data_collection: null   # 控制数据收集（"allow" 或 "deny"）
 ```
 
 :::info
-提供商路由仅在通过 OpenRouter 使用时生效。对于直接提供商连接（例如，直接连接到 Anthropic API）没有影响。
+提供商路由仅在使用 OpenRouter 时适用。它对直接提供商连接（例如，直接连接到 Anthropic API）没有影响。
 :::
 
 ## 选项
@@ -70,7 +74,7 @@ provider_routing:
 
 ### `order`
 
-明确的优先级顺序。首先列出的提供商是首选。未列出的提供商将作为备用。
+明确的优先级顺序。首先列出的提供商是首选。未列出的提供商将作为后备使用。
 
 ```yaml
 provider_routing:
@@ -82,7 +86,7 @@ provider_routing:
 
 ### `require_parameters`
 
-当为 `true` 时，OpenRouter 将仅路由到支持你请求中**所有**参数（如 `temperature`、`top_p`、`tools` 等）的提供商。这避免了参数的静默丢弃。
+当为 `true` 时，OpenRouter 将仅路由到支持你请求中**所有**参数的提供商（如 `temperature`、`top_p`、`tools` 等）。这避免了参数的静默丢弃。
 
 ```yaml
 provider_routing:
@@ -91,18 +95,18 @@ provider_routing:
 
 ### `data_collection`
 
-控制提供商是否可以将你的提示词用于训练。选项是 `"allow"` 或 `"deny"`。
+控制提供商是否可以将你的提示词用于训练。选项为 `"allow"` 或 `"deny"`。
 
 ```yaml
 provider_routing:
   data_collection: "deny"
 ```
 
-## 实际示例
+## 实用示例
 
 ### 优化成本
 
-路由到最便宜的可用提供商。适用于高使用量和开发：
+路由到最便宜的可用提供商。适用于高使用量场景和开发：
 
 ```yaml
 provider_routing:
@@ -120,7 +124,7 @@ provider_routing:
 
 ### 优化吞吐量
 
-最适合每秒 Token 数很重要的长文本生成：
+最适合每秒 Token 数至关重要的长文本生成：
 
 ```yaml
 provider_routing:
@@ -149,7 +153,7 @@ provider_routing:
   data_collection: "deny"
 ```
 
-### 带备用方案的优先顺序
+### 带后备的首选顺序
 
 首先尝试你首选的提供商，如果不可用则回退到其他提供商：
 
@@ -163,10 +167,10 @@ provider_routing:
 
 ## 工作原理
 
-提供商路由偏好通过每个 API 调用上的 `extra_body.provider` 字段传递给 OpenRouter API。这适用于：
+提供商路由偏好通过每个 API 调用中的 `extra_body.provider` 字段传递给 OpenRouter API。这适用于：
 
-- **CLI 模式** — 在 `~/.hermes/config.yaml` 中配置，启动时加载
-- **消息网关模式** — 相同的配置文件，在消息网关启动时加载
+- **CLI 模式** —— 在 `~/.hermes/config.yaml` 中配置，启动时加载
+- **消息网关模式** —— 相同的配置文件，在网关启动时加载
 
 路由配置从 `config.yaml` 中读取，并在创建 `AIAgent` 时作为参数传递：
 
@@ -195,6 +199,6 @@ provider_routing:
 
 当没有配置 `provider_routing` 部分时（默认情况），OpenRouter 使用其自身的默认路由逻辑，该逻辑通常会自动平衡成本和可用性。
 
-:::tip 提供商路由 vs. 备用模型
-提供商路由控制 **OpenRouter 内的子提供商** 来处理你的请求。关于当你的主要模型失败时自动故障转移到完全不同的提供商，请参阅 [备用提供商](/user-guide/features/fallback-providers)。
+:::tip 提供商路由 vs. 后备模型
+提供商路由控制 **OpenRouter 内部的哪些子提供商** 处理你的请求。关于当你的主模型失败时自动故障转移到完全不同的提供商，请参阅 [后备提供商](/user-guide/features/fallback-providers)。
 :::

@@ -21,7 +21,7 @@ description: "通过 DuckDuckGo 进行免费网络搜索 — 文本、新闻、�
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `search`, `duckduckgo`, `web-search`, `free`, `fallback` |
-| 相关技能 | [`arxiv`](/user-guide/skills/bundled/research/research-arxiv) |
+| 相关技能 | [`arxiv`](/docs/user-guide/skills/bundled/research/research-arxiv) |
 
 ## 参考：完整的 SKILL.md
 
@@ -48,16 +48,16 @@ command -v ddgs >/dev/null && echo "DDGS_CLI=installed" || echo "DDGS_CLI=missin
 1. 如果 `ddgs` CLI 已安装，优先使用 `terminal` + `ddgs`
 2. 如果 `ddgs` CLI 缺失，不要假设 `execute_code` 可以导入 `ddgs`
 3. 如果用户特别需要 DuckDuckGo，请先在相关执行环境中安装 `ddgs`
-4. 否则回退到内置的 web/browser 工具
+4. 否则，回退到内置的网页/浏览器工具
 
 重要的运行时注意事项：
-- Terminal 和 `execute_code` 是独立的运行时环境
+- Terminal 和 `execute_code` 是独立的运行时
 - 在 shell 中成功安装并不保证 `execute_code` 可以导入 `ddgs`
 - 切勿假设第三方 Python 包在 `execute_code` 中已预装
 
 ## 安装
 
-仅在特别需要 DuckDuckGo 搜索且当前运行时环境未提供时，才安装 `ddgs`。
+仅在特别需要 DuckDuckGo 搜索且当前运行时未提供时，才安装 `ddgs`。
 
 ```bash
 # Python 包 + CLI 入口点
@@ -67,7 +67,7 @@ pip install ddgs
 ddgs --help
 ```
 
-如果工作流依赖于 Python 导入，请在使用 `from ddgs import DDGS` 之前，验证同一运行时环境可以导入 `ddgs`。
+如果工作流依赖于 Python 导入，在使用 `from ddgs import DDGS` 之前，请验证同一运行时可以导入 `ddgs`。
 
 ## 方法 1：CLI 搜索（首选）
 
@@ -109,10 +109,10 @@ ddgs text -q "fastapi tutorial" -m 5 -o json
 
 ## 方法 2：Python API（仅在验证后使用）
 
-仅在验证 `ddgs` 已安装后，才在 `execute_code` 或其他 Python 运行时环境中使用 `DDGS` 类。不要假设 `execute_code` 默认包含第三方包。
+仅在验证 `ddgs` 已安装后，才在 `execute_code` 或其他 Python 运行时中使用 `DDGS` 类。不要默认假设 `execute_code` 包含第三方包。
 
 安全的措辞：
-- "在安装或验证所需包后，使用带有 `ddgs` 的 `execute_code`"
+- "如果需要，在安装或验证包后，使用带有 `ddgs` 的 `execute_code`"
 
 避免说：
 - "`execute_code` 包含 `ddgs`"
@@ -139,7 +139,7 @@ with DDGS() as ddgs:
 
 ### 新闻搜索
 
-最适合：时事、突发新闻、最新动态。
+最适合：时事、突发新闻、最新更新。
 
 ```python
 from ddgs import DDGS
@@ -210,7 +210,7 @@ CLI 示例：
 ddgs text -q "fastapi deployment guide" -m 3 -o json
 ```
 
-Python 示例，仅在验证 `ddgs` 已安装在该运行时环境中后使用：
+Python 示例，仅在验证该运行时已安装 `ddgs` 后使用：
 
 ```python
 from ddgs import DDGS
@@ -230,26 +230,26 @@ with DDGS() as ddgs:
 - **结果质量**：通常良好，但比 Firecrawl 的搜索可配置性差。
 - **可用性**：DuckDuckGo 可能会阻止来自某些云 IP 的请求。如果搜索返回空结果，请尝试不同的关键词或等待几秒钟。
 - **字段可变性**：返回的字段可能因结果或 `ddgs` 版本而异。对可选字段使用 `.get()` 以避免 `KeyError`。
-- **独立的运行时环境**：在 terminal 中成功安装 `ddgs` 并不自动意味着 `execute_code` 可以导入它。
+- **独立的运行时**：在 terminal 中成功安装 `ddgs` 并不自动意味着 `execute_code` 可以导入它。
 
 ## 故障排除
 
 | 问题 | 可能原因 | 应对措施 |
 |---------|--------------|------------|
-| `ddgs: command not found` | CLI 未安装在 shell 环境中 | 安装 `ddgs`，或改用内置的 web/browser 工具 |
-| `ModuleNotFoundError: No module named 'ddgs'` | Python 运行时环境未安装该包 | 在该运行时环境准备就绪前，不要在那里使用 Python DDGS |
+| `ddgs: command not found` | CLI 未安装在 shell 环境中 | 安装 `ddgs`，或改用内置的网页/浏览器工具 |
+| `ModuleNotFoundError: No module named 'ddgs'` | Python 运行时未安装该包 | 在该运行时准备就绪之前，不要在那里使用 Python DDGS |
 | 搜索无结果 | 临时速率限制或查询不佳 | 等待几秒钟，重试，或调整查询 |
-| CLI 可用但 `execute_code` 导入失败 | Terminal 和 `execute_code` 是不同的运行时环境 | 继续使用 CLI，或单独准备 Python 运行时环境 |
+| CLI 可用但 `execute_code` 导入失败 | Terminal 和 `execute_code` 是不同的运行时 | 继续使用 CLI，或单独准备 Python 运行时 |
 
 ## 常见陷阱
 
 - **`max_results` 是仅关键字参数**：`ddgs.text("query", 5)` 会引发错误。请使用 `ddgs.text("query", max_results=5)`。
 - **不要假设 CLI 存在**：在使用前检查 `command -v ddgs`。
-- **不要假设 `execute_code` 可以导入 `ddgs`**：`from ddgs import DDGS` 可能会因 `ModuleNotFoundError` 而失败，除非该运行时环境已单独准备。
-- **包名**：包名是 `ddgs`（以前是 `duckduckgo-search`）。使用 `pip install ddgs` 安装。
+- **不要假设 `execute_code` 可以导入 `ddgs`**：`from ddgs import DDGS` 可能会因 `ModuleNotFoundError` 而失败，除非该运行时已单独准备。
+- **包名称**：包名是 `ddgs`（以前是 `duckduckgo-search`）。使用 `pip install ddgs` 安装。
 - **不要混淆 `-q` 和 `-m`** (CLI)：`-q` 用于查询，`-m` 用于最大结果数。
 - **空结果**：如果 `ddgs` 返回空结果，可能是被限制了速率。等待几秒钟后重试。
 
-## 验证信息
+## 验证版本
 
-已验证示例符合 `ddgs==9.11.2` 的语义。技能指南现在将 CLI 可用性和 Python 导入可用性视为独立的问题，因此文档化的工作流与实际运行时行为相匹配。
+已验证示例符合 `ddgs==9.11.2` 的语义。技能指南现在将 CLI 可用性和 Python 导入可用性视为独立的问题，因此记录的工作流与实际运行时行为相匹配。

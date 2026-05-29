@@ -21,7 +21,7 @@ description: "深色主题的 SVG 架构/云/基础设施图，以 HTML 形式�
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `architecture`, `diagrams`, `SVG`, `HTML`, `visualization`, `infrastructure`, `cloud` |
-| 相关技能 | [`concept-diagrams`](/user-guide/skills/optional/creative/creative-concept-diagrams), [`excalidraw`](/user-guide/skills/bundled/creative/creative-excalidraw) |
+| 相关技能 | [`concept-diagrams`](/docs/user-guide/skills/optional/creative/creative-concept-diagrams), [`excalidraw`](/docs/user-guide/skills/bundled/creative/creative-excalidraw) |
 
 ## 参考：完整的 SKILL.md
 
@@ -35,21 +35,21 @@ description: "深色主题的 SVG 架构/云/基础设施图，以 HTML 形式�
 
 ## 适用范围
 
-**最适合：**
-- 软件系统架构（前端/后端/数据库层）
+**最适合用于：**
+- 软件系统架构（前端 / 后端 / 数据库层）
 - 云基础设施（VPC、区域、子网、托管服务）
-- 微服务/服务网格拓扑
+- 微服务 / 服务网格拓扑
 - 数据库 + API 映射、部署图
 - 任何适合深色、网格背景美学的技术基础设施主题
 
 **以下情况请优先考虑其他技能：**
 - 物理、化学、数学、生物学或其他科学主题
-- 物理对象（车辆、硬件、解剖、横截面）
-- 平面图、叙事旅程、教育/教科书式视觉内容
-- 手绘白板草图（考虑 `excalidraw`）
-- 动画解说（考虑动画技能）
+- 物理对象（车辆、硬件、解剖结构、横截面）
+- 平面图、叙事旅程、教育/教科书风格的视觉内容
+- 手绘白板草图（考虑使用 `excalidraw`）
+- 动画解说（考虑使用动画技能）
 
-如果某个主题有更专业的技能可用，请优先使用该技能。如果没有合适的，此技能也可以作为通用的 SVG 图表备用方案 — 输出将保持下述的深色技术美学风格。
+如果有更专业的技能适用于该主题，请优先使用。如果没有合适的，此技能也可以作为通用的 SVG 图表备用方案 — 输出将保持下述的深色技术美学风格。
 
 基于 [Cocoon AI 的 architecture-diagram-generator](https://github.com/Cocoon-AI/architecture-diagram-generator) (MIT)。
 
@@ -94,9 +94,9 @@ xdg-open ./my-architecture.html
 | **外部** | `rgba(30, 41, 59, 0.5)` | `#94a3b8` (slate-400) |
 
 ### 排版与背景
-- **字体:** JetBrains Mono（等宽字体），从 Google Fonts 加载
-- **大小:** 12px（名称），9px（子标签），8px（注释），7px（微小标签）
-- **背景:** Slate-950 (`#020617`) 带有微妙的 40px 网格图案
+- **字体:** JetBrains Mono (Monospace)，从 Google Fonts 加载
+- **大小:** 12px (名称), 9px (子标签), 8px (注释), 7px (微小标签)
+- **背景:** Slate-950 (`#020617`)，带有微妙的 40px 网格图案
 
 ```svg
 <!-- 背景网格图案 -->
@@ -110,10 +110,10 @@ xdg-open ./my-architecture.html
 ### 组件渲染
 组件是圆角矩形 (`rx="6"`)，描边宽度为 1.5px。为防止箭头透过半透明填充色显示，使用**双矩形遮罩技术**：
 1.  绘制一个不透明的背景矩形 (`#0f172a`)
-2.  在其上方绘制带样式的半透明矩形
+2.  在其上方绘制带有样式的半透明矩形
 
 ### 连接规则
-- **Z 轴顺序:** 在 SVG 中*尽早*绘制箭头（在网格之后），使其渲染在组件框后面
+- **Z 轴顺序:** 在 SVG 中*尽早*绘制箭头（在网格之后），使其渲染在组件框的后面
 - **箭头头部:** 通过 SVG 标记定义
 - **安全流:** 使用玫瑰色 (`#fb7185`) 的虚线
 - **边界:**
@@ -121,17 +121,17 @@ xdg-open ./my-architecture.html
   - *区域:* 大虚线 (`8,4`)，琥珀色，`rx="12"`
 
 ### 间距与布局逻辑
-- **标准高度:** 60px（服务）；80-120px（大型组件）
-- **垂直间隙:** 组件之间最小 40px
-- **消息总线:** 必须放置*在服务之间的间隙中*，不能重叠
+- **标准高度:** 60px (服务); 80-120px (大型组件)
+- **垂直间距:** 组件之间至少 40px
+- **消息总线:** 必须*放置*在服务之间的间隙中，不能重叠
 - **图例放置:** **至关重要。** 必须放置在所有边界框之外。计算所有边界的最低 Y 坐标，并将图例放置在其下方至少 20px 处。
 
 ## 文档结构
 
 生成的 HTML 文件遵循四部分布局：
-1.  **页眉:** 带有脉动圆点指示器和副标题的标题
+1.  **页眉:** 带有脉动点指示器和副标题的标题
 2.  **主 SVG:** 包含在圆角边框卡片内的图表
-3.  **摘要卡片:** 图表下方用于展示高级别细节的三张卡片网格
+3.  **摘要卡片:** 图表下方用于展示高层级细节的三张卡片网格
 4.  **页脚:** 最少的元数据
 
 ### 信息卡片模式
@@ -149,9 +149,9 @@ xdg-open ./my-architecture.html
 ```
 
 ## 输出要求
-- **单文件:** 一个自包含的 `.html` 文件
+- **单一文件:** 一个自包含的 `.html` 文件
 - **无外部依赖:** 所有 CSS 和 SVG 必须内联（Google Fonts 除外）
-- **无 JavaScript:** 使用纯 CSS 实现任何动画（如脉动圆点）
+- **无 JavaScript:** 使用纯 CSS 实现任何动画（如脉动点）
 - **兼容性:** 必须在任何现代网络浏览器中正确渲染
 
 ## 模板参考
@@ -162,4 +162,4 @@ xdg-open ./my-architecture.html
 skill_view(name="architecture-diagram", file_path="templates/template.html")
 ```
 
-该模板包含每种组件类型（前端、后端、数据库、云、安全）、箭头样式（标准、虚线、曲线）、安全组、区域边界和图例的工作示例 — 在生成图表时将其用作您的结构参考。
+该模板包含每种组件类型（前端、后端、数据库、云、安全）、箭头样式（标准、虚线、曲线）、安全组、区域边界和图例的工作示例 — 在生成图表时将其作为您的结构参考。

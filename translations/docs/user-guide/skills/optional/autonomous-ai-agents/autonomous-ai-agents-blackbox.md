@@ -8,7 +8,7 @@ description: "将编码任务委派给 Blackbox AI CLI Agent"
 
 # Blackbox
 
-将编码任务委派给 Blackbox AI CLI Agent。这是一个内置评判机制的多模型 Agent，通过多个 LLM 运行任务并选取最佳结果。需要安装 blackbox CLI 并拥有 Blackbox AI API 密钥。
+将编码任务委派给 Blackbox AI CLI Agent。这是一个内置评判器的多模型 Agent，通过多个 LLM 运行任务并选取最佳结果。需要安装 blackbox CLI 并拥有 Blackbox AI API 密钥。
 
 ## 技能元数据
 
@@ -21,7 +21,7 @@ description: "将编码任务委派给 Blackbox AI CLI Agent"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Coding-Agent`, `Blackbox`, `Multi-Agent`, `Judge`, `Multi-Model` |
-| 相关技能 | [`claude-code`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
+| 相关技能 | [`claude-code`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`hermes-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent) |
 
 ## 参考：完整的 SKILL.md
 
@@ -31,7 +31,7 @@ description: "将编码任务委派给 Blackbox AI CLI Agent"
 
 # Blackbox CLI
 
-通过 Hermes 终端将编码任务委派给 [Blackbox AI](https://www.blackbox.ai/)。Blackbox 是一个多模型编码 Agent CLI，它将任务分派给多个 LLM（Claude、Codex、Gemini、Blackbox Pro）并使用一个评判器来选择最佳实现。
+通过 Hermes 终端将编码任务委派给 [Blackbox AI](https://www.blackbox.ai/)。Blackbox 是一个多模型编码 Agent CLI，它将任务分派给多个 LLM（Claude、Codex、Gemini、Blackbox Pro）并使用评判器来选择最佳实现。
 
 该 CLI 是[开源](https://github.com/blackboxaicode/cli)的（GPL-3.0，TypeScript，从 Gemini CLI 分叉而来），支持交互式会话、非交互式单次执行、检查点、MCP 和视觉模型切换。
 
@@ -56,7 +56,7 @@ terminal(command="blackbox --prompt '为 Express API 添加 JWT 认证和刷新�
 
 对于快速草稿工作：
 ```
-terminal(command="cd $(mktemp -d) && git init && blackbox --prompt '使用 SQLite 构建一个待办事项 REST API'", pty=true)
+terminal(command="cd $(mktemp -d) && git init && blackbox --prompt '为待办事项构建一个使用 SQLite 的 REST API'", pty=true)
 ```
 
 ## 后台模式（长任务）
@@ -64,8 +64,8 @@ terminal(command="cd $(mktemp -d) && git init && blackbox --prompt '使用 SQLit
 对于需要数分钟的任务，使用后台模式以便监控进度：
 
 ```
-# 在后台启动并使用 PTY
-terminal(command="blackbox --prompt '将认证模块重构为使用 OAuth 2.0'", workdir="~/project", background=true, pty=true)
+# 在后台启动并启用 PTY
+terminal(command="blackbox --prompt '重构认证模块以使用 OAuth 2.0'", workdir="~/project", background=true, pty=true)
 # 返回 session_id
 
 # 监控进度
@@ -96,7 +96,7 @@ terminal(command="blackbox --resume-checkpoint 'task-abc123-2026-03-06' --prompt
 | 命令 | 效果 |
 |---------|--------|
 | `/compress` | 压缩对话历史以节省 Token |
-| `/clear` | 清除历史记录并重新开始 |
+| `/clear` | 清除历史并重新开始 |
 | `/stats` | 查看当前 Token 使用情况 |
 | `Ctrl+C` | 取消当前操作 |
 

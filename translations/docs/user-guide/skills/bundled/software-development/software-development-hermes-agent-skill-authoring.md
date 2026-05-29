@@ -4,11 +4,11 @@ sidebar_label: "Hermes Agent 技能编写"
 description: "编写仓库内技能"
 ---
 
-{/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
+{/* 此页面由技能目录下的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Hermes Agent 技能编写
 
-编写仓库内 SKILL.md：frontmatter、验证器、结构。
+编写仓库内 SKILL.md：Frontmatter、验证器、结构。
 
 ## 技能元数据
 
@@ -21,7 +21,7 @@ description: "编写仓库内技能"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `skills`, `authoring`, `hermes-agent`, `conventions`, `skill-md` |
-| 相关技能 | [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
+| 相关技能 | [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
 
 ## 参考：完整的 SKILL.md
 
@@ -40,7 +40,7 @@ SKILL.md 可以存在于两个位置：
 
 ## 何时使用
 
-- 用户要求你“在此分支/仓库/提交中添加一个技能”
+- 用户要求你“在此分支/仓库/提交中”添加一个技能
 - 你正在提交一个应随 hermes-agent 分发的可复用工作流
 - 你正在编辑 `/home/bb/hermes-agent/skills/` 下的现有技能（小修改用 `patch`，重写用 `write_file`；`skill_manage` 仍可用于仓库内技能的 `patch`，但不能用于 `create`）
 
@@ -50,17 +50,17 @@ SKILL.md 可以存在于两个位置：
 
 - 以 `---` 作为开头字节（前面不能有空行）。
 - 在正文前以 `\n---\n` 结束。
-- 解析为 YAML 映射。
+- 可解析为 YAML 映射。
 - 存在 `name` 字段。
 - 存在 `description` 字段，长度 ≤ **1024 个字符**（`MAX_DESCRIPTION_LENGTH`）。
 - 结束的 `---` 之后有非空正文。
 
-`skills/software-development/` 下每个技能使用的对等匹配格式：
+`skills/software-development/` 下每个技能都使用的对等匹配格式：
 
 ```yaml
 ---
 name: my-skill-name               # 小写，连字符，≤64 个字符 (MAX_NAME_LENGTH)
-description: Use when <trigger>. <one-line behavior>.
+description: 在 <触发条件> 时使用。<单行行为描述>。
 version: 1.0.0
 author: Hermes Agent
 license: MIT
@@ -81,7 +81,7 @@ metadata:
 
 ## 对等匹配的结构
 
-每个仓库内技能大致遵循以下结构：
+每个仓库内技能大致遵循：
 
 ```
 # <标题>
@@ -99,7 +99,7 @@ metadata:
 - Hermes 特定配方（通过 scripts/run_tests.sh 测试，ui-tui 路径等）
 
 ## 常见陷阱
-错误及其修复的编号列表。
+错误及其修复方法的编号列表。
 
 ## 验证清单
 - [ ] 操作后验证的复选框列表
@@ -116,7 +116,7 @@ metadata:
 skills/<category>/<skill-name>/SKILL.md
 ```
 
-仓库中当前的类别（用 `ls skills/` 确认）：`autonomous-ai-agents`, `creative`, `data-science`, `devops`, `dogfood`, `email`, `gaming`, `github`, `leisure`, `mcp`, `media`, `mlops/*`, `note-taking`, `productivity`, `red-teaming`, `research`, `smart-home`, `social-media`, `software-development`。
+仓库中当前的类别（通过 `ls skills/` 确认）：`autonomous-ai-agents`, `creative`, `data-science`, `devops`, `dogfood`, `email`, `gaming`, `github`, `leisure`, `mcp`, `media`, `mlops/*`, `note-taking`, `productivity`, `red-teaming`, `research`, `smart-home`, `social-media`, `software-development`。
 
 选择最接近的现有类别。不要随意创建新的顶级类别。
 
@@ -127,9 +127,9 @@ skills/<category>/<skill-name>/SKILL.md
     ls skills/<category>/
     ```
     阅读 2-3 个对等技能的 SKILL.md 文件以匹配语气和结构。
-2.  如果不确定，**检查验证器约束**（位于 `tools/skill_manager_tool.py`）。
-3.  **使用 `write_file` 草拟** `skills/<category>/<name>/SKILL.md`。
-4.  **本地验证：**
+2.  如果不确定，**检查验证器约束**（在 `tools/skill_manager_tool.py` 中）。
+3.  **起草**：使用 `write_file` 写入 `skills/<category>/<name>/SKILL.md`。
+4.  **本地验证**：
     ```python
     import yaml, re, pathlib
     content = pathlib.Path("skills/<category>/<name>/SKILL.md").read_text()
@@ -140,7 +140,7 @@ skills/<category>/<skill-name>/SKILL.md
     assert len(fm["description"]) <= 1024
     assert len(content) <= 100_000
     ```
-5.  **在活动分支上执行 `git add` + `git commit`**。
+5.  在活动分支上执行 **Git add + commit**。
 6.  **注意：** 当前会话的技能加载器是缓存的 — 在新会话开始之前，`skill_view` / `skills_list` 将看不到新技能。这是预期行为，不是错误。
 
 ## 交叉引用其他技能
@@ -152,23 +152,17 @@ skills/<category>/<skill-name>/SKILL.md
 -   **小修复（拼写错误、添加陷阱、收紧触发条件）：** `skill_manage(action='patch', name=..., old_string=..., new_string=...)` 在仓库内技能上工作正常。
 -   **重大重写：** 使用 `write_file` 重写整个 SKILL.md。`skill_manage(action='edit')` 也有效，但需要提供完整的新内容。
 -   **添加支持文件：** 使用 `write_file` 写入 `skills/<category>/<name>/references/<file>.md`、`templates/<file>` 或 `scripts/<file>`。`skill_manage(action='write_file')` 也有效，并强制执行 references/templates/scripts/assets 子目录白名单。
--   **始终提交**编辑 — 仓库内技能是源代码，不是运行时状态。
+-   **始终提交** 编辑 — 仓库内技能是源代码，不是运行时状态。
 
 ## 常见陷阱
 
 1.  **对仓库内技能使用 `skill_manage(action='create')`。** 它会写入 `~/.hermes/skills/`，而不是仓库目录树。对于仓库内创建，请使用 `write_file`。
-
 2.  **在 `---` 前有前导空白。** 验证器检查 `content.startswith("---")`；任何前导空行或 BOM 都会导致验证失败。
-
-3.  **描述过于笼统。** 对等技能的描述以 "Use when ..." 开头，并描述*触发类别*，而不是单一任务。"Use when debugging X" 优于 "Debug X"。
-
-4.  **忘记 author/license/metadata 块。** 验证器不强制执行，但每个对等技能都有；省略会使技能看起来未完成。
-
+3.  **描述过于笼统。** 对等描述以“在 ... 时使用”开头，并描述*触发类别*，而不是单一任务。“在调试 X 时使用”优于“调试 X”。
+4.  **忘记 author/license/metadata 块。** 验证器不强制执行，但每个对等技能都有；省略会使技能看起来半成品。
 5.  **编写与对等技能重复的技能。** 在创建之前，先 `ls skills/<category>/` 并打开 2-3 个对等技能。优先扩展现有技能，而不是创建一个狭窄的兄弟技能。
-
 6.  **期望当前会话能看到新技能。** 它不会。技能加载器在会话开始时初始化。在新会话中或通过 `skill_view` 使用确切路径进行验证。
-
-7.  **链接到仓库中不存在的技能。** `related_skills: [some-user-local-skill]` 对你有效，但对于其他克隆用户会失效。建议仅使用仓库内链接。
+7.  **链接到仓库中不存在的技能。** `related_skills: [some-user-local-skill]` 对你有效，但对于其他克隆仓库的用户会失效。建议仅使用仓库内链接。
 
 ## 验证清单
 
@@ -176,8 +170,8 @@ skills/<category>/<skill-name>/SKILL.md
 - [ ] Frontmatter 从字节 0 开始，以 `---` 开头，以 `\n---\n` 结束
 - [ ] `name`、`description`、`version`、`author`、`license`、`metadata.hermes.{tags, related_skills}` 全部存在
 - [ ] 名称 ≤ 64 个字符，小写 + 连字符
-- [ ] 描述 ≤ 1024 个字符，并以 "Use when ..." 开头
+- [ ] 描述 ≤ 1024 个字符，并以“在 ... 时使用”开头
 - [ ] 总文件大小 ≤ 100,000 个字符（目标 8-15k）
 - [ ] 结构：`# 标题` → `## 概述` → `## 何时使用` → 正文 → `## 常见陷阱` → `## 验证清单`
-- [ ] `related_skills` 引用在仓库内可解析（或明确允许为用户本地）
+- [ ] `related_skills` 引用在仓库内可解析（或明确允许为用户本地技能）
 - [ ] 在目标分支上完成了 `git add skills/<category>/<name>/ && git commit`

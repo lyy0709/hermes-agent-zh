@@ -21,24 +21,24 @@ Parallel CLI 的可选供应商技能 —— 面向 Agent 的原生网络搜索�
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Research`, `Web`, `Search`, `Deep-Research`, `Enrichment`, `CLI` |
-| 相关技能 | [`duckduckgo-search`](/user-guide/skills/optional/research/research-duckduckgo-search), [`mcporter`](/user-guide/skills/optional/mcp/mcp-mcporter) |
+| 相关技能 | [`duckduckgo-search`](/docs/user-guide/skills/optional/research/research-duckduckgo-search), [`mcporter`](/docs/user-guide/skills/optional/mcp/mcp-mcporter) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 # Parallel CLI
 
-当用户明确需要 Parallel，或者当面向终端的原生工作流能受益于 Parallel 供应商特定的网络搜索、提取、深度研究、数据增强、实体发现或监控堆栈时，使用 `parallel-cli`。
+当用户明确需要 Parallel，或者当终端原生工作流能够受益于 Parallel 供应商特定的网络搜索、提取、深度研究、数据增强、实体发现或监控技术栈时，使用 `parallel-cli`。
 
 这是一个可选的第三方工作流，并非 Hermes 的核心能力。
 
-重要预期：
+重要注意事项：
 - Parallel 是一项具有免费层级的付费服务，并非完全免费的本地工具。
 - 它与 Hermes 原生的 `web_search` / `web_extract` 功能重叠，因此对于普通查询，默认不要优先使用它。
-- 当用户特别提到 Parallel 或需要 Parallel 特有的功能（如数据增强、FindAll 或监控工作流）时，优先使用此技能。
+- 当用户特别提到 Parallel 或需要类似 Parallel 的数据增强、FindAll 或监控工作流等功能时，优先使用此技能。
 
 `parallel-cli` 专为 Agent 设计：
 - 通过 `--json` 输出 JSON
@@ -53,13 +53,13 @@ Parallel CLI 的可选供应商技能 —— 面向 Agent 的原生网络搜索�
 - 用户明确提到 Parallel 或 `parallel-cli`
 - 任务需要比简单的一次性搜索/提取更丰富的工作流
 - 你需要可以启动并在稍后轮询的异步深度研究任务
-- 你需要结构化数据增强、FindAll 实体发现或监控
+- 你需要结构化的数据增强、FindAll 实体发现或监控功能
 
-当用户未明确要求 Parallel 时，对于快速的一次性查询，优先使用 Hermes 原生的 `web_search` / `web_extract`。
+当用户没有特别要求 Parallel 时，对于快速的一次性查询，优先使用 Hermes 原生的 `web_search` / `web_extract`。
 
 ## 安装
 
-尝试为执行环境提供侵入性最小的安装路径。
+尝试为当前执行环境使用侵入性最小的安装路径。
 
 ### Homebrew
 
@@ -85,7 +85,7 @@ pip install "parallel-web-tools[cli]"
 curl -fsSL https://parallel.ai/install.sh | bash
 ```
 
-如果你想要隔离的 Python 安装，`pipx` 也可以使用：
+如果你想要一个隔离的 Python 安装，`pipx` 也可以使用：
 
 ```bash
 pipx install "parallel-web-tools[cli]"
@@ -128,7 +128,7 @@ parallel-cli auth
 4.  仅引用 CLI 输出返回的 URL。
 5.  当可能进行后续提问时，将大型 JSON 输出保存到临时文件。
 6.  仅对真正长时间运行的工作流使用后台进程；否则在前台运行。
-7.  除非用户明确需要 Parallel 或需要 Parallel 特有的工作流，否则优先使用 Hermes 原生工具。
+7.  除非用户明确需要 Parallel 或需要 Parallel 独有的工作流，否则优先使用 Hermes 原生工具。
 
 ## 快速参考
 
@@ -159,7 +159,7 @@ parallel-cli
 - `--exclude-domains domain1.com,domain2.com`
 - `--after-date YYYY-MM-DD`
 
-方便时从标准输入读取：
+在方便时从标准输入读取：
 
 ```bash
 echo "What is the latest funding for Anthropic?" | parallel-cli search - --json
@@ -181,7 +181,7 @@ parallel-cli search "AI coding agent enterprise reviews" --mode agentic --json
 有用的约束条件：
 - `--include-domains` 用于缩小可信来源范围
 - `--exclude-domains` 用于排除嘈杂的域名
-- `--after-date` 用于最近性过滤
+- `--after-date` 用于近因过滤
 - `--max-results` 当你需要更广泛的覆盖范围时
 
 如果你预期有后续问题，请保存输出：
@@ -207,14 +207,14 @@ parallel-cli extract https://example.com --full-content --json
 parallel-cli fetch https://example.com --json
 ```
 
-当页面内容宽泛且你只需要其中一部分信息时，使用 `--objective`。
+当页面内容宽泛而你只需要其中一部分信息时，使用 `--objective`。
 
 ## 深度研究
 
 用于可能需要时间的更深层次多步骤研究任务。
 
-常用处理器层级：
-- `lite` / `base` 用于更快、更便宜的流程
+常见的处理器层级：
+- `lite` / `base` 用于更快、更便宜的扫描
 - `core` / `pro` 用于更全面的综合
 - `ultra` 用于最繁重的研究任务
 
@@ -260,7 +260,7 @@ parallel-cli research run \
 
 ## 数据增强
 
-当用户拥有 CSV/JSON/表格输入并希望基于网络研究推断出额外的列时使用。
+当用户拥有 CSV/JSON/表格输入并希望通过网络研究推断出额外的列时使用。
 
 ### 建议列
 
@@ -307,7 +307,7 @@ parallel-cli enrich status <task_group_id> --json
 parallel-cli enrich poll <task_group_id> --json
 ```
 
-在非交互式操作时，对列定义使用显式的 JSON 数组。
+在非交互式操作时，为列定义使用显式的 JSON 数组。
 在报告成功之前，验证输出文件。
 
 ## FindAll
@@ -323,7 +323,7 @@ parallel-cli findall result <run_id> --json
 parallel-cli findall schema <run_id> --json
 ```
 
-当用户想要一个可以在以后审查、过滤或增强的实体发现集合时，这比普通搜索更合适。
+当用户想要一个可以在以后审查、过滤或增强的已发现实体集合时，这比普通搜索更合适。
 
 ## 监控
 
@@ -336,20 +336,20 @@ parallel-cli monitor events <monitor_id> --json
 parallel-cli monitor delete <monitor_id> --json
 ```
 
-创建通常是敏感的部分，因为执行频率和交付方式很重要：
+创建通常是敏感的部分，因为频率和交付方式很重要：
 
 ```bash
 parallel-cli monitor create --help
 ```
 
-当用户希望对页面或来源进行周期性跟踪而不是一次性获取时，使用此功能。
+当用户想要对页面或来源进行周期性跟踪，而不是一次性获取时，使用此功能。
 
 ## 推荐的 Hermes 使用模式
 
-### 带引用的快速答案
+### 带有引用的快速答案
 1.  运行 `parallel-cli search ... --json`
 2.  解析标题、URL、日期、摘要
-3.  仅使用返回的 URL 进行内联引用总结
+3.  仅使用返回的 URL 中的内联引用来总结
 
 ### URL 调查
 1.  运行 `parallel-cli extract URL --json`
@@ -369,9 +369,9 @@ parallel-cli monitor create --help
 4.  如果需要，轮询完成状态
 5.  在报告成功之前，验证输出文件
 
-## 错误处理和退出代码
+## 错误处理和退出码
 
-CLI 记录了以下退出代码：
+CLI 记录了以下退出码：
 - `0` 成功
 - `2` 输入错误
 - `3` 认证错误
@@ -406,6 +406,6 @@ parallel-cli config auto-update-check off
 - 不要引用 CLI 输出中未出现的来源。
 - `login` 可能需要 PTY/浏览器交互。
 - 对于短任务，优先使用前台执行；不要过度使用后台进程。
-- 对于大型结果集，将 JSON 保存到 `/tmp/*.json`，而不是将所有内容塞进上下文。
+- 对于大型结果集，将 JSON 保存到 `/tmp/*.json`，而不是将所有内容塞入上下文。
 - 当 Hermes 原生工具已经足够时，不要默默地选择 Parallel。
 - 请记住，这是一个供应商工作流，通常需要账户认证，并且在免费层级之外通常需要付费使用。

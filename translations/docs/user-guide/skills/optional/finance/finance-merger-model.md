@@ -8,7 +8,7 @@ description: "在 Excel 中构建增厚/稀释（并购）模型 — 备考利�
 
 # 并购模型
 
-在 Excel 中构建增厚/稀释（并购）模型 — 备考利润表、协同效应、融资结构、每股收益影响。与 `excel-author` 技能搭配使用。适用于并购推介、董事会材料或交易评估。
+在 Excel 中构建增厚/稀释（并购）模型 — 备考利润表、协同效应、融资结构、每股收益影响。与 excel-author 技能配合使用。适用于并购推介、董事会材料或交易评估。
 
 ## 技能元数据
 
@@ -21,12 +21,12 @@ description: "在 Excel 中构建增厚/稀释（并购）模型 — 备考利�
 | 许可证 | Apache-2.0 |
 | 平台 | linux, macos, windows |
 | 标签 | `finance`, `m-and-a`, `merger`, `accretion-dilution`, `excel`, `openpyxl`, `modeling`, `investment-banking` |
-| 相关技能 | [`excel-author`](/user-guide/skills/optional/finance/finance-excel-author), [`pptx-author`](/user-guide/skills/optional/finance/finance-pptx-author), [`dcf-model`](/user-guide/skills/optional/finance/finance-dcf-model), [`3-statement-model`](/user-guide/skills/optional/finance/finance-3-statement-model) |
+| 相关技能 | [`excel-author`](/docs/user-guide/skills/optional/finance/finance-excel-author), [`pptx-author`](/docs/user-guide/skills/optional/finance/finance-pptx-author), [`dcf-model`](/docs/user-guide/skills/optional/finance/finance-dcf-model), [`3-statement-model`](/docs/user-guide/skills/optional/finance/finance-3-statement-model) |
 
 ## 参考：完整的 SKILL.md
 
 :::info
-以下是 Hermes 触发此技能时加载的完整技能定义。这是 Agent 在技能激活时看到的指令。
+以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
 ## 执行环境
@@ -45,19 +45,19 @@ description: "在 Excel 中构建增厚/稀释（并购）模型 — 备考利�
 
 **收购方：**
 - 公司名称、当前股价、流通股数
-- 最近十二个月和未来十二个月的每股收益（GAAP 和调整后）
+- 最近十二个月和未来十二个月每股收益（GAAP 和调整后）
 - 市盈率倍数
-- 债务税前成本、税率
+- 税前债务成本、税率
 - 资产负债表上的现金、现有债务
 
 **目标公司：**
 - 公司名称、当前股价、流通股数（若为上市公司）
-- 最近十二个月和未来十二个月的每股收益或净利润
+- 最近十二个月和未来十二个月每股收益或净利润
 - 企业价值或股权价值
 
 **交易条款：**
 - 每股要约价格（或相对于当前的溢价）
-- 对价结构：现金比例 vs. 股票比例
+- 对价结构：现金占比 vs. 股票占比
 - 为现金部分筹集的新债务
 - 预期协同效应（收入和成本）及分阶段实施时间表
 - 交易费用和融资成本
@@ -89,7 +89,7 @@ description: "在 Excel 中构建增厚/稀释（并购）模型 — 备考利�
 
 逐年计算（第 1-3 年）：
 
-| | 独立经营 | 备考 | 增厚/(稀释) |
+| | 独立 | 备考 | 增厚/(稀释) |
 |---|-----------|-----------|---------------------|
 | 收购方净利润 | | | |
 | 目标公司净利润 | | | |
@@ -122,7 +122,7 @@ description: "在 Excel 中构建增厚/稀释（并购）模型 — 备考利�
 
 ### 步骤 6：盈亏平衡协同效应
 
-计算使交易在第 1 年达到每股收益中性所需的最低协同效应。
+计算使交易在第 1 年实现每股收益中性所需的最低协同效应。
 
 ### 步骤 7：输出
 
@@ -137,25 +137,25 @@ description: "在 Excel 中构建增厚/稀释（并购）模型 — 备考利�
 
 ## 重要注意事项
 
-- 在相关处始终同时显示 GAAP 和调整后（现金）每股收益
+- 在相关情况下，始终同时显示 GAAP 和调整后（现金）每股收益
 - 股票交易：使用收购方当前价格计算换股比例，注意新发行股份带来的稀释
 - 包含购买价格分配 — 商誉和无形资产摊销对 GAAP 每股收益很重要
 - 协同效应分阶段实施至关重要 — 第 1 年通常仅为稳态协同效应的 25-50%
-- 不要忘记用于支付的现金所放弃的利息收入以及新筹集债务的利息支出
+- 不要忘记使用现金所放弃的利息收入以及新筹集债务的利息支出
 - 协同效应和利息调整的税率应与收购方的边际税率匹配
 
-## 数据来源 — 优先使用 MCP，网络作为后备
+## 数据来源 — 优先使用 MCP，网络作为备选
 
-以下许多段落提到"使用 S&P Kensho MCP / Daloopa MCP / FactSet MCP"。这些是来自原始 Cowork 插件上下文的商业金融数据 MCP。在 Hermes 中：
+以下许多段落提到"使用 S&P Kensho MCP / Daloopa MCP / FactSet MCP"。这些是原始 Cowork 插件上下文中的商业金融数据 MCP。在 Hermes 中：
 
-- **如果您配置了任何结构化金融数据 MCP**（Hermes 支持 MCP — 参见 `native-mcp` 技能），请优先使用它来获取时点可比数据、先例交易和文件。
+- **如果您配置了任何结构化金融数据 MCP**（Hermes 支持 MCP — 参见 `native-mcp` 技能），请优先使用它来获取时点可比数据、先例交易和申报文件。
 - **否则**，回退到：
   - 针对 SEC EDGAR (`https://www.sec.gov/cgi-bin/browse-edgar`) 使用 `web_search` / `web_extract` 获取美国申报文件
   - 公司投资者关系页面获取新闻稿、财报演示文稿
   - 使用 `browser_navigate` 访问交互式数据门户
-  - 用户提供的数据（当上下文中没有时，请明确询问）
-- **切勿捏造数据**。如果无法获取某个倍数、先例或申报文件中的数字，请将单元格标记为 `[UNSOURCED]` 并告知用户。
+  - 用户提供的数据（当上下文中没有时，明确询问）
+- **切勿捏造数据**。如果无法获取某个倍数、先例或申报文件数字，请将单元格标记为 `[UNSOURCED]` 并向用户提示。
 
-## 归属说明
+## 归属
 
-此技能改编自 Anthropic 的 Claude for Financial Services 插件套件（Apache-2.0）。Office-JS / Cowork 实时 Excel 路径已被移除；此版本通过 `excel-author` 技能的约定，以无头 openpyxl 为目标。原始来源：https://github.com/anthropics/financial-services
+此技能改编自 Anthropic 的 Claude for Financial Services 插件套件 (Apache-2.0)。Office-JS / Cowork 实时 Excel 路径已被移除；此版本通过 `excel-author` 技能的约定，针对无头 openpyxl。原始地址：https://github.com/anthropics/financial-services

@@ -21,7 +21,7 @@ description: "通过 memo CLI 管理 Apple 笔记：创建、搜索、编辑"
 | 许可证 | MIT |
 | 平台 | macos |
 | 标签 | `Notes`, `Apple`, `macOS`, `note-taking` |
-| 相关技能 | [`obsidian`](/user-guide/skills/bundled/note-taking/note-taking-obsidian) |
+| 相关技能 | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian) |
 
 ## 参考：完整的 SKILL.md
 
@@ -37,7 +37,7 @@ description: "通过 memo CLI 管理 Apple 笔记：创建、搜索、编辑"
 
 - 装有 Notes.app 的 **macOS**
 - 安装：`brew tap antoniorodr/memo && brew install antoniorodr/memo/memo`
-- 出现提示时，授予对 Notes.app 的自动化访问权限（系统设置 → 隐私与安全性 → 自动化）
+- 出现提示时，授予 Notes.app 自动化访问权限（系统设置 → 隐私与安全性 → 自动化）
 
 ## 使用时机
 
@@ -50,7 +50,7 @@ description: "通过 memo CLI 管理 Apple 笔记：创建、搜索、编辑"
 
 - Obsidian 库管理 → 使用 `obsidian` 技能
 - Bear Notes → 独立应用（此处不支持）
-- 仅限 Agent 的快速笔记 → 改用 `memory` 工具
+- 仅 Agent 使用的快速笔记 → 改用 `memory` 工具
 
 ## 快速参考
 
@@ -72,13 +72,13 @@ memo notes -a "Note Title"        # 快速添加（带标题）
 ### 编辑笔记
 
 ```bash
-memo notes -e                     # 交互式选择要编辑的笔记
+memo notes -e                     # 交互式选择并编辑
 ```
 
 ### 删除笔记
 
 ```bash
-memo notes -d                     # 交互式选择要删除的笔记
+memo notes -d                     # 交互式选择并删除
 ```
 
 ### 移动笔记
@@ -96,7 +96,7 @@ memo notes -ex                    # 导出为 HTML/Markdown
 ## 限制
 
 - 无法编辑包含图片或附件的笔记
-- 交互式提示需要终端访问权限（如果需要，请使用 pty=true）
+- 交互式提示需要终端访问（必要时使用 pty=true）
 - 仅限 macOS — 需要 Apple Notes.app
 
 ## 规则

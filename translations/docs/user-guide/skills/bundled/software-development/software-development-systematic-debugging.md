@@ -1,12 +1,12 @@
 ---
-title: "系统化调试 — 4阶段根因调试：修复前先理解问题"
-sidebar_label: "系统化调试"
+title: "系统性调试 — 4阶段根因调试：修复前先理解问题"
+sidebar_label: "系统性调试"
 description: "4阶段根因调试：修复前先理解问题"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
-# 系统化调试
+# 系统性调试
 
 4阶段根因调试：修复前先理解问题。
 
@@ -17,11 +17,11 @@ description: "4阶段根因调试：修复前先理解问题"
 | 来源 | 内置（默认安装） |
 | 路径 | `skills/software-development/systematic-debugging` |
 | 版本 | `1.1.0` |
-| 作者 | Hermes Agent（改编自 obra/superpowers） |
+| 作者 | Hermes Agent (改编自 obra/superpowers) |
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `debugging`, `troubleshooting`, `problem-solving`, `root-cause`, `investigation` |
-| 相关技能 | [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`writing-plans`](/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
+| 相关技能 | [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`writing-plans`](/docs/user-guide/skills/bundled/software-development/software-development-writing-plans), [`subagent-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-subagent-driven-development) |
 
 ## 参考：完整的 SKILL.md
 
@@ -29,11 +29,11 @@ description: "4阶段根因调试：修复前先理解问题"
 以下是 Hermes 触发此技能时加载的完整技能定义。这是技能激活时 Agent 看到的指令。
 :::
 
-# 系统化调试
+# 系统性调试
 
 ## 概述
 
-随机修复浪费时间并制造新 Bug。快速补丁掩盖了根本问题。
+随机修复浪费时间并产生新 Bug。快速补丁掩盖了根本问题。
 
 **核心原则：** 在尝试修复之前，**必须**找到根本原因。修复症状就是失败。
 
@@ -42,16 +42,16 @@ description: "4阶段根因调试：修复前先理解问题"
 ## 铁律
 
 ```
-未完成根因调查，不得提出修复方案
+没有根因调查，就没有修复
 ```
 
-如果你没有完成第 1 阶段，就不能提出修复方案。
+如果你没有完成阶段 1，就不能提出修复方案。
 
 ## 何时使用
 
 适用于**任何**技术问题：
 - 测试失败
-- 生产环境中的 Bug
+- 生产环境 Bug
 - 意外行为
 - 性能问题
 - 构建失败
@@ -60,14 +60,14 @@ description: "4阶段根因调试：修复前先理解问题"
 **在以下情况尤其要使用：**
 - 时间紧迫时（紧急情况容易诱使猜测）
 - "只是一个快速修复"看起来很明显时
-- 你已经尝试了多种修复方案时
+- 你已经尝试了多种修复时
 - 之前的修复没有奏效时
-- 你还没有完全理解问题时
+- 你没有完全理解问题时
 
-**以下情况不要跳过：**
+**不要跳过的情况：**
 - 问题看起来很简单（简单的 Bug 也有根本原因）
 - 你很匆忙（仓促行事必然导致返工）
-- 有人要求立即修复（系统化比胡乱尝试更快）
+- 有人要求立即修复（系统性调试比胡乱尝试更快）
 
 ## 四个阶段
 
@@ -117,10 +117,10 @@ pytest tests/test_module.py -v --tb=long
 # 最近的提交
 git log --oneline -10
 
-# 未提交的更改
+# 未提交的变更
 git diff
 
-# 特定文件的更改
+# 特定文件的变更
 git log -p --follow src/problematic_file.py | head -100
 ```
 
@@ -144,7 +144,7 @@ git log -p --follow src/problematic_file.py | head -100
 
 **当错误位于调用栈深处时：**
 
-- 错误值起源于何处？
+- 错误值起源于哪里？
 - 是什么用错误值调用了这个函数？
 - 持续向上游追踪，直到找到源头
 - 在源头修复，而不是在症状处
@@ -179,7 +179,7 @@ search_files("variable_name\\s*=", path="src/", file_glob="*.py")
 ### 1. 找到工作示例
 
 - 在同一代码库中找到类似的正常工作代码
-- 哪些与损坏部分相似的东西是正常的？
+- 哪些与损坏的代码类似且能正常工作？
 
 **操作：** 使用 `search_files` 查找可比较的模式：
 
@@ -195,9 +195,9 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 
 ### 3. 识别差异
 
-- 正常和损坏之间有什么不同？
+- 工作代码和损坏代码之间有什么不同？
 - 列出每一个差异，无论多小
-- 不要假设"那不可能有关系"
+- 不要假设"那不可能有影响"
 
 ### 4. 理解依赖关系
 
@@ -219,7 +219,7 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 
 ### 2. 最小化测试
 
-- 做出**最小**可能的更改来测试假设
+- 做出**最小**可能的变更来测试假设
 - 一次只改变一个变量
 - 不要同时修复多个问题
 
@@ -244,7 +244,7 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 
 ### 1. 创建失败的测试用例
 
-- 最简单的可能复现
+- 最简单的可能复现方式
 - 如果可能，使用自动化测试
 - 修复前**必须**有
 - 使用 `test-driven-development` 技能
@@ -252,8 +252,8 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 ### 2. 实施单一修复
 
 - 解决已识别的根本原因
-- 一次**只做一项**更改
-- 不要"顺便"进行改进
+- 一次只做一个变更
+- 不要做"既然我在这里"的改进
 - 不要捆绑重构
 
 ### 3. 验证修复
@@ -270,7 +270,7 @@ pytest tests/ -q
 
 - **停止。**
 - 计数：你尝试了多少次修复？
-- 如果 **< 3**：返回阶段 1，用新信息重新分析
+- 如果 &lt; 3：返回阶段 1，用新信息重新分析
 - **如果 ≥ 3：停止并质疑架构（见下面的步骤 5）**
 - 在没有架构讨论的情况下，**不要**尝试第 4 次修复
 
@@ -297,12 +297,12 @@ pytest tests/ -q
 如果你发现自己有这些想法：
 - "先快速修复，稍后调查"
 - "就试试改 X，看看是否有效"
-- "添加多个更改，运行测试"
-- "跳过测试，我手动验证"
+- "添加多个变更，运行测试"
+- "跳过测试，我会手动验证"
 - "可能是 X，让我修复它"
 - "我不完全理解，但这可能有效"
-- "模式说是 X，但我会以不同的方式调整它"
-- "以下是主要问题：[列出未经调查的修复方案]"
+- "模式说是 X，但我会以不同方式调整它"
+- "以下是主要问题：[列出未经调查的修复]"
 - 在追踪数据流之前提出解决方案
 - **"再试一次修复"（当已经尝试了 2 次以上）**
 - **每次修复都在不同地方揭示出新问题**
@@ -315,8 +315,8 @@ pytest tests/ -q
 
 | 借口 | 现实 |
 |--------|---------|
-| "问题很简单，不需要流程" | 简单问题也有根本原因。流程对简单的 Bug 来说很快。 |
-| "紧急情况，没时间走流程" | 系统化调试**比**猜测和试错式的折腾**更快**。 |
+| "问题很简单，不需要流程" | 简单问题也有根本原因。流程对简单 Bug 来说很快。 |
+| "紧急情况，没时间走流程" | 系统性调试比猜测和试错式的胡乱尝试**更快**。 |
 | "先试试这个，然后再调查" | 第一次修复就设定了模式。从一开始就做对。 |
 | "确认修复有效后再写测试" | 未经测试的修复不牢固。先写测试可以证明它。 |
 | "一次修复多个问题节省时间" | 无法隔离是什么起了作用。导致新的 Bug。 |
@@ -330,7 +330,7 @@ pytest tests/ -q
 |-------|---------------|------------------|
 | **1. 根因** | 阅读错误、复现、检查变更、收集证据、追踪数据流 | 理解**是什么**和**为什么** |
 | **2. 模式** | 找到工作示例、对比、识别差异 | 知道有什么不同 |
-| **3. 假设** | 形成理论、最小化测试、一次一个变量 | 假设被证实或形成新假设 |
+| **3. 假设** | 形成理论、最小化测试、一次一个变量 | 假设被确认或形成新假设 |
 | **4. 实施** | 创建回归测试、修复根本原因、验证 | Bug 解决，所有测试通过 |
 
 ## Hermes Agent 集成
@@ -352,13 +352,13 @@ pytest tests/ -q
 delegate_task(
     goal="调查为什么 [特定测试/行为] 失败",
     context="""
-    遵循系统化调试技能：
+    遵循 systematic-debugging 技能：
     1. 仔细阅读错误信息
     2. 复现问题
     3. 追踪数据流以找到根本原因
-    4. 报告发现 — 暂时**不要**修复
+    4. 报告发现 — 暂时不要修复
 
-    错误：[粘贴完整错误信息]
+    错误：[粘贴完整错误]
     文件：[失败代码的路径]
     测试命令：[确切的命令]
     """,
@@ -370,16 +370,16 @@ delegate_task(
 
 修复 Bug 时：
 1. 编写一个复现 Bug 的测试（红色）
-2. 系统化调试以找到根本原因
+2. 系统性地调试以找到根本原因
 3. 修复根本原因（绿色）
 4. 测试证明修复有效并防止回归
 
 ## 实际影响
 
 来自调试会话的数据：
-- 系统化方法：15-30 分钟修复
-- 随机修复方法：2-3 小时折腾
+- 系统性方法：15-30 分钟修复
+- 随机修复方法：2-3 小时的胡乱尝试
 - 首次修复成功率：95% vs 40%
-- 引入新 Bug 的情况：几乎为零 vs 常见
+- 引入的新 Bug：几乎为零 vs 常见
 
-**没有捷径。不要猜测。系统化总是胜出。**
+**没有捷径。没有猜测。系统性调试总是胜出。**

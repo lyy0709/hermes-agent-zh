@@ -6,9 +6,9 @@ description: "通过浏览器 OAuth 登录 MiniMax，并在 Hermes Agent 中使�
 
 # MiniMax OAuth
 
-Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 **MiniMax**，使用与 [MiniMax 门户](https://www.minimax.io) 相同的凭据。无需 API 密钥或信用卡 — 登录一次，Hermes 会自动刷新您的会话。
+Hermes Agent 支持通过基于浏览器的 OAuth 登录流程使用 **MiniMax**，使用与 [MiniMax 门户](https://www.minimax.io) 相同的凭据。无需 API 密钥或信用卡 — 登录一次，Hermes 会自动刷新您的会话。
 
-传输层复用了 `anthropic_messages` 适配器（MiniMax 在 `/anthropic` 路径下暴露了一个与 Anthropic Messages 兼容的端点），因此所有现有的工具调用、流式传输和上下文功能都无需任何适配器更改即可工作。
+传输层复用了 `anthropic_messages` 适配器（MiniMax 在 `/anthropic` 路径下暴露了一个与 Anthropic Messages 兼容的端点），因此所有现有的工具调用、流式传输和上下文功能都无需更改适配器即可工作。
 
 ## 概述
 
@@ -16,7 +16,7 @@ Hermes Agent 通过基于浏览器的 OAuth 登录流程支持 **MiniMax**，使
 |------|-------|
 | 提供商 ID | `minimax-oauth` |
 | 显示名称 | MiniMax (OAuth) |
-| 认证类型 | 浏览器 OAuth (PKCE 设备码流程) |
+| 认证类型 | 浏览器 OAuth (PKCE 重定向流程) |
 | 传输层 | 兼容 Anthropic Messages (`anthropic_messages`) |
 | 模型 | `MiniMax-M2.7`, `MiniMax-M2.7-highspeed` |
 | 全球端点 | `https://api.minimax.io/anthropic` |
@@ -38,7 +38,7 @@ hermes model
 # → 从提供商列表中选择 "MiniMax (OAuth)"
 # → Hermes 将在浏览器中打开 MiniMax 授权页面
 # → 在浏览器中批准访问
-# → 选择一个模型 (MiniMax-M2.7 或 MiniMax-M2.7-highspeed)
+# → 选择一个模型（MiniMax-M2.7 或 MiniMax-M2.7-highspeed）
 # → 开始聊天
 
 hermes
@@ -54,13 +54,11 @@ hermes
 hermes auth add minimax-oauth
 ```
 
-### 中国区域
+### 中国区
 
-如果您的账户在中国平台 (`minimaxi.com`) 上，请改用中国区域的 OAuth 提供商 ID `minimax-cn`，或者跳过 OAuth 直接配置 `MINIMAX_CN_API_KEY` / `MINIMAX_CN_BASE_URL`。旧文档中描述的 `--region cn` 标志**未**通过 CLI 的参数解析器连接；请改用 `minimax-cn` 提供商：
+如果您的账户在中国平台 (`minimaxi.com`) 上，请改用基于 API 密钥的 `minimax-cn` 提供商 — `minimax-cn` 仅注册了 `auth_type="api_key"`（无 OAuth 流程）。直接配置 `MINIMAX_CN_API_KEY`（以及可选的 `MINIMAX_CN_BASE_URL`）：
 
 ```bash
-hermes auth add minimax-cn --type oauth   # 如果您的中国账户支持 OAuth
-# 或者更简单的方式：
 echo 'MINIMAX_CN_API_KEY=your-key' >> ~/.hermes/.env
 ```
 
@@ -72,16 +70,16 @@ echo 'MINIMAX_CN_API_KEY=your-key' >> ~/.hermes/.env
 hermes auth add minimax-oauth --no-browser
 ```
 
-Hermes 将打印验证 URL 和用户代码 — 在任何设备上打开该 URL 并在提示时输入代码。
+Hermes 将打印验证 URL 和用户代码 — 在任何设备上打开该 URL，并在提示时输入代码。
 
 ## OAuth 流程
 
-Hermes 针对 MiniMax OAuth 端点实现了 PKCE 设备码流程：
+Hermes 针对 MiniMax OAuth 端点实现了 PKCE 浏览器 OAuth 流程：
 
-1.  Hermes 生成一个 PKCE 验证器 / 挑战对和一个随机状态值。
-2.  它向 `{base_url}/oauth/code` 发送 POST 请求，附带挑战并接收 `user_code` 和 `verification_uri`。
+1.  Hermes 生成一对 PKCE 验证器/质询值和一个随机的状态值。
+2.  它向 `{base_url}/oauth/code` 发送 POST 请求，附带质询值，并收到 `user_code` 和 `verification_uri`。
 3.  您的浏览器打开 `verification_uri`。如果提示，请输入 `user_code`。
-4.  Hermes 轮询 `{base_url}/oauth/token` 直到令牌到达（或截止时间过去）。
+4.  Hermes 轮询 `{base_url}/oauth/token`，直到令牌到达（或截止时间过去）。
 5.  令牌（`access_token`、`refresh_token`、过期时间）被保存到 `~/.hermes/auth.json` 中的 `minimax-oauth` 键下。
 
 令牌刷新（标准的 OAuth `refresh_token` 授权）会在每次会话开始时，当访问令牌距离过期时间在 60 秒内时自动运行。
@@ -95,7 +93,7 @@ hermes doctor
 `◆ Auth Providers` 部分将显示：
 
 ```
-✓ MiniMax OAuth  (已登录, 区域=全球)
+✓ MiniMax OAuth  (已登录, region=global)
 ```
 
 或者，如果未登录：
@@ -115,8 +113,8 @@ hermes model
 或者直接设置模型：
 
 ```bash
-hermes config set model MiniMax-M2.7
-hermes config set provider minimax-oauth
+hermes config set model.default MiniMax-M2.7
+hermes config set model.provider minimax-oauth
 ```
 
 ## 配置参考
@@ -139,10 +137,10 @@ model:
 
 ### 提供商别名
 
-以下所有内容都解析为 `minimax-oauth`：
+以下所有别名都解析为 `minimax-oauth`：
 
 ```bash
-hermes --provider minimax-oauth    # 规范形式
+hermes --provider minimax-oauth    # 规范名称
 hermes --provider minimax-portal   # 别名
 hermes --provider minimax-global   # 别名
 hermes --provider minimax_oauth    # 别名（下划线形式）
@@ -152,7 +150,7 @@ hermes --provider minimax_oauth    # 别名（下划线形式）
 
 `minimax-oauth` 提供商**不**使用 `MINIMAX_API_KEY` 或 `MINIMAX_BASE_URL`。这些变量仅用于基于 API 密钥的 `minimax` 和 `minimax-cn` 提供商。
 
-| 变量 | 效果 |
+| 变量 | 作用 |
 |----------|--------|
 | `MINIMAX_API_KEY` | 仅由 `minimax` 提供商使用 — 对 `minimax-oauth` 忽略 |
 | `MINIMAX_CN_API_KEY` | 仅由 `minimax-cn` 提供商使用 — 对 `minimax-oauth` 忽略 |
@@ -180,13 +178,13 @@ hermes --provider minimax-oauth
 
 如果访问令牌距离过期时间在 60 秒内，Hermes 会在每次会话开始时刷新令牌。如果访问令牌已经过期（例如，在长时间离线后），刷新会在下一次请求时自动进行。如果刷新失败并出现 `refresh_token_reused` 或 `invalid_grant`，Hermes 会将会话标记为需要重新登录。
 
-当刷新失败是终局性的（HTTP 4xx、`invalid_grant`、授权被撤销等）时，Hermes 会将刷新令牌标记为失效并在本地隔离它，以免不断重试注定失败的交换。Agent 会显示一条“需要重新认证”的消息，并在您重新登录之前保持静默。
+当刷新失败是终局性的（HTTP 4xx、`invalid_grant`、授权被撤销等）时，Hermes 会将刷新令牌标记为失效，并在本地隔离它，以免不断重试注定失败的交换。Agent 会显示一条“需要重新认证”的消息，并在您重新登录之前保持静默。
 
 **修复：** 再次运行 `hermes auth add minimax-oauth` 以开始新的登录。隔离状态会在下一次成功交换后清除。
 
 ### 授权超时
 
-设备码流程有一个有限的过期窗口。如果您没有及时批准登录，Hermes 会引发超时错误。
+设备代码流程有一个有限的过期窗口。如果您没有及时批准登录，Hermes 会引发超时错误。
 
 **修复：** 重新运行 `hermes auth add minimax-oauth`（或 `hermes model`）。流程将重新开始。
 
@@ -204,7 +202,7 @@ Hermes 检测到授权服务器返回的 `state` 值与它发送的值不匹配�
 hermes auth add minimax-oauth --no-browser
 ```
 
-Hermes 会打印 URL 和代码。在任何设备上打开该 URL 并在那里完成流程。
+Hermes 将打印 URL 和代码。在任何设备上打开该 URL 并在那里完成流程。
 
 ### 运行时出现“未登录到 MiniMax OAuth”错误
 

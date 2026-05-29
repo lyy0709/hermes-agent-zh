@@ -21,7 +21,7 @@ description: "通过 SSH 和 Pinggy 实现零安装的本地主机隧道"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `Pinggy`, `Tunnel`, `Networking`, `SSH`, `Webhook`, `Localhost` |
-| 相关技能 | `cloudflared-quick-tunnel`, [`webhook-subscriptions`](/user-guide/skills/bundled/devops/devops-webhook-subscriptions) |
+| 相关技能 | `cloudflared-quick-tunnel`, [`webhook-subscriptions`](/docs/user-guide/skills/bundled/devops/devops-webhook-subscriptions) |
 
 ## 参考：完整的 SKILL.md
 
@@ -33,13 +33,13 @@ description: "通过 SSH 和 Pinggy 实现零安装的本地主机隧道"
 
 使用 Pinggy SSH 反向隧道将本地服务（开发服务器、Webhook 接收器、MCP 端点、演示）暴露到公共互联网。无需安装守护进程 — 用户使用自带的 SSH 客户端连接到 `a.pinggy.io:443`，Pinggy 会返回一个公共的 HTTP/HTTPS URL。
 
-免费层：60 分钟隧道，随机子域名，无需注册。专业层（每月 3 美元）需使用 Token 选择加入。
+免费层：60 分钟隧道，随机子域名，无需注册。专业层（3 美元/月）需使用 Token 选择加入。
 
 ## 使用时机
 
-- 用户要求“暴露这个本地服务”、“分享我的开发服务器”、“使这个 URL 公开”、“隧道端口 N”、“为 Webhook 获取一个公共 URL”
+- 用户要求“暴露这个本地服务”、“分享我的开发服务器”、“让这个 URL 公开”、“隧道端口 N”、“为 Webhook 获取一个公共 URL”
 - 需要在本地任务期间接收 Webhook 回调（Stripe、GitHub、Discord、AgentMail）
-- 与远程方共享一次性 HTTP 演示（MCP 服务器、Ollama/vLLM 端点、仪表板）
+- 与远程方分享一次性 HTTP 演示（MCP 服务器、Ollama/vLLM 端点、仪表板）
 - 主机有 SSH 但没有 `cloudflared` / `ngrok` 二进制文件，且安装它们会显得过于复杂
 
 如果主机已配置 `cloudflared`，请优先使用 `cloudflared-quick-tunnel` 技能 — Cloudflare 快速隧道不会在 60 分钟后过期。
@@ -56,17 +56,17 @@ description: "通过 SSH 和 Pinggy 实现零安装的本地主机隧道"
 ## 快速参考
 
 ```bash
-# 端口 8000 的普通 HTTP/HTTPS 隧道（免费层）
+# 为端口 8000 创建纯 HTTP/HTTPS 隧道（免费层）
 ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
     -R0:localhost:8000 free@a.pinggy.io
 
 # TCP 隧道（数据库、原始 SSH 等）
 ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:5432 tcp@a.pinggy.io
 
-# TLS 隧道（Pinggy 无法解密 — 在源端自带证书）
+# TLS 隧道（Pinggy 无法解密 — 请在源服务端自带证书）
 ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:443 tls@a.pinggy.io
 
-# 基本身份验证门控 (b:用户:密码)
+# 基础认证门控 (b:用户:密码)
 ssh -p 443 -o StrictHostKeyChecking=no -R0:localhost:8000 \
     "b:admin:secret+free@a.pinggy.io"
 
@@ -97,9 +97,9 @@ curl -sI http://127.0.0.1:8000/ | head -1
 # 期望得到 HTTP/1.x 200（或任何非连接拒绝的响应）
 ```
 
-如果还没有服务在监听，请先启动它（例如 `python3 -m http.server 8000 --bind 127.0.0.1`）。Pinggy 会愉快地返回一个指向无服务的 URL — 在源服务启动前，用户将看到 502 错误。
+如果还没有服务在监听，请先启动它（例如 `python3 -m http.server 8000 --bind 127.0.0.1`）。Pinggy 会愉快地返回一个指向空服务的 URL — 在源服务启动前，用户将看到 502 错误。
 
-### 2. 将隧道作为后台进程启动
+### 2. 以后台进程方式启动隧道
 
 使用 `terminal(background=True)` 并将输出捕获到日志文件（Pinggy 在 stdout 上打印 URL，然后保持连接打开）：
 
@@ -139,7 +139,7 @@ https://yqycl-98-162-69-48.a.free.pinggy.link
 
 ```bash
 curl -sI https://<the-url>/ | head -3
-# 期望得到 200/302/或本地源服务实际返回的任何内容
+# 期望得到 200/302/或本地源服务实际返回的任何状态码
 ```
 
 如果得到 `502 Bad Gateway`，说明 SSH 会话已启动，但本地源服务未在监听 — 请先修复步骤 1。
@@ -156,11 +156,11 @@ pkill -f 'ssh -p 443 .* free@a\.pinggy\.io'
 
 ## 通过用户名关键词进行访问控制
 
-Pinggy 将控制标志堆叠到 SSH 用户名中，用 `+` 分隔。当 `user@host` 参数包含 `+` 时，始终用引号括起来：
+Pinggy 将控制标志堆叠到 SSH 用户名中，用 `+` 分隔。当参数包含 `+` 时，始终引用整个 `user@host` 参数：
 
 | 关键词 | 效果 |
 |---------|--------|
-| `b:user:pass` | HTTP 基本身份验证门控 |
+| `b:user:pass` | HTTP 基础认证门控 |
 | `k:token` | Bearer Token 头部门控 (`Authorization: Bearer <token>`) |
 | `w:CIDR` | IP 白名单（单个 IP 或 CIDR，可重复） |
 | `co` | 添加 `Access-Control-Allow-Origin: *` (CORS) |
@@ -187,19 +187,19 @@ ssh -p 443 -L4300:localhost:4300 -R0:localhost:8000 free@a.pinggy.io
 - **免费版 URL 是随机的，重启后会改变。** 不要收藏它，不要将其粘贴到配置文件中。每次都要从日志中重新解析。
 - **每个源 IP 的并发免费隧道限制为一个。** 从同一台机器启动第二个隧道通常会终止第一个。专业版取消此限制。
 - **用户名中的 `+` 必须加引号。** 裸写的 `ssh ... b:admin:secret+free@a.pinggy.io` 在 bash 中有效，但在将 `+` 特殊处理的 shell 下或以编程方式组装时会出错。始终用双引号包裹。
-- **没有访问控制标志时，不要隧道传输任何敏感内容。** 裸 HTTP 隧道对任何拥有该 URL 的人都是可访问的。对于非公开服务，请使用 `b:`、`k:` 或 `w:`。
-- **`process(action='log')` 可能会错过 SSH 横幅输出。** Pinggy 打印 URL 后，SSH 会话进入交互模式。始终重定向到日志文件并直接 `grep` 该文件——与 `cloudflared-quick-tunnel` 的模式相同。
-- **首次运行时提示主机密钥。** 默认的 OpenSSH 配置会要求用户接受 Pinggy 的主机密钥。对于无人值守的运行，始终传递 `-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null`。
-- **TCP 和 TLS 隧道返回一个 `<子域名>.a.pinggy.online:<端口>` 对，而不是一个 https URL。** 使用不同的正则表达式解析（`tcp://` 和一个端口）。不要假设每个 Pinggy 隧道都是 HTTP。
-- **专业模式要求将 Token 作为用户名，而不是标志。** 使用 `"$PINGGY_TOKEN+a.pinggy.io"`（没有 `free@`）。使用 Token 时，您还可以添加 `:persistent` 以获得稳定的子域名——参见 `pinggy.io/docs/`。
+- **在没有访问控制标志的情况下，不要隧道传输任何敏感内容。** 裸 HTTP 隧道可以被任何拥有该 URL 的人访问。对于非公开服务，请使用 `b:`、`k:` 或 `w:`。
+- **`process(action='log')` 可能会错过 SSH 横幅输出。** Pinggy 打印 URL 后，SSH 会话进入交互模式。始终重定向到日志文件并直接 `grep` 文件——与 `cloudflared-quick-tunnel` 模式相同。
+- **首次运行时提示主机密钥。** 默认的 OpenSSH 配置会要求用户接受 Pinggy 的主机密钥。对于无人值守运行，始终传递 `-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null`。
+- **TCP 和 TLS 隧道返回一个 `<子域名>.a.pinggy.online:<端口>` 对，而不是 https URL。** 使用不同的正则表达式解析（`tcp://` 和一个端口）。不要假设每个 Pinggy 隧道都是 HTTP。
+- **专业模式要求将 Token 作为用户名，而不是标志。** 使用 `"$PINGGY_TOKEN+a.pinggy.io"`（没有 `free@`）。使用 Token 时，还可以添加 `:persistent` 以获得稳定的子域名——参见 `pinggy.io/docs/`。
 
 ## 配方
 
-将本地源与 Pinggy 隧道结合的组合模式。每个配方都是自包含的——启动源，启动隧道，解析 URL，将其交还给用户。
+将本地源与 Pinggy 隧道结合的组合模式。每个配方都是独立的——启动源、启动隧道、解析 URL、将其交还给用户。
 
 ### 配方 1 — 接收 Webhook 回调
 
-当外部服务（Stripe、GitHub、Discord、AgentMail 等）需要在本地任务期间向一个公开可访问的 URL 发送 POST 请求时使用此方法。
+当外部服务（Stripe、GitHub、Discord、AgentMail 等）需要在本地任务期间向一个可公开访问的 URL 发送 POST 请求时使用此配方。
 
 ```bash
 # 1. 微型捕获服务器：每个请求都会被追加到 /tmp/webhook-hits.log
@@ -237,11 +237,11 @@ echo "Webhook URL: $URL"
 tail -f /tmp/webhook-hits.log
 ```
 
-将 `$URL` 交给需要调用您的服务。清理：`kill $(cat /tmp/webhook-server.pid) $(cat /tmp/webhook-pinggy.pid)`。
+将 `$URL` 交给需要调用你的服务。清理：`kill $(cat /tmp/webhook-server.pid) $(cat /tmp/webhook-pinggy.pid)`。
 
 ### 配方 2 — 通过 HTTP/SSE 暴露 MCP 服务器
 
-当远程 MCP 客户端（另一台机器上的 Claude Desktop、队友的编辑器等）需要访问在本地机器上运行的 MCP 服务器时使用。仅适用于使用 HTTP 传输的 MCP 服务器——stdio 模式的服务器无法被隧道传输。
+当远程 MCP 客户端（另一台机器上的 Claude Desktop、队友的编辑器等）需要访问在本地运行的 MCP 服务器时使用。仅适用于使用 HTTP 传输的 MCP 服务器——stdio 模式的服务器无法被隧道传输。
 
 ```bash
 # 1. 以 HTTP 模式启动 MCP 服务器（示例：在端口 8765 上运行的 FastMCP 服务器）
@@ -284,11 +284,11 @@ echo "Token:    $TOKEN"
 # 验证
 curl -s "$URL/api/tags" -H "Authorization: Bearer $TOKEN" | head
 ```
-`co` 启用 CORS，以便浏览器调用方可以访问端点。对于仅限后端的调用方，请去掉 `co`。对于 OpenAI 兼容的 vLLM/llama.cpp 端点，调用方使用基础 URL `$URL/v1` 和 `Authorization: Bearer $TOKEN` —— 但请注意 Pinggy 不会剥离/替换请求体中的任何内容，因此模型服务器本身会看到 Pinggy 的 Token；本地服务器应配置为忽略身份验证（因为它已经在 `127.0.0.1` 上运行），并让 Pinggy 来处理访问控制。
+`co` 启用 CORS，以便浏览器调用方可以访问端点。对于仅限后端的调用方，请去掉 `co`。对于兼容 OpenAI 的 vLLM/llama.cpp 端点，调用方使用基础 URL `$URL/v1` 和 `Authorization: Bearer $TOKEN` —— 但请注意 Pinggy 不会剥离/替换请求体中的任何内容，因此模型服务器本身会看到 Pinggy 的 Token；本地服务器应配置为忽略身份验证（因为它已经在 `127.0.0.1` 上运行），并让 Pinggy 来处理访问控制。
 
 ### 方案 4 — 使用一次性密码共享开发服务器
 
-这是最快的“让队友访问我运行中的应用”的模式。使用随机密码，打印一次，当你按 Ctrl-C 时连接终止。
+这是最快的“让队友访问我运行中的应用”模式。使用随机密码，打印一次，当你按 Ctrl-C 时连接终止。
 
 ```bash
 PASS=$(openssl rand -base64 12 | tr -d '+/=' | head -c 12)
@@ -296,7 +296,7 @@ echo "Dev server password: $PASS"
 ssh -p 443 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o ServerAliveInterval=30 \
     -R0:localhost:3000 "b:dev:$PASS+co+x:https+free@a.pinggy.io"
-# URL 会打印到终端。分享 URL 和密码。按 Ctrl-C 来拆除连接。
+# URL 会打印到终端。分享 URL 和密码。按 Ctrl-C 以拆除连接。
 ```
 
 `b:dev:$PASS` 使用 HTTP 基本身份验证来保护 URL。`x:https` 强制使用 TLS。`co` 为 SPA 前端添加 CORS。

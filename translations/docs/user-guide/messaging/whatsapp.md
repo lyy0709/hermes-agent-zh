@@ -6,17 +6,19 @@ description: "通过内置的 Baileys 桥接器将 Hermes Agent 设置为 WhatsA
 
 # WhatsApp 设置
 
-Hermes 通过一个基于 **Baileys** 的内置桥接器连接到 WhatsApp。其工作原理是模拟一个 WhatsApp Web 会话——**并非**通过官方的 WhatsApp Business API。因此，不需要 Meta 开发者账户或商业验证。
+Hermes 通过一个基于 **Baileys** 的内置桥接器连接到 WhatsApp。其工作原理是模拟一个 WhatsApp Web 会话——**并非**通过官方的 WhatsApp Business API。因此，不需要 Meta 开发者账户或企业验证。
+
+> 运行 `hermes gateway setup` 并选择 **WhatsApp** 以获取引导式设置。
 
 :::warning 非官方 API —— 封禁风险
-WhatsApp **不**正式支持 Business API 之外的第三方机器人。使用第三方桥接器存在账户被限制的小风险。为最小化风险：
-- **使用一个专用的电话号码**给机器人（不要用你的个人号码）
-- **不要发送批量/垃圾消息**——保持使用方式为对话式
-- **不要向未先发消息的人自动发送外发消息**
+WhatsApp **不**正式支持 Business API 之外的第三方机器人。使用第三方桥接器存在账户受限的小风险。为将风险降至最低：
+- **使用一个专用的电话号码** 给机器人（不要用你的个人号码）
+- **不要发送批量/垃圾消息** —— 保持使用方式为对话式
+- **不要自动化地向未先发消息的人发送消息**
 :::
 
 :::warning WhatsApp Web 协议更新
-WhatsApp 会定期更新其 Web 协议，这可能会暂时破坏与第三方桥接器的兼容性。当这种情况发生时，Hermes 会更新桥接器依赖项。如果机器人在 WhatsApp 更新后停止工作，请拉取最新的 Hermes 版本并重新配对。
+WhatsApp 会定期更新其 Web 协议，这可能会暂时破坏与第三方桥接器的兼容性。当这种情况发生时，Hermes 会更新桥接器依赖项。如果机器人因 WhatsApp 更新而停止工作，请拉取最新的 Hermes 版本并重新配对。
 :::
 
 ## 两种模式
@@ -33,7 +35,7 @@ WhatsApp 会定期更新其 Web 协议，这可能会暂时破坏与第三方桥
 - **Node.js v18+** 和 **npm** —— WhatsApp 桥接器作为 Node.js 进程运行
 - **一部安装了 WhatsApp 的手机**（用于扫描二维码）
 
-与旧版基于浏览器的桥接器不同，当前基于 Baileys 的桥接器**不**需要本地 Chromium 或 Puppeteer 依赖栈。
+与旧版基于浏览器的桥接器不同，当前基于 Baileys 的桥接器**不**需要本地的 Chromium 或 Puppeteer 依赖栈。
 
 ---
 
@@ -53,14 +55,14 @@ hermes whatsapp
 **扫描二维码：**
 
 1. 在手机上打开 WhatsApp
-2. 转到 **设置 → 已关联的设备**
+2. 进入 **设置 → 已关联的设备**
 3. 点击 **关联设备**
 4. 将摄像头对准终端中的二维码
 
 配对成功后，向导会确认连接并退出。您的会话会自动保存。
 
 :::tip
-如果二维码看起来乱码，请确保您的终端至少有 60 列宽并支持 Unicode。您也可以尝试使用不同的终端模拟器。
+如果二维码看起来乱码，请确保您的终端至少 60 列宽并支持 Unicode。您也可以尝试使用不同的终端模拟器。
 :::
 
 ---
@@ -101,7 +103,7 @@ WHATSAPP_ALLOWED_USERS=15551234567         # 逗号分隔的电话号码（带�
 :::tip 允许所有人的简写
 设置 `WHATSAPP_ALLOWED_USERS=*` 允许**所有**发送者（等同于 `WHATSAPP_ALLOW_ALL_USERS=true`）。
 这与 [Signal 群组白名单](/reference/environment-variables) 保持一致。
-要使用配对流程，请删除这两个变量，并依赖 [DM 配对系统](/user-guide/security#dm-pairing-system)。
+要使用配对流程，请删除这两个变量并依赖 [DM 配对系统](/user-guide/security#dm-pairing-system)。
 :::
 
 `~/.hermes/config.yaml` 中的可选行为设置：
@@ -121,7 +123,7 @@ whatsapp:
 ```bash
 hermes gateway              # 前台运行
 hermes gateway install      # 安装为用户服务
-sudo hermes gateway install --system   # 仅限 Linux：启动时系统服务
+sudo hermes gateway install --system   # 仅限 Linux：开机启动的系统服务
 ```
 
 消息网关会使用保存的会话自动启动 WhatsApp 桥接器。
@@ -132,9 +134,9 @@ sudo hermes gateway install --system   # 仅限 Linux：启动时系统服务
 
 Baileys 桥接器将其会话保存在 `~/.hermes/platforms/whatsapp/session` 下。这意味着：
 
-- **会话在重启后仍然存在**——您不需要每次都重新扫描二维码
+- **会话在重启后保留** —— 您不需要每次都重新扫描二维码
 - 会话数据包括加密密钥和设备凭证
-- **请勿共享或提交此会话目录**——它授予对 WhatsApp 账户的完全访问权限
+- **请勿共享或提交此会话目录** —— 它授予对 WhatsApp 账户的完全访问权限
 
 ---
 
@@ -154,7 +156,7 @@ hermes whatsapp
 
 Hermes 支持 WhatsApp 上的语音：
 
-- **接收：** 语音消息（`.ogg` opus）会自动使用配置的 STT 提供商进行转录：本地 `faster-whisper`、Groq Whisper（`GROQ_API_KEY`）或 OpenAI Whisper（`VOICE_TOOLS_OPENAI_KEY`）
+- **接收：** 语音消息（`.ogg` opus）会自动使用配置的 STT 提供商进行转录：本地的 `faster-whisper`、Groq Whisper（`GROQ_API_KEY`）或 OpenAI Whisper（`VOICE_TOOLS_OPENAI_KEY`）
 - **发送：** TTS 响应作为 MP3 音频文件附件发送
 - Agent 响应默认以 "⚕ **Hermes Agent**" 为前缀。您可以在 `config.yaml` 中自定义或禁用此功能：
 
@@ -169,11 +171,11 @@ whatsapp:
 
 ## 消息格式化和发送
 
-WhatsApp 支持**流式（渐进式）响应**——机器人会随着 AI 生成文本而实时编辑其消息，就像 Discord 和 Telegram 一样。在内部，WhatsApp 在发送能力上被归类为 TIER_MEDIUM 平台。
+WhatsApp 支持**流式（渐进式）响应** —— 机器人会随着 AI 生成文本而实时编辑其消息，就像 Discord 和 Telegram 一样。在内部，WhatsApp 在发送能力上被归类为 TIER_MEDIUM 平台。
 
 ### 分块
 
-长响应会在 **4,096 个字符** 处自动拆分为多条消息（WhatsApp 的实际显示限制）。您无需配置任何内容——消息网关会处理拆分并按顺序发送块。
+长响应会自动按 **4,096 个字符** 每块进行分割（WhatsApp 的实际显示限制）。您无需配置任何内容 —— 消息网关会处理分割并按顺序发送块。
 
 ### WhatsApp 兼容的 Markdown
 
@@ -186,11 +188,11 @@ AI 响应中的标准 Markdown 会自动转换为 WhatsApp 的原生格式：
 | `# 标题` | `*标题*` | 粗体文本（无原生标题） |
 | `[链接文本](url)` | `链接文本 (url)` | 内联 URL |
 
-代码块和内联代码保持不变，因为 WhatsApp 原生支持三重反引号格式。
+代码块和内联代码会按原样保留，因为 WhatsApp 原生支持三重反引号格式。
 
 ### 工具进度
 
-当 Agent 调用工具（网络搜索、文件操作等）时，WhatsApp 会显示实时进度指示器，显示正在运行哪个工具。此功能默认启用——无需配置。
+当 Agent 调用工具（网络搜索、文件操作等）时，WhatsApp 会显示实时进度指示器，显示正在运行哪个工具。此功能默认启用 —— 无需配置。
 
 ---
 
@@ -199,9 +201,9 @@ AI 响应中的标准 Markdown 会自动转换为 WhatsApp 的原生格式：
 | 问题 | 解决方案 |
 |---------|----------|
 | **二维码无法扫描** | 确保终端足够宽（60+ 列）。尝试不同的终端。确保您从正确的 WhatsApp 账户（机器人号码，非个人）扫描。 |
-| **二维码过期** | 二维码每约 20 秒刷新一次。如果超时，请重启 `hermes whatsapp`。 |
-| **会话未持久化** | 检查 `~/.hermes/platforms/whatsapp/session` 是否存在且可写。如果是容器化环境，请将其挂载为持久卷。 |
-| **意外退出登录** | WhatsApp 在长时间不活动后会取消关联设备。保持手机开机并连接到网络，然后如果需要，使用 `hermes whatsapp` 重新配对。 |
+| **二维码过期** | 二维码大约每 20 秒刷新一次。如果超时，请重启 `hermes whatsapp`。 |
+| **会话未持久化** | 检查 `~/.hermes/platforms/whatsapp/session` 是否存在且可写。如果是容器化部署，请将其挂载为持久卷。 |
+| **意外退出登录** | WhatsApp 在长时间不活动后会取消关联设备。保持手机开机并连接到网络，如果需要，使用 `hermes whatsapp` 重新配对。 |
 | **桥接器崩溃或重连循环** | 重启消息网关，更新 Hermes，如果会话因 WhatsApp 协议更改而失效，则重新配对。 |
 | **WhatsApp 更新后机器人停止工作** | 更新 Hermes 以获取最新的桥接器版本，然后重新配对。 |
 | **macOS："Node.js 未安装"，但终端中 node 命令有效** | launchd 服务不继承您的 shell PATH。运行 `hermes gateway install` 将您当前的 PATH 重新快照到 plist 中，然后运行 `hermes gateway start`。详情请参阅 [消息网关服务文档](./index.md#macos-launchd)。 |
@@ -223,8 +225,8 @@ whatsapp:
   unauthorized_dm_behavior: ignore
 ```
 
-- `~/.hermes/platforms/whatsapp/session` 目录包含完整的会话凭证——请像保护密码一样保护它
+- `~/.hermes/platforms/whatsapp/session` 目录包含完整的会话凭证 —— 请像保护密码一样保护它
 - 设置文件权限：`chmod 700 ~/.hermes/platforms/whatsapp/session`
-- 为机器人使用**专用电话号码**，以隔离您个人账户的风险
-- 如果您怀疑账户被盗用，请从 WhatsApp → 设置 → 已关联的设备 中取消关联该设备
+- 使用**专用的电话号码**给机器人，以隔离您个人账户的风险
+- 如果您怀疑被入侵，请从 WhatsApp → 设置 → 已关联的设备 中取消关联该设备
 - 日志中的电话号码会被部分隐藏，但请检查您的日志保留策略

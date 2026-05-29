@@ -21,7 +21,7 @@ description: "只读 EVM 客户端：跨 8 条链的钱包、代币、Gas"
 | 许可证 | MIT |
 | 平台 | linux, macos, windows |
 | 标签 | `EVM`, `Ethereum`, `BNB`, `BSC`, `Base`, `Arbitrum`, `Polygon`, `Optimism`, `Avalanche`, `zkSync`, `Blockchain`, `Crypto`, `Web3`, `DeFi`, `NFT`, `ENS`, `Whale`, `Security` |
-| 相关技能 | [`solana`](/user-guide/skills/optional/blockchain/blockchain-solana) |
+| 相关技能 | [`solana`](/docs/user-guide/skills/optional/blockchain/blockchain-solana) |
 
 ## 参考：完整的 SKILL.md
 
@@ -42,17 +42,17 @@ Optimism、Avalanche (C-Chain)、zkSync Era。
 无需 API 密钥。零外部依赖 — 仅使用 Python 标准库
 (urllib, json, argparse, threading)。
 
-> **取代了独立的 `base` 技能。** Base 特定代币（AERO, DEGEN,
+> **取代了独立的 `base` 技能。** Base 特定的代币（AERO, DEGEN,
 > TOSHI, BRETT, WELL, cbETH, cbBTC, wstETH, rETH）以及所有之前位于
-> `optional-skills/blockchain/base/` 下的 Base RPC 功能都已整合到本技能中。
-> 对任何命令传递 `--chain base` 以获取 Base 链的覆盖。
+> `optional-skills/blockchain/base/` 下的 Base RPC 功能都已整合到
+> 此技能中。对任何命令传递 `--chain base` 即可获得 Base 覆盖。
 
 ---
 
 ## 何时使用
 - 用户询问任何 EVM 链上的钱包余额或资产组合
 - 用户希望一次性检查同一钱包在**所有**链上的情况
-- 用户希望通过哈希检查（或解码）一笔交易
+- 用户希望通过哈希值检查交易（或解码其内容）
 - 用户需要 ERC-20 代币元数据、价格、供应量或市值
 - 用户需要地址的近期交易历史
 - 用户需要当前 Gas 价格或跨链比较费用
@@ -66,7 +66,7 @@ Optimism、Avalanche (C-Chain)、zkSync Era。
 
 ## 先决条件
 仅需 Python 3.8+ 标准库。无需 pip 安装。
-价格：CoinGecko 免费 API（速率限制，约 10-30 次请求/分钟）。
+定价：CoinGecko 免费 API（速率限制，约 10-30 次请求/分钟）。
 ENS：ensideas.com 公共 API。
 交易解码：4byte.directory 公共 API。
 
@@ -93,7 +93,7 @@ python3 $SCRIPT multichain 0xd8dA...96045        # 同一钱包在 ALL 链上的
 
 # 代币与价格
 python3 $SCRIPT price ETH
-python3 $SCRIPT price 0xdAC1...1ec7              # 通过合约地址
+python3 $SCRIPT price 0xdAC1...1ec7              # 按合约地址
 python3 $SCRIPT token 0xdAC1...1ec7              # ERC-20 元数据 + 市值
 
 # 交易
@@ -153,7 +153,7 @@ python3 $SCRIPT compare
 python3 $SCRIPT tx 0x5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060
 python3 $SCRIPT decode 0x5c504ed...   # 显示人类可读的函数签名
 ```
-解码使用 4byte.directory 将 0xa9059cbb 转换为 transfer(address,uint256)。
+解码使用 4byte.directory 将 0xa9059cbb -> transfer(address,uint256)。
 
 ### 5. ENS 解析
 ```bash
@@ -207,13 +207,13 @@ python3 $SCRIPT gas --chain polygon
 ## 注意事项
 - CoinGecko 免费层：约 10-30 次请求/分钟。使用 `--no-prices` 进行更快的钱包扫描。
 - 公共 RPC 可能限流。生产环境请设置 EVM_RPC_URL 为私有端点。
-- `wallet` 和 `allowance` 仅检查已知代币列表（每条链约 30 个代币）。如需完整的代币发现，请使用区块浏览器 API。
+- `wallet` 和 `allowance` 仅检查已知代币列表（每条链约 30 个代币）。如需完整的代币发现，请使用区块浏览器。
 - `activity` 仅扫描近期区块（最多 200 个）。完整历史记录请使用 Etherscan API。
 - `multichain` 运行 8 个并行线程 — 可能触发公共 RPC 的速率限制。
 - ENS 解析依赖于单个公共端点 (ensideas.com / ens.vitalik.ca)，无备用方案。如果该端点宕机，`ens` 将失败 — 稍后重试或使用区块浏览器。
-- 交易解码依赖于单个公共端点 (4byte.directory)，无备用方案。其数据库中未包含的选择器将显示为 `unknown`。
-- **L2 Gas 估算仅针对 L2 执行。** 在 Base、Arbitrum、Optimism 和 zkSync 等 Rollup 上，实际交易成本还包括 L1 数据发布费，该费用取决于 calldata 大小和当前 L1 Gas 价格。`gas` 命令不估算该 L1 部分。对于 Base 链，请参考网络的 L1 费用预言机（合约 `0x420000000000000000000000000000000000000F`）。
-- 地址 / 交易哈希输入会验证 0x 前缀 + 正确长度 + 十六进制，但**不**强制要求 EIP-55 校验和大小写（RPC 端点接受任何大小写的十六进制）。
+- 交易解码依赖于单个公共端点 (4byte.directory)，无备用方案。其数据库中未收录的选择器将显示为 `unknown`。
+- **L2 Gas 估算仅针对 L2 执行。** 在 Base、Arbitrum、Optimism 和 zkSync 等 Rollup 上，实际交易成本还包括 L1 数据发布费，该费用取决于 calldata 大小和当前 L1 Gas 价格。`gas` 命令不估算该 L1 部分。对于 Base，请查看网络的 L1 费用预言机（合约 `0x420000000000000000000000000000000000000F`）。
+- 地址 / 交易哈希输入会验证 0x 前缀 + 正确长度 + 十六进制，但**不**强制 EIP-55 校验和大小写（RPC 端点接受任何大小写的十六进制）。
 
 ---
 
