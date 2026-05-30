@@ -7,7 +7,7 @@ sidebar_position: 3
 Hermes 使用两种模型槽位：
 
 - **主模型** — Agent 用于思考的模型。每条用户消息、每次工具调用循环、每个流式响应都通过此模型处理。
-- **辅助模型** — Agent 卸载的较小辅助任务。上下文压缩、视觉（图像分析）、网页摘要、批准评分、MCP 工具路由、会话标题生成和技能搜索。每个任务都有自己的槽位，可以独立覆盖。
+- **辅助模型** — Agent 卸载的较小副任务。上下文压缩、视觉（图像分析）、网页摘要、批准评分、MCP 工具路由、会话标题生成和技能搜索。每个任务都有自己的槽位，可以独立覆盖。
 
 本页介绍如何通过仪表板配置这两种模型。如果您更喜欢配置文件或 CLI，请跳至底部的[替代方法](#alternative-methods)。
 
@@ -18,7 +18,7 @@ Hermes 使用两种模型槽位：
 :::
 
 :::note `model:` 模式 — 空字符串与映射
-在全新安装时，捆绑的默认配置包含 `model: ""`（一个空字符串标记，表示“尚未配置”）。首次运行 `hermes setup` 或 `hermes model` 时，该键会就地升级为包含 `provider`、`default`、`base_url` 和 `api_mode` 子键的映射 — 即本页及 [`profiles.md`](./profiles.md) / [`configuration.md`](./configuration.md) 中展示的结构。如果您在 `config.yaml` 中看到空字符串，请运行 `hermes model`（或在仪表板中点击 **Change**），Hermes 将为您写入字典形式。
+在全新安装时，捆绑的默认配置包含 `model: ""`（一个空字符串标记，表示“尚未配置”）。首次运行 `hermes setup` 或 `hermes model` 时，该键会就地升级为包含 `provider`、`default`、`base_url` 和 `api_mode` 子键的映射 — 即本页及 [`profiles.md`](./profiles.md) / [`configuration.md`](./configuration.md) 中所示的格式。如果您在 `config.yaml` 中看到空字符串，请运行 `hermes model`（或在仪表板中点击 **Change**），Hermes 将为您写入字典格式。
 :::
 
 ## 模型页面
@@ -26,7 +26,7 @@ Hermes 使用两种模型槽位：
 打开仪表板，点击侧边栏中的 **Models**。您会看到两个部分：
 
 1. **模型设置** — 顶部面板，用于为槽位分配模型。
-2. **使用情况分析** — 显示在选定时间段内运行过会话的每个模型的排名卡片，包含 Token 数量、成本和能力徽章。
+2. **使用分析** — 排名卡片，显示在选定时间段内运行过会话的每个模型，包含 Token 数量、成本和能力徽章。
 
 ![模型页面概览](/img/docs/dashboard-models/overview.png)
 
@@ -40,10 +40,10 @@ Hermes 使用两种模型槽位：
 
 选择器有两列：
 
-- **左侧** — 已认证的提供商。仅显示您已设置（API 密钥已设置、OAuth 授权或定义为自定义端点）的提供商。如果缺少某个提供商，请前往 **Keys** 添加其凭据。
+- **左侧** — 已认证的提供商。仅显示您已设置（设置了 API 密钥、OAuth 授权或定义为自定义端点）的提供商。如果缺少某个提供商，请前往 **Keys** 添加其凭据。
 - **右侧** — 所选提供商的精选模型列表。这些是 Hermes 为该提供商推荐的代理式模型，而非原始的 `/models` 转储（在 OpenRouter 上包含 400 多个模型，包括 TTS、图像生成器和重排器）。
 
-在筛选框中输入内容，按提供商名称、slug 或模型 ID 进行筛选。
+在筛选框中输入内容，按提供商名称、Slug 或模型 ID 进行筛选。
 
 选择一个模型，点击 **Switch**，Hermes 会将其写入 `~/.hermes/config.yaml` 的 `model` 部分。**这仅适用于新会话** — 您已打开的任何聊天标签页将继续使用其启动时的模型。要在当前聊天中热切换模型，请使用其中的 `/model` 斜杠命令。
 
@@ -53,7 +53,7 @@ Hermes 使用两种模型槽位：
 
 ![辅助面板展开](/img/docs/dashboard-models/auxiliary-expanded.png)
 
-每个辅助任务默认为 `auto` — 这意味着 Hermes 也使用您的主模型来处理该任务。当您希望为辅助任务使用更便宜或更快的模型时，可以覆盖特定任务。
+每个辅助任务默认为 `auto` — 意味着 Hermes 也使用您的主模型来处理该任务。当您希望为副任务使用更便宜或更快的模型时，可以覆盖特定任务。
 
 ### 常见的覆盖模式
 
@@ -73,23 +73,23 @@ Hermes 使用两种模型槽位：
 
 ### 全部重置为自动
 
-如果您过度调整并希望重新开始，请点击辅助部分顶部的 **Reset all to auto**。每个槽位都将恢复使用您的主模型。
+如果您过度调整并希望重新开始，请点击辅助部分顶部的 **Reset all to auto**。每个槽位将恢复使用您的主模型。
 
 ## “Use as” 快捷方式
 
-页面上的每个模型卡片都有一个 **Use as** 下拉菜单。这是快速路径 — 选择一个您在分析中看到的模型，点击 **Use as**，然后一键将其分配给主槽位或任何特定的辅助任务：
+页面上的每个模型卡片都有一个 **Use as** 下拉菜单。这是快速路径 — 选择一个您在分析中看到的模型，点击 **Use as**，并一键将其分配给主槽位或任何特定的辅助任务：
 
 ![Use as 下拉菜单](/img/docs/dashboard-models/use-as-dropdown.png)
 
 下拉菜单包含：
 
 - **主模型** — 与在主行点击 Change 相同。
-- **所有辅助任务** — 一次性将此模型分配给所有 8 个辅助槽位。当您只想将所有辅助任务放在一个便宜的快速模型上时很有用。
-- **单个任务选项** — Vision、Web Extract、Compression 等。每个任务当前分配的模型会标记为 `current`。
+- **所有辅助任务** — 将此模型一次性分配给所有 8 个辅助槽位。当您希望所有副任务都使用便宜的快速模型时很有用。
+- **单个任务选项** — 视觉、网页提取、压缩等。每个任务当前分配的模型会标记为 `current`。
 
 当卡片当前被分配给某个任务时，会带有 `main` 或 `aux · <task>` 徽章 — 这样您一眼就能看出您历史模型中的哪些模型被连接到了哪里。
 
-## 什么会被写入 `config.yaml`
+## 写入 `config.yaml` 的内容
 
 当您通过仪表板保存时，Hermes 会写入 `~/.hermes/config.yaml`：
 
@@ -129,8 +129,8 @@ auxiliary:
 ## 何时生效？
 
 - **CLI** (`hermes chat`)：下一次调用 `hermes chat` 时。
-- **消息网关**（Telegram、Discord、Slack 等）：下一次*新建*会话时。现有会话保持其原有模型。如果你想强制所有会话都获取此更改，请重启网关 (`hermes gateway restart`)。
-- **仪表板聊天标签页** (`/chat`)：下一次新建 PTY 时。当前打开的聊天保持其原有模型 —— 可在聊天内使用 `/model` 命令进行热切换。
+- **消息网关** (Telegram、Discord、Slack 等)：下一次*新建*会话时。现有会话保持其原有模型。如果你想强制所有会话都获取此更改，请重启消息网关 (`hermes gateway restart`)。
+- **仪表板聊天标签页** (`/chat`)：下一次新建 PTY 时。当前打开的聊天保持其原有模型——可在聊天内使用 `/model` 命令进行热切换。
 
 更改永远不会使运行中会话的提示词缓存失效。这是有意为之：在会话内切换主模型需要重置缓存（系统提示词包含模型特定的内容），我们将其保留给聊天中显式的 `/model` 斜杠命令。
 
@@ -138,11 +138,11 @@ auxiliary:
 
 ### 选择器中显示“没有已认证的提供商”
 
-Hermes 只会在拥有有效凭证时列出提供商。请检查侧边栏的 **Keys** —— 你应该能看到以下之一：API 密钥、成功的 OAuth 或自定义端点 URL。如果你想要的提供商不在那里，请运行 `hermes setup` 来配置它，或者前往 **Keys** 并添加环境变量。
+Hermes 只会在拥有有效凭证时列出提供商。请检查侧边栏的 **Keys** —— 你应该能看到以下之一：API 密钥、成功的 OAuth 认证，或自定义端点 URL。如果你想要的提供商不在那里，请运行 `hermes setup` 来配置它，或者前往 **Keys** 并添加环境变量。
 
 ### 我运行的聊天中主模型没有改变
 
-这是预期行为。仪表板写入 `config.yaml`，新会话会读取它。当前打开的聊天是一个活跃的 Agent 进程 —— 它保持其启动时使用的模型。在聊天内使用 `/model <name>` 来热切换该特定会话。
+这是预期行为。仪表板写入 `config.yaml`，新会话会读取该文件。当前打开的聊天是一个活跃的 Agent 进程——它保持其启动时所用的模型。在聊天内使用 `/model <name>` 来热切换该特定会话。
 
 ### 辅助任务覆盖“没有生效”
 
@@ -150,11 +150,11 @@ Hermes 只会在拥有有效凭证时列出提供商。请检查侧边栏的 **K
 
 1.  **你是否启动了新会话？** 现有聊天不会重新读取配置。
 2.  **`provider` 是否设置为 `auto` 以外的值？** 如果该字段显示 `auto`，则该任务仍在使用你的主模型。点击 **Change** 并选择一个实际的提供商。
-3.  **该提供商是否已认证？** 如果你将 `minimax` 分配给一个任务但没有 MiniMax API 密钥，该任务将回退到 openrouter 默认值，并在 `agent.log` 中记录警告。
+3.  **该提供商是否已认证？** 如果你将 `minimax` 分配给一个任务，但没有 MiniMax API 密钥，则该任务会回退到 openrouter 默认值，并在 `agent.log` 中记录警告。
 
-### 我选择了一个模型，但 Hermes 切换了提供商
+### 我选择了一个模型，但 Hermes 为我切换了提供商
 
-在 OpenRouter（或任何聚合器）上，裸模型名称会*在*聚合器内首先解析。因此，OpenRouter 上的 `claude-sonnet-4` 会变成 `anthropic/claude-sonnet-4.6`，并保持使用你的 OpenRouter 认证。但如果你在原生 Anthropic 认证下输入 `claude-sonnet-4`，它会保持为 `claude-sonnet-4-6`。如果你看到意外的提供商切换，请检查你当前的提供商是否符合预期 —— 选择器总是在对话框顶部显示当前的主模型。
+在 OpenRouter（或任何聚合器）上，裸模型名称会*在*聚合器内首先解析。因此，OpenRouter 上的 `claude-sonnet-4` 会变成 `anthropic/claude-sonnet-4.6`，并保持使用你的 OpenRouter 认证。但如果你在原生 Anthropic 认证下输入 `claude-sonnet-4`，它会保持为 `claude-sonnet-4-6`。如果你看到意外的提供商切换，请检查你当前的提供商是否符合预期——选择器总是在对话框顶部显示当前的主模型。
 
 ## 替代方法
 
@@ -167,11 +167,11 @@ Hermes 只会在拥有有效凭证时列出提供商。请检查侧边栏的 **K
 /model gpt-5.4 --provider openrouter --global    # 同时持久化到 config.yaml
 ```
 
-`--global` 会执行与仪表板 **Change** 按钮相同的操作，并且会原地切换正在运行的会话。
+`--global` 会执行与仪表板 **Change** 按钮相同的操作，并且会原地切换运行中的会话。
 
 ### 自定义别名
 
-为你经常使用的模型定义自己的短名称，然后在 CLI 或任何消息平台中使用 `/model <alias>`。有两种等效的格式 —— 选择适合你工作流程的即可。
+为你经常使用的模型定义自己的短名称，然后在 CLI 或任何消息平台中使用 `/model <alias>`。有两种等效的格式——选择适合你工作流程的即可。
 
 **规范格式（顶层 `model_aliases:`）** —— 完全控制 provider + base_url：
 
@@ -195,7 +195,7 @@ hermes config set model.aliases.grok x-ai/grok-4
 
 两种路径都提供给同一个加载器 (`hermes_cli/model_switch.py`)。在 `model_aliases:` 中声明的条目优先于同名的 `model.aliases:` 条目。
 
-然后在聊天中使用 `/model fav` 或 `/model grok`。用户定义的别名会覆盖内置的短名称（`sonnet`、`kimi`、`opus` 等）。完整参考请见[自定义模型别名](/reference/slash-commands#custom-model-aliases)。
+然后在聊天中使用 `/model fav` 或 `/model grok`。用户定义的别名会覆盖内置的短名称 (`sonnet`、`kimi`、`opus` 等)。完整参考请见[自定义模型别名](/reference/slash-commands#custom-model-aliases)。
 
 ### `hermes model` 子命令
 
@@ -205,7 +205,7 @@ hermes model            # 交互式提供商 + 模型选择器（切换默认值
 
 `hermes model` 会引导你选择提供商、进行认证（OAuth 流程会打开浏览器；API 密钥提供商会提示输入密钥），然后从该提供商的精选目录中选择特定模型。选择结果会写入 `~/.hermes/config.yaml` 中的 `model.provider` 和 `model.model`。
 
-要列出提供商/模型而不启动选择器，请使用仪表板或下面的 REST 端点。要检查 CLI 当前实际会使用什么：`hermes config get model` 和 `hermes status`。
+要列出提供商/模型而不启动选择器，请使用仪表板或下面的 REST 端点。要检查 CLI 当前实际会使用什么：`hermes config show | grep '^model\.'` 和 `hermes status`。
 
 ### 直接编辑配置
 

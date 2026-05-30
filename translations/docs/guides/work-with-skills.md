@@ -30,7 +30,7 @@ hermes skills list
 ascii-art         使用 pyfiglet、cowsay、boxes... 生成 ASCII 艺术
 arxiv             从 arXiv 搜索和检索学术论文...
 github-pr-workflow 完整的 PR 生命周期——创建分支、提交...
-plan              计划模式——检查上下文，编写 markdown...
+plan              计划模式——检查上下文，编写 Markdown...
 excalidraw        使用 Excalidraw 创建手绘风格图表...
 ```
 
@@ -44,13 +44,13 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 
 ### 技能中心
 
-官方可选技能（默认不激活的较重量级或小众技能）可通过中心获取：
+官方的可选技能（默认不激活的较重量级或小众技能）可通过中心获取：
 
 ```bash
-# 浏览官方可选技能
+# 浏览官方的可选技能
 /skills browse
 
-# 在中心搜索
+# 搜索中心
 /skills search blockchain
 ```
 
@@ -62,7 +62,7 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 
 ```bash
 # 加载一个技能并给它一个任务
-/ascii-art 制作一个写着“HELLO WORLD”的横幅
+/ascii-art 制作一个写着 "HELLO WORLD" 的横幅
 /plan 为待办事项应用设计一个 REST API
 /github-pr-workflow 为身份验证重构创建一个 PR
 
@@ -78,7 +78,7 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 
 1.  **`skills_list()`** —— 所有技能的紧凑列表（约 3k Token）。在会话开始时加载。
 2.  **`skill_view(name)`** —— 单个技能的完整 SKILL.md 内容。当 Agent 确定需要该技能时加载。
-3.  **`skill_view(name, file_path)`** —— 技能内的特定参考文件。仅在需要时加载。
+3.  **`skill_view(name, file_path)`** —— 技能内的特定引用文件。仅在需要时加载。
 
 这意味着技能在实际使用之前不会消耗 Token。
 
@@ -86,16 +86,16 @@ excalidraw        使用 Excalidraw 创建手绘风格图表...
 
 ## 从中心安装
 
-官方可选技能随 Hermes 一起提供，但默认不激活。需要显式安装它们：
+官方的可选技能随 Hermes 一起提供，但默认不激活。需要显式安装它们：
 
 ```bash
-# 安装一个官方可选技能
+# 安装一个官方的可选技能
 hermes skills install official/research/arxiv
 
 # 在聊天会话中从中心安装
 /skills install official/creative/songwriting-and-ai-music
 
-# 从任何 HTTP(S) URL 直接安装单个文件的 SKILL.md
+# 直接从任何 HTTP(S) URL 安装单个文件 SKILL.md
 hermes skills install https://sharethis.chat/SKILL.md
 /skills install https://example.com/SKILL.md --name my-skill
 ```
@@ -133,7 +133,7 @@ skill_view("superpowers:writing-plans")
 skill_view("writing-plans")
 ```
 
-插件技能**不会**列在系统提示词中，也不会出现在 `skills_list` 中。它们是选择加入的——当您知道插件提供某个技能时，请显式加载它。加载后，Agent 会看到一个横幅，列出同一插件的兄弟技能。
+插件技能**不**列在系统提示词中，也不会出现在 `skills_list` 中。它们是选择加入的——当您知道插件提供某个技能时，请显式加载它。加载后，Agent 会看到一个横幅，列出同一插件的兄弟技能。
 
 关于如何在您自己的插件中提供技能，请参阅[构建 Hermes 插件 → 捆绑技能](/guides/build-a-hermes-plugin#bundle-skills)。
 
@@ -153,7 +153,7 @@ metadata:
         url: "https://developers.google.com/tenor/guides/quickstart"
 ```
 
-当首次加载带有配置的技能时，Hermes 会提示您输入值。它们存储在 `config.yaml` 中的 `skills.config.*` 下。
+当首次加载带有配置的技能时，Hermes 会提示您输入值。它们存储在 `config.yaml` 的 `skills.config.*` 下。
 
 从 CLI 管理技能配置：
 
@@ -162,14 +162,14 @@ metadata:
 hermes skills config gif-search
 
 # 查看所有技能配置
-hermes config get skills.config
+hermes config show | grep '^skills\.config'
 ```
 
 ---
 
 ## 创建您自己的技能
 
-技能只是带有 YAML frontmatter 的 Markdown 文件。创建一个只需不到五分钟。
+技能只是带有 YAML frontmatter 的 Markdown 文件。创建一个技能不到五分钟。
 
 ### 1. 创建目录
 
@@ -208,7 +208,7 @@ metadata:
 运行 `check-command` 以确认结果正确。
 ```
 
-### 3. 添加参考文件（可选）
+### 3. 添加引用文件（可选）
 
 技能可以包含 Agent 按需加载的支持文件：
 
@@ -227,12 +227,12 @@ my-skill/
 在您的 SKILL.md 中引用这些文件：
 
 ```markdown
-有关 API 详细信息，请加载参考：`skill_view("my-skill", "references/api-docs.md")`
+有关 API 详细信息，请加载引用：`skill_view("my-skill", "references/api-docs.md")`
 ```
 
 ### 4. 测试它
 
-开始一个新会话并尝试您的技能：
+启动一个新会话并尝试您的技能：
 
 ```bash
 hermes chat -q "/my-skill help me with the thing"
@@ -241,7 +241,7 @@ hermes chat -q "/my-skill help me with the thing"
 该技能会自动出现——无需注册。将其放入 `~/.hermes/skills/` 即可生效。
 
 :::info
-Agent 也可以使用 `skill_manage` 自行创建和更新技能。在解决复杂问题后，Hermes 可能会提议将方法保存为技能以供下次使用。
+Agent 也可以使用 `skill_manage` 自行创建和更新技能。在解决复杂问题后，Hermes 可能会提议将方法保存为技能，以备下次使用。
 :::
 
 ---
@@ -264,11 +264,11 @@ hermes skills
 
 | | 技能 | 记忆 |
 |---|---|---|
-| **是什么** | 程序性知识——如何做事 | 事实性知识——事物是什么 |
+| **是什么** | 程序性知识——如何做事情 | 事实性知识——事情是什么 |
 | **何时使用** | 按需加载，仅在相关时 | 自动注入到每个会话中 |
-| **大小** | 可以很大（数百行） | 应紧凑（仅关键事实） |
+| **大小** | 可以很大（数百行） | 应该紧凑（仅关键事实） |
 | **成本** | 加载前为零 Token | 小但持续的 Token 成本 |
-| **示例** | "如何部署到 Kubernetes" | "用户偏好深色模式，住在太平洋标准时间" |
+| **示例** | "如何部署到 Kubernetes" | "用户偏好深色模式，住在太平洋标准时区" |
 | **谁创建** | 您、Agent 或从中心安装 | Agent，基于对话 |
 
 **经验法则：** 如果您会把它放在参考文档中，它就是技能。如果您会把它写在便利贴上，它就是记忆。
@@ -277,13 +277,13 @@ hermes skills
 
 ## 技巧
 
-**保持技能专注。** 一个试图涵盖“所有 DevOps”的技能会太长且太模糊。一个涵盖“将 Python 应用部署到 Fly.io”的技能则足够具体，真正有用。
+**保持技能专注。** 一个试图涵盖"所有 DevOps"的技能会太长且太模糊。一个涵盖"将 Python 应用部署到 Fly.io"的技能则足够具体，真正有用。
 
-**让 Agent 创建技能。** 在完成复杂的多步骤任务后，Hermes 通常会提议将方法保存为技能。请同意——这些由 Agent 编写的技能捕获了确切的工作流程，包括沿途发现的常见问题。
+**让 Agent 创建技能。** 完成复杂的多步骤任务后，Hermes 通常会提议将方法保存为技能。请同意——这些由 Agent 编写的技能捕获了确切的工作流程，包括沿途发现的常见问题。
 
 **使用分类。** 将技能组织到子目录中（`~/.hermes/skills/devops/`、`~/.hermes/skills/research/` 等）。这使列表易于管理，并帮助 Agent 更快地找到相关技能。
 
-**当技能过时时更新它们。** 如果您使用某个技能时遇到了它未涵盖的问题，请告诉 Hermes 用您学到的东西更新该技能。未维护的技能会成为负担。
+**当技能过时时进行更新。** 如果您使用某个技能时遇到了它未涵盖的问题，请告诉 Hermes 用您学到的东西更新该技能。未维护的技能会成为负担。
 
 ---
 

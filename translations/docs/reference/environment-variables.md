@@ -6,13 +6,13 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 
 # 环境变量参考
 
-所有变量都应设置在 `~/.hermes/.env` 文件中。你也可以使用 `hermes config set VAR value` 来设置它们。
+所有变量都应设置在 `~/.hermes/.env` 文件中。你也可以使用 `hermes config set VAR value` 命令来设置它们。
 
 ## LLM 提供商
 
 | 变量 | 描述 |
 |----------|-------------|
-| `OPENROUTER_API_KEY` | OpenRouter API 密钥（推荐，灵活性高） |
+| `OPENROUTER_API_KEY` | OpenRouter API 密钥（推荐使用，灵活性高） |
 | `OPENROUTER_BASE_URL` | 覆盖 OpenRouter 兼容的基础 URL |
 | `HERMES_OPENROUTER_CACHE` | 启用 OpenRouter 响应缓存 (`1`/`true`/`yes`/`on`)。覆盖 config.yaml 中的 `openrouter.response_cache`。参见 [响应缓存](https://openrouter.ai/docs/guides/features/response-caching)。 |
 | `HERMES_OPENROUTER_CACHE_TTL` | 缓存 TTL（秒，1-86400）。覆盖 config.yaml 中的 `openrouter.response_cache_ttl`。 |
@@ -27,7 +27,7 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `COPILOT_CLI_PATH` | `HERMES_COPILOT_ACP_COMMAND` 的别名 |
 | `HERMES_COPILOT_ACP_ARGS` | 覆盖 Copilot ACP 参数（默认：`--acp --stdio`） |
 | `COPILOT_ACP_BASE_URL` | 覆盖 Copilot ACP 基础 URL |
-| `GLM_API_KEY` | z.ai / 智谱 AI GLM API 密钥 ([z.ai](https://z.ai)) |
+| `GLM_API_KEY` | z.ai / 智谱AI GLM API 密钥 ([z.ai](https://z.ai)) |
 | `ZAI_API_KEY` | `GLM_API_KEY` 的别名 |
 | `Z_AI_API_KEY` | `GLM_API_KEY` 的别名 |
 | `GLM_BASE_URL` | 覆盖 z.ai 基础 URL（默认：`https://api.z.ai/api/paas/v4`） |
@@ -38,10 +38,10 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `ARCEE_BASE_URL` | 覆盖 Arcee 基础 URL（默认：`https://api.arcee.ai/api/v1`） |
 | `GMI_API_KEY` | GMI Cloud API 密钥 ([gmicloud.ai](https://www.gmicloud.ai/)) |
 | `GMI_BASE_URL` | 覆盖 GMI Cloud 基础 URL（默认：`https://api.gmi-serving.com/v1`） |
-| `MINIMAX_API_KEY` | MiniMax API 密钥 — 全球端点 ([minimax.io](https://www.minimax.io))。**`minimax-oauth` 不使用此变量**（OAuth 路径使用浏览器登录）。 |
-| `MINIMAX_BASE_URL` | 覆盖 MiniMax 基础 URL（默认：`https://api.minimax.io/anthropic` — Hermes 使用 MiniMax 的 Anthropic Messages 兼容端点）。**`minimax-oauth` 不使用此变量**。 |
-| `MINIMAX_CN_API_KEY` | MiniMax API 密钥 — 中国区端点 ([minimaxi.com](https://www.minimaxi.com))。**`minimax-oauth` 不使用此变量**（OAuth 路径使用浏览器登录）。 |
-| `MINIMAX_CN_BASE_URL` | 覆盖 MiniMax 中国区基础 URL（默认：`https://api.minimaxi.com/anthropic`）。**`minimax-oauth` 不使用此变量**。 |
+| `MINIMAX_API_KEY` | MiniMax API 密钥 — 全球端点 ([minimax.io](https://www.minimax.io))。**不被 `minimax-oauth` 使用**（OAuth 路径使用浏览器登录）。 |
+| `MINIMAX_BASE_URL` | 覆盖 MiniMax 基础 URL（默认：`https://api.minimax.io/anthropic` — Hermes 使用 MiniMax 的 Anthropic Messages 兼容端点）。**不被 `minimax-oauth` 使用**。 |
+| `MINIMAX_CN_API_KEY` | MiniMax API 密钥 — 中国区端点 ([minimaxi.com](https://www.minimaxi.com))。**不被 `minimax-oauth` 使用**（OAuth 路径使用浏览器登录）。 |
+| `MINIMAX_CN_BASE_URL` | 覆盖 MiniMax 中国区基础 URL（默认：`https://api.minimaxi.com/anthropic`）。**不被 `minimax-oauth` 使用**。 |
 | `KILOCODE_API_KEY` | Kilo Code API 密钥 ([kilo.ai](https://kilo.ai)) |
 | `KILOCODE_BASE_URL` | 覆盖 Kilo Code 基础 URL（默认：`https://api.kilo.ai/api/gateway`） |
 | `XIAOMI_API_KEY` | 小米 MiMo API 密钥 ([platform.xiaomimimo.com](https://platform.xiaomimimo.com)) |
@@ -51,13 +51,13 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `AZURE_FOUNDRY_API_KEY` | Microsoft Foundry / Azure OpenAI API 密钥 ([ai.azure.com](https://ai.azure.com/))。当 `model.auth_mode: entra_id` 时不需要 |
 | `AZURE_FOUNDRY_BASE_URL` | Microsoft Foundry 端点 URL（例如，OpenAI 风格为 `https://<resource>.openai.azure.com/openai/v1`，Anthropic 风格为 `https://<resource>.services.ai.azure.com/anthropic`） |
 | `AZURE_ANTHROPIC_KEY` | 用于 `provider: anthropic` + `base_url` 指向 Microsoft Foundry Claude 部署的 Azure Anthropic API 密钥（当同时配置了 Anthropic 和 Azure Anthropic 时，作为 `ANTHROPIC_API_KEY` 的替代方案） |
-| `AZURE_TENANT_ID` | Entra ID 租户 ID（服务主体流程；当 `model.auth_mode: entra_id` 时，`azure-identity` 会识别此变量） |
+| `AZURE_TENANT_ID` | Entra ID 租户 ID（服务主体流程；当 `model.auth_mode: entra_id` 时由 `azure-identity` 识别） |
 | `AZURE_CLIENT_ID` | Entra ID 客户端 ID（服务主体、工作负载身份或用户分配的托管身份） |
-| `AZURE_CLIENT_SECRET` | `EnvironmentCredential` 使用的服务主体密钥 |
+| `AZURE_CLIENT_SECRET` | 供 `EnvironmentCredential` 使用的服务主体密钥 |
 | `AZURE_CLIENT_CERTIFICATE_PATH` | 服务主体证书（`AZURE_CLIENT_SECRET` 的替代方案） |
-| `AZURE_FEDERATED_TOKEN_FILE` | AKS 工作负载身份 / OIDC 流程的联合令牌文件路径 |
+| `AZURE_FEDERATED_TOKEN_FILE` | 用于 AKS 工作负载身份 / OIDC 流程的联合令牌文件路径 |
 | `AZURE_AUTHORITY_HOST` | 主权云授权覆盖（例如，Azure Government 为 `https://login.microsoftonline.us`）。参见 [Azure Foundry 指南](/guides/azure-foundry#sovereign-clouds-government-china) |
-| `IDENTITY_ENDPOINT` / `MSI_ENDPOINT` | App Service、Functions 和 Container Apps 的托管身份端点；VM 通常使用 IMDS 而不设置这些变量 |
+| `IDENTITY_ENDPOINT` / `MSI_ENDPOINT` | App Service、Functions 和 Container Apps 的托管身份端点；VM 通常使用 IMDS 且不设置这些变量 |
 | `HF_TOKEN` | Hugging Face 推理提供商的 Token ([huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)) |
 | `HF_BASE_URL` | 覆盖 Hugging Face 基础 URL（默认：`https://router.huggingface.co/v1`） |
 | `GOOGLE_API_KEY` | Google AI Studio API 密钥 ([aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)) |
@@ -75,47 +75,47 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `NOVITA_API_KEY` | NovitaAI API 密钥 — 面向 Model API、Agent 沙盒和 GPU 云的 AI 原生云 ([novita.ai/settings/key-management](https://novita.ai/settings/key-management)) |
 | `NOVITA_BASE_URL` | 覆盖 NovitaAI 基础 URL（默认：`https://api.novita.ai/openai/v1`） |
 | `NVIDIA_API_KEY` | NVIDIA NIM API 密钥 — Nemotron 和开源模型 ([build.nvidia.com](https://build.nvidia.com)) |
-| `NVIDIA_BASE_URL` | 覆盖 NVIDIA 基础 URL（默认：`https://integrate.api.nvidia.com/v1`；本地 NIM 端点设置为 `http://localhost:8000/v1`） |
+| `NVIDIA_BASE_URL` | 覆盖 NVIDIA 基础 URL（默认：`https://integrate.api.nvidia.com/v1`；对于本地 NIM 端点，设置为 `http://localhost:8000/v1`） |
 | `STEPFUN_API_KEY` | StepFun API 密钥 — Step 系列模型 ([platform.stepfun.com](https://platform.stepfun.com)) |
 | `STEPFUN_BASE_URL` | 覆盖 StepFun 基础 URL（默认：`https://api.stepfun.com/v1`） |
-| `OLLAMA_API_KEY` | Ollama Cloud API 密钥 — 托管的 Ollama 目录，无需本地 GPU ([ollama.com/settings/keys](https://ollama.com/settings/keys)) |
+| `OLLAMA_API_KEY` | Ollama Cloud API 密钥 — 无需本地 GPU 的托管 Ollama 目录 ([ollama.com/settings/keys](https://ollama.com/settings/keys)) |
 | `OLLAMA_BASE_URL` | 覆盖 Ollama Cloud 基础 URL（默认：`https://ollama.com/v1`） |
 | `XAI_API_KEY` | xAI (Grok) API 密钥，用于聊天 + TTS + 网络搜索 ([console.x.ai](https://console.x.ai/)) |
 | `XAI_BASE_URL` | 覆盖 xAI 基础 URL（默认：`https://api.x.ai/v1`） |
 | `MISTRAL_API_KEY` | Mistral API 密钥，用于 Voxtral TTS 和 Voxtral STT ([console.mistral.ai](https://console.mistral.ai)) |
-| `AWS_REGION` | AWS Bedrock 推理区域（例如 `us-east-1`、`eu-central-1`）。由 boto3 读取。 |
-| `AWS_PROFILE` | AWS Bedrock 认证的命名配置文件（读取 `~/.aws/credentials`）。留空则使用默认的 boto3 凭据链。 |
+| `AWS_REGION` | 用于 Bedrock 推理的 AWS 区域（例如 `us-east-1`、`eu-central-1`）。由 boto3 读取。 |
+| `AWS_PROFILE` | 用于 Bedrock 身份验证的 AWS 命名配置文件（读取 `~/.aws/credentials`）。留空以使用默认的 boto3 凭据链。 |
 | `BEDROCK_BASE_URL` | 覆盖 Bedrock 运行时基础 URL（默认：`https://bedrock-runtime.us-east-1.amazonaws.com`；通常留空，改用 `AWS_REGION`） |
 | `HERMES_QWEN_BASE_URL` | Qwen Portal 基础 URL 覆盖（默认：`https://portal.qwen.ai/v1`） |
 | `OPENCODE_ZEN_API_KEY` | OpenCode Zen API 密钥 — 按需付费访问精选模型 ([opencode.ai](https://opencode.ai/auth)) |
 | `OPENCODE_ZEN_BASE_URL` | 覆盖 OpenCode Zen 基础 URL |
 | `OPENCODE_GO_API_KEY` | OpenCode Go API 密钥 — 每月 $10 订阅，用于开源模型 ([opencode.ai](https://opencode.ai/auth)) |
 | `OPENCODE_GO_BASE_URL` | 覆盖 OpenCode Go 基础 URL |
-| `CLAUDE_CODE_OAUTH_TOKEN` | 如果你手动导出了令牌，则显式覆盖 Claude Code 令牌 |
-| `HERMES_MODEL` | 在进程级别覆盖模型名称（由定时任务调度器使用；正常使用建议用 `config.yaml`） |
-| `VOICE_TOOLS_OPENAI_KEY` | OpenAI 语音转文本和文本转语音提供商的首选 OpenAI 密钥 |
+| `CLAUDE_CODE_OAUTH_TOKEN` | 如果你手动导出了一个令牌，用于显式覆盖 Claude Code 令牌 |
+| `HERMES_MODEL` | 在进程级别覆盖模型名称（由 cron 调度器使用；正常使用建议用 `config.yaml`） |
+| `VOICE_TOOLS_OPENAI_KEY` | 用于 OpenAI 语音转文本和文本转语音提供商的首选 OpenAI 密钥 |
 | `HERMES_LOCAL_STT_COMMAND` | 可选的本地语音转文本命令模板。支持 `{input_path}`、`{output_dir}`、`{language}` 和 `{model}` 占位符 |
 | `HERMES_LOCAL_STT_LANGUAGE` | 传递给 `HERMES_LOCAL_STT_COMMAND` 或自动检测的本地 `whisper` CLI 回退的默认语言（默认：`en`） |
 | `HERMES_HOME` | 覆盖 Hermes 配置目录（默认：`~/.hermes`）。同时限定消息网关 PID 文件和 systemd 服务名称，以便多个安装可以同时运行 |
 | `HERMES_GIT_BASH_PATH` | **仅限 Windows。** 覆盖终端工具的 `bash.exe` 发现路径。指向任何 bash — 完整的 Git-for-Windows 安装、通过符号链接的 WSL bash、MSYS2、Cygwin。安装程序会自动将其设置为它提供的 PortableGit。参见 [Windows（原生）指南](../user-guide/windows-native.md#how-hermes-runs-shell-commands-on-windows) |
-| `HERMES_DISABLE_WINDOWS_UTF8` | **仅限 Windows。** 设置为 `1` 以禁用 UTF-8 stdio 垫片 (`configure_windows_stdio()`) 并回退到控制台的区域设置代码页。用于二分查找编码错误；在正常操作中很少是正确设置 |
-| `HERMES_KANBAN_HOME` | 覆盖锚定看板（数据库 + 工作空间 + 工作日志）的共享 Hermes 根目录。回退到 `get_default_hermes_root()`（任何活动配置文件的父目录）。对测试和不寻常的部署有用 |
+| `HERMES_DISABLE_WINDOWS_UTF8` | **仅限 Windows。** 设置为 `1` 以禁用 UTF-8 stdio 垫片 (`configure_windows_stdio()`)，并回退到控制台的区域设置代码页。用于二分查找编码错误；在正常操作中很少是正确设置 |
+| `HERMES_KANBAN_HOME` | 覆盖锚定看板（数据库 + 工作空间 + 工作日志）的共享 Hermes 根目录。回退到 `get_default_hermes_root()`（任何活动配置文件的父目录）。用于测试和不寻常的部署 |
 | `HERMES_KANBAN_BOARD` | 为此进程固定活动看板。优先于 `~/.hermes/kanban/current`；调度器将其注入工作子进程环境，使工作进程物理上无法看到其他看板上的任务。默认为 `default`。Slug 验证：小写字母数字 + 连字符 + 下划线，1-64 个字符 |
 | `HERMES_KANBAN_DB` | 直接固定看板数据库文件路径（最高优先级；高于 `HERMES_KANBAN_BOARD` 和 `HERMES_KANBAN_HOME`）。调度器将其注入工作子进程环境，使配置文件工作进程汇聚到调度器的看板 |
 | `HERMES_KANBAN_WORKSPACES_ROOT` | 直接固定看板工作空间根目录（工作空间的最高优先级；高于 `HERMES_KANBAN_HOME`）。调度器将其注入工作子进程环境 |
-| `HERMES_KANBAN_DISPATCH_IN_GATEWAY` | `kanban.dispatch_in_gateway` 的运行时覆盖。设置为 `0`、`false`、`no` 或 `off` 以防止消息网关启动嵌入式看板调度器；任何其他非空值则启用它。当单独的调度器进程拥有看板时很有用。 |
+| `HERMES_KANBAN_DISPATCH_IN_GATEWAY` | `kanban.dispatch_in_gateway` 的运行时覆盖。设置为 `0`、`false`、`no` 或 `off` 以阻止消息网关启动嵌入式看板调度器；任何其他非空值则启用它。当单独的调度器进程拥有看板时很有用。 |
 ## 提供商认证（OAuth）
 
-对于原生的 Anthropic 认证，当 Claude Code 自身的凭证文件存在时，Hermes 优先使用它们，因为这些凭证可以自动刷新。**针对 Anthropic 的 OAuth 需要一个 Claude Max 计划并购买额外的使用额度** —— Hermes 以 Claude Code 的身份路由，这只会从 Max 计划的额外/超额额度中扣除，而不是基础 Max 额度，并且在 Claude Pro 上无效。如果没有 Max 计划 + 额外额度，请改用 API 密钥。环境变量如 `ANTHROPIC_TOKEN` 仍然可以作为手动覆盖使用，但它们不再是 Claude Max 登录的首选方式。
+对于原生的 Anthropic 认证，当 Claude Code 自身的凭证文件存在时，Hermes 会优先使用它们，因为这些凭证可以自动刷新。**针对 Anthropic 的 OAuth 需要 Claude Max 计划并已购买额外使用额度** —— Hermes 会以 Claude Code 的身份路由请求，这只会从 Max 计划的额外/超额额度中扣除，而不是基础 Max 额度，并且在 Claude Pro 计划上无效。如果没有 Max 计划 + 额外额度，请改用 API 密钥。环境变量如 `ANTHROPIC_TOKEN` 作为手动覆盖仍然有用，但它们不再是 Claude Max 登录的首选方式。
 
 | 变量 | 描述 |
 |----------|-------------|
 | `HERMES_PORTAL_BASE_URL` | 覆盖 Nous Portal URL（用于开发/测试） |
 | `NOUS_INFERENCE_BASE_URL` | 覆盖 Nous 推理 API URL |
 | `HERMES_NOUS_MIN_KEY_TTL_SECONDS` | Agent 密钥重新签发前的最小 TTL（默认：1800 = 30分钟） |
-| `HERMES_NOUS_TIMEOUT_SECONDS` | Nous 凭证/令牌流程的 HTTP 超时时间 |
+| `HERMES_NOUS_TIMEOUT_SECONDS` | Nous 凭证/Token 流程的 HTTP 超时时间 |
 | `HERMES_DUMP_REQUESTS` | 将 API 请求负载转储到日志文件（`true`/`false`） |
-| `HERMES_PREFILL_MESSAGES_FILE` | 在 API 调用时注入的临时预填充消息的 JSON 文件路径 |
+| `HERMES_PREFILL_MESSAGES_FILE` | 指向一个 JSON 文件的路径，该文件包含在 API 调用时注入的临时预填充消息 |
 | `HERMES_TIMEZONE` | IANA 时区覆盖（例如 `America/New_York`） |
 
 ## 工具 API
@@ -123,10 +123,10 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | 变量 | 描述 |
 |----------|-------------|
 | `PARALLEL_API_KEY` | AI 原生网络搜索 ([parallel.ai](https://parallel.ai/)) |
-| `FIRECRAWL_API_KEY` | 网络爬取和云浏览器 ([firecrawl.dev](https://firecrawl.dev/)) |
+| `FIRECRAWL_API_KEY` | 网页抓取和云浏览器 ([firecrawl.dev](https://firecrawl.dev/)) |
 | `FIRECRAWL_API_URL` | 用于自托管实例的自定义 Firecrawl API 端点（可选） |
 | `TAVILY_API_KEY` | Tavily API 密钥，用于 AI 原生网络搜索、提取和爬取 ([app.tavily.com](https://app.tavily.com/home)) |
-| `SEARXNG_URL` | 用于免费自托管网络搜索的 SearXNG 实例 URL —— 无需 API 密钥 ([searxng.github.io](https://searxng.github.io/searxng/)) |
+| `SEARXNG_URL` | SearXNG 实例 URL，用于免费自托管网络搜索 —— 无需 API 密钥 ([searxng.github.io](https://searxng.github.io/searxng/)) |
 | `TAVILY_BASE_URL` | 覆盖 Tavily API 端点。适用于企业代理和自托管的 Tavily 兼容搜索后端。模式与 `GROQ_BASE_URL` 相同。 |
 | `EXA_API_KEY` | Exa API 密钥，用于 AI 原生网络搜索和内容 ([exa.ai](https://exa.ai/)) |
 | `BROWSERBASE_API_KEY` | 浏览器自动化 ([browserbase.com](https://browserbase.com/)) |
@@ -147,28 +147,28 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `GROQ_BASE_URL` | 覆盖 Groq OpenAI 兼容的 STT 端点 |
 | `STT_OPENAI_MODEL` | 覆盖 OpenAI STT 模型（默认：`whisper-1`） |
 | `STT_OPENAI_BASE_URL` | 覆盖 OpenAI 兼容的 STT 端点 |
-| `GITHUB_TOKEN` | 用于 Skills Hub 的 GitHub 令牌（更高的 API 速率限制，技能发布） |
+| `GITHUB_TOKEN` | 用于 Skills Hub 的 GitHub Token（更高的 API 速率限制，技能发布） |
 | `HONCHO_API_KEY` | 跨会话用户建模 ([honcho.dev](https://honcho.dev/)) |
-| `HONCHO_BASE_URL` | 自托管 Honcho 实例的基础 URL（默认：Honcho 云）。本地实例不需要 API 密钥 |
+| `HONCHO_BASE_URL` | 自托管 Honcho 实例的基础 URL（默认：Honcho 云）。本地实例无需 API 密钥 |
 | `HINDSIGHT_TIMEOUT` | Hindsight 记忆提供者 API 调用的超时时间（秒）（默认：`60`）。如果你的 Hindsight 实例在 `/sync` 或 `on_session_switch` 期间响应缓慢，并且在 `errors.log` 中看到超时，请增加此值。 |
 | `SUPERMEMORY_API_KEY` | 具有个人资料回忆和会话摄取功能的语义长期记忆 ([supermemory.ai](https://supermemory.ai)) |
 | `DAYTONA_API_KEY` | Daytona 云沙盒 ([daytona.io](https://daytona.io/)) |
 
 ### Langfuse 可观测性
 
-用于捆绑的 [`observability/langfuse`](/user-guide/features/built-in-plugins#observabilitylangfuse) 插件的环境变量。在 `~/.hermes/.env` 中设置这些变量。插件也必须启用（`hermes plugins enable observability/langfuse`，或在 `hermes plugins` 中勾选复选框），这些变量才能生效。
+用于捆绑的 [`observability/langfuse`](/user-guide/features/built-in-plugins#observabilitylangfuse) 插件的环境变量。在 `~/.hermes/.env` 中设置这些变量。在生效之前，还必须启用该插件（`hermes plugins enable observability/langfuse`，或在 `hermes plugins` 中勾选复选框）。
 
 | 变量 | 描述 |
 |----------|-------------|
 | `HERMES_LANGFUSE_PUBLIC_KEY` | Langfuse 项目公钥 (`pk-lf-...`)。必需。 |
 | `HERMES_LANGFUSE_SECRET_KEY` | Langfuse 项目密钥 (`sk-lf-...`)。必需。 |
 | `HERMES_LANGFUSE_BASE_URL` | Langfuse 服务器 URL（默认：`https://cloud.langfuse.com`）。用于自托管时设置。 |
-| `HERMES_LANGFUSE_ENV` | 跟踪记录上的环境标签 (`production`, `staging`, …) |
+| `HERMES_LANGFUSE_ENV` | 跟踪记录上的环境标签（`production`、`staging`、…） |
 | `HERMES_LANGFUSE_RELEASE` | 跟踪记录上的发布/版本标签 |
 | `HERMES_LANGFUSE_SAMPLE_RATE` | SDK 采样率 0.0–1.0（默认：`1.0`） |
 | `HERMES_LANGFUSE_MAX_CHARS` | 序列化负载的每字段截断长度（默认：`12000`） |
 | `HERMES_LANGFUSE_DEBUG` | `true` 启用详细的插件日志记录到 `agent.log` |
-| `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_BASE_URL` | 标准 Langfuse SDK 名称。当等效的 `HERMES_LANGFUSE_*` 变量未设置时，作为备用值接受。 |
+| `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_BASE_URL` | 标准 Langfuse SDK 名称。当等效的 `HERMES_LANGFUSE_*` 变量未设置时，作为后备方案被接受。 |
 ### Nous 工具网关
 
 这些变量为付费 Nous 订阅者或自托管网关部署配置[工具网关](/user-guide/features/tool-gateway)。大多数用户无需设置这些——网关通过 `hermes model` 或 `hermes tools` 自动配置。
@@ -185,9 +185,9 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | 变量 | 描述 |
 |----------|-------------|
 | `TERMINAL_ENV` | 后端：`local`、`docker`、`ssh`、`singularity`、`modal`、`daytona` |
-| `HERMES_DOCKER_BINARY` | 覆盖 Hermes 调用的容器二进制文件（例如 `podman`、`/usr/local/bin/docker`）。未设置时，Hermes 自动在 `PATH` 上发现 `docker` 或 `podman`。当两者都安装且你希望使用非默认项，或者二进制文件位于 `PATH` 之外时需要。 |
+| `HERMES_DOCKER_BINARY` | 覆盖 Hermes 调用的容器二进制文件（例如 `podman`、`/usr/local/bin/docker`）。未设置时，Hermes 自动在 `PATH` 上发现 `docker` 或 `podman`。当两者都安装且您想要非默认的那个，或者二进制文件位于 `PATH` 之外时需要。 |
 | `TERMINAL_DOCKER_IMAGE` | Docker 镜像（默认：`nikolaik/python-nodejs:python3.11-nodejs20`） |
-| `TERMINAL_DOCKER_FORWARD_ENV` | 要显式转发到 Docker 终端会话的环境变量名称的 JSON 数组。注意：技能声明的 `required_environment_variables` 会自动转发——你只需要为任何技能都未声明的变量设置此项。 |
+| `TERMINAL_DOCKER_FORWARD_ENV` | 要显式转发到 Docker 终端会话的环境变量名称的 JSON 数组。注意：技能声明的 `required_environment_variables` 会自动转发——您只需要为任何技能都未声明的变量设置此项。 |
 | `TERMINAL_DOCKER_VOLUMES` | 额外的 Docker 卷挂载（逗号分隔的 `host:container` 对） |
 | `TERMINAL_DOCKER_MOUNT_CWD_TO_WORKSPACE` | 高级选择加入：将启动时的当前工作目录挂载到 Docker 的 `/workspace`（`true`/`false`，默认：`false`） |
 | `TERMINAL_SINGULARITY_IMAGE` | Singularity 镜像或 `.sif` 路径 |
@@ -195,7 +195,7 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `TERMINAL_DAYTONA_IMAGE` | Daytona 沙盒镜像 |
 | `TERMINAL_TIMEOUT` | 命令超时时间（秒） |
 | `TERMINAL_LIFETIME_SECONDS` | 终端会话的最大生命周期（秒） |
-| `TERMINAL_CWD` | 终端会话的工作目录（仅限网关/cron；CLI 使用启动目录） |
+| `TERMINAL_CWD` | 已弃用，用于直接覆盖网关/定时任务终端会话的工作目录。建议使用 `config.yaml` 中的 `terminal.cwd`；CLI 仍使用启动目录。 |
 | `SUDO_PASSWORD` | 启用 sudo 而无需交互式提示 |
 
 对于云沙盒后端，持久性是面向文件系统的。`TERMINAL_LIFETIME_SECONDS` 控制 Hermes 何时清理空闲的终端会话，后续恢复可能会重新创建沙盒，而不是保持相同的活动进程运行。
@@ -218,7 +218,7 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `TERMINAL_CONTAINER_MEMORY` | 内存大小（MB）（默认：5120） |
 | `TERMINAL_CONTAINER_DISK` | 磁盘大小（MB）（默认：51200） |
 | `TERMINAL_CONTAINER_PERSISTENT` | 跨会话持久化容器文件系统（默认：`true`） |
-| `TERMINAL_SANDBOX_DIR` | 用于工作区和覆盖层的主机目录（默认：`~/.hermes/sandboxes/`） |
+| `TERMINAL_SANDBOX_DIR` | 用于工作空间和覆盖层的主机目录（默认：`~/.hermes/sandboxes/`） |
 
 ## 持久化 Shell
 
@@ -234,11 +234,11 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 |----------|-------------|
 | `TELEGRAM_BOT_TOKEN` | Telegram 机器人 Token（来自 @BotFather） |
 | `TELEGRAM_ALLOWED_USERS` | 允许使用机器人的逗号分隔的用户 ID（适用于私聊、群组和论坛） |
-| `TELEGRAM_GROUP_ALLOWED_USERS` | 仅在群组/论坛中授权的逗号分隔的发送者用户 ID（**不授予私聊权限**）。为向后兼容 #17686 之前的配置，以 `-` 开头的聊天 ID 格式的值仍被视为聊天 ID，但会显示弃用警告。 |
+| `TELEGRAM_GROUP_ALLOWED_USERS` | 仅在群组/论坛中授权的逗号分隔的发送者用户 ID（**不**授予私聊访问权限）。为向后兼容 #17686 之前的配置，仍接受以 `-` 开头的聊天 ID 形状的值作为聊天 ID，但会显示弃用警告。 |
 | `TELEGRAM_GROUP_ALLOWED_CHATS` | 逗号分隔的群组/论坛聊天 ID；任何成员均被授权 |
-| `TELEGRAM_HOME_CHANNEL` | 用于 cron 交付的默认 Telegram 聊天/频道 |
+| `TELEGRAM_HOME_CHANNEL` | 用于定时任务交付的默认 Telegram 聊天/频道 |
 | `TELEGRAM_HOME_CHANNEL_NAME` | Telegram 主频道的显示名称 |
-| `TELEGRAM_CRON_THREAD_ID` | 接收 cron 交付的论坛主题 ID；仅针对 cron 覆盖 `TELEGRAM_HOME_CHANNEL_THREAD_ID`。在主题模式下使用，以便对 cron 消息的回复会开启新会话，而不是进入系统大厅 (#24409)。 |
+| `TELEGRAM_CRON_THREAD_ID` | 接收定时任务交付的论坛主题 ID；仅针对定时任务覆盖 `TELEGRAM_HOME_CHANNEL_THREAD_ID`。在主题模式下使用，以便对定时任务消息的回复会开启新会话，而不是进入系统大厅 (#24409)。 |
 | `TELEGRAM_WEBHOOK_URL` | Webhook 模式的公共 HTTPS URL（启用 webhook 而非轮询） |
 | `TELEGRAM_WEBHOOK_PORT` | Webhook 服务器的本地监听端口（默认：`8443`） |
 | `TELEGRAM_WEBHOOK_SECRET` | Telegram 在每个更新中回显用于验证的密钥 Token。**只要设置了 `TELEGRAM_WEBHOOK_URL` 就必须提供**——没有它网关将拒绝启动 (GHSA-3vpc-7q5r-276h)。使用 `openssl rand -hex 32` 生成。 |
@@ -246,15 +246,15 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `TELEGRAM_REQUIRE_MENTION` | 在 Telegram 群组中响应前需要显式触发。等同于 `config.yaml` 中的 `telegram.require_mention`。 |
 | `TELEGRAM_MENTION_PATTERNS` | JSON 数组、换行分隔列表或逗号分隔列表，包含启用 Telegram 群组提及门控时接受的唤醒词正则表达式模式。等同于 `telegram.mention_patterns`。 |
 | `TELEGRAM_EXCLUSIVE_BOT_MENTIONS` | 启用后，Telegram 群组中显式的 `@...bot` 提及在回复或唤醒词回退运行之前，仅路由到被提及的机器人用户名。默认：`true`。等同于 `telegram.exclusive_bot_mentions`。 |
-| `TELEGRAM_REPLY_TO_MODE` | 回复引用行为：`off`、`first`（默认）或 `all`。匹配 Discord 模式。 |
+| `TELEGRAM_REPLY_TO_MODE` | 回复引用行为：`off`、`first`（默认）或 `all`。与 Discord 模式匹配。 |
 | `TELEGRAM_IGNORED_THREADS` | 机器人永不响应的逗号分隔的 Telegram 论坛主题/线程 ID |
 | `TELEGRAM_PROXY` | Telegram 连接的代理 URL——覆盖 `HTTPS_PROXY`。支持 `http://`、`https://`、`socks5://` |
 | `DISCORD_BOT_TOKEN` | Discord 机器人 Token |
 | `DISCORD_ALLOWED_USERS` | 允许使用机器人的逗号分隔的 Discord 用户 ID |
-| `DISCORD_ALLOWED_ROLES` | 允许使用机器人的逗号分隔的 Discord 角色 ID（与 `DISCORD_ALLOWED_USERS` 为 OR 关系）。自动启用 Members 意图。在审核团队变动时很有用——角色授权会自动传播。 |
+| `DISCORD_ALLOWED_ROLES` | 允许使用机器人的逗号分隔的 Discord 角色 ID（与 `DISCORD_ALLOWED_USERS` 是 OR 关系）。自动启用 Members 意图。在审核团队变动时很有用——角色授权会自动传播。 |
 | `DISCORD_ALLOWED_CHANNELS` | 逗号分隔的 Discord 频道 ID。设置后，机器人仅在这些频道中响应（如果允许，还包括私聊）。覆盖 `config.yaml` 中的 `discord.allowed_channels`。 |
 | `DISCORD_PROXY` | Discord 连接的代理 URL——覆盖 `HTTPS_PROXY`。支持 `http://`、`https://`、`socks5://` |
-| `DISCORD_HOME_CHANNEL` | 用于 cron 交付的默认 Discord 频道 |
+| `DISCORD_HOME_CHANNEL` | 用于定时任务交付的默认 Discord 频道 |
 | `DISCORD_HOME_CHANNEL_NAME` | Discord 主频道的显示名称 |
 | `DISCORD_COMMAND_SYNC_POLICY` | Discord 斜杠命令启动同步策略：`safe`（差异化和协调）、`bulk`（传统的 `tree.sync()`）或 `off` |
 | `DISCORD_REQUIRE_MENTION` | 在服务器频道中响应前需要 @提及 |
@@ -273,14 +273,14 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `SLACK_BOT_TOKEN` | Slack 机器人 Token（`xoxb-...`） |
 | `SLACK_APP_TOKEN` | Slack 应用级 Token（`xapp-...`，Socket 模式必需） |
 | `SLACK_ALLOWED_USERS` | 逗号分隔的 Slack 用户 ID |
-| `SLACK_HOME_CHANNEL` | 用于 cron 交付的默认 Slack 频道 |
+| `SLACK_HOME_CHANNEL` | 用于定时任务交付的默认 Slack 频道 |
 | `SLACK_HOME_CHANNEL_NAME` | Slack 主频道的显示名称 |
 | `GOOGLE_CHAT_PROJECT_ID` | 托管 Pub/Sub 主题的 GCP 项目（回退到 `GOOGLE_CLOUD_PROJECT`） |
 | `GOOGLE_CHAT_SUBSCRIPTION_NAME` | 完整的 Pub/Sub 订阅路径，`projects/{proj}/subscriptions/{sub}`（旧别名：`GOOGLE_CHAT_SUBSCRIPTION`） |
-| `GOOGLE_CHAT_SERVICE_ACCOUNT_JSON` | 服务账户 JSON 的路径，或内联的 JSON（回退到 `GOOGLE_APPLICATION_CREDENTIALS`） |
+| `GOOGLE_CHAT_SERVICE_ACCOUNT_JSON` | 服务账户 JSON 文件的路径，或内联的 JSON（回退到 `GOOGLE_APPLICATION_CREDENTIALS`） |
 | `GOOGLE_CHAT_ALLOWED_USERS` | 允许与机器人聊天的逗号分隔的用户邮箱 |
 | `GOOGLE_CHAT_ALLOW_ALL_USERS` | 允许任何 Google Chat 用户触发机器人（仅限开发） |
-| `GOOGLE_CHAT_HOME_CHANNEL` | 用于 cron 交付的默认空间（例如 `spaces/AAAA...`） |
+| `GOOGLE_CHAT_HOME_CHANNEL` | 用于定时任务交付的默认空间（例如 `spaces/AAAA...`） |
 | `GOOGLE_CHAT_HOME_CHANNEL_NAME` | Google Chat 主空间的显示名称 |
 | `GOOGLE_CHAT_MAX_MESSAGES` | Pub/Sub FlowControl 最大在途消息数（默认：`1`） |
 | `GOOGLE_CHAT_MAX_BYTES` | Pub/Sub FlowControl 最大在途字节数（默认：`16777216`，16 MiB） |
@@ -292,7 +292,7 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `WHATSAPP_ALLOW_ALL_USERS` | 允许所有 WhatsApp 发送者，无需白名单（`true`/`false`） |
 | `WHATSAPP_DEBUG` | 在桥接中记录原始消息事件以进行故障排除（`true`/`false`） |
 | `SIGNAL_HTTP_URL` | signal-cli 守护进程 HTTP 端点（例如 `http://127.0.0.1:8080`） |
-| `SIGNAL_ACCOUNT` | 机器人电话号码（E.164 格式） |
+| `SIGNAL_ACCOUNT` | 机器人电话号码，E.164 格式 |
 | `SIGNAL_ALLOWED_USERS` | 逗号分隔的 E.164 电话号码或 UUID |
 | `SIGNAL_GROUP_ALLOWED_USERS` | 逗号分隔的群组 ID，或 `*` 表示所有群组 |
 | `SIGNAL_HOME_CHANNEL_NAME` | Signal 主频道的显示名称 |
@@ -300,14 +300,14 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `SIGNAL_ALLOW_ALL_USERS` | 允许所有 Signal 用户，无需白名单 |
 | `TWILIO_ACCOUNT_SID` | Twilio 账户 SID（与电话技能共享） |
 | `TWILIO_AUTH_TOKEN` | Twilio 认证 Token（与电话技能共享；也用于 webhook 签名验证） |
-| `TWILIO_PHONE_NUMBER` | Twilio 电话号码（E.164 格式）（与电话技能共享） |
+| `TWILIO_PHONE_NUMBER` | Twilio 电话号码，E.164 格式（与电话技能共享） |
 | `SMS_WEBHOOK_URL` | 用于 Twilio 签名验证的公共 URL——必须与 Twilio 控制台中的 webhook URL 匹配（必需） |
 | `SMS_WEBHOOK_PORT` | 入站 SMS 的 Webhook 监听端口（默认：`8080`） |
 | `SMS_WEBHOOK_HOST` | Webhook 绑定地址（默认：`0.0.0.0`） |
 | `SMS_INSECURE_NO_SIGNATURE` | 设置为 `true` 以禁用 Twilio 签名验证（仅限本地开发——不用于生产） |
 | `SMS_ALLOWED_USERS` | 允许聊天的逗号分隔的 E.164 电话号码 |
 | `SMS_ALLOW_ALL_USERS` | 允许所有 SMS 发送者，无需白名单 |
-| `SMS_HOME_CHANNEL` | 用于 cron 作业/通知交付的电话号码 |
+| `SMS_HOME_CHANNEL` | 用于定时任务/通知交付的电话号码 |
 | `SMS_HOME_CHANNEL_NAME` | SMS 主频道的显示名称 |
 | `EMAIL_ADDRESS` | 电子邮件网关适配器的邮箱地址 |
 | `EMAIL_PASSWORD` | 邮箱账户的密码或应用密码 |
@@ -332,12 +332,12 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `FEISHU_ALLOWED_USERS` | 允许向机器人发送消息的逗号分隔的飞书用户 ID |
 | `FEISHU_ALLOW_BOTS` | `none`（默认）/ `mentions` / `all`——接受来自其他机器人的入站消息。参见[机器人间消息传递](../user-guide/messaging/feishu.md#bot-to-bot-messaging) |
 | `FEISHU_REQUIRE_MENTION` | `true`（默认）/ `false`——群组消息是否必须 @提及机器人。可通过 `group_rules.<chat_id>.require_mention` 按聊天覆盖。 |
-| `FEISHU_HOME_CHANNEL` | 用于 cron 交付和通知的飞书聊天 ID |
+| `FEISHU_HOME_CHANNEL` | 用于定时任务交付和通知的飞书聊天 ID |
 | `WECOM_BOT_ID` | 企业微信 AI 机器人 ID，来自管理控制台 |
 | `WECOM_SECRET` | 企业微信 AI 机器人密钥 |
 | `WECOM_WEBSOCKET_URL` | 自定义 WebSocket URL（默认：`wss://openws.work.weixin.qq.com`） |
 | `WECOM_ALLOWED_USERS` | 允许向机器人发送消息的逗号分隔的企业微信用户 ID |
-| `WECOM_HOME_CHANNEL` | 用于 cron 交付和通知的企业微信聊天 ID |
+| `WECOM_HOME_CHANNEL` | 用于定时任务交付和通知的企业微信聊天 ID |
 | `WECOM_CALLBACK_CORP_ID` | 企业微信企业 Corp ID，用于回调自建应用 |
 | `WECOM_CALLBACK_CORP_SECRET` | 自建应用的 Corp 密钥 |
 | `WECOM_CALLBACK_AGENT_ID` | 自建应用的 Agent ID |
@@ -347,22 +347,22 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `WECOM_CALLBACK_PORT` | 回调服务器端口（默认：`8645`） |
 | `WECOM_CALLBACK_ALLOWED_USERS` | 用于白名单的逗号分隔的用户 ID |
 | `WECOM_CALLBACK_ALLOW_ALL_USERS` | 设置为 `true` 以允许所有用户，无需白名单 |
-| `WEIXIN_ACCOUNT_ID` | 通过 iLink Bot API 扫码登录获取的微信账户 ID |
-| `WEIXIN_TOKEN` | 通过 iLink Bot API 扫码登录获取的微信认证 Token |
+| `WEIXIN_ACCOUNT_ID` | 通过 iLink Bot API 二维码登录获取的微信账户 ID |
+| `WEIXIN_TOKEN` | 通过 iLink Bot API 二维码登录获取的微信认证 Token |
 | `WEIXIN_BASE_URL` | 覆盖微信 iLink Bot API 基础 URL（默认：`https://ilinkai.weixin.qq.com`） |
 | `WEIXIN_CDN_BASE_URL` | 覆盖微信媒体 CDN 基础 URL（默认：`https://novac2c.cdn.weixin.qq.com/c2c`） |
 | `WEIXIN_DM_POLICY` | 私聊策略：`open`、`allowlist`、`pairing`、`disabled`（默认：`open`） |
 | `WEIXIN_GROUP_POLICY` | 群组消息策略：`open`、`allowlist`、`disabled`（默认：`disabled`） |
 | `WEIXIN_ALLOWED_USERS` | 允许与机器人私聊的逗号分隔的微信用户 ID |
-| `WEIXIN_GROUP_ALLOWED_USERS` | 允许与机器人交互的逗号分隔的微信**群聊 ID**（非成员用户 ID）。变量名是历史遗留的——它期望的是群组 ID。仅当 iLink 实际传递群组事件时才生效；扫码登录的 iLink 机器人身份（`...@im.bot`）通常不会接收普通的微信群消息。 |
-| `WEIXIN_HOME_CHANNEL` | 用于 cron 交付和通知的微信聊天 ID |
+| `WEIXIN_GROUP_ALLOWED_USERS` | 允许与机器人交互的逗号分隔的微信**群聊 ID**（非成员用户 ID）。变量名是遗留的——它期望群组 ID。仅当 iLink 实际传递群组事件时才生效；二维码登录的 iLink 机器人身份（`...@im.bot`）通常不会接收普通的微信群消息。 |
+| `WEIXIN_HOME_CHANNEL` | 用于定时任务交付和通知的微信聊天 ID |
 | `WEIXIN_HOME_CHANNEL_NAME` | 微信主频道的显示名称 |
 | `WEIXIN_ALLOW_ALL_USERS` | 允许所有微信用户，无需白名单（`true`/`false`） |
 | `BLUEBUBBLES_SERVER_URL` | BlueBubbles 服务器 URL（例如 `http://192.168.1.10:1234`） |
 | `BLUEBUBBLES_PASSWORD` | BlueBubbles 服务器密码 |
 | `BLUEBUBBLES_WEBHOOK_HOST` | Webhook 监听器绑定地址（默认：`127.0.0.1`） |
 | `BLUEBUBBLES_WEBHOOK_PORT` | Webhook 监听器端口（默认：`8645`） |
-| `BLUEBUBBLES_HOME_CHANNEL` | 用于 cron/通知交付的电话/邮箱 |
+| `BLUEBUBBLES_HOME_CHANNEL` | 用于定时任务/通知交付的电话/邮箱 |
 | `BLUEBUBBLES_ALLOWED_USERS` | 逗号分隔的授权用户 |
 | `BLUEBUBBLES_ALLOW_ALL_USERS` | 允许所有用户（`true`/`false`） |
 | `QQ_APP_ID` | QQ 机器人 App ID，来自 [q.qq.com](https://q.qq.com) |
@@ -373,13 +373,13 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `QQ_ALLOWED_USERS` | 允许向机器人发送消息的逗号分隔的 QQ 用户 openID |
 | `QQ_GROUP_ALLOWED_USERS` | 用于群组 @-消息访问的逗号分隔的 QQ 群组 ID |
 | `QQ_ALLOW_ALL_USERS` | 允许所有用户（`true`/`false`，覆盖 `QQ_ALLOWED_USERS`） |
-| `QQBOT_HOME_CHANNEL` | 用于 cron 交付和通知的 QQ 用户/群组 openID |
+| `QQBOT_HOME_CHANNEL` | 用于定时任务交付和通知的 QQ 用户/群组 openID |
 | `QQBOT_HOME_CHANNEL_NAME` | QQ 主频道的显示名称 |
 | `QQ_PORTAL_HOST` | 覆盖 QQ 门户主机（设置为 `sandbox.q.qq.com` 以通过沙盒网关路由；默认：`q.qq.com`）。 |
 | `MATTERMOST_URL` | Mattermost 服务器 URL（例如 `https://mm.example.com`） |
 | `MATTERMOST_TOKEN` | Mattermost 的机器人 Token 或个人访问 Token |
 | `MATTERMOST_ALLOWED_USERS` | 允许向机器人发送消息的逗号分隔的 Mattermost 用户 ID |
-| `MATTERMOST_HOME_CHANNEL` | 用于主动消息交付（cron、通知）的频道 ID |
+| `MATTERMOST_HOME_CHANNEL` | 用于主动消息交付（定时任务、通知）的频道 ID |
 | `MATTERMOST_REQUIRE_MENTION` | 在频道中需要 `@提及`（默认：`true`）。设置为 `false` 以响应所有消息。 |
 | `MATTERMOST_FREE_RESPONSE_CHANNELS` | 机器人无需 `@提及` 即可响应的逗号分隔的频道 ID |
 | `MATTERMOST_REPLY_MODE` | 回复样式：`thread`（线程式回复）或 `off`（扁平消息，默认） |
@@ -391,7 +391,7 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `MATRIX_HOME_ROOM` | 用于主动消息交付的房间 ID（例如 `!abc123:matrix.org`） |
 | `MATRIX_ENCRYPTION` | 启用端到端加密（`true`/`false`，默认：`false`） |
 | `MATRIX_DEVICE_ID` | 稳定的 Matrix 设备 ID，用于跨重启的 E2EE 持久化（例如 `HERMES_BOT`）。没有这个，E2EE 密钥会在每次启动时轮换，历史房间解密会中断。 |
-| `MATRIX_REACTIONS` | 在入站消息上启用处理生命周期的表情符号反应（默认：`true`）。设置为 `false` 以禁用。 |
+| `MATRIX_REACTIONS` | 在入站消息上启用处理周期表情符号反应（默认：`true`）。设置为 `false` 以禁用。 |
 | `MATRIX_REQUIRE_MENTION` | 在房间中需要 `@提及`（默认：`true`）。设置为 `false` 以响应所有消息。 |
 | `MATRIX_FREE_RESPONSE_ROOMS` | 机器人无需 `@提及` 即可响应的逗号分隔的房间 ID |
 | `MATRIX_AUTO_THREAD` | 为房间消息自动创建线程（默认：`true`） |
@@ -405,12 +405,12 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `API_SERVER_ENABLED` | 启用 OpenAI 兼容的 API 服务器（`true`/`false`）。与其他平台一起运行。 |
 | `API_SERVER_KEY` | API 服务器认证的 Bearer Token。只要启用了 API 服务器就必须提供。 |
 | `API_SERVER_CORS_ORIGINS` | 允许直接调用 API 服务器的逗号分隔的浏览器来源（例如 `http://localhost:3000,http://127.0.0.1:3000`）。默认：禁用。 |
-| `API_SERVER_PORT` | API 服务器的端口（默认：`8642`） |
-| `API_SERVER_HOST` | API 服务器的主机/绑定地址（默认：`127.0.0.1`）。环回地址上仍需要 `API_SERVER_KEY`；使用窄范围的 `API_SERVER_CORS_ORIGINS` 白名单进行浏览器访问。 |
-| `API_SERVER_MODEL_NAME` | 在 `/v1/models` 上公布的模型名称。默认为配置文件名称（或默认配置文件的 `hermes-agent`）。对于像 Open WebUI 这样的前端需要每个连接有不同模型名称的多用户设置很有用。 |
-| `GATEWAY_PROXY_URL` | 用于转发消息的远程 Hermes API 服务器的 URL（[代理模式](/user-guide/messaging/matrix#proxy-mode-e2ee-on-macos)）。设置后，网关仅处理平台 I/O——所有 Agent 工作都委派给远程服务器。也可通过 `config.yaml` 中的 `gateway.proxy_url` 配置。 |
-| `GATEWAY_PROXY_KEY` | 代理模式下用于远程 API 服务器认证的 Bearer Token。必须与远程主机上的 `API_SERVER_KEY` 匹配。 |
-| `MESSAGING_CWD` | 消息传递模式下终端命令的工作目录（默认：`~`） |
+| `API_SERVER_PORT` | API 服务器端口（默认：`8642`） |
+| `API_SERVER_HOST` | API 服务器的主机/绑定地址（默认：`127.0.0.1`）。回环地址上仍需要 `API_SERVER_KEY`；使用狭窄的 `API_SERVER_CORS_ORIGINS` 白名单进行浏览器访问。 |
+| `API_SERVER_MODEL_NAME` | 在 `/v1/models` 上公布的模型名称。默认为配置文件名称（或默认配置文件的 `hermes-agent`）。对于多用户设置很有用，其中像 Open WebUI 这样的前端需要每个连接有不同的模型名称。 |
+| `GATEWAY_PROXY_URL` | 远程 Hermes API 服务器的 URL，用于转发消息到该服务器（[代理模式](/user-guide/messaging/matrix#proxy-mode-e2ee-on-macos)）。设置后，网关仅处理平台 I/O——所有 Agent 工作都委派给远程服务器。也可通过 `config.yaml` 中的 `gateway.proxy_url` 配置。 |
+| `GATEWAY_PROXY_KEY` | 在代理模式下用于认证远程 API 服务器的 Bearer Token。必须与远程主机上的 `API_SERVER_KEY` 匹配。 |
+| `MESSAGING_CWD` | 已弃用的网关工作目录兼容性回退。建议使用 `config.yaml` 中的 `terminal.cwd`。 |
 | `GATEWAY_ALLOWED_USERS` | 跨所有平台允许的逗号分隔的用户 ID |
 | `GATEWAY_ALLOW_ALL_USERS` | 允许所有用户，无需白名单（`true`/`false`，默认：`false`） |
 ### Microsoft Graph (Teams 会议)
@@ -422,8 +422,8 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `MSGRAPH_TENANT_ID` | Graph 应用注册的 Azure AD 租户 ID（目录 GUID）。 |
 | `MSGRAPH_CLIENT_ID` | Azure 应用注册的应用程序（客户端）ID。 |
 | `MSGRAPH_CLIENT_SECRET` | 应用注册的客户端密钥值。使用 `chmod 600` 权限存储在 `~/.hermes/.env` 中；通过 Azure 门户定期轮换。 |
-| `MSGRAPH_SCOPE` | 客户端凭据 Token 请求的 OAuth2 作用域（默认值：`https://graph.microsoft.com/.default`）。 |
-| `MSGRAPH_AUTHORITY_URL` | Microsoft 标识平台授权机构（默认值：`https://login.microsoftonline.com`）。仅在国家/主权云中需要覆盖（例如，GCC High 使用 `https://login.microsoftonline.us`）。 |
+| `MSGRAPH_SCOPE` | 客户端凭据 Token 请求的 OAuth2 范围（默认：`https://graph.microsoft.com/.default`）。 |
+| `MSGRAPH_AUTHORITY_URL` | Microsoft 标识平台授权机构（默认：`https://login.microsoftonline.com`）。仅在国家/主权云中需要覆盖（例如，GCC High 使用 `https://login.microsoftonline.us`）。 |
 
 ### Microsoft Graph Webhook 监听器
 
@@ -432,23 +432,23 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | 变量 | 描述 |
 |----------|-------------|
 | `MSGRAPH_WEBHOOK_ENABLED` | 启用 `msgraph_webhook` 消息网关平台（`true`/`1`/`yes`）。 |
-| `MSGRAPH_WEBHOOK_PORT` | 监听器绑定的端口（默认值：`8646`）。 |
+| `MSGRAPH_WEBHOOK_PORT` | 监听器绑定的端口（默认：`8646`）。 |
 | `MSGRAPH_WEBHOOK_CLIENT_STATE` | Graph 在每个通知中回显的共享密钥；与 `hmac.compare_digest` 进行比较。使用 `openssl rand -hex 32` 生成。 |
 | `MSGRAPH_WEBHOOK_ACCEPTED_RESOURCES` | Graph 资源路径/模式的逗号分隔允许列表（例如：`communications/onlineMeetings,chats/*/messages`）。尾随的 `*` 表示前缀匹配。空值 = 接受所有。 |
-| `MSGRAPH_WEBHOOK_ALLOWED_SOURCE_CIDRS` | 允许向监听器发送 POST 请求的逗号分隔 CIDR 范围（例如：`52.96.0.0/14,52.104.0.0/14`）。空值 = 允许所有（默认）。在生产环境中，应限制为 Microsoft Graph 发布的出口范围。 |
+| `MSGRAPH_WEBHOOK_ALLOWED_SOURCE_CIDRS` | 允许向监听器发送 POST 请求的逗号分隔的 CIDR 范围（例如：`52.96.0.0/14,52.104.0.0/14`）。空值 = 允许所有（默认）。在生产环境中应限制为 Microsoft Graph 发布的出口范围。 |
 
 ### Teams 会议摘要投递
 
-仅在启用 [`teams_pipeline` 插件](/user-guide/messaging/msgraph-webhook) 时使用。这些设置也可以在 `config.yaml` 的 `platforms.teams.extra` 下配置——当两者都设置时，环境变量优先。请参阅 [Microsoft Teams → 会议摘要投递](/user-guide/messaging/teams#meeting-summary-delivery-teams-meeting-pipeline)。
+仅在启用 [`teams_pipeline` 插件](/user-guide/messaging/msgraph-webhook) 时使用。这些设置也可以在 `config.yaml` 中的 `platforms.teams.extra` 下配置 —— 当两者都设置时，环境变量优先。请参阅 [Microsoft Teams → 会议摘要投递](/user-guide/messaging/teams#meeting-summary-delivery-teams-meeting-pipeline)。
 
 | 变量 | 描述 |
 |----------|-------------|
 | `TEAMS_DELIVERY_MODE` | `graph` 或 `incoming_webhook`。 |
 | `TEAMS_INCOMING_WEBHOOK_URL` | Teams 生成的 Webhook URL；当 `TEAMS_DELIVERY_MODE=incoming_webhook` 时必需。 |
-| `TEAMS_GRAPH_ACCESS_TOKEN` | 预先获取的用于 Graph 投递的委派访问 Token。很少需要——当未设置时，写入器会回退到 `MSGRAPH_*` 应用凭据。 |
+| `TEAMS_GRAPH_ACCESS_TOKEN` | 预先获取的用于 Graph 投递的委派访问 Token。很少需要 —— 当未设置时，写入器会回退到 `MSGRAPH_*` 应用凭据。 |
 | `TEAMS_TEAM_ID` | 用于频道投递的目标团队 ID（`graph` 模式）。 |
 | `TEAMS_CHANNEL_ID` | 目标频道 ID（与 `TEAMS_TEAM_ID` 配对使用）。 |
-| `TEAMS_CHAT_ID` | 目标 1:1 或群聊 ID（`graph` 模式下替代 team+channel 的方案）。 |
+| `TEAMS_CHAT_ID` | 目标 1:1 或群聊 ID（`graph` 模式下替代团队+频道的方式）。 |
 
 ### LINE Messaging API
 
@@ -458,19 +458,19 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 |----------|-------------|
 | `LINE_CHANNEL_ACCESS_TOKEN` | 来自 LINE Developers Console（Messaging API 标签页）的长期频道访问 Token。必需。 |
 | `LINE_CHANNEL_SECRET` | 频道密钥（Basic settings 标签页）；用于 HMAC-SHA256 Webhook 签名验证。必需。 |
-| `LINE_HOST` | Webhook 绑定主机（默认值：`0.0.0.0`）。 |
-| `LINE_PORT` | Webhook 绑定端口（默认值：`8646`）。 |
-| `LINE_PUBLIC_URL` | 公共 HTTPS 基础 URL（例如：`https://my-tunnel.example.com`）。发送图片/音频/视频时必需——LINE 只接受可通过 HTTPS 访问的 URL。 |
-| `LINE_ALLOWED_USERS` | 允许与机器人私聊的逗号分隔用户 ID（以 `U` 开头）。 |
-| `LINE_ALLOWED_GROUPS` | 机器人将响应的逗号分隔群组 ID（以 `C` 开头）。 |
-| `LINE_ALLOWED_ROOMS` | 机器人将响应的逗号分隔房间 ID（以 `R` 开头）。 |
-| `LINE_ALLOW_ALL_USERS` | 仅用于开发的应急方案——接受任何来源。默认值：`false`。 |
-| `LINE_HOME_CHANNEL` | 带有 `deliver: line` 的定时任务的默认投递目标。 |
-| `LINE_SLOW_RESPONSE_THRESHOLD` | 慢速 LLM 模板按钮回发触发前的秒数（默认值：`45`）。设置为 `0` 以禁用并始终回退到 Push 方式。 |
+| `LINE_HOST` | Webhook 绑定主机（默认：`0.0.0.0`）。 |
+| `LINE_PORT` | Webhook 绑定端口（默认：`8646`）。 |
+| `LINE_PUBLIC_URL` | 公共 HTTPS 基础 URL（例如：`https://my-tunnel.example.com`）。发送图片/音频/视频时必需 —— LINE 只接受可通过 HTTPS 访问的 URL。 |
+| `LINE_ALLOWED_USERS` | 允许与机器人私聊的逗号分隔的用户 ID（以 `U` 开头）。 |
+| `LINE_ALLOWED_GROUPS` | 机器人将响应的逗号分隔的群组 ID（以 `C` 开头）。 |
+| `LINE_ALLOWED_ROOMS` | 机器人将响应的逗号分隔的房间 ID（以 `R` 开头）。 |
+| `LINE_ALLOW_ALL_USERS` | 仅用于开发的应急方案 —— 接受任何来源。默认：`false`。 |
+| `LINE_HOME_CHANNEL` | 具有 `deliver: line` 的定时任务的默认投递目标。 |
+| `LINE_SLOW_RESPONSE_THRESHOLD` | 慢速 LLM 模板按钮回发触发前的秒数（默认：`45`）。设置为 `0` 以禁用并始终回退到 Push。 |
 | `LINE_PENDING_TEXT` | 与回发按钮一起显示的气泡文本。 |
-| `LINE_BUTTON_LABEL` | 回发按钮标签（默认值：`Get answer`）。 |
-| `LINE_DELIVERED_TEXT` | 当再次点击已投递的回发按钮时的回复（默认值：`Already replied ✅`）。 |
-| `LINE_INTERRUPTED_TEXT` | 当点击被 `/stop` 中断的孤立回发按钮时的回复（默认值：`Run was interrupted before completion.`）。 |
+| `LINE_BUTTON_LABEL` | 回发按钮标签（默认：`Get answer`）。 |
+| `LINE_DELIVERED_TEXT` | 当再次点击已投递的回发按钮时的回复（默认：`Already replied ✅`）。 |
+| `LINE_INTERRUPTED_TEXT` | 当点击因 `/stop` 而孤立的回发按钮时的回复（默认：`Run was interrupted before completion.`）。 |
 
 ### ntfy（推送通知）
 
@@ -479,84 +479,84 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | 变量 | 描述 |
 |----------|-------------|
 | `NTFY_TOPIC` | 要订阅的主题（接收消息）。必需。 |
-| `NTFY_SERVER_URL` | 服务器 URL（默认值：`https://ntfy.sh`）。指向自托管的 ntfy 以保护隐私。 |
-| `NTFY_TOKEN` | 可选的身份验证 Token。Bearer Token（例如：`tk_xyz`）或用于基本身份验证的 `user:pass`。 |
+| `NTFY_SERVER_URL` | 服务器 URL（默认：`https://ntfy.sh`）。指向自托管的 ntfy 以保护隐私。 |
+| `NTFY_TOKEN` | 可选的认证 Token。Bearer Token（例如 `tk_xyz`）或用于基本认证的 `user:pass`。 |
 | `NTFY_PUBLISH_TOPIC` | 用于发送回复的主题（默认为 `NTFY_TOPIC`）。 |
-| `NTFY_MARKDOWN` | 设置为 `true` 以发送带有 `X-Markdown: true` 标头的回复。默认值：`false`。 |
+| `NTFY_MARKDOWN` | 设置为 `true` 以发送带有 `X-Markdown: true` 头的回复。默认：`false`。 |
 | `NTFY_ALLOWED_USERS` | 允许列表（视为用户 ID；在 ntfy 上这些是主题名称）。通常设置为与 `NTFY_TOPIC` 相同的值。 |
-| `NTFY_ALLOW_ALL_USERS` | 仅用于开发的应急方案——仅在访问控制的私有主题上安全。默认值：`false`。 |
-| `NTFY_HOME_CHANNEL` | 带有 `deliver: ntfy` 的定时任务的默认投递目标。 |
+| `NTFY_ALLOW_ALL_USERS` | 仅用于开发的应急方案 —— 仅在访问受控的私有主题上安全。默认：`false`。 |
+| `NTFY_HOME_CHANNEL` | 具有 `deliver: ntfy` 的定时任务的默认投递目标。 |
 | `NTFY_HOME_CHANNEL_NAME` | 主频道的人工标签（默认为主题名称）。 |
 在使用不受信任的主题部署之前，请参阅 [ntfy 消息指南](/user-guide/messaging/ntfy) —— 特别是 **身份模型** 部分。
 
 ### 高级消息调优
 
-用于限制出站消息批处理器的各平台高级调节选项。大多数用户永远不需要接触这些；默认值设置为尊重每个平台的速率限制，同时不会感觉迟缓。
+用于节流出站消息批处理器的、针对每个平台的高级调节选项。大多数用户永远不需要接触这些；默认值设置为尊重每个平台的速率限制，同时不会感觉迟钝。
 
 | 变量 | 描述 |
 |----------|-------------|
-| `HERMES_TELEGRAM_TEXT_BATCH_DELAY_SECONDS` | 刷新已排队的 Telegram 文本块之前的宽限窗口（默认：`0.6`）。 |
-| `HERMES_TELEGRAM_TEXT_BATCH_SPLIT_DELAY_SECONDS` | 当单个 Telegram 消息超过长度限制时，分割块之间的延迟（默认：`2.0`）。 |
-| `HERMES_TELEGRAM_MEDIA_BATCH_DELAY_SECONDS` | 刷新已排队的 Telegram 媒体之前的宽限窗口（默认：`0.6`）。 |
+| `HERMES_TELEGRAM_TEXT_BATCH_DELAY_SECONDS` | 刷新已排队的 Telegram 文本块之前的宽限窗口（默认值：`0.6`）。 |
+| `HERMES_TELEGRAM_TEXT_BATCH_SPLIT_DELAY_SECONDS` | 当单个 Telegram 消息超过长度限制时，分割块之间的延迟（默认值：`2.0`）。 |
+| `HERMES_TELEGRAM_MEDIA_BATCH_DELAY_SECONDS` | 刷新已排队的 Telegram 媒体之前的宽限窗口（默认值：`0.6`）。 |
 | `HERMES_TELEGRAM_FOLLOWUP_GRACE_SECONDS` | Agent 完成后发送后续消息之前的延迟，以避免与最后一个流式块竞争。 |
 | `HERMES_TELEGRAM_HTTP_CONNECT_TIMEOUT` / `_READ_TIMEOUT` / `_WRITE_TIMEOUT` / `_POOL_TIMEOUT` | 覆盖底层的 `python-telegram-bot` HTTP 超时设置（秒）。 |
 | `HERMES_TELEGRAM_HTTP_POOL_SIZE` | 到 Telegram API 的最大并发 HTTP 连接数。 |
 | `HERMES_TELEGRAM_DISABLE_FALLBACK_IPS` | 禁用 DNS 失败时使用的硬编码 Cloudflare 备用 IP（`true`/`false`）。 |
-| `HERMES_DISCORD_TEXT_BATCH_DELAY_SECONDS` | 刷新已排队的 Discord 文本块之前的宽限窗口（默认：`0.6`）。 |
-| `HERMES_DISCORD_TEXT_BATCH_SPLIT_DELAY_SECONDS` | 当 Discord 消息超过长度限制时，分割块之间的延迟（默认：`2.0`）。 |
-| `HERMES_MATRIX_TEXT_BATCH_DELAY_SECONDS` / `_SPLIT_DELAY_SECONDS` | Matrix 对应的 Telegram 批处理调节选项。 |
+| `HERMES_DISCORD_TEXT_BATCH_DELAY_SECONDS` | 刷新已排队的 Discord 文本块之前的宽限窗口（默认值：`0.6`）。 |
+| `HERMES_DISCORD_TEXT_BATCH_SPLIT_DELAY_SECONDS` | 当 Discord 消息超过长度限制时，分割块之间的延迟（默认值：`2.0`）。 |
+| `HERMES_MATRIX_TEXT_BATCH_DELAY_SECONDS` / `_SPLIT_DELAY_SECONDS` | Matrix 平台对应的批处理调节选项。 |
 | `HERMES_FEISHU_TEXT_BATCH_DELAY_SECONDS` / `_SPLIT_DELAY_SECONDS` / `_MAX_CHARS` / `_MAX_MESSAGES` | 飞书批处理器调优 —— 延迟、分割延迟、每条消息最大字符数、每批最大消息数。 |
 | `HERMES_FEISHU_MEDIA_BATCH_DELAY_SECONDS` | 飞书媒体刷新延迟。 |
-| `HERMES_FEISHU_DEDUP_CACHE_SIZE` | 飞书 Webhook 去重缓存的大小（默认：`1024`）。 |
+| `HERMES_FEISHU_DEDUP_CACHE_SIZE` | 飞书 Webhook 去重缓存的大小（默认值：`1024`）。 |
 | `HERMES_WECOM_TEXT_BATCH_DELAY_SECONDS` / `_SPLIT_DELAY_SECONDS` | 企业微信批处理器调优。 |
-| `HERMES_VISION_DOWNLOAD_TIMEOUT` | 在将图像交给视觉模型之前下载图像的超时时间（秒）（默认：`30`）。 |
-| `HERMES_RESTART_DRAIN_TIMEOUT` | 消息网关：在 `/restart` 时等待活动运行任务排空的时间（秒），之后强制重启（默认：`900`）。 |
+| `HERMES_VISION_DOWNLOAD_TIMEOUT` | 在将图像交给视觉模型之前下载图像的超时时间（秒）（默认值：`30`）。 |
+| `HERMES_RESTART_DRAIN_TIMEOUT` | 消息网关：在 `/restart` 命令后等待活动运行任务排空的时间（秒），之后强制重启（默认值：`900`）。 |
 | `HERMES_GATEWAY_PLATFORM_CONNECT_TIMEOUT` | 消息网关启动期间每个平台的连接超时时间（秒）。 |
-| `HERMES_GATEWAY_BUSY_INPUT_MODE` | 默认的消息网关忙碌输入行为：`queue`、`steer` 或 `interrupt`。可以通过每个聊天的 `/busy` 命令覆盖。 |
-| `HERMES_GATEWAY_BUSY_ACK_ENABLED` | 当用户在 Agent 忙碌时发送输入时，消息网关是否发送确认消息（⚡/⏳/⏩）（默认：`true`）。设置为 `false` 以完全抑制这些消息 —— 输入仍然会正常排队/转向/中断，只是聊天回复被静音。从 `config.yaml` 中的 `display.busy_ack_enabled` 桥接而来。 |
+| `HERMES_GATEWAY_BUSY_INPUT_MODE` | 默认的消息网关忙碌输入行为：`queue`、`steer` 或 `interrupt`。可以通过每个聊天中的 `/busy` 命令覆盖。 |
+| `HERMES_GATEWAY_BUSY_ACK_ENABLED` | 当用户在 Agent 忙碌时发送输入时，消息网关是否发送确认消息（⚡/⏳/⏩）（默认值：`true`）。设置为 `false` 以完全抑制这些消息 —— 输入仍会正常排队/转向/中断，只是聊天回复被静音。从 `config.yaml` 中的 `display.busy_ack_enabled` 桥接而来。 |
 | `HERMES_GATEWAY_NO_SUPERVISE` | 在 s6-overlay Docker 镜像内部，运行 `hermes gateway run` 时选择退出自动监管，并使用 pre-s6 前台语义（无自动重启，消息网关是容器的主进程）。真值：`1`、`true`、`yes`。等同于 `--no-supervise` CLI 标志。在 s6 镜像外部无效。 |
-| `HERMES_FILE_MUTATION_VERIFIER` | 启用每轮文件变更验证器页脚（默认：`true`）。启用后，Hermes 会附加一个提示性列表，列出本轮中任何失败且未被成功写入覆盖的 `write_file` / `patch` 调用。设置为 `0`、`false`、`no` 或 `off` 以抑制。镜像 `config.yaml` 中的 `display.file_mutation_verifier`；当设置了环境变量时，环境变量优先。 |
-| `HERMES_CRON_TIMEOUT` | 定时任务 Agent 运行的不活动超时时间（秒）（默认：`600`）。Agent 在主动调用工具或接收流式 Token 时可以无限期运行 —— 仅在空闲时触发。设置为 `0` 表示无限制。 |
-| `HERMES_CRON_SCRIPT_TIMEOUT` | 附加到定时任务的预运行脚本的超时时间（秒）（默认：`120`）。覆盖需要更长执行时间的脚本（例如，用于反机器人定时的随机延迟）。也可以通过 `config.yaml` 中的 `cron.script_timeout_seconds` 配置。 |
-| `HERMES_CRON_MAX_PARALLEL` | 每个时间点并行运行的最大定时任务数（默认：`4`）。 |
+| `HERMES_FILE_MUTATION_VERIFIER` | 启用每轮文件变更验证器页脚（默认值：`true`）。启用后，Hermes 会附加一个提示性列表，列出本轮中任何失败且未被成功写入覆盖的 `write_file` / `patch` 调用。设置为 `0`、`false`、`no` 或 `off` 以抑制。镜像 `config.yaml` 中的 `display.file_mutation_verifier`；设置环境变量时，环境变量优先。 |
+| `HERMES_CRON_TIMEOUT` | 定时任务 Agent 运行的不活动超时时间（秒）（默认值：`600`）。Agent 在主动调用工具或接收流式 Token 时可以无限期运行 —— 此设置仅在空闲时触发。设置为 `0` 表示无限制。 |
+| `HERMES_CRON_SCRIPT_TIMEOUT` | 附加到定时任务的预运行脚本的超时时间（秒）（默认值：`120`）。覆盖需要更长时间执行的脚本（例如，用于反机器人定时的随机延迟）。也可以通过 `config.yaml` 中的 `cron.script_timeout_seconds` 配置。 |
+| `HERMES_CRON_MAX_PARALLEL` | 每次触发时并行运行的最大定时任务数（默认值：`4`）。 |
 
 ## Agent 行为
 
 | 变量 | 描述 |
 |----------|-------------|
-| `HERMES_MAX_ITERATIONS` | 每次对话的最大工具调用迭代次数（默认：90） |
+| `HERMES_MAX_ITERATIONS` | 每次对话的最大工具调用迭代次数（默认值：90） |
 | `HERMES_INFERENCE_MODEL` | 在进程级别覆盖模型名称（对于会话，优先级高于 `config.yaml`）。也可以通过 `-m`/`--model` 标志设置。 |
-| `HERMES_YOLO_MODE` | 设置为 `1` 以绕过危险命令批准提示。等同于 `--yolo`。 |
+| `HERMES_YOLO_MODE` | 设置为 `1` 以绕过危险命令的批准提示。等同于 `--yolo`。 |
 | `HERMES_ACCEPT_HOOKS` | 自动批准 `config.yaml` 中声明的任何未见过的 shell 钩子，无需 TTY 提示。等同于 `--accept-hooks` 或 `hooks_auto_accept: true`。 |
 | `HERMES_IGNORE_USER_CONFIG` | 跳过 `~/.hermes/config.yaml` 并使用内置默认值（`.env` 中的凭据仍会加载）。等同于 `--ignore-user-config`。 |
-| `HERMES_IGNORE_RULES` | 跳过自动注入 `AGENTS.md`、`SOUL.md`、`.cursorrules`、记忆和预加载技能。等同于 `--ignore-rules`。 |
-| `HERMES_MD_NAMES` | 要自动注入的规则文件名的逗号分隔列表（默认：`AGENTS.md,CLAUDE.md,.cursorrules,SOUL.md`）。 |
+| `HERMES_IGNORE_RULES` | 跳过 `AGENTS.md`、`SOUL.md`、`.cursorrules`、记忆和预加载技能的自动注入。等同于 `--ignore-rules`。 |
+| `HERMES_MD_NAMES` | 要自动注入的规则文件名的逗号分隔列表（默认值：`AGENTS.md,CLAUDE.md,.cursorrules,SOUL.md`）。 |
 | `HERMES_TOOL_PROGRESS` | 用于工具进度显示的已弃用兼容性变量。建议使用 `config.yaml` 中的 `display.tool_progress`。 |
 | `HERMES_TOOL_PROGRESS_MODE` | 用于工具进度模式的已弃用兼容性变量。建议使用 `config.yaml` 中的 `display.tool_progress`。 |
 | `HERMES_HUMAN_DELAY_MODE` | 响应节奏：`off`/`natural`/`custom` |
 | `HERMES_HUMAN_DELAY_MIN_MS` | 自定义延迟范围最小值（毫秒） |
 | `HERMES_HUMAN_DELAY_MAX_MS` | 自定义延迟范围最大值（毫秒） |
 | `HERMES_QUIET` | 抑制非必要输出（`true`/`false`） |
-| `CODEX_HOME` | 当启用 [Codex 应用服务器运行时](../user-guide/features/codex-app-server-runtime) 时，覆盖 Codex CLI 读取其配置 + 身份验证的目录（默认：`~/.codex`）。Hermes 的迁移会将托管块写入 `<CODEX_HOME>/config.toml`。 |
+| `CODEX_HOME` | 当启用 [Codex 应用服务器运行时](../user-guide/features/codex-app-server-runtime) 时，覆盖 Codex CLI 读取其配置和身份验证的目录（默认值：`~/.codex`）。Hermes 的迁移会将托管块写入 `<CODEX_HOME>/config.toml`。 |
 | `HERMES_KANBAN_TASK` | 看板调度器在生成工作进程时设置（任务 UUID）。工作进程和生成的 `hermes-tools` MCP 子进程会继承它，以便看板工具正确进行门控。不要手动设置。 |
-| `HERMES_API_TIMEOUT` | LLM API 调用超时时间（秒）（默认：`1800`） |
-| `HERMES_API_CALL_STALE_TIMEOUT` | 非流式陈旧调用超时时间（秒）（默认：`300`）。对于本地提供商，如果留空则自动禁用。也可以通过 `config.yaml` 中的 `providers.<id>.stale_timeout_seconds` 或 `providers.<id>.models.<model>.stale_timeout_seconds` 配置。 |
-| `HERMES_STREAM_READ_TIMEOUT` | 流式套接字读取超时时间（秒）（默认：`120`）。对于本地提供商，自动增加到 `HERMES_API_TIMEOUT`。如果本地 LLM 在长代码生成期间超时，请增加此值。 |
-| `HERMES_STREAM_STALE_TIMEOUT` | 陈旧流检测超时时间（秒）（默认：`180`）。对于本地提供商自动禁用。如果在此窗口内没有收到任何块，则触发连接终止。 |
-| `HERMES_STREAM_RETRIES` | 在瞬态网络错误时，流中重新连接尝试的次数（默认：`3`）。 |
-| `HERMES_AGENT_TIMEOUT` | 消息网关中运行 Agent 的不活动超时时间（秒）（默认：`900`）。每次工具调用和流式 Token 时重置。设置为 `0` 以禁用。 |
-| `HERMES_AGENT_TIMEOUT_WARNING` | 消息网关：在不活动这么多秒后发送警告消息（默认：`HERMES_AGENT_TIMEOUT` 的 75%）。 |
+| `HERMES_API_TIMEOUT` | LLM API 调用超时时间（秒）（默认值：`1800`） |
+| `HERMES_API_CALL_STALE_TIMEOUT` | 非流式陈旧调用超时时间（秒）（默认值：`300`）。对于本地提供商，如果留空则自动禁用。也可以通过 `config.yaml` 中的 `providers.<id>.stale_timeout_seconds` 或 `providers.<id>.models.<model>.stale_timeout_seconds` 配置。 |
+| `HERMES_STREAM_READ_TIMEOUT` | 流式套接字读取超时时间（秒）（默认值：`120`）。对于本地提供商，自动增加到 `HERMES_API_TIMEOUT`。如果本地 LLM 在长代码生成期间超时，请增加此值。 |
+| `HERMES_STREAM_STALE_TIMEOUT` | 陈旧流检测超时时间（秒）（默认值：`180`）。对于本地提供商自动禁用。如果在此窗口内没有收到任何数据块，则触发连接终止。 |
+| `HERMES_STREAM_RETRIES` | 在瞬态网络错误时，流中重新连接尝试的次数（默认值：`3`）。 |
+| `HERMES_AGENT_TIMEOUT` | 消息网关中运行 Agent 的不活动超时时间（秒）（默认值：`900`）。每次工具调用和流式 Token 都会重置。设置为 `0` 以禁用。 |
+| `HERMES_AGENT_TIMEOUT_WARNING` | 消息网关：在不活动这么多秒后发送警告消息（默认值：`HERMES_AGENT_TIMEOUT` 的 75%）。 |
 | `HERMES_AGENT_NOTIFY_INTERVAL` | 消息网关：长时间运行的 Agent 轮次之间进度通知的间隔时间（秒）。 |
-| `HERMES_CHECKPOINT_TIMEOUT` | 文件系统检查点创建的超时时间（秒）（默认：`30`）。 |
+| `HERMES_CHECKPOINT_TIMEOUT` | 文件系统检查点创建的超时时间（秒）（默认值：`30`）。 |
 | `HERMES_EXEC_ASK` | 在消息网关模式下启用执行批准提示（`true`/`false`） |
-| `HERMES_ENABLE_PROJECT_PLUGINS` | 为 Agent 加载器和仪表板 Web 服务器启用从 `./.hermes/plugins/` 自动发现仓库本地插件。接受标准的真值集：`1` / `true` / `yes` / `on`（不区分大小写）。其他所有值 —— 包括 `0`、`false`、`no`、`off` 和空字符串 —— 都被视为 **禁用**（默认）。注意：根据 GHSA-5qr3-c538-wm9j (#29156)，即使启用了此变量，仪表板 Web 服务器也拒绝自动导入项目插件的 Python `api` 文件 —— 项目插件可以通过静态 JS/CSS 扩展 UI，但其后端路由仅在移动到 `~/.hermes/plugins/` 下时才会加载。 |
-| `HERMES_PLUGINS_DEBUG` | `1`/`true` 以在 stderr 上显示详细的插件发现日志 —— 扫描的目录、解析的清单、跳过原因，以及解析或 `register()` 失败时的完整回溯。面向插件作者。 |
+| `HERMES_ENABLE_PROJECT_PLUGINS` | 为 Agent 加载器和仪表板 Web 服务器启用从 `./.hermes/plugins/` 自动发现仓库本地插件。接受标准真值集：`1` / `true` / `yes` / `on`（不区分大小写）。其他所有值 —— 包括 `0`、`false`、`no`、`off` 和空字符串 —— 都被视为 **禁用**（默认）。注意：根据 GHSA-5qr3-c538-wm9j (#29156)，即使启用了此变量，仪表板 Web 服务器也拒绝自动导入项目插件的 Python `api` 文件 —— 项目插件可以通过静态 JS/CSS 扩展 UI，但其后端路由仅在移动到 `~/.hermes/plugins/` 下时才会加载。 |
+| `HERMES_PLUGINS_DEBUG` | `1`/`true` 以在 stderr 上显示详细的插件发现日志 —— 扫描的目录、解析的清单、跳过原因以及解析或 `register()` 失败时的完整回溯。面向插件作者。 |
 | `HERMES_BACKGROUND_NOTIFICATIONS` | 消息网关中后台进程通知模式：`all`（默认）、`result`、`error`、`off` |
-| `HERMES_EPHEMERAL_SYSTEM_PROMPT` | 在 API 调用时注入的临时系统提示词（永远不会持久化到会话） |
-| `HERMES_PREFILL_MESSAGES_FILE` | 指向在 API 调用时注入的临时预填充消息的 JSON 文件的路径。 |
+| `HERMES_EPHEMERAL_SYSTEM_PROMPT` | 在 API 调用时注入的临时系统提示词（永远不会持久化到会话中） |
+| `HERMES_PREFILL_MESSAGES_FILE` | 在 API 调用时注入的临时预填充消息的 JSON 文件路径。 |
 | `HERMES_ALLOW_PRIVATE_URLS` | `true`/`false` —— 允许工具获取 localhost/私有网络 URL。在消息网关模式下默认关闭。 |
-| `HERMES_REDACT_SECRETS` | `true`/`false` —— 控制工具输出、日志和聊天响应中的秘密信息脱敏（默认：`true`）。 |
-| `HERMES_WRITE_SAFE_ROOT` | 可选的目录前缀，用于限制 `write_file`/`patch` 写入；超出此范围的路径需要批准。 |
+| `HERMES_REDACT_SECRETS` | `true`/`false` —— 控制工具输出、日志和聊天响应中的秘密信息脱敏（默认值：`true`）。 |
+| `HERMES_WRITE_SAFE_ROOT` | 可选的目录前缀，用于限制 `write_file`/`patch` 写入；此范围之外的路径需要批准。 |
 | `HERMES_DISABLE_FILE_STATE_GUARD` | 设置为 `1` 以关闭 `patch`/`write_file` 上的“自您读取后文件已更改”防护。 |
 | `HERMES_CORE_TOOLS` | 用于规范核心工具列表的逗号分隔覆盖（高级；很少需要）。 |
 | `HERMES_BUNDLED_SKILLS` | 用于启动时加载的捆绑技能列表的逗号分隔覆盖。 |
@@ -565,18 +565,18 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | `HERMES_DUMP_REQUESTS` | 将 API 请求负载转储到日志文件（`true`/`false`） |
 | `HERMES_DUMP_REQUEST_STDOUT` | 将 API 请求负载转储到 stdout 而不是日志文件。 |
 | `HERMES_OAUTH_TRACE` | 设置为 `1` 以记录 OAuth Token 交换和刷新尝试。包括脱敏的计时信息。 |
-| `HERMES_OAUTH_FILE` | 覆盖用于 OAuth 凭据存储的路径（默认：`~/.hermes/auth.json`）。 |
+| `HERMES_OAUTH_FILE` | 覆盖用于 OAuth 凭据存储的路径（默认值：`~/.hermes/auth.json`）。 |
 | `HERMES_AGENT_HELP_GUIDANCE` | 为自定义部署向系统提示词附加额外的指导文本。 |
 | `HERMES_AGENT_LOGO` | 覆盖 CLI 启动时的 ASCII 横幅徽标。 |
-| `DELEGATION_MAX_CONCURRENT_CHILDREN` | 每个 `delegate_task` 批次的最大并行子 Agent 数（默认：`3`，下限为 1，无上限）。也可以通过 `config.yaml` 中的 `delegation.max_concurrent_children` 配置 —— 配置值优先。 |
+| `DELEGATION_MAX_CONCURRENT_CHILDREN` | 每个 `delegate_task` 批处理的最大并行子 Agent 数（默认值：`3`，下限为 1，无上限）。也可以通过 `config.yaml` 中的 `delegation.max_concurrent_children` 配置 —— 配置值优先。 |
 ## 界面
 
 | 变量 | 描述 |
 |----------|-------------|
 | `HERMES_TUI` | 当设置为 `1` 时，启动 [TUI](../user-guide/tui.md) 而非经典 CLI。等同于传递 `--tui` 参数。 |
-| `HERMES_TUI_DIR` | 预构建的 `ui-tui/` 目录的路径（必须包含 `dist/entry.js` 和已填充的 `node_modules`）。供发行版和 Nix 使用，以跳过首次启动时的 `npm install`。 |
-| `HERMES_TUI_RESUME` | 启动时通过 ID 恢复特定的 TUI 会话。设置后，`hermes --tui` 会跳过创建新会话，转而拾取指定名称的会话 —— 这在断开连接或终端崩溃后重新连接时很有用。 |
-| `HERMES_TUI_THEME` | 强制设置 TUI 颜色主题：`light`、`dark`，或原始的 6 字符背景十六进制值（例如 `ffffff` 或 `1a1a2e`）。未设置时，Hermes 使用 `COLORFGBG` 和终端背景查询自动检测；此变量会覆盖那些未设置 `COLORFGBG` 的终端（Ghostty、Warp、iTerm2 等）的检测。 |
+| `HERMES_TUI_DIR` | 预构建的 `ui-tui/` 目录路径（必须包含 `dist/entry.js` 和已填充的 `node_modules`）。供发行版和 Nix 使用，以跳过首次启动时的 `npm install`。 |
+| `HERMES_TUI_RESUME` | 启动时通过 ID 恢复特定的 TUI 会话。设置后，`hermes --tui` 会跳过创建新会话，转而拾取指定会话 —— 这在断开连接或终端崩溃后重新连接时很有用。 |
+| `HERMES_TUI_THEME` | 强制设置 TUI 颜色主题：`light`、`dark` 或原始的 6 字符背景十六进制值（例如 `ffffff` 或 `1a1a2e`）。未设置时，Hermes 使用 `COLORFGBG` 和终端背景查询自动检测；此变量会覆盖那些未设置 `COLORFGBG` 的终端（Ghostty、Warp、iTerm2 等）的检测。 |
 | `HERMES_INFERENCE_MODEL` | 强制指定 `hermes -z` / `hermes chat` 使用的模型，而无需修改 `config.yaml`。与 `--provider` 标志配对使用。对于需要每次运行覆盖默认模型的脚本化调用者（sweeper、CI、批量运行器）很有用。 |
 
 ## 会话设置
@@ -584,23 +584,23 @@ description: "Hermes Agent 使用的所有环境变量的完整参考"
 | 变量 | 描述 |
 |----------|-------------|
 | `SESSION_IDLE_MINUTES` | 在 N 分钟不活动后重置会话（默认值：1440） |
-| `SESSION_RESET_HOUR` | 每日重置的小时数，24 小时制（默认值：4 = 凌晨 4 点） |
+| `SESSION_RESET_HOUR` | 每日重置时间，24 小时制（默认值：4 = 凌晨 4 点） |
 | `HERMES_SESSION_ID` | **自动导出到 Hermes 生成的每个工具子进程**（`terminal`、`execute_code`、持久化 shell、Docker/Singularity 后端、委派的子 Agent 运行）中。由 Agent 设置为当前会话 ID；从工具调用的用户脚本可以读取它，以将其输出、遥测数据或副作用与原始的 Hermes 会话关联起来。**您不应手动设置此变量** —— 从父 shell 覆盖它仅在 Agent 运行之外生效，并且在 Agent 启动会话时会被覆盖。 |
 
 ## 上下文压缩（仅限 config.yaml）
 
-上下文压缩仅通过 `config.yaml` 配置 —— 没有对应的环境变量。阈值设置位于 `compression:` 块中，而摘要模型/提供商则位于 `auxiliary.compression:` 下。
+上下文压缩仅通过 `config.yaml` 配置 —— 没有对应的环境变量。阈值设置在 `compression:` 块中，而摘要模型/提供商则在 `auxiliary.compression:` 下配置。
 
 ```yaml
 compression:
   enabled: true
   threshold: 0.50
   target_ratio: 0.20         # 作为最近尾部保留的阈值比例
-  protect_last_n: 20         # 保持未压缩状态的最少最近消息数
+  protect_last_n: 20         # 保持未压缩的最小最近消息数
 ```
 
 :::info 旧版迁移
-包含 `compression.summary_model`、`compression.summary_provider` 和 `compression.summary_base_url` 的旧版配置在首次加载时会自动迁移到 `auxiliary.compression.*`。
+包含 `compression.summary_model`、`compression.summary_provider` 和 `compression.summary_base_url` 的旧配置会在首次加载时自动迁移到 `auxiliary.compression.*`。
 :::
 
 ## 辅助任务覆盖
@@ -628,7 +628,7 @@ fallback_providers:
     model: anthropic/claude-sonnet-4
 ```
 
-为了向后兼容，旧的顶层 `fallback_model` 单提供商格式仍会被读取，但新配置应使用 `fallback_providers`。
+为了向后兼容，仍会读取旧的顶层 `fallback_model` 单提供商格式，但新配置应使用 `fallback_providers`。
 
 有关完整详情，请参阅 [备用提供商](/user-guide/features/fallback-providers)。
 
@@ -646,5 +646,5 @@ fallback_providers:
 | `data_collection` | `"allow"`（默认）或 `"deny"` 以排除存储数据的提供商 |
 
 :::tip
-使用 `hermes config set` 来设置环境变量 —— 它会自动将它们保存到正确的文件中（`.env` 用于密钥，`config.yaml` 用于其他所有内容）。
+使用 `hermes config set` 来设置环境变量 —— 它会自动将它们保存到正确的文件（`.env` 用于密钥，`config.yaml` 用于其他所有内容）。
 :::

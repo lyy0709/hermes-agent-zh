@@ -1,4 +1,4 @@
-"""欢迎横幅、ASCII 艺术、技能摘要和 CLI 更新检查。
+"""欢迎横幅、ASCII 艺术、技能摘要和 CLI 的更新检查。
 
 纯显示函数，不依赖 HermesCLI 状态。
 """
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 # =========================================================================
-# ANSI building blocks for conversation display
+# 用于对话显示的 ANSI 构建块
 # =========================================================================
 
-_GOLD = "\033[1;38;2;255;215;0m"  # True-color #FFD700 bold
+_GOLD = "\033[1;38;2;255;215;0m"  # 真彩色 #FFD700 粗体
 _BOLD = "\033[1m"
 _DIM = "\033[2m"
 _RST = "\033[0m"
@@ -40,29 +40,18 @@ def cprint(text: str):
 
 
 # =========================================================================
-# Skin-aware color helpers
+# 皮肤感知的颜色助手
 # =========================================================================
 
 def _skin_color(key: str, fallback: str) -> str:
-    """从当前皮肤获取颜色，或返回回退值。"""
+    """从活动皮肤获取颜色，或返回回退值。"""
     try:
         from hermes_cli.skin_engine import get_active_skin
         return get_active_skin().get_color(key, fallback)
     except Exception:
         return fallback
-
-
-def _skin_branding(key: str, fallback: str) -> str:
-    """从当前皮肤获取品牌字符串，或返回回退值。"""
-    try:
-        from hermes_cli.skin_engine import get_active_skin
-        return get_active_skin().get_branding(key, fallback)
-    except Exception:
-        return fallback
-
-
 # =========================================================================
-# ASCII Art & Branding
+# ASCII 艺术与品牌标识
 # =========================================================================
 
 from hermes_cli import __version__ as VERSION, __release_date__ as RELEASE_DATE
@@ -93,7 +82,7 @@ HERMES_CADUCEUS = """[#CD7F32]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀�
 
 
 # =========================================================================
-# Skills scanning
+# 技能扫描
 # =========================================================================
 def get_available_skills() -> Dict[str, List[str]]:
     """Return skills grouped by category, filtered by platform and disabled state.
@@ -123,14 +112,14 @@ def get_available_skills() -> Dict[str, List[str]]:
 _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 
 # 当我们知道有更新但无法统计提交数时返回的标记值
-# (例如 nix 构建的 hermes — 没有本地 git 历史记录可用来计数)。
+# (例如 nix 构建的 hermes — 没有本地 git 历史记录来统计差异)。
 UPDATE_AVAILABLE_NO_COUNT = -1
 
 _UPSTREAM_REPO_URL = "https://github.com/NousResearch/hermes-agent.git"
 
 
 def _check_via_rev(local_rev: str) -> Optional[int]:
-    """通过 ls-remote 将嵌入的 git 修订版本与上游 main 分支进行比较。
+    """通过 ls-remote 比较嵌入的 git 修订版本与上游 main 分支。
 
     如果是最新则返回 0，如果落后则返回 ``UPDATE_AVAILABLE_NO_COUNT``，
     失败时返回 ``None``。
@@ -151,7 +140,7 @@ def _check_via_rev(local_rev: str) -> Optional[int]:
 
 
 def _check_via_local_git(repo_dir: Path) -> Optional[int]:
-    """统计本地检出仓库中落后于 origin/main 的提交数量。"""
+    """统计本地检出仓库落后于 origin/main 的提交数。"""
     try:
         subprocess.run(
             ["git", "fetch", "origin", "--quiet"],
@@ -217,15 +206,20 @@ def check_via_pypi() -> Optional[int]:
 def check_for_updates() -> Optional[int]:
     """检查是否有 Hermes 更新可用。
 
-    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 将其与上游 main 分支比较。否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数。
+    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 与上游 main 分支比较。
+    否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数量。
 
-    返回落后提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
+    返回落后的提交数量，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
+    如果是最新版本则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
     """
     hermes_home = get_hermes_home()
     cache_file = hermes_home / ".update_check"
     embedded_rev = os.environ.get("HERMES_REVISION") or None
 
-    # 读取缓存 — 如果自上次检查以来嵌入的修订版本已更改，则使缓存失效
+    # 读取缓存 — 如果自上次检查以来嵌入的修订版本或已安装版本发生了变化，则使缓存失效。
+    # 版本保护对于 pip 安装很重要：`check_via_pypi()` 与 VERSION 比较，所以 `pip install --upgrade`
+    # 会改变 VERSION 但保持修订版本不变（两者均为 None），如果没有这个保护，
+    # 过时的“落后”计数将在升级后存活长达 6 小时。参见 #34491。
     now = time.time()
     try:
         if cache_file.exists():
@@ -233,6 +227,7 @@ def check_for_updates() -> Optional[int]:
             if (
                 now - cached.get("ts", 0) < _UPDATE_CHECK_CACHE_SECONDS
                 and cached.get("rev") == embedded_rev
+                and cached.get("ver") == VERSION
             ):
                 return cached.get("behind")
     except Exception:
@@ -242,8 +237,8 @@ def check_for_updates() -> Optional[int]:
         behind = _check_via_rev(embedded_rev)
     else:
         # 优先使用运行代码的位置而非配置文件作用域的路径。
-        # $HERMES_HOME/hermes-agent/ 可能是来自 --clone-all 的陈旧副本；
-        # Path(__file__) 始终解析到实际安装的检出位置。
+        # $HERMES_HOME/hermes-agent/ 可能是来自 --clone-all 的过时副本；
+        # Path(__file__) 始终解析到实际安装的仓库。
         repo_dir = Path(__file__).parent.parent.resolve()
         if not (repo_dir / ".git").exists():
             repo_dir = hermes_home / "hermes-agent"
@@ -253,7 +248,9 @@ def check_for_updates() -> Optional[int]:
             behind = _check_via_local_git(repo_dir)
 
     try:
-        cache_file.write_text(json.dumps({"ts": now, "behind": behind, "rev": embedded_rev}))
+        cache_file.write_text(
+            json.dumps({"ts": now, "behind": behind, "rev": embedded_rev, "ver": VERSION})
+        )
     except Exception:
         pass
 
@@ -261,20 +258,18 @@ def check_for_updates() -> Optional[int]:
 
 
 def _resolve_repo_dir() -> Optional[Path]:
-    """返回活跃的 Hermes git 检出目录，如果这不是 git 安装则返回 None。
+    """返回活跃的 Hermes git 仓库，如果这不是 git 安装则返回 None。
 
     优先使用运行代码的位置而非配置文件作用域的路径，
-    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带过来的陈旧副本。
+    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带的过时副本。
     """
     repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
         hermes_home = get_hermes_home()
         repo_dir = hermes_home / "hermes-agent"
     return repo_dir if (repo_dir / ".git").exists() else None
-
-
 def _git_short_hash(repo_dir: Path, rev: str) -> Optional[str]:
-    """将 git 修订版本解析为 8 字符短哈希。"""
+    """Resolve a git revision to an 8-character short hash."""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--short=8", rev],
@@ -289,6 +284,8 @@ def _git_short_hash(repo_dir: Path, rev: str) -> Optional[str]:
         return None
     value = (result.stdout or "").strip()
     return value or None
+
+
 def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
     """Return upstream/local git hashes for the startup banner.
 
@@ -531,7 +528,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     left_lines.append(f"[{accent}]{model_short}[/]{ctx_str} [dim {dim}]·[/] [dim {dim}]Nous Research[/]")
 
     if os.getenv("HERMES_YOLO_MODE"):
-        left_lines.append(f"[bold red]⚠ YOLO 模式[/] [dim {dim}]— 所有确认提示已绕过[/]")
+        left_lines.append(f"[bold red]⚠ YOLO 模式[/] [dim {dim}]— 已绕过所有审批提示[/]")
     left_lines.append(f"[dim {dim}]{cwd}[/]")
     if session_id:
         left_lines.append(f"[dim {session_color}]会话: {session_id}[/]")
@@ -689,6 +686,21 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
                 right_lines.append(line)
     except Exception:
         pass  # Never break the banner over an update check
+
+    # Pip-install warning — `pip install hermes-agent` is not the supported
+    # install path (it exists on PyPI for internal/CI reasons, not end users).
+    # Such installs miss the git checkout + installer-managed deps, so updates,
+    # self-update, and issue triage don't behave correctly. Warn, don't block.
+    try:
+        from hermes_cli.config import detect_install_method
+        if detect_install_method() == "pip":
+            right_lines.append(
+                "[bold yellow]⚠ pip 安装方式不受官方支持[/]"
+                "[dim yellow] — 仅用于内部/CI 目的，非用户安装；"
+                "可能出现不稳定问题且无法获得技术支持[/]"
+            )
+    except Exception:
+        pass  # Never break the banner over the install-method check
 
     right_content = "\n".join(right_lines)
     layout_table.add_row(left_content, right_content)

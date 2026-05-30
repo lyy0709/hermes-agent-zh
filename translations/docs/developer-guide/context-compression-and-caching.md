@@ -10,7 +10,7 @@ Hermes Agent 采用双压缩系统和 Anthropic 提示词缓存，以在长对�
 
 ```yaml
 context:
-  engine: "compressor"    # 默认 — 内置有损摘要
+  engine: "compressor"    # 默认值 — 内置有损摘要
   engine: "lcm"           # 示例 — 提供无损上下文的插件
 ```
 
@@ -37,27 +37,27 @@ Hermes 有两个独立的压缩层，它们独立运行：
 
 ```
                      ┌──────────────────────────┐
-  传入消息           │   消息网关会话清理        │  在上下文达到 85% 时触发
-  ─────────────────► │   (Agent 处理前，粗略估计) │  大型会话的安全网
+  传入消息           │   消息网关会话清理        │  在上下文 85% 时触发
+  ─────────────────► │   (Agent 前，粗略估计)    │  大型会话的安全网
                      └─────────────┬────────────┘
                                    │
                                    ▼
                      ┌──────────────────────────┐
-                     │   Agent ContextCompressor │  在上下文达到 50% 时触发 (默认)
+                     │   Agent ContextCompressor │  在上下文 50% 时触发（默认）
                      │   (循环内，真实 Token)     │  常规上下文管理
                      └──────────────────────────┘
 ```
 
 ### 1. 消息网关会话清理 (85% 阈值)
 
-位于 `gateway/run.py` (搜索 `Session hygiene: auto-compress`)。这是一个**安全网**，在 Agent 处理消息之前运行。它防止会话在轮次之间变得过大时（例如，Telegram/Discord 中过夜累积）导致 API 失败。
+位于 `gateway/run.py` (搜索 `Session hygiene: auto-compress`)。这是一个**安全网**，在 Agent 处理消息之前运行。它防止会话在轮次之间变得过大时（例如，Telegram/Discord 中隔夜累积）导致 API 失败。
 
 - **阈值**：固定为模型上下文长度的 85%
 - **Token 来源**：优先使用上一轮 API 报告的实际 Token；回退到基于字符的粗略估计 (`estimate_messages_tokens_rough`)
 - **触发条件**：仅当 `len(history) >= 4` 且压缩启用时
 - **目的**：捕获逃脱 Agent 自身压缩器的会话
 
-消息网关清理阈值有意设置得比 Agent 的压缩器高。将其设置为 50%（与 Agent 相同）会导致在长消息网关会话中每一轮都过早压缩。
+消息网关清理阈值有意设置得比 Agent 的压缩器更高。将其设置为 50%（与 Agent 相同）会导致在长消息网关会话中每一轮都过早压缩。
 
 ### 2. Agent ContextCompressor (50% 阈值，可配置)
 
@@ -77,7 +77,7 @@ compression:
 # 摘要模型/提供商在 auxiliary 下配置：
 auxiliary:
   compression:
-    model: null              # 覆盖用于摘要的模型 (默认: 自动检测)
+    model: null              # 覆盖摘要模型 (默认: 自动检测)
     provider: auto           # 提供商: "auto", "openrouter", "nous", "main" 等
     base_url: null           # 自定义 OpenAI 兼容端点
 ```
@@ -87,11 +87,11 @@ auxiliary:
 | 参数 | 默认值 | 范围 | 描述 |
 |-----------|---------|-------|-------------|
 | `threshold` | `0.50` | 0.0-1.0 | 当提示词 Token ≥ `threshold × context_length` 时触发压缩 |
-| `target_ratio` | `0.20` | 0.10-0.80 | 控制尾部保护的 Token 预算：`threshold_tokens × target_ratio` |
+| `target_ratio` | `0.20` | 0.10-0.80 | 控制尾部保护 Token 预算：`threshold_tokens × target_ratio` |
 | `protect_last_n` | `20` | ≥1 | 始终保留的最少最近消息数 |
 | `protect_first_n` | `3` | (硬编码) | 系统提示词 + 首次交换始终保留 |
 
-### 计算值 (对于默认设置下的 200K 上下文模型)
+### 计算值（对于默认设置下的 200K 上下文模型）
 
 ```
 context_length       = 200,000
@@ -100,11 +100,15 @@ tail_token_budget    = 100,000 × 0.20 = 20,000
 max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 ```
 
+:::note 阈值源自 MAIN 模型的上下文窗口
+`threshold_tokens` 始终是 `threshold × context_length`，其中 `context_length` 是**主 Agent 模型**的上下文窗口 — 绝不是辅助/摘要模型的。在默认 `0.50` 的 262,144 Token 模型上，阈值是 `262,144 × 0.50 = 131,072`。这个数字接近常见的 "128K 上下文" 是百分比的巧合，而不是辅助模型窗口触发的标志。辅助模型的上下文窗口是另一个问题 — 请参阅下面的 "摘要模型上下文长度" 警告，了解它如何影响是否生成摘要，而不是何时触发压缩。
+:::
+
 ## 压缩算法
 
 `ContextCompressor.compress()` 方法遵循 4 阶段算法：
 
-### 阶段 1：修剪旧工具结果 (廉价，无需 LLM 调用)
+### 阶段 1：修剪旧工具结果（廉价，无需 LLM 调用）
 
 受保护尾部之外的旧工具结果（>200 字符）被替换为：
 ```
@@ -112,31 +116,30 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 ```
 
 这是一个廉价的预处理，可以从冗长的工具输出（文件内容、终端输出、搜索结果）中节省大量 Token。
-
-### 阶段 2：确定边界
+### 第二阶段：确定边界
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  消息列表                                                   │
 │                                                             │
-│  [0..2]  ← protect_first_n (系统提示词 + 首次交换)          │
-│  [3..N]  ← 中间轮次 → 被摘要                                │
-│  [N..end] ← 尾部 (基于 Token 预算 OR protect_last_n)        │
+│  [0..2]  ← protect_first_n (系统提示词 + 首次交互)          │
+│  [3..N]  ← 中间轮次 → 被总结                                 │
+│  [N..end] ← 尾部 (根据 Token 预算 或 protect_last_n)        │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-尾部保护是**基于 Token 预算的**：从末尾向前遍历，累积 Token 直到预算耗尽。如果预算保护的消息更少，则回退到固定的 `protect_last_n` 计数。
-边界对齐以避免拆分工具调用/工具结果组。
-`_align_boundary_backward()` 方法会遍历连续的工具结果，以找到父助理消息，从而保持组的完整性。
+尾部保护基于 **Token 预算**：从末尾向前遍历，累积 Token 直到预算耗尽。如果预算保护的轮次少于固定值 `protect_last_n`，则回退到固定计数。
 
-### 阶段 3：生成结构化摘要
+边界会进行对齐，以避免分割 tool_call/tool_result 组。`_align_boundary_backward()` 方法会跳过连续的工具结果，找到父级助手消息，从而保持组的完整性。
 
-:::warning 摘要模型的上下文长度
-摘要模型的上下文窗口**必须至少与**主 Agent 模型的一样大。整个中间部分会在一次 `call_llm(task="compression")` 调用中发送给摘要模型。如果摘要模型的上下文较小，API 会返回上下文长度错误——`_generate_summary()` 会捕获该错误，记录警告并返回 `None`。然后压缩器会**在没有摘要的情况下**丢弃中间轮次，悄无声息地丢失会话上下文。这是导致压缩质量下降的最常见原因。
+### 第三阶段：生成结构化总结
+
+:::warning 总结模型的上下文长度
+总结模型的上下文窗口**必须至少与**主 Agent 模型的上下文窗口一样大。整个中间部分会在一次 `call_llm(task="compression")` 调用中发送给总结模型。如果总结模型的上下文较小，API 会返回上下文长度错误 —— `_generate_summary()` 会捕获该错误，记录警告并返回 `None`。然后压缩器会**在没有总结的情况下**丢弃中间轮次，悄无声息地丢失会话上下文。这是压缩质量下降的最常见原因。
 :::
 
-中间轮次使用辅助 LLM 和结构化模板进行摘要：
+中间轮次使用辅助 LLM 和结构化模板进行总结：
 
 ```
 ## 目标
@@ -147,7 +150,7 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 
 ## 进展
 ### 已完成
-[已完成的工作——具体文件路径、运行的命令、结果]
+[已完成的工作 —— 具体的文件路径、运行的命令、结果]
 ### 进行中
 [当前正在进行的工作]
 ### 受阻
@@ -157,145 +160,142 @@ max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 [重要的技术决策及其原因]
 
 ## 相关文件
-[读取、修改或创建的文件——每个文件附简要说明]
+[读取、修改或创建的文件 —— 每个文件附简要说明]
 
 ## 后续步骤
 [接下来需要做什么]
 
 ## 关键上下文
-[具体的值、错误消息、配置详情]
+[具体的值、错误信息、配置详情]
 ```
 
-摘要预算根据压缩内容量进行缩放：
+总结预算根据被压缩内容的量进行缩放：
 - 公式：`content_tokens × 0.20`（`_SUMMARY_RATIO` 常量）
 - 最小值：2,000 Token
 - 最大值：`min(context_length × 0.05, 12,000)` Token
 
-### 阶段 4：组装压缩后的消息
+### 第四阶段：组装压缩后的消息
 
-压缩后的消息列表为：
-1. 头部消息（首次压缩时会在系统提示词后附加说明）
-2. 摘要消息（选择角色以避免连续相同角色违规）
-3. 尾部消息（未修改）
+压缩后的消息列表是：
+1.  头部消息（首次压缩时会在系统提示词后附加说明）
+2.  总结消息（选择角色以避免连续相同角色违规）
+3.  尾部消息（未修改）
 
-孤立的工具调用/工具结果对由 `_sanitize_tool_pairs()` 清理：
+孤立的 tool_call/tool_result 对由 `_sanitize_tool_pairs()` 清理：
 - 引用已移除调用的工具结果 → 被移除
-- 结果被移除的工具调用 → 注入存根结果
+- 其结果被移除的工具调用 → 注入存根结果
 
 ### 迭代式重新压缩
 
-在后续压缩中，之前的摘要会连同**更新**它的指令（而非从头开始摘要）一起传递给 LLM。这可以在多次压缩中保留信息——项目从“进行中”移动到“已完成”，添加新的进展，并移除过时的信息。
+在后续压缩中，之前的总结会连同**更新**它的指令一起传递给 LLM，而不是从头开始总结。这可以在多次压缩中保留信息 —— 项目从“进行中”移动到“已完成”，添加新的进展，并移除过时的信息。
 
-压缩器实例上的 `_previous_summary` 字段为此目的存储上一次的摘要文本。
+压缩器实例上的 `_previous_summary` 字段用于存储上一次的总结文本。
 
 ## 压缩前后示例
 
 ### 压缩前（45 条消息，约 95K Token）
 
 ```
-[0] system:    "You are a helpful assistant..." (系统提示词)
-[1] user:      "Help me set up a FastAPI project"
+[0] system:    "你是一个乐于助人的助手..." (系统提示词)
+[1] user:      "帮我设置一个 FastAPI 项目"
 [2] assistant: <tool_call> terminal: mkdir project </tool_call>
-[3] tool:      "directory created"
+[3] tool:      "目录已创建"
 [4] assistant: <tool_call> write_file: main.py </tool_call>
-[5] tool:      "file written (2.3KB)"
+[5] tool:      "文件已写入 (2.3KB)"
     ... 30 多轮文件编辑、测试、调试 ...
 [38] assistant: <tool_call> terminal: pytest </tool_call>
-[39] tool:      "8 passed, 2 failed\n..."  (5KB 输出)
-[40] user:      "Fix the failing tests"
+[39] tool:      "8 通过，2 失败\n..."  (5KB 输出)
+[40] user:      "修复失败的测试"
 [41] assistant: <tool_call> read_file: tests/test_api.py </tool_call>
 [42] tool:      "import pytest\n..."  (3KB)
-[43] assistant: "I see the issue with the test fixtures..."
-[44] user:      "Great, also add error handling"
+[43] assistant: "我看到了测试夹具的问题..."
+[44] user:      "很好，同时添加错误处理"
 ```
 
 ### 压缩后（25 条消息，约 45K Token）
 
 ```
-[0] system:    "You are a helpful assistant...
-               [Note: Some earlier conversation turns have been compacted...]"
-[1] user:      "Help me set up a FastAPI project"
-[2] assistant: "[CONTEXT COMPACTION] Earlier turns were compacted...
+[0] system:    "你是一个乐于助人的助手...
+               [注意：部分早期会话轮次已被压缩...]"
+[1] user:      "帮我设置一个 FastAPI 项目"
+[2] assistant: "[上下文压缩] 早期轮次已被压缩...
 
                ## 目标
-               Set up a FastAPI project with tests and error handling
+               设置一个带有测试和错误处理的 FastAPI 项目
 
                ## 进展
                ### 已完成
-               - Created project structure: main.py, tests/, requirements.txt
-               - Implemented 5 API endpoints in main.py
-               - Wrote 10 test cases in tests/test_api.py
-               - 8/10 tests passing
+               - 创建了项目结构：main.py, tests/, requirements.txt
+               - 在 main.py 中实现了 5 个 API 端点
+               - 在 tests/test_api.py 中编写了 10 个测试用例
+               - 10 个测试中有 8 个通过
 
                ### 进行中
-               - Fixing 2 failing tests (test_create_user, test_delete_user)
+               - 修复 2 个失败的测试 (test_create_user, test_delete_user)
 
                ## 相关文件
-               - main.py — FastAPI app with 5 endpoints
-               - tests/test_api.py — 10 test cases
+               - main.py — 包含 5 个端点的 FastAPI 应用
+               - tests/test_api.py — 10 个测试用例
                - requirements.txt — fastapi, pytest, httpx
 
                ## 后续步骤
-               - Fix failing test fixtures
-               - Add error handling"
-[3] user:      "Fix the failing tests"
+               - 修复失败的测试夹具
+               - 添加错误处理"
+[3] user:      "修复失败的测试"
 [4] assistant: <tool_call> read_file: tests/test_api.py </tool_call>
 [5] tool:      "import pytest\n..."
-[6] assistant: "I see the issue with the test fixtures..."
-[7] user:      "Great, also add error handling"
+[6] assistant: "我看到了测试夹具的问题..."
+[7] user:      "很好，同时添加错误处理"
 ```
 
 ## 提示词缓存（Anthropic）
 
 来源：`agent/prompt_caching.py`
 
-通过缓存会话前缀，在多轮对话中减少约 75% 的输入 Token 成本。使用 Anthropic 的 `cache_control` 断点。
+通过缓存会话前缀，在多轮对话中将输入 Token 成本降低约 75%。使用 Anthropic 的 `cache_control` 断点。
 
 ### 策略：system_and_3
 
 Anthropic 允许每个请求最多 4 个 `cache_control` 断点。Hermes 使用 "system_and_3" 策略：
 
 ```
-断点 1: 系统提示词           (所有轮次中稳定)
+断点 1: 系统提示词           (在所有轮次中稳定)
 断点 2: 倒数第 3 条非系统消息  ─┐
 断点 3: 倒数第 2 条非系统消息   ├─ 滚动窗口
 断点 4: 最后一条非系统消息      ─┘
 ```
-
 ### 工作原理
 
-`apply_anthropic_cache_control()` 深度复制消息并注入 `cache_control` 标记：
+`apply_anthropic_cache_control()` 会深度复制消息并注入 `cache_control` 标记：
 
 ```python
 # 缓存标记格式
 marker = {"type": "ephemeral"}
-# 或者对于 1 小时 TTL：
+# 或者设置 1 小时 TTL：
 marker = {"type": "ephemeral", "ttl": "1h"}
 ```
 
-标记根据内容类型以不同方式应用：
+标记的注入方式根据内容类型而不同：
 
-| 内容类型 | 标记放置位置 |
+| 内容类型 | 标记注入位置 |
 |-------------|-------------------|
 | 字符串内容 | 转换为 `[{"type": "text", "text": ..., "cache_control": ...}]` |
 | 列表内容 | 添加到最后一个元素的字典中 |
 | 无/空内容 | 添加为 `msg["cache_control"]` |
 | 工具消息 | 添加为 `msg["cache_control"]`（仅限原生 Anthropic） |
+
 ### 缓存感知设计模式
 
-1. **稳定的系统提示词**：系统提示词是断点 1，并在所有轮次中缓存。避免在对话中途修改它（压缩仅在第一次压缩时附加一个注释）。
-
-2. **消息顺序很重要**：缓存命中需要前缀匹配。在中间添加或删除消息会使之后的所有内容缓存失效。
-
-3. **压缩缓存交互**：压缩后，压缩区域的缓存会失效，但系统提示词缓存会保留。滚动的 3 条消息窗口会在 1-2 轮内重新建立缓存。
-
-4. **TTL 选择**：默认是 `5m`（5 分钟）。对于用户在各轮次之间休息的长时间运行的会话，使用 `1h`。
+1.  **稳定的系统提示词**：系统提示词是断点 1，并在所有轮次中被缓存。避免在对话中途修改它（压缩仅在第一次压缩时附加一个注释）。
+2.  **消息顺序很重要**：缓存命中需要前缀匹配。在中间添加或删除消息会使之后的所有内容缓存失效。
+3.  **压缩缓存交互**：压缩后，被压缩区域的缓存会失效，但系统提示词的缓存会保留。滚动的 3 条消息窗口会在 1-2 轮内重新建立缓存。
+4.  **TTL 选择**：默认是 `5m`（5 分钟）。对于用户在各轮次之间休息的长时间运行的会话，使用 `1h`。
 
 ### 启用提示词缓存
 
 提示词缓存在以下情况下自动启用：
-- 模型是 Anthropic Claude 模型（通过模型名称检测）
-- 提供商支持 `cache_control`（原生的 Anthropic API 或 OpenRouter）
+*   模型是 Anthropic Claude 模型（通过模型名称检测）
+*   提供商支持 `cache_control`（原生 Anthropic API 或 OpenRouter）
 
 ```yaml
 # config.yaml — TTL 是可配置的（必须是 "5m" 或 "1h"）
@@ -303,11 +303,11 @@ prompt_caching:
   cache_ttl: "5m"
 ```
 
-CLI 在启动时显示缓存状态：
+CLI 在启动时会显示缓存状态：
 ```
-💾 Prompt caching: ENABLED (Claude via OpenRouter, 5m TTL)
+💾 提示词缓存：已启用（通过 OpenRouter 的 Claude，5m TTL）
 ```
 
 ## 上下文压力警告
 
-中间上下文压力警告已被移除（参见 `run_agent.py` 中的迭代预算块，其中注明："没有中间压力警告——它们导致模型过早'放弃'复杂任务"）。当提示词 Token 数达到配置的 `compression.threshold`（默认为 50%）时，压缩会触发，没有预先的警告步骤；消息网关会话清理作为次要安全网，在模型上下文窗口的 85% 时触发。
+中间上下文压力警告已被移除（参见 `run_agent.py` 中的迭代预算块，其中注明：“没有中间压力警告——它们会导致模型在复杂任务上过早‘放弃’”）。当提示词 Token 数达到配置的 `compression.threshold`（默认为 50%）时，压缩会触发，没有预先的警告步骤；消息网关会话清理作为二级安全网在模型上下文窗口的 85% 处触发。

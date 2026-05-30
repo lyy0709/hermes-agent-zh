@@ -9,10 +9,10 @@ sidebar_position: 9
 
 凭证池允许您为同一提供商注册多个 API 密钥或 OAuth 令牌。当一个密钥达到速率限制或计费配额时，Hermes 会自动轮换到下一个健康的密钥——无需切换提供商即可保持会话活跃。
 
-这与[备用提供商](./fallback-providers.md)不同，后者会完全切换到*不同的*提供商。凭证池是同一提供商内的轮换；备用提供商是跨提供商的故障转移。系统会先尝试凭证池——如果池中所有密钥都已耗尽，*然后*才会激活备用提供商。
+这与[回退提供商](./fallback-providers.md)不同，后者会完全切换到*不同的*提供商。凭证池是同一提供商内的轮换；回退提供商是跨提供商的故障转移。系统会首先尝试凭证池——如果池中所有密钥都已耗尽，*然后*才会激活回退提供商。
 
 :::tip
-凭证池主要适用于 API 密钥提供商（OpenRouter、Anthropic）。单个 [Nous Portal](/integrations/nous-portal) OAuth 可覆盖 300 多个模型，因此大多数 Portal 用户不需要凭证池。
+凭证池主要适用于 API 密钥提供商（OpenRouter、Anthropic）。单个 [Nous Portal](/integrations/nous-portal) OAuth 覆盖 300 多个模型，因此大多数 Portal 用户不需要使用凭证池。
 :::
 
 ## 工作原理
@@ -22,20 +22,23 @@ sidebar_position: 9
   → 从池中选取密钥（round_robin / least_used / fill_first / random）
   → 发送给提供商
   → 429 速率限制？
-      → 重试同一密钥一次（瞬时故障）
-      → 第二次 429 → 轮换到池中下一个密钥
-      → 所有密钥耗尽 → fallback_model（不同提供商）
+      → 达到计划/使用限制（例如 ChatGPT/Codex 的"usage limit reached"）？
+          → 立即轮换到池中的下一个密钥（不重试——重试不会清除上限）
+      → 通用/临时性 429？
+          → 使用相同密钥重试一次（临时性波动）
+          → 第二次 429 → 轮换到池中的下一个密钥
+      → 所有密钥耗尽 → fallback_model（不同的提供商）
   → 402 计费错误？
-      → 立即轮换到池中下一个密钥（24 小时冷却）
-  → 401 身份验证过期？
+      → 立即轮换到池中的下一个密钥（24 小时冷却）
+  → 401 认证过期？
       → 尝试刷新令牌（OAuth）
-      → 刷新失败 → 轮换到池中下一个密钥
+      → 刷新失败 → 轮换到池中的下一个密钥
   → 成功 → 正常继续
 ```
 
 ## 快速开始
 
-如果您已在 `.env` 中设置了 API 密钥，Hermes 会自动将其发现为单密钥池。要受益于池化，请添加更多密钥：
+如果您已经在 `.env` 中设置了 API 密钥，Hermes 会自动将其发现为单密钥池。要受益于池化，请添加更多密钥：
 
 ```bash
 # 添加第二个 OpenRouter 密钥
@@ -93,7 +96,7 @@ hermes auth
 ```
 anthropic 同时支持 API 密钥和 OAuth 登录。
   1. API 密钥（从提供商仪表板粘贴密钥）
-  2. OAuth 登录（通过浏览器进行身份验证）
+  2. OAuth 登录（通过浏览器认证）
 输入 [1/2]：
 ```
 
@@ -112,7 +115,7 @@ anthropic 同时支持 API 密钥和 OAuth 登录。
 
 ## 轮换策略
 
-通过 `hermes auth` → "设置轮换策略" 或在 `config.yaml` 中配置：
+通过 `hermes auth` → "Set rotation strategy" 或在 `config.yaml` 中配置：
 
 ```yaml
 credential_pool_strategies:
@@ -122,7 +125,7 @@ credential_pool_strategies:
 
 | 策略 | 行为 |
 |----------|----------|
-| `fill_first`（默认） | 使用第一个健康密钥直到耗尽，然后移动到下一个 |
+| `fill_first` (默认) | 使用第一个健康密钥直到耗尽，然后移动到下一个 |
 | `round_robin` | 均匀循环使用密钥，每次选择后轮换 |
 | `least_used` | 始终选择请求计数最低的密钥 |
 | `random` | 在健康密钥中随机选择 |
@@ -133,14 +136,14 @@ credential_pool_strategies:
 
 | 错误 | 行为 | 冷却时间 |
 |-------|----------|----------|
-| **429 速率限制** | 重试同一密钥一次（瞬时）。连续第二次 429 则轮换到下一个密钥 | 1 小时 |
+| **429 速率限制** | 使用相同密钥重试一次（临时性）。连续第二次 429 则轮换到下一个密钥 | 1 小时 |
 | **402 计费/配额** | 立即轮换到下一个密钥 | 24 小时 |
-| **401 身份验证过期** | 首先尝试刷新 OAuth 令牌。仅在刷新失败时轮换 | — |
+| **401 认证过期** | 首先尝试刷新 OAuth 令牌。仅在刷新失败时轮换 | — |
 | **所有密钥耗尽** | 如果配置了 `fallback_model`，则回退到该模型 | — |
 
-`has_retried_429` 标志在每次成功的 API 调用后重置，因此单个瞬时 429 不会触发轮换。
+`has_retried_429` 标志在每次成功的 API 调用后重置，因此单个临时性 429 不会触发轮换。
 
-## 自定义端点凭证池
+## 自定义端点池
 
 自定义 OpenAI 兼容端点（Together.ai、RunPod、本地服务器）拥有自己的凭证池，以 `config.yaml` 中 `custom_providers` 的端点名称为键。
 
@@ -157,7 +160,7 @@ hermes auth list
 hermes auth add Together.ai --api-key sk-together-second-key
 ```
 
-自定义端点凭证池存储在 `auth.json` 的 `credential_pool` 下，带有 `custom:` 前缀：
+自定义端点池存储在 `auth.json` 的 `credential_pool` 下，带有 `custom:` 前缀：
 
 ```json
 {
@@ -175,25 +178,25 @@ Hermes 自动从多个来源发现凭证，并在启动时填充凭证池：
 | 来源 | 示例 | 自动填充？ |
 |--------|---------|-------------|
 | 环境变量 | `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY` | 是 |
-| OAuth 令牌（auth.json） | Codex 设备代码，Nous 设备代码 | 是 |
-| Claude Code 凭证 | `~/.claude/.credentials.json` | 是（Anthropic） |
-| Hermes PKCE OAuth | `~/.hermes/auth.json` | 是（Anthropic） |
-| 自定义端点配置 | `config.yaml` 中的 `model.api_key` | 是（自定义端点） |
+| OAuth 令牌 (auth.json) | Codex 设备代码, Nous 设备代码 | 是 |
+| Claude Code 凭证 | `~/.claude/.credentials.json` | 是 (Anthropic) |
+| Hermes PKCE OAuth | `~/.hermes/auth.json` | 是 (Anthropic) |
+| 自定义端点配置 | `config.yaml` 中的 `model.api_key` | 是 (自定义端点) |
 | 手动条目 | 通过 `hermes auth add` 添加 | 持久化在 auth.json 中 |
 
-自动填充的条目在每次加载凭证池时更新——如果您移除了环境变量，其对应的池条目会自动被清理。手动条目（通过 `hermes auth add` 添加）永远不会被自动清理。
+自动填充的条目在每次加载凭证池时更新——如果您移除了环境变量，其对应的池条目会自动被修剪。手动条目（通过 `hermes auth add` 添加）永远不会被自动修剪。
 
-借用的运行时密钥（例如环境变量、Bitwarden/Vault/keyring/systemd 引用和自定义配置值）仅在 `auth.json` 边界处存储引用。Hermes 可以在内存中使用解析后的值进行当前运行，但仅持久化元数据，例如来源引用、标签、状态、请求计数器和不可逆的指纹。手动条目和 Hermes 拥有的 OAuth/设备代码状态则保留其刷新所需的持久化令牌。
+借用的运行时密钥（例如环境变量、Bitwarden/Vault/keyring/systemd 引用和自定义配置值）仅在 `auth.json` 边界处存储引用。Hermes 可以在当前运行的内存中使用解析后的值，但仅持久化元数据，例如来源引用、标签、状态、请求计数器和不可逆的指纹。手动条目和 Hermes 拥有的 OAuth/设备代码状态则保留其刷新所需的持久化令牌。
 
 ## 委派与子 Agent 共享
 
 当 Agent 通过 `delegate_task` 生成子 Agent 时，父 Agent 的凭证池会自动与子 Agent 共享：
 
-- **同一提供商** — 子 Agent 接收父 Agent 的完整凭证池，支持在速率限制时进行密钥轮换
+- **同一提供商** — 子 Agent 接收父 Agent 的完整凭证池，能够在达到速率限制时进行密钥轮换
 - **不同提供商** — 子 Agent 加载该提供商自己的凭证池（如果已配置）
 - **未配置凭证池** — 子 Agent 回退到继承的单个 API 密钥
 
-这意味着子 Agent 无需额外配置即可获得与父 Agent 相同的速率限制恢复能力。按任务凭证租赁确保子 Agent 在并发轮换密钥时不会相互冲突。
+这意味着子 Agent 无需额外配置即可受益于与父 Agent 相同的速率限制恢复能力。按任务凭证租赁确保子 Agent 在并发轮换密钥时不会相互冲突。
 
 ## 线程安全
 
@@ -247,7 +250,7 @@ Hermes 自动从多个来源发现凭证，并在启动时填充凭证池：
 
 上面的 OpenRouter 条目是从外部来源借用的，因此原始密钥不存储在 `auth.json` 中。手动添加的 Anthropic 条目是特意添加到 Hermes 的凭证存储中的，因此其令牌保持持久化。
 
-轮换策略存储在 `config.yaml` 中（而非 `auth.json`）：
+轮换策略存储在 `config.yaml` 中（不在 `auth.json` 中）：
 
 ```yaml
 credential_pool_strategies:

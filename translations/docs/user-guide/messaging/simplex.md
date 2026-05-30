@@ -15,7 +15,7 @@
 
 ```bash
 # Linux / macOS 二进制文件
-curl -L https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-chat-ubuntu-22_04-x86-64 -o simplex-chat
+curl -L https://github.com/simplex-chat/simplex-chat/releases/latest/download/simplex-chat-ubuntu-22_04-x86_64 -o simplex-chat
 chmod +x simplex-chat
 ```
 
@@ -66,9 +66,9 @@ SIMPLEX_HOME_CHANNEL=<contact-id>
 默认情况下 **所有联系人都被拒绝**。您必须：
 
 1. 将 `SIMPLEX_ALLOWED_USERS` 设置为逗号分隔的联系人 ID 列表，或者
-2. 使用 **私信配对** —— 向机器人发送任何消息，它将回复一个配对码。通过 `hermes gateway pair` 输入该代码。
+2. 使用 **私信配对** —— 向机器人发送任何消息，它将回复一个配对码。通过 `hermes gateway pair` 输入该配对码。
 
-## 将 SimpleX 与定时任务结合使用
+## 将 SimpleX 与定时任务一起使用
 
 ```python
 cronjob(
@@ -93,8 +93,8 @@ send_message(target="simplex:<contact-id>", message="Done!")
 
 ## 故障排除
 
-**"无法连接到守护进程"** —— 确保 `simplex-chat -p 5225` 正在运行，并且端口与 `SIMPLEX_WS_URL` 匹配。
+**“无法连接到守护进程”** —— 确保 `simplex-chat -p 5225` 正在运行，并且端口与 `SIMPLEX_WS_URL` 匹配。
 
-**"websockets 未安装"** —— 运行 `pip install websockets`。
+**“未安装 websockets”** —— 运行 `pip install websockets`。
 
 **未收到消息** —— 检查联系人的 ID 是否在 `SIMPLEX_ALLOWED_USERS` 中，或通过私信配对批准他们。

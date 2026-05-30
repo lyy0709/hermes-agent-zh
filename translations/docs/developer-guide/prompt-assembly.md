@@ -26,20 +26,20 @@ Hermes 有意将以下内容分开：
 
 ## 缓存的系统提示词层
 
-缓存的系统提示词大致按以下顺序组装：
+缓存的系统提示词由三个有序层级组装而成（参见 `agent/system_prompt.py`）：
 
-1.  Agent 身份 — 当可用时，来自 `HERMES_HOME` 的 `SOUL.md`，否则回退到 `prompt_builder.py` 中的 `DEFAULT_AGENT_IDENTITY`
-2.  工具感知行为指导
-3.  Honcho 静态块（激活时）
-4.  可选的系统消息
-5.  冻结的 MEMORY 快照
-6.  冻结的 USER 配置文件快照
-7.  技能索引
-8.  上下文文件（`AGENTS.md`、`.cursorrules`、`.cursor/rules/*.mdc`）— 当 `SOUL.md` 已在步骤 1 中作为身份加载时，**不**包含在此处
-9.  时间戳 / 可选的会话 ID
-10. 平台提示
+1.  **稳定层** — 身份（`SOUL.md` 或回退内容）、工具/模型指导、技能提示词、环境提示、平台提示
+2.  **上下文层** — 调用者提供的 `system_message` 加上项目上下文文件（`.hermes.md` / `AGENTS.md` / `CLAUDE.md` / `.cursorrules`）
+3.  **易变层** — 内置记忆快照（`MEMORY.md`）、用户资料快照（`USER.md`）、外部记忆提供程序块、时间戳/会话/模型/提供程序行
 
-当设置 `skip_context_files` 时（例如，子 Agent 委派），不会加载 `SOUL.md`，而是使用硬编码的 `DEFAULT_AGENT_IDENTITY`。
+最终的系统提示词按以下顺序连接：`稳定层` → `上下文层` → `易变层`。
+
+这个顺序对于优先级讨论很重要：
+- 技能属于**稳定层**
+- 记忆/资料快照属于**易变层**
+- 两者都仍在缓存的系统提示词中（它们不是作为临时的中途覆盖层注入的）
+
+当设置 `skip_context_files` 时（例如，子 Agent 委派），不会加载 SOUL.md，而是使用硬编码的 `DEFAULT_AGENT_IDENTITY`。
 
 ### 具体示例：组装后的系统提示词
 
@@ -61,11 +61,12 @@ Hermes 有意将以下内容分开：
 在要求用户重复之前，请使用 session_search 来回忆。
 
 # 工具使用强制（仅适用于 GPT/Codex 模型）
-你必须使用你的工具来采取行动 — 不要描述你将要做什么或计划做什么而不实际执行。
+你必须使用你的工具来采取行动——不要描述你将要做什么或计划做什么，
+而不实际执行。
 ...
 
 # 第 3 层：Honcho 静态块（激活时）
-[Honcho 人格/上下文数据]
+[Honcho 个性/上下文数据]
 
 # 第 4 层：可选的系统消息（来自配置或 API）
 [用户配置的系统消息覆盖]
@@ -77,14 +78,14 @@ Hermes 有意将以下内容分开：
 - 正在处理项目 "atlas"，位于 ~/code/atlas
 - 时区：US/Pacific
 
-# 第 6 层：冻结的 USER 配置文件快照
-## 用户配置文件
+# 第 6 层：冻结的 USER 资料快照
+## 用户资料
 - 姓名：Alice
 - GitHub：alice-dev
 
 # 第 7 层：技能索引
 ## 技能（强制）
-在回复之前，请扫描下面的技能。如果有一个技能明确匹配你的任务，
+在回复之前，扫描下面的技能。如果有一个技能明确匹配你的任务，
 请使用 skill_view(name) 加载它并遵循其说明。
 ...
 <available_skills>
@@ -101,19 +102,19 @@ Hermes 有意将以下内容分开：
 
 ## AGENTS.md
 这是 atlas 项目。使用 pytest 进行测试。主要入口点是 src/atlas/main.py。
-在提交之前始终运行 `make lint`。
+提交前始终运行 `make lint`。
 
 # 第 9 层：时间戳 + 会话
 当前时间：2026-03-30T14:30:00-07:00
 会话：abc123
 
 # 第 10 层：平台提示
-你是一个 CLI AI Agent。尽量不要使用 Markdown，而是使用可在终端内呈现的简单文本。
+你是一个 CLI AI Agent。尽量不要使用 markdown，而是使用可在终端内呈现的简单文本。
 ```
 
 ## SOUL.md 如何出现在提示词中
 
-`SOUL.md` 位于 `~/.hermes/SOUL.md`，作为 Agent 的身份 — 系统提示词的第一个部分。`prompt_builder.py` 中的加载逻辑如下：
+`SOUL.md` 位于 `~/.hermes/SOUL.md`，作为 Agent 的身份——系统提示词的第一个部分。`prompt_builder.py` 中的加载逻辑如下：
 
 ```python
 # 来自 agent/prompt_builder.py（简化版）
@@ -127,7 +128,7 @@ def load_soul_md() -> Optional[str]:
     return content
 ```
 
-当 `load_soul_md()` 返回内容时，它会替换硬编码的 `DEFAULT_AGENT_IDENTITY`。然后调用 `build_context_files_prompt()` 函数，并设置 `skip_soul=True`，以防止 `SOUL.md` 出现两次（一次作为身份，一次作为上下文文件）。
+当 `load_soul_md()` 返回内容时，它会替换硬编码的 `DEFAULT_AGENT_IDENTITY`。然后调用 `build_context_files_prompt()` 函数，并设置 `skip_soul=True`，以防止 SOUL.md 出现两次（一次作为身份，一次作为上下文文件）。
 
 如果 `SOUL.md` 不存在，系统将回退到：
 
@@ -135,22 +136,22 @@ def load_soul_md() -> Optional[str]:
 你是 Hermes Agent，一个由 Nous Research 创建的智能 AI 助手。
 你乐于助人、知识渊博且直接。你协助用户完成广泛的任务，
 包括回答问题、编写和编辑代码、分析信息、创造性工作以及通过你的工具执行操作。
-你沟通清晰，在适当时承认不确定性，并优先考虑真正有用而不是冗长，除非另有指示。
-在你的探索和调查中要有针对性和效率。
+你沟通清晰，在适当时承认不确定性，并优先考虑真正有用而非冗长，
+除非下文另有指示。在探索和调查中要有针对性和效率。
 ```
 
 ## 上下文文件如何注入
 
-`build_context_files_prompt()` 使用**优先级系统** — 只加载一种项目上下文类型（第一个匹配项获胜）：
+`build_context_files_prompt()` 使用**优先级系统**——只加载一种项目上下文类型（首次匹配获胜）：
 
 ```python
 # 来自 agent/prompt_builder.py（简化版）
 def build_context_files_prompt(cwd=None, skip_soul=False):
     cwd_path = Path(cwd).resolve()
 
-    # 优先级：第一个匹配项获胜 — 只加载一个项目上下文
+    # 优先级：首次匹配获胜——只加载一个项目上下文
     project_context = (
-        _load_hermes_md(cwd_path)       # 1. .hermes.md / HERMES.md（向上遍历到 git 根目录）
+        _load_hermes_md(cwd_path)       # 1. .hermes.md / HERMES.md（遍历到 git 根目录）
         or _load_agents_md(cwd_path)    # 2. AGENTS.md（仅 CWD）
         or _load_claude_md(cwd_path)    # 3. CLAUDE.md（仅 CWD）
         or _load_cursorrules(cwd_path)  # 4. .cursorrules / .cursor/rules/*.mdc
@@ -181,36 +182,38 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 
 | 优先级 | 文件 | 搜索范围 | 备注 |
 |----------|-------|-------------|-------|
-| 1 | `.hermes.md`、`HERMES.md` | 从 CWD 向上到 git 根目录 | Hermes 原生项目配置 |
+| 1 | `.hermes.md`, `HERMES.md` | 从 CWD 向上到 git 根目录 | Hermes 原生项目配置 |
 | 2 | `AGENTS.md` | 仅 CWD | 常见的 Agent 指令文件 |
 | 3 | `CLAUDE.md` | 仅 CWD | Claude Code 兼容性 |
-| 4 | `.cursorrules`、`.cursor/rules/*.mdc` | 仅 CWD | Cursor 兼容性 |
+| 4 | `.cursorrules`, `.cursor/rules/*.mdc` | 仅 CWD | Cursor 兼容性 |
 
 所有上下文文件都经过：
-- **安全扫描** — 检查提示词注入模式（不可见 Unicode、"忽略先前指令"、凭据泄露尝试）
+- **安全扫描** — 检查提示词注入模式（不可见 Unicode、"忽略先前指令"、凭据窃取尝试）
 - **截断** — 使用 70/20 头尾比例和截断标记，限制在 20,000 个字符
 - **YAML frontmatter 剥离** — 移除 `.hermes.md` 的 frontmatter（保留用于未来的配置覆盖）
 
 ## 仅 API 调用时层
 
-这些内容有意**不**作为缓存的系统提示词的一部分持久化：
+这些内容有意*不*作为缓存的系统提示词的一部分持久化：
 
 - `ephemeral_system_prompt`
 - 预填充消息
-- 消息网关派生的会话上下文覆盖
-- 注入到当前轮次用户消息中的后续轮次 Honcho 回忆
+- 消息网关派生的会话上下文覆盖层
+- 后期轮次中注入到当前轮次用户消息中的 Honcho/外部回忆
+
+`pre_llm_call` 插件上下文也属于这个 API 调用时路径：它被附加到当前轮次的**用户消息**，而不是写入缓存的系统提示词。当多个插件返回上下文时，Hermes 会连接这些上下文块（参见 [Hooks → `pre_llm_call`](../user-guide/features/hooks.md#pre_llm_call)）。
 
 这种分离保持了稳定前缀的稳定性以便缓存。
 
 ## 记忆快照
 
-本地记忆和用户配置文件数据在会话开始时作为冻结快照注入。会话中的写入会更新磁盘状态，但不会改变已构建的系统提示词，直到新的会话或强制重建发生。
+本地记忆和用户资料数据被捕获在系统提示词的**易变层**中。会话中的写入会更新磁盘状态，但不会改变已构建的缓存系统提示词，直到运行重建路径（新会话，或显式的失效/重建流程，例如压缩触发的重建）。
 
 ## 上下文文件
 
-`agent/prompt_builder.py` 使用**优先级系统**扫描和清理项目上下文文件 — 只加载一种类型（第一个匹配项获胜）：
+`agent/prompt_builder.py` 使用**优先级系统**扫描和清理项目上下文文件——只加载一种类型（首次匹配获胜）：
 
-1.  `.hermes.md` / `HERMES.md`（向上遍历到 git 根目录）
+1.  `.hermes.md` / `HERMES.md`（遍历到 git 根目录）
 2.  `AGENTS.md`（启动时的 CWD；在会话期间通过 `agent/subdirectory_hints.py` 逐步发现子目录）
 3.  `CLAUDE.md`（仅 CWD）
 4.  `.cursorrules` / `.cursor/rules/*.mdc`（仅 CWD）
@@ -230,15 +233,15 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 ### 首先使用这些表面
 
 - `~/.hermes/SOUL.md` — 用你自己的 Agent 角色和固定行为替换内置的默认身份块。
-- `~/.hermes/MEMORY.md` 和 `~/.hermes/USER.md` — 提供应快照到新会话中的持久跨会话事实和用户配置文件数据。
+- `~/.hermes/MEMORY.md` 和 `~/.hermes/USER.md` — 提供应快照到新会话中的持久跨会话事实和用户资料数据。
 - 项目上下文文件，如 `.hermes.md`、`HERMES.md`、`AGENTS.md`、`CLAUDE.md` 或 `.cursorrules` — 注入特定于仓库的工作规则。
-- 技能 — 打包可重用的工作流和引用，而无需编辑核心提示词代码。
+- 技能 — 打包可重用的工作流和参考，而无需编辑核心提示词代码。
 - 可选的系统提示词配置 / API 覆盖 — 添加特定于部署的指令文本，而无需分叉 Hermes。
-- 临时覆盖，如 `HERMES_EPHEMERAL_SYSTEM_PROMPT` 或预填充消息 — 添加不应成为缓存提示词前缀一部分的轮次范围指导。
+- 临时覆盖层，如 `HERMES_EPHEMERAL_SYSTEM_PROMPT` 或预填充消息 — 添加不应成为缓存提示词前缀一部分的轮次范围指导。
 
 ### 何时改为编辑代码
 
-仅当你打算维护一个分叉或贡献上游行为更改时，才编辑 `agent/prompt_builder.py`。该文件为每个会话组装提示词管道、缓存边界和注入顺序。直接编辑那里是全局产品更改，而不是每个用户的提示词自定义。
+仅当你打算维护一个分叉或贡献上游行为更改时，才编辑 `agent/prompt_builder.py`。该文件为每个会话组装提示词管道、缓存边界和注入顺序。直接编辑那里是全局产品更改，而不是每用户提示词自定义。
 
 换句话说：
 
@@ -251,7 +254,7 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
 
 该架构有意优化以：
 
-- 保持提供商端的提示词缓存
+- 保持提供程序端的提示词缓存
 - 避免不必要地改变历史记录
 - 保持记忆语义易于理解
 - 让消息网关/ACP/CLI 添加上下文而不污染持久提示词状态

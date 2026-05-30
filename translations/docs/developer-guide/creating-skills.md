@@ -84,7 +84,7 @@ required_environment_variables:          # 可选 — 技能需要的环境变�
 常用命令或 API 调用的表格。
 
 ## 步骤
-Agent 遵循的逐步指令。
+Agent 遵循的分步指令。
 
 ## 常见问题
 已知的失败模式及处理方法。
@@ -112,10 +112,10 @@ platforms: [windows]          # 仅 Windows
 ```yaml
 metadata:
   hermes:
-    requires_toolsets: [web]           # 如果 web 工具集处于**非**活动状态，则隐藏
-    requires_tools: [web_search]       # 如果 web_search 工具**不可用**，则隐藏
-    fallback_for_toolsets: [browser]   # 如果 browser 工具集**处于**活动状态，则隐藏
-    fallback_for_tools: [browser_navigate]  # 如果 browser_navigate **可用**，则隐藏
+    requires_toolsets: [web]           # 如果 web 工具集处于非活动状态，则隐藏
+    requires_tools: [web_search]       # 如果 web_search 工具不可用，则隐藏
+    fallback_for_toolsets: [browser]   # 如果 browser 工具集处于活动状态，则隐藏
+    fallback_for_tools: [browser_navigate]  # 如果 browser_navigate 工具可用，则隐藏
 ```
 
 | 字段 | 行为 |
@@ -125,7 +125,7 @@ metadata:
 | `fallback_for_toolsets` | 当**任何**列出的工具集**可用**时，技能被**隐藏** |
 | `fallback_for_tools` | 当**任何**列出的工具**可用**时，技能被**隐藏** |
 
-**`fallback_for_*` 的使用场景：** 创建一个技能，作为主要工具不可用时的备用方案。例如，一个带有 `fallback_for_tools: [web_search]` 的 `duckduckgo-search` 技能，仅在 web 搜索工具（需要 API 密钥）未配置时显示。
+**`fallback_for_*` 的使用场景：** 创建一个在主工具不可用时的备用技能。例如，一个带有 `fallback_for_tools: [web_search]` 的 `duckduckgo-search` 技能，仅当 web 搜索工具（需要 API 密钥）未配置时才显示。
 
 **`requires_*` 的使用场景：** 创建一个仅在特定工具存在时才有意义的技能。例如，一个带有 `requires_toolsets: [web]` 的网页抓取工作流技能，在 web 工具被禁用时不会使提示词变得杂乱。
 
@@ -142,12 +142,12 @@ required_environment_variables:
 ```
 
 每个条目支持：
-- `name`（必需）— 环境变量名称
-- `prompt`（可选）— 向用户询问值时显示的提示文本
-- `help`（可选）— 获取该值的帮助文本或 URL
-- `required_for`（可选）— 描述哪个功能需要此变量
+- `name`（必需） — 环境变量名称
+- `prompt`（可选） — 向用户询问值时显示的提示文本
+- `help`（可选） — 获取该值的帮助文本或 URL
+- `required_for`（可选） — 描述哪个功能需要此变量
 
-用户也可以在 `config.yaml` 中手动配置传递变量：
+用户也可以在 `config.yaml` 中手动配置要传递的变量：
 ```yaml
 terminal:
   env_passthrough:
@@ -159,7 +159,7 @@ terminal:
 
 ## 加载时的安全设置
 
-当技能需要 API 密钥或 Token 时，请使用 `required_environment_variables`。缺失的值**不会**在发现时隐藏该技能。相反，Hermes 会在本地 CLI 中加载该技能时安全地提示用户输入这些值。
+当一个技能需要 API 密钥或 Token 时，请使用 `required_environment_variables`。缺失的值**不会**在发现时隐藏该技能。相反，Hermes 会在本地 CLI 中加载该技能时，安全地提示用户输入这些值。
 
 ```yaml
 required_environment_variables:
@@ -169,17 +169,17 @@ required_environment_variables:
     required_for: 完整功能
 ```
 
-用户可以跳过设置并继续加载该技能。Hermes 永远不会向模型暴露原始的秘密值。消息网关和消息会话会显示本地设置指南，而不是在会话内收集秘密。
+用户可以跳过设置并继续加载该技能。Hermes 永远不会向模型暴露原始的密钥值。消息网关和消息会话会显示本地设置指南，而不是在会话中收集密钥。
 
 :::tip 沙盒透传
-当你的技能加载时，任何已设置的已声明的 `required_environment_variables` 都会**自动透传**到 `execute_code` 和 `terminal` 沙盒——包括像 Docker 和 Modal 这样的远程后端。你的技能脚本可以访问 `$TENOR_API_KEY`（或在 Python 中访问 `os.environ["TENOR_API_KEY"]`），而无需用户进行任何额外配置。详情请参阅[环境变量透传](/user-guide/security#environment-variable-passthrough)。
+当你的技能加载时，任何已设置的、已声明的 `required_environment_variables` 都会**自动透传**到 `execute_code` 和 `terminal` 沙盒——包括 Docker 和 Modal 等远程后端。你的技能脚本可以访问 `$TENOR_API_KEY`（或在 Python 中访问 `os.environ["TENOR_API_KEY"]`），而无需用户进行任何额外配置。详情请参阅[环境变量透传](/user-guide/security#environment-variable-passthrough)。
 :::
 
-为了向后兼容，遗留的 `prerequisites.env_vars` 仍然受支持。
+为了向后兼容，仍支持旧版的 `prerequisites.env_vars` 作为别名。
 
 ### 配置设置 (config.yaml)
 
-技能可以声明存储在 `config.yaml` 中 `skills.config` 命名空间下的非秘密设置。与环境变量（存储在 `.env` 中的秘密）不同，配置设置用于路径、偏好设置和其他非敏感值。
+技能可以声明非机密的设置，这些设置存储在 `config.yaml` 文件的 `skills.config` 命名空间下。与环境变量（作为机密存储在 `.env` 中）不同，配置设置用于路径、偏好设置和其他非敏感值。
 
 ```yaml
 metadata:
@@ -203,15 +203,15 @@ metadata:
 
 **工作原理：**
 
-1.  **存储：** 值被写入 `config.yaml` 中的 `skills.config.<key>` 下：
+1.  **存储：** 值被写入 `config.yaml` 文件的 `skills.config.<key>` 下：
     ```yaml
     skills:
       config:
-         myplugin:
-           path: ~/my-data
+        myplugin:
+          path: ~/my-data
     ```
 
-2.  **发现：** `hermes config migrate` 扫描所有已启用的技能，查找未配置的设置，并提示用户。设置也会出现在 `hermes config show` 的“技能设置”部分。
+2.  **发现：** `hermes config migrate` 扫描所有已启用的技能，查找未配置的设置，并提示用户。设置也会出现在 `hermes config show` 的 "Skill Settings" 部分。
 
 3.  **运行时注入：** 当技能加载时，其配置值会被解析并附加到技能消息中：
     ```
@@ -227,7 +227,7 @@ metadata:
     ```
 
 :::tip 何时使用哪种
-使用 `required_environment_variables` 处理 API 密钥、Token 和其他**秘密**（存储在 `~/.hermes/.env` 中，从不向模型显示）。使用 `config` 处理**路径、偏好设置和非敏感设置**（存储在 `config.yaml` 中，在 config show 中可见）。
+使用 `required_environment_variables` 处理 API 密钥、Token 和其他**机密信息**（存储在 `~/.hermes/.env` 中，永远不会显示给模型）。使用 `config` 处理**路径、偏好设置和非敏感设置**（存储在 `config.yaml` 中，在 `config show` 中可见）。
 :::
 
 ### 凭证文件要求（OAuth Token 等）
@@ -244,11 +244,11 @@ required_credential_files:
 
 每个条目支持：
 - `path`（必需）—— 相对于 `~/.hermes/` 的文件路径
-- `description`（可选）—— 解释文件是什么以及如何创建
+- `description`（可选）—— 解释该文件是什么以及如何创建
 
 加载时，Hermes 会检查这些文件是否存在。缺失的文件会触发 `setup_needed`。存在的文件会自动：
-- **挂载到 Docker** 容器中作为只读绑定挂载
-- **同步到 Modal** 沙盒中（在创建时和每个命令执行前，因此会话中的 OAuth 可以工作）
+- **挂载到 Docker** 容器中，作为只读绑定挂载
+- **同步到 Modal** 沙盒中（在创建时和每个命令执行前，因此会话中的 OAuth 可以正常工作）
 - 在**本地**后端上可用，无需任何特殊处理
 
 :::tip 何时使用哪种
@@ -273,11 +273,11 @@ required_credential_files:
 
 ### 将媒体作为文档交付 (`[[as_document]]`)
 
-如果你的技能生成高分辨率截图、图表或任何有损预览压缩会损害质量的图像——请在响应的某个地方（通常是最后一行）发出字面指令 `[[as_document]]`。消息网关会剥离该指令，并将该响应中提取的每个媒体路径作为可下载的文件附件交付，而不是作为内联图像气泡。完整的语义请参阅[技能输出和媒体交付](../user-guide/features/skills.md#skill-output-and-media-delivery)。
+如果你的技能生成高分辨率截图、图表或任何有损预览压缩会损害质量的图像——请在响应中的某个位置（通常是最后一行）输出字面指令 `[[as_document]]`。消息网关会剥离该指令，并将该响应中提取的每个媒体路径作为可下载的文件附件交付，而不是作为内联图像气泡。完整的语义请参阅[技能输出和媒体交付](../user-guide/features/skills.md#skill-output-and-media-delivery)。
 
 #### 从 SKILL.md 引用捆绑的脚本
 
-当技能加载时，激活消息会将绝对技能目录暴露为 `[Skill directory: /abs/path]`，并且还会在 SKILL.md 正文的任何地方替换两个模板 Token：
+当技能加载时，激活消息会将绝对技能目录暴露为 `[Skill directory: /abs/path]`，并且还会在 SKILL.md 正文的任何位置替换两个模板 Token：
 | Token | 替换为 |
 |---|---|
 | `${HERMES_SKILL_DIR}` | 技能目录的绝对路径 |
@@ -291,15 +291,15 @@ required_credential_files:
     node ${HERMES_SKILL_DIR}/scripts/analyse.js <input>
 ```
 
-Agent 看到替换后的绝对路径，并使用一个可直接运行的命令调用 `terminal` 工具——无需路径计算，也无需额外的 `skill_view` 往返。可以通过在 `config.yaml` 中设置 `skills.template_vars: false` 来全局禁用替换。
+Agent 会看到替换后的绝对路径，并使用一个可直接运行的命令调用 `terminal` 工具——无需路径计算，也无需额外的 `skill_view` 往返。可以通过在 `config.yaml` 中设置 `skills.template_vars: false` 来全局禁用替换。
 
 #### 内联 Shell 代码片段（可选）
 
 技能也可以在 SKILL.md 正文中嵌入写为 `` !`cmd` `` 的内联 Shell 代码片段。启用后，每个代码片段的 stdout 会在 Agent 读取消息之前内联到消息中，因此技能可以注入动态上下文：
 
 ```markdown
-当前日期: !`date -u +%Y-%m-%d`
-Git 分支: !`git -C ${HERMES_SKILL_DIR} rev-parse --abbrev-ref HEAD`
+当前日期：!`date -u +%Y-%m-%d`
+Git 分支：!`git -C ${HERMES_SKILL_DIR} rev-parse --abbrev-ref HEAD`
 ```
 
 此功能**默认关闭**——SKILL.md 中的任何代码片段都会在主机上未经批准运行，因此请仅对您信任的技能源启用它：
@@ -311,7 +311,7 @@ skills:
   inline_shell_timeout: 10   # 每个代码片段的秒数
 ```
 
-代码片段以技能目录作为其工作目录运行，输出限制在 4000 个字符以内。失败（超时、非零退出）会显示为简短的 `[inline-shell error: ...]` 标记，而不会破坏整个技能。
+代码片段以技能目录作为其工作目录运行，输出限制在 4000 个字符以内。失败（超时、非零退出）会显示一个简短的 `[inline-shell error: ...]` 标记，而不会破坏整个技能。
 
 ### 测试它
 
@@ -323,7 +323,7 @@ hermes chat --toolsets skills -q "使用 X 技能来做 Y"
 
 ## 技能应该放在哪里？
 
-捆绑技能（位于 `skills/` 中）随每个 Hermes 安装一起提供。它们应该**对大多数用户广泛有用**：
+捆绑技能（位于 `skills/` 中）随每个 Hermes 安装包一起提供。它们应该**对大多数用户普遍有用**：
 
 - 文档处理、网络研究、常见的开发工作流、系统管理
 - 被广泛人群定期使用
@@ -348,7 +348,7 @@ hermes skills publish skills/my-skill --to github --repo owner/repo
 hermes skills tap add owner/repo
 ```
 
-然后用户可以从你的仓库搜索和安装。
+然后用户就可以从你的仓库搜索和安装。
 
 ## 安全扫描
 

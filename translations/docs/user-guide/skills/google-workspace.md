@@ -7,7 +7,7 @@ description: "发送电子邮件、管理日历事件、搜索云端硬盘、读
 
 # Google Workspace 技能
 
-为 Hermes 提供 Gmail、日历、云端硬盘、联系人、表格和文档的集成。使用 OAuth2 并支持自动 Token 刷新。优先使用 [Google Workspace CLI (`gws`)](https://github.com/nicholasgasior/gws) 以获得更广泛的功能覆盖，否则回退到 Google 的 Python 客户端库。
+为 Hermes 提供 Gmail、日历、云端硬盘、联系人、表格和文档的集成。使用 OAuth2 并支持自动刷新 Token。优先使用 [Google Workspace CLI (`gws`)](https://github.com/googleworkspace/cli) 以获得更广泛的覆盖范围，否则回退到 Google 的 Python 客户端库。
 
 **技能路径：** `skills/productivity/google-workspace/`
 
@@ -15,13 +15,13 @@ description: "发送电子邮件、管理日历事件、搜索云端硬盘、读
 
 设置过程完全由 Agent 驱动 — 只需让 Hermes 设置 Google Workspace，它会引导您完成每个步骤。流程如下：
 
-1.  **创建 Google Cloud 项目**并启用所需的 API（Gmail、日历、云端硬盘、表格、文档、联系人）
+1.  **创建一个 Google Cloud 项目** 并启用所需的 API（Gmail、日历、云端硬盘、表格、文档、联系人）
 2.  **创建 OAuth 2.0 凭据**（桌面应用类型）并下载客户端密钥 JSON 文件
-3.  **授权** — Hermes 生成授权 URL，您在浏览器中批准，然后粘贴回重定向 URL
+3.  **授权** — Hermes 生成一个授权 URL，您在浏览器中批准，然后粘贴回重定向 URL
 4.  **完成** — 从此时起 Token 会自动刷新
 
 :::tip 仅需电子邮件的用户
-如果您只需要电子邮件功能（不需要日历/云端硬盘/表格），请改用 **himalaya** 技能 — 它使用 Gmail 应用密码，只需 2 分钟即可完成。无需 Google Cloud 项目。
+如果您只需要电子邮件功能（不需要日历/云端硬盘/表格），请改用 **himalaya** 技能 — 它使用 Gmail 应用密码，只需 2 分钟。无需 Google Cloud 项目。
 :::
 
 ## Gmail
@@ -36,7 +36,7 @@ $GAPI gmail search "has:attachment filename:pdf newer_than:7d"
 
 返回包含每条消息的 `id`、`from`、`subject`、`date`、`snippet` 和 `labels` 的 JSON。
 
-### 读取
+### 阅读
 
 ```bash
 $GAPI gmail get MESSAGE_ID
@@ -77,9 +77,9 @@ $GAPI gmail send --to client@co.com --subject "Code Review" \
   --from '"Code Assistant" <shared@company.com>' --body "..."
 ```
 
-**工作原理：** `--from` 的值被设置为 MIME 消息上的 RFC 5322 `From` 标头。Gmail 允许在您自己经过身份验证的电子邮件地址上自定义显示名称，无需任何额外配置。收件人将看到自定义的显示名称（例如 "Research Agent"），而电子邮件地址保持不变。
+**工作原理：** `--from` 的值被设置为 MIME 消息上的 RFC 5322 `From` 标头。Gmail 允许在您自己已认证的电子邮件地址上自定义显示名称，无需任何额外配置。收件人看到的是自定义的显示名称（例如 "Research Agent"），而电子邮件地址保持不变。
 
-**重要提示：** 如果您在 `--from` 中使用*不同的电子邮件地址*（不是经过身份验证的账户），Gmail 要求该地址必须在 Gmail 设置 → 账户 → 以...身份发送邮件中配置为 [Send As 别名](https://support.google.com/mail/answer/22370)。
+**重要提示：** 如果您在 `--from` 中使用*不同的电子邮件地址*（不是已认证的账户），Gmail 要求该地址必须在 Gmail 设置 → 账户 → 以其他地址发送邮件中配置为 [Send As 别名](https://support.google.com/mail/answer/22370)。
 
 `--from` 标志在 `send` 和 `reply` 命令上都有效：
 
