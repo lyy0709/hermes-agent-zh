@@ -11,10 +11,10 @@ Hermes 通过一个基于 **Baileys** 的内置桥接器连接到 WhatsApp。其
 > 运行 `hermes gateway setup` 并选择 **WhatsApp** 以获取引导式设置。
 
 :::warning 非官方 API —— 封禁风险
-WhatsApp **不**正式支持 Business API 之外的第三方机器人。使用第三方桥接器存在账户受限的小风险。为将风险降至最低：
-- **使用一个专用的电话号码** 给机器人（不要用你的个人号码）
-- **不要发送批量/垃圾消息** —— 保持使用方式为对话式
-- **不要自动化地向未先发消息的人发送消息**
+WhatsApp **不**正式支持 Business API 之外的第三方机器人。使用第三方桥接器存在账户受限的较小风险。为最小化风险：
+- **使用一个专用的手机号码** 给机器人（不要用你的个人号码）
+- **不要发送批量/垃圾消息** —— 保持对话式使用
+- **不要自动化发送消息** 给那些没有先发消息给你的人
 :::
 
 :::warning WhatsApp Web 协议更新
@@ -25,7 +25,7 @@ WhatsApp 会定期更新其 Web 协议，这可能会暂时破坏与第三方桥
 
 | 模式 | 工作原理 | 最适合 |
 |------|-------------|----------|
-| **独立的机器人号码**（推荐） | 将一个电话号码专用于机器人。人们直接向该号码发送消息。 | 用户体验清晰，多用户，封禁风险较低 |
+| **独立的机器人号码**（推荐） | 将一个手机号码专用于机器人。人们直接向该号码发送消息。 | 用户体验清晰，多用户，封禁风险较低 |
 | **个人自聊** | 使用你自己的 WhatsApp。你给自己发消息来与 Agent 对话。 | 快速设置，单用户，测试 |
 
 ---
@@ -35,7 +35,7 @@ WhatsApp 会定期更新其 Web 协议，这可能会暂时破坏与第三方桥
 - **Node.js v18+** 和 **npm** —— WhatsApp 桥接器作为 Node.js 进程运行
 - **一部安装了 WhatsApp 的手机**（用于扫描二维码）
 
-与旧版基于浏览器的桥接器不同，当前基于 Baileys 的桥接器**不**需要本地的 Chromium 或 Puppeteer 依赖栈。
+与旧版基于浏览器的桥接器不同，当前基于 Baileys 的桥接器**不**需要本地 Chromium 或 Puppeteer 依赖栈。
 
 ---
 
@@ -55,25 +55,25 @@ hermes whatsapp
 **扫描二维码：**
 
 1. 在手机上打开 WhatsApp
-2. 进入 **设置 → 已关联的设备**
-3. 点击 **关联设备**
+2. 进入 **设置 → 已链接的设备**
+3. 点击 **链接设备**
 4. 将摄像头对准终端中的二维码
 
 配对成功后，向导会确认连接并退出。您的会话会自动保存。
 
 :::tip
-如果二维码看起来乱码，请确保您的终端至少 60 列宽并支持 Unicode。您也可以尝试使用不同的终端模拟器。
+如果二维码看起来乱码，请确保您的终端至少有 60 列宽并支持 Unicode。您也可以尝试使用不同的终端模拟器。
 :::
 
 ---
 
-## 步骤 2：获取第二个电话号码（机器人模式）
+## 步骤 2：获取第二个手机号码（机器人模式）
 
-对于机器人模式，您需要一个尚未在 WhatsApp 注册的电话号码。有三种选择：
+对于机器人模式，您需要一个尚未在 WhatsApp 注册的手机号码。有三种选择：
 
 | 选项 | 成本 | 备注 |
 |--------|------|-------|
-| **Google Voice** | 免费 | 仅限美国。在 [voice.google.com](https://voice.google.com) 获取号码。通过 Google Voice 应用使用短信验证 WhatsApp。 |
+| **Google Voice** | 免费 | 仅限美国。在 [voice.google.com](https://voice.google.com) 获取号码。通过 Google Voice 应用通过短信验证 WhatsApp。 |
 | **预付费 SIM 卡** | 一次性 $5–15 | 任何运营商。激活，验证 WhatsApp，然后 SIM 卡可以放在抽屉里。号码必须保持活跃（每 90 天打一次电话）。 |
 | **VoIP 服务** | 免费–$5/月 | TextNow、TextFree 或类似服务。一些 VoIP 号码被 WhatsApp 屏蔽——如果第一个不行，可以多试几个。 |
 
@@ -106,7 +106,7 @@ WHATSAPP_ALLOWED_USERS=15551234567         # 逗号分隔的电话号码（带�
 要使用配对流程，请删除这两个变量并依赖 [DM 配对系统](/user-guide/security#dm-pairing-system)。
 :::
 
-`~/.hermes/config.yaml` 中的可选行为设置：
+在 `~/.hermes/config.yaml` 中的可选行为设置：
 
 ```yaml
 unauthorized_dm_behavior: pair
@@ -126,7 +126,7 @@ hermes gateway install      # 安装为用户服务
 sudo hermes gateway install --system   # 仅限 Linux：开机启动的系统服务
 ```
 
-消息网关会使用保存的会话自动启动 WhatsApp 桥接器。
+消息网关会自动使用保存的会话启动 WhatsApp 桥接器。
 
 ---
 
@@ -142,7 +142,7 @@ Baileys 桥接器将其会话保存在 `~/.hermes/platforms/whatsapp/session` �
 
 ## 重新配对
 
-如果会话中断（手机重置、WhatsApp 更新、手动取消关联），您将在消息网关日志中看到连接错误。要修复它：
+如果会话中断（手机重置、WhatsApp 更新、手动取消链接），您将在消息网关日志中看到连接错误。要修复它：
 
 ```bash
 hermes whatsapp
@@ -154,11 +154,11 @@ hermes whatsapp
 
 ## 语音消息
 
-Hermes 支持 WhatsApp 上的语音：
+Hermes 支持 WhatsApp 上的语音功能：
 
-- **接收：** 语音消息（`.ogg` opus）会自动使用配置的 STT 提供商进行转录：本地的 `faster-whisper`、Groq Whisper（`GROQ_API_KEY`）或 OpenAI Whisper（`VOICE_TOOLS_OPENAI_KEY`）
+- **接收：** 语音消息（`.ogg` opus 格式）会自动使用配置的 STT 提供商进行转录：本地 `faster-whisper`、Groq Whisper（`GROQ_API_KEY`）或 OpenAI Whisper（`VOICE_TOOLS_OPENAI_KEY`）
 - **发送：** TTS 响应作为 MP3 音频文件附件发送
-- Agent 响应默认以 "⚕ **Hermes Agent**" 为前缀。您可以在 `config.yaml` 中自定义或禁用此功能：
+- Agent 的响应默认以 "⚕ **Hermes Agent**" 为前缀。您可以在 `config.yaml` 中自定义或禁用此功能：
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -175,7 +175,7 @@ WhatsApp 支持**流式（渐进式）响应** —— 机器人会随着 AI 生�
 
 ### 分块
 
-长响应会自动按 **4,096 个字符** 每块进行分割（WhatsApp 的实际显示限制）。您无需配置任何内容 —— 消息网关会处理分割并按顺序发送块。
+长响应会在每 **4,096 个字符** 处自动分割成多条消息（WhatsApp 的实际显示限制）。您无需配置任何内容 —— 消息网关会处理分割并按顺序发送块。
 
 ### WhatsApp 兼容的 Markdown
 
@@ -188,11 +188,27 @@ AI 响应中的标准 Markdown 会自动转换为 WhatsApp 的原生格式：
 | `# 标题` | `*标题*` | 粗体文本（无原生标题） |
 | `[链接文本](url)` | `链接文本 (url)` | 内联 URL |
 
-代码块和内联代码会按原样保留，因为 WhatsApp 原生支持三重反引号格式。
+代码块和内联代码会原样保留，因为 WhatsApp 原生支持三重反引号格式。
 
 ### 工具进度
 
 当 Agent 调用工具（网络搜索、文件操作等）时，WhatsApp 会显示实时进度指示器，显示正在运行哪个工具。此功能默认启用 —— 无需配置。
+
+### 消息批处理（防抖）
+
+WhatsApp 单独发送每条消息，因此快速连续的消息（转发的批次、粘贴分割、多行文本）原本会为每个片段触发一次单独的 Agent 调用 —— 浪费 Token 并产生多个不连贯的回复。适配器会缓冲来自同一聊天的连续文本消息，并在短暂的静默期（默认 **5 秒**，对于非常长的片段延长至 **10 秒**）后将它们作为一个组合请求发送。通过 `config.yaml` 进行调整：
+
+```yaml
+# ~/.hermes/config.yaml
+gateway:
+  platforms:
+    whatsapp:
+      extra:
+        text_batch_delay_seconds: 5.0         # 刷新批次前的静默期
+        text_batch_split_delay_seconds: 10.0  # 接近分割阈值时的延长延迟
+```
+
+设置 `text_batch_delay_seconds: 0` 可立即发送每条消息（禁用批处理）。
 
 ---
 
@@ -200,13 +216,13 @@ AI 响应中的标准 Markdown 会自动转换为 WhatsApp 的原生格式：
 
 | 问题 | 解决方案 |
 |---------|----------|
-| **二维码无法扫描** | 确保终端足够宽（60+ 列）。尝试不同的终端。确保您从正确的 WhatsApp 账户（机器人号码，非个人）扫描。 |
+| **二维码无法扫描** | 确保终端足够宽（60+ 列）。尝试不同的终端。确保从正确的 WhatsApp 账户（机器人号码，而非个人号码）扫描。 |
 | **二维码过期** | 二维码大约每 20 秒刷新一次。如果超时，请重启 `hermes whatsapp`。 |
 | **会话未持久化** | 检查 `~/.hermes/platforms/whatsapp/session` 是否存在且可写。如果是容器化部署，请将其挂载为持久卷。 |
-| **意外退出登录** | WhatsApp 在长时间不活动后会取消关联设备。保持手机开机并连接到网络，如果需要，使用 `hermes whatsapp` 重新配对。 |
+| **意外退出登录** | WhatsApp 在长时间不活动后会取消链接设备。保持手机开机并连接到网络，然后在需要时使用 `hermes whatsapp` 重新配对。 |
 | **桥接器崩溃或重连循环** | 重启消息网关，更新 Hermes，如果会话因 WhatsApp 协议更改而失效，则重新配对。 |
 | **WhatsApp 更新后机器人停止工作** | 更新 Hermes 以获取最新的桥接器版本，然后重新配对。 |
-| **macOS："Node.js 未安装"，但终端中 node 命令有效** | launchd 服务不继承您的 shell PATH。运行 `hermes gateway install` 将您当前的 PATH 重新快照到 plist 中，然后运行 `hermes gateway start`。详情请参阅 [消息网关服务文档](./index.md#macos-launchd)。 |
+| **macOS: "Node.js 未安装" 但终端中 node 命令有效** | launchd 服务不继承您的 shell PATH。运行 `hermes gateway install` 将您当前的 PATH 重新快照到 plist 中，然后运行 `hermes gateway start`。详情请参阅 [消息网关服务文档](./index.md#macos-launchd)。 |
 | **未收到消息** | 验证 `WHATSAPP_ALLOWED_USERS` 是否包含发送者的号码（带国家代码，无 `+` 或空格），或将其设置为 `*` 以允许所有人。在 `.env` 中设置 `WHATSAPP_DEBUG=true` 并重启消息网关，以在 `bridge.log` 中查看原始消息事件。 |
 | **机器人向陌生人回复配对码** | 如果您希望未经授权的 DM 被静默忽略，请在 `~/.hermes/config.yaml` 中设置 `whatsapp.unauthorized_dm_behavior: ignore`。 |
 
@@ -227,6 +243,6 @@ whatsapp:
 
 - `~/.hermes/platforms/whatsapp/session` 目录包含完整的会话凭证 —— 请像保护密码一样保护它
 - 设置文件权限：`chmod 700 ~/.hermes/platforms/whatsapp/session`
-- 使用**专用的电话号码**给机器人，以隔离您个人账户的风险
-- 如果您怀疑被入侵，请从 WhatsApp → 设置 → 已关联的设备 中取消关联该设备
+- 为机器人使用**专用手机号码**，以隔离与您个人账户的风险
+- 如果您怀疑账户被盗用，请从 WhatsApp → 设置 → 已链接的设备中取消链接该设备
 - 日志中的电话号码会被部分隐藏，但请检查您的日志保留策略

@@ -12,14 +12,15 @@ import threading
 import time
 from pathlib import Path
 from hermes_constants import get_hermes_home
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-
-from prompt_toolkit import print_formatted_text as _pt_print
-from prompt_toolkit.formatted_text import ANSI as _PT_ANSI
+# rich 和 prompt_toolkit 是延迟导入的（在需要使用它们的函数内部），而不是在模块级别。
+# 导入此模块位于 TUI 消息网关的关键启动路径上，纯粹是为了访问轻量级的更新检查
+# 辅助函数（``prefetch_update_check``）；在 ``gateway.ready`` 可以触发之前，
+# 急切地拉取 rich.console + prompt_toolkit 会增加约 50ms 的浪费导入时间。
+# 保持仅类型引用可供检查器使用，而不产生运行时成本。
+if TYPE_CHECKING:
+    from rich.console import Console
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +37,13 @@ _RST = "\033[0m"
 
 def cprint(text: str):
     """通过 prompt_toolkit 的渲染器打印 ANSI 彩色文本。"""
+    from prompt_toolkit import print_formatted_text as _pt_print
+    from prompt_toolkit.formatted_text import ANSI as _PT_ANSI
     _pt_print(_PT_ANSI(text))
 
 
 # =========================================================================
-# 皮肤感知的颜色助手
+# 皮肤感知的颜色辅助函数
 # =========================================================================
 
 def _skin_color(key: str, fallback: str) -> str:
@@ -140,7 +143,7 @@ def _check_via_rev(local_rev: str) -> Optional[int]:
 
 
 def _check_via_local_git(repo_dir: Path) -> Optional[int]:
-    """统计本地检出仓库落后于 origin/main 的提交数。"""
+    """统计本地检出仓库中落后于 origin/main 的提交数。"""
     try:
         subprocess.run(
             ["git", "fetch", "origin", "--quiet"],
@@ -164,7 +167,7 @@ def _check_via_local_git(repo_dir: Path) -> Optional[int]:
 
 
 def _version_tuple(v: str) -> tuple[int, ...]:
-    """将 '0.13.0' 解析为 (0, 13, 0) 以进行比较。非数字段变为 0。"""
+    """将 '0.13.0' 解析为 (0, 13, 0) 以便比较。非数字段变为 0。"""
     parts = []
     for segment in v.split("."):
         try:
@@ -206,19 +209,16 @@ def check_via_pypi() -> Optional[int]:
 def check_for_updates() -> Optional[int]:
     """检查是否有 Hermes 更新可用。
 
-    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 与上游 main 分支比较。
-    否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数量。
+    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 将其与上游 main 分支进行比较。否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数量。
 
-    返回落后的提交数量，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
-    如果是最新版本则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
+    返回落后提交的数量，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，如果是最新版本则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
     """
     hermes_home = get_hermes_home()
     cache_file = hermes_home / ".update_check"
     embedded_rev = os.environ.get("HERMES_REVISION") or None
 
-    # 读取缓存 — 如果自上次检查以来嵌入的修订版本或已安装版本发生了变化，则使缓存失效。
-    # 版本保护对于 pip 安装很重要：`check_via_pypi()` 与 VERSION 比较，所以 `pip install --upgrade`
-    # 会改变 VERSION 但保持修订版本不变（两者均为 None），如果没有这个保护，
+    # 读取缓存 — 如果自上次检查以来，嵌入的修订版本或已安装版本发生了变化，则使缓存失效。版本保护对于 pip 安装很重要：
+    # `check_via_pypi()` 与 VERSION 进行比较，因此 `pip install --upgrade` 会改变 VERSION 但保持修订版本不变（两者均为 None），如果没有此保护，
     # 过时的“落后”计数将在升级后存活长达 6 小时。参见 #34491。
     now = time.time()
     try:
@@ -236,8 +236,8 @@ def check_for_updates() -> Optional[int]:
     if embedded_rev:
         behind = _check_via_rev(embedded_rev)
     else:
-        # 优先使用运行代码的位置而非配置文件作用域的路径。
-        # $HERMES_HOME/hermes-agent/ 可能是来自 --clone-all 的过时副本；
+        # 优先使用运行代码的位置，而非配置文件作用域的路径。
+        # $HERMES_HOME/hermes-agent/ 可能是来自 --clone-all 的陈旧副本；
         # Path(__file__) 始终解析到实际安装的仓库。
         repo_dir = Path(__file__).parent.parent.resolve()
         if not (repo_dir / ".git").exists():
@@ -260,8 +260,8 @@ def check_for_updates() -> Optional[int]:
 def _resolve_repo_dir() -> Optional[Path]:
     """返回活跃的 Hermes git 仓库，如果这不是 git 安装则返回 None。
 
-    优先使用运行代码的位置而非配置文件作用域的路径，
-    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带的过时副本。
+    优先使用运行代码的位置，而非配置文件作用域的路径，
+    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带的陈旧副本。
     """
     repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
@@ -400,8 +400,8 @@ def format_banner_version_label() -> str:
     if ahead <= 0 or upstream == local:
         return f"{base} · 上游 {upstream}"
 
-    carried_word = "个提交" if ahead == 1 else "个提交"
-    return f"{base} · 上游 {upstream} · 本地 {local} (+{ahead} 个未推送的 {carried_word})"
+    carried_word = "提交" if ahead == 1 else "提交"
+    return f"{base} · 上游 {upstream} · 本地 {local} (+{ahead} 个待合并 {carried_word})"
 
 
 # =========================================================================
@@ -460,7 +460,7 @@ def _display_toolset_name(toolset_name: str) -> str:
     )
 
 
-def build_welcome_banner(console: Console, model: str, cwd: str,
+def build_welcome_banner(console: "Console", model: str, cwd: str,
                          tools: List[dict] = None,
                          enabled_toolsets: List[str] = None,
                          session_id: str = None,
@@ -479,6 +479,8 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
         context_length: Model's context window size in tokens.
     """
     from model_tools import check_tool_availability, TOOLSET_REQUIREMENTS
+    from rich.panel import Panel
+    from rich.table import Table
     if get_toolset_for_tool is None:
         from model_tools import get_toolset_for_tool
 
@@ -528,7 +530,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     left_lines.append(f"[{accent}]{model_short}[/]{ctx_str} [dim {dim}]·[/] [dim {dim}]Nous Research[/]")
 
     if os.getenv("HERMES_YOLO_MODE"):
-        left_lines.append(f"[bold red]⚠ YOLO 模式[/] [dim {dim}]— 已绕过所有审批提示[/]")
+        left_lines.append(f"[bold red]⚠ YOLO 模式[/] [dim {dim}]— 所有审批提示已绕过[/]")
     left_lines.append(f"[dim {dim}]{cwd}[/]")
     if session_id:
         left_lines.append(f"[dim {session_color}]会话: {session_id}[/]")
@@ -539,7 +541,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
 
     for tool in tools:
         tool_name = tool["function"]["name"]
-        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "其他")
+        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "other")
         toolsets_dict.setdefault(toolset, []).append(tool_name)
 
     for item in unavailable_toolsets:
@@ -670,9 +672,9 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
         if behind is not None and behind != 0:
             from hermes_cli.config import get_managed_update_command, recommended_update_command
             if behind > 0:
-                commits_word = "个提交" if behind == 1 else "个提交"
+                commits_word = "提交" if behind == 1 else "提交"
                 right_lines.append(
-                    f"[bold yellow]⚠ 落后 {behind} {commits_word}[/]"
+                    f"[bold yellow]⚠ 落后 {behind} 个 {commits_word}[/]"
                     f"[dim yellow] — 运行 [bold]{recommended_update_command()}[/bold] 以更新[/]"
                 )
             else:
@@ -696,8 +698,8 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
         if detect_install_method() == "pip":
             right_lines.append(
                 "[bold yellow]⚠ pip 安装方式不受官方支持[/]"
-                "[dim yellow] — 仅用于内部/CI 目的，非用户安装；"
-                "可能出现不稳定问题且无法获得技术支持[/]"
+                "[dim yellow] — 此方式因非用户安装目的而存在；"
+                "请预期不稳定性和问题无法得到支持[/]"
             )
     except Exception:
         pass  # Never break the banner over the install-method check
