@@ -25,8 +25,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "AGENTS.md": {
-    "source_hash": "sha256:5b35fd42b228b455c50866a3eabad54f8d23aaef09dbbde8c0cec332a42ea6a6",
-    "translated_at": "2026-06-01T06:57:05.270677+00:00",
+    "source_hash": "sha256:0fa72e76050a163baadd34a7f9958e5c04d66d6c190101a1067cd262295a9a09",
+    "translated_at": "2026-06-03T06:58:24.548176+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/developer-guide/adding-providers.md": {
@@ -245,13 +245,13 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/cli-commands.md": {
-    "source_hash": "sha256:4f0b9a99b9beea1d1a34528244c0249da48b8803f2adc1dbcb8f02430e0b2d39",
-    "translated_at": "2026-06-02T06:43:11.766001+00:00",
+    "source_hash": "sha256:91e3773d8183ab3fccaa9af7b8f2698aef76905c6cd02f1fe6f2643fcbf0326a",
+    "translated_at": "2026-06-03T07:05:25.582957+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/environment-variables.md": {
-    "source_hash": "sha256:0e4a9229948190df5212547a67f14b9c71074c922395804ea655fa4f643d5e83",
-    "translated_at": "2026-05-30T06:03:42.739105+00:00",
+    "source_hash": "sha256:74c341f24ce55020607f6a4c33c178de01ac0e8343651cf628f904095a7f9014",
+    "translated_at": "2026-06-03T07:06:23.851755+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/reference/slash-commands.md": {
@@ -585,8 +585,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/features/web-dashboard.md": {
-    "source_hash": "sha256:d11962295db03ebf86a6cf6e4239186f84be6cebb43a3d984ec9f1826427b547",
-    "translated_at": "2026-06-02T06:39:33.922472+00:00",
+    "source_hash": "sha256:6a0c1a80c8b78c13a5ba4df201d46b221c0571f2f4b19604cc787b64b510c783",
+    "translated_at": "2026-06-03T06:54:57.228355+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "hermes_cli/banner.py": {
@@ -650,8 +650,8 @@
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/user-guide/tui.md": {
-    "source_hash": "sha256:dd52c7ed81d814d6382c5fbc072e2440aca18bfc0012354257ff9cbadc21d24a",
-    "translated_at": "2026-05-27T06:23:31.639981+00:00",
+    "source_hash": "sha256:72408b04a3b306f820455c5be8d7bfe7c829a8cee265380c52830ccf13c40898",
+    "translated_at": "2026-06-03T06:57:57.935490+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   },
   "website/docs/guides/github-pr-review-agent.md": {
@@ -1827,6 +1827,11 @@
   "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-grok.md": {
     "source_hash": "sha256:2c7ae4405145682fd40a3ae6eab8f8edec8aa5146e9b68f2c1a40042b1ee0d6f",
     "translated_at": "2026-05-30T06:19:16.221727+00:00",
+    "model": "deepseek-ai/DeepSeek-V3.2"
+  },
+  "website/docs/user-guide/desktop.md": {
+    "source_hash": "sha256:d2339fa51eed6c0847372382747b61a8d2210ac108c4ce3edbc3ef8e402a62d9",
+    "translated_at": "2026-06-03T06:47:12.999694+00:00",
     "model": "deepseek-ai/DeepSeek-V3.2"
   }
 }
