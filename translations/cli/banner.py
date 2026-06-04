@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 # rich 和 prompt_toolkit 是延迟导入的（在需要使用它们的函数内部），而不是在模块级别。
 # 导入此模块位于 TUI 消息网关的关键启动路径上，纯粹是为了访问轻量级的更新检查
 # 辅助函数（``prefetch_update_check``）；在 ``gateway.ready`` 可以触发之前，
-# 急切地拉取 rich.console + prompt_toolkit 会增加约 50ms 的浪费导入时间。
-# 保持仅类型引用可供检查器使用，而不产生运行时成本。
+# 急切地拉取 rich.console + prompt_toolkit 增加了约 50ms 的浪费导入时间。
+# 保持仅类型引用可供检查器使用，而无需运行时成本。
 if TYPE_CHECKING:
     from rich.console import Console
 
@@ -111,18 +111,18 @@ def get_available_skills() -> Dict[str, List[str]]:
 # 更新检查
 # =========================================================================
 
-# 缓存更新检查结果6小时，避免重复的 git fetch
+# 缓存更新检查结果 6 小时，避免重复的 git 获取
 _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 
-# 当我们知道有更新但无法统计提交数时返回的标记值
-# (例如 nix 构建的 hermes — 没有本地 git 历史记录来统计差异)。
+# 当我们知道存在更新但无法统计提交数时返回的标记
+# (例如 nix 构建的 hermes — 没有本地 git 历史记录可用来计数)。
 UPDATE_AVAILABLE_NO_COUNT = -1
 
 _UPSTREAM_REPO_URL = "https://github.com/NousResearch/hermes-agent.git"
 
 
 def _check_via_rev(local_rev: str) -> Optional[int]:
-    """通过 ls-remote 比较嵌入的 git 修订版本与上游 main 分支。
+    """通过 ls-remote 将嵌入的 git 修订版本与上游 main 分支进行比较。
 
     如果是最新则返回 0，如果落后则返回 ``UPDATE_AVAILABLE_NO_COUNT``，
     失败时返回 ``None``。
@@ -167,7 +167,7 @@ def _check_via_local_git(repo_dir: Path) -> Optional[int]:
 
 
 def _version_tuple(v: str) -> tuple[int, ...]:
-    """将 '0.13.0' 解析为 (0, 13, 0) 以便比较。非数字段变为 0。"""
+    """将 '0.13.0' 解析为 (0, 13, 0) 以进行比较。非数字段变为 0。"""
     parts = []
     for segment in v.split("."):
         try:
@@ -209,17 +209,16 @@ def check_via_pypi() -> Optional[int]:
 def check_for_updates() -> Optional[int]:
     """检查是否有 Hermes 更新可用。
 
-    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 将其与上游 main 分支进行比较。否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数量。
+    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 将其与上游 main 分支进行比较。否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数。
 
-    返回落后提交的数量，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，如果是最新版本则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
+    返回落后的提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
     """
     hermes_home = get_hermes_home()
     cache_file = hermes_home / ".update_check"
     embedded_rev = os.environ.get("HERMES_REVISION") or None
 
     # 读取缓存 — 如果自上次检查以来，嵌入的修订版本或已安装版本发生了变化，则使缓存失效。版本保护对于 pip 安装很重要：
-    # `check_via_pypi()` 与 VERSION 进行比较，因此 `pip install --upgrade` 会改变 VERSION 但保持修订版本不变（两者均为 None），如果没有此保护，
-    # 过时的“落后”计数将在升级后存活长达 6 小时。参见 #34491。
+    # `check_via_pypi()` 与 VERSION 进行比较，因此 `pip install --upgrade` 会改变 VERSION 但保持 rev 不变（两者均为 None），如果没有这个保护，过时的“落后”计数将在升级后存活长达 6 小时。参见 #34491。
     now = time.time()
     try:
         if cache_file.exists():
@@ -258,10 +257,10 @@ def check_for_updates() -> Optional[int]:
 
 
 def _resolve_repo_dir() -> Optional[Path]:
-    """返回活跃的 Hermes git 仓库，如果这不是 git 安装则返回 None。
+    """返回活动的 Hermes git 仓库，如果这不是 git 安装则返回 None。
 
     优先使用运行代码的位置，而非配置文件作用域的路径，
-    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带的陈旧副本。
+    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带过来的陈旧副本。
     """
     repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
@@ -413,7 +412,7 @@ _update_check_done = threading.Event()
 
 
 def prefetch_update_check():
-    """Kick off update check in a background daemon thread."""
+    """在后台守护线程中启动更新检查。"""
     def _run():
         global _update_result
         _update_result = check_for_updates()
@@ -423,7 +422,7 @@ def prefetch_update_check():
 
 
 def get_update_result(timeout: float = 0.5) -> Optional[int]:
-    """Get result of prefetched check. Returns None if not ready."""
+    """获取预取检查的结果。如果未就绪则返回 None。"""
     _update_check_done.wait(timeout=timeout)
     return _update_result
 
@@ -433,7 +432,7 @@ def get_update_result(timeout: float = 0.5) -> Optional[int]:
 # =========================================================================
 
 def _format_context_length(tokens: int) -> str:
-    """Format a token count for display (e.g. 128000 → '128K', 1048576 → '1M')."""
+    """格式化 Token 计数以便显示（例如 128000 → '128K', 1048576 → '1M'）。"""
     if tokens >= 1_000_000:
         val = tokens / 1_000_000
         rounded = round(val)
@@ -450,7 +449,7 @@ def _format_context_length(tokens: int) -> str:
 
 
 def _display_toolset_name(toolset_name: str) -> str:
-    """Normalize internal/legacy toolset identifiers for banner display."""
+    """规范化内部/遗留工具集标识符以便在横幅中显示。"""
     if not toolset_name:
         return "未知"
     return (
@@ -466,17 +465,17 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
                          session_id: str = None,
                          get_toolset_for_tool=None,
                          context_length: int = None):
-    """Build and print a welcome banner with caduceus on left and info on right.
+    """构建并打印欢迎横幅，左侧为蛇杖，右侧为信息。
 
     Args:
-        console: Rich Console instance.
-        model: Current model name.
-        cwd: Current working directory.
-        tools: List of tool definitions.
-        enabled_toolsets: List of enabled toolset names.
-        session_id: Session identifier.
-        get_toolset_for_tool: Callable to map tool name -> toolset name.
-        context_length: Model's context window size in tokens.
+        console: Rich Console 实例。
+        model: 当前模型名称。
+        cwd: 当前工作目录。
+        tools: 工具定义列表。
+        enabled_toolsets: 已启用的工具集名称列表。
+        session_id: 会话标识符。
+        get_toolset_for_tool: 将工具名称映射到工具集名称的可调用对象。
+        context_length: 模型的上下文窗口大小（以 Token 计）。
     """
     from model_tools import check_tool_availability, TOOLSET_REQUIREMENTS
     from rich.panel import Panel
@@ -489,9 +488,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
 
     _, unavailable_toolsets = check_tool_availability(quiet=True)
     disabled_tools = set()
-    # Tools whose toolset has a check_fn are lazy-initialized (e.g. honcho,
-    # homeassistant) — they show as unavailable at banner time because the
-    # check hasn't run yet, but they aren't misconfigured.
+    # 那些工具集具有 check_fn 的工具是延迟初始化的（例如 honcho, homeassistant）——它们在横幅显示时显示为不可用，因为检查尚未运行，但它们并未配置错误。
     lazy_tools = set()
     for item in unavailable_toolsets:
         toolset_name = item.get("name", "")
@@ -506,13 +503,13 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     layout_table.add_column("left", justify="center")
     layout_table.add_column("right", justify="left")
 
-    # Resolve skin colors once for the entire banner
+    # 为整个横幅解析一次皮肤颜色
     accent = _skin_color("banner_accent", "#FFBF00")
     dim = _skin_color("banner_dim", "#B8860B")
     text = _skin_color("banner_text", "#FFF8DC")
     session_color = _skin_color("session_border", "#8B8682")
 
-    # Use skin's custom caduceus art if provided
+    # 如果皮肤提供了自定义蛇杖艺术，则使用它
     try:
         from hermes_cli.skin_engine import get_active_skin
         _bskin = get_active_skin()
@@ -530,7 +527,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     left_lines.append(f"[{accent}]{model_short}[/]{ctx_str} [dim {dim}]·[/] [dim {dim}]Nous Research[/]")
 
     if os.getenv("HERMES_YOLO_MODE"):
-        left_lines.append(f"[bold red]⚠ YOLO 模式[/] [dim {dim}]— 所有审批提示已绕过[/]")
+        left_lines.append(f"[bold red]⚠ YOLO 模式[/] [dim {dim}]— 所有批准提示已绕过[/]")
     left_lines.append(f"[dim {dim}]{cwd}[/]")
     if session_id:
         left_lines.append(f"[dim {session_color}]会话: {session_id}[/]")
@@ -541,7 +538,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
 
     for tool in tools:
         tool_name = tool["function"]["name"]
-        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "other")
+        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "其他")
         toolsets_dict.setdefault(toolset, []).append(tool_name)
 
     for item in unavailable_toolsets:
@@ -595,7 +592,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     if remaining_toolsets > 0:
         right_lines.append(f"[dim {dim}](以及 {remaining_toolsets} 个更多工具集...)[/]")
 
-    # MCP Servers section (only if configured)
+    # MCP 服务器部分（仅在配置时显示）
     try:
         from tools.mcp_tool import get_mcp_status
         mcp_status = get_mcp_status()
@@ -611,10 +608,15 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
                     f"[dim {dim}]{srv['name']}[/] [{text}]({srv['transport']})[/] "
                     f"[dim {dim}]—[/] [{text}]{srv['tools']} 个工具[/]"
                 )
+            elif srv.get("disabled"):
+                right_lines.append(
+                    f"[dim {dim}]{srv['name']}[/] [dim]({srv['transport']})[/] "
+                    f"[dim {dim}]— 已禁用[/]"
+                )
             else:
                 right_lines.append(
                     f"[red]{srv['name']}[/] [dim]({srv['transport']})[/] "
-                    f"[red]— 连接失败[/]"
+                    f"[red]— 失败[/]"
                 )
 
     right_lines.append("")
@@ -642,9 +644,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     if mcp_connected:
         summary_parts.append(f"{mcp_connected} 个 MCP 服务器")
     summary_parts.append("/help 查看命令")
-    # Indicate when the codex_app_server runtime is active so users
-    # understand why tool counts may not match what's actually reachable
-    # (codex builds its own tool list inside the spawned subprocess).
+    # 当 codex_app_server 运行时处于活动状态时进行指示，以便用户理解为什么工具数量可能与实际可用的不匹配（codex 在其生成的子进程内部构建自己的工具列表）。
     try:
         from hermes_cli.codex_runtime_switch import get_current_runtime
         from hermes_cli.config import load_config as _load_cfg
@@ -655,18 +655,18 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
             )
     except Exception:
         pass
-    # Show active profile name when not 'default'
+    # 当活动配置文件不是 'default' 时显示其名称
     try:
         from hermes_cli.profiles import get_active_profile_name
         _profile_name = get_active_profile_name()
         if _profile_name and _profile_name != "default":
             right_lines.append(f"[bold {accent}]配置文件:[/] [{text}]{_profile_name}[/]")
     except Exception:
-        pass  # Never break the banner over a profiles.py bug
+        pass  # 绝不让配置文件错误破坏横幅
 
     right_lines.append(f"[dim {dim}]{' · '.join(summary_parts)}[/]")
 
-    # Update check — use prefetched result if available
+    # 更新检查 — 如果可用，使用预取的结果
     try:
         behind = get_update_result(timeout=0.5)
         if behind is not None and behind != 0:
@@ -678,31 +678,26 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
                     f"[dim yellow] — 运行 [bold]{recommended_update_command()}[/bold] 以更新[/]"
                 )
             else:
-                # UPDATE_AVAILABLE_NO_COUNT: nix-built hermes; we know an update
-                # exists but not by how much, and we don't know how the user
-                # installed it (nix run, profile, system flake, home-manager).
+                # UPDATE_AVAILABLE_NO_COUNT: nix 构建的 hermes；我们知道存在更新但不知道具体落后多少，并且我们不知道用户是如何安装的（nix run, profile, system flake, home-manager）。
                 managed_cmd = get_managed_update_command()
                 line = "[bold yellow]⚠ 有可用更新[/]"
                 if managed_cmd:
                     line += f"[dim yellow] — 运行 [bold]{managed_cmd}[/bold][/]"
                 right_lines.append(line)
     except Exception:
-        pass  # Never break the banner over an update check
+        pass  # 绝不让更新检查破坏横幅
 
-    # Pip-install warning — `pip install hermes-agent` is not the supported
-    # install path (it exists on PyPI for internal/CI reasons, not end users).
-    # Such installs miss the git checkout + installer-managed deps, so updates,
-    # self-update, and issue triage don't behave correctly. Warn, don't block.
+    # Pip 安装警告 — `pip install hermes-agent` 不是受支持的安装路径（它在 PyPI 上存在是出于内部/CI 原因，而非面向最终用户）。此类安装会缺少 git 检出和安装程序管理的依赖项，因此更新、自我更新和问题排查无法正常工作。发出警告，但不阻止。
     try:
         from hermes_cli.config import detect_install_method
         if detect_install_method() == "pip":
             right_lines.append(
-                "[bold yellow]⚠ pip 安装方式不受官方支持[/]"
-                "[dim yellow] — 此方式因非用户安装目的而存在；"
-                "请预期不稳定性和问题无法得到支持[/]"
+                "[bold yellow]⚠ pip 安装非官方支持[/]"
+                "[dim yellow] — 存在的原因并非面向用户安装；"
+                "请预期不稳定性和无法支持问题[/]"
             )
     except Exception:
-        pass  # Never break the banner over the install-method check
+        pass  # 绝不让安装方法检查破坏横幅
 
     right_content = "\n".join(right_lines)
     layout_table.add_row(left_content, right_content)

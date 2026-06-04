@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: "贡献指南"
-description: "如何为 Hermes Agent 做贡献 — 开发环境设置、代码风格、PR 流程"
+description: "如何为 Hermes Agent 做贡献 —— 开发环境设置、代码风格、PR 流程"
 ---
 
 # 贡献指南
@@ -14,11 +14,11 @@ description: "如何为 Hermes Agent 做贡献 — 开发环境设置、代码�
 
 1.  **Bug 修复** — 崩溃、错误行为、数据丢失
 2.  **跨平台兼容性** — macOS、不同的 Linux 发行版、WSL2
-3.  **安全加固** — shell 注入、提示词注入、路径遍历
+3.  **安全加固** — 命令注入、提示词注入、路径遍历
 4.  **性能和健壮性** — 重试逻辑、错误处理、优雅降级
 5.  **新技能** — 广泛有用的技能（参见[创建技能](creating-skills.md)）
 6.  **新工具** — 很少需要；大多数功能应作为技能实现
-7.  **文档** — 修复、澄清、新增示例
+7.  **文档** — 修复、澄清、新示例
 
 ## 常见贡献路径
 
@@ -33,7 +33,7 @@ description: "如何为 Hermes Agent 做贡献 — 开发环境设置、代码�
 
 | 要求 | 备注 |
 |-------------|-------|
-| **Git** | 支持 `--recurse-submodules`，并安装 `git-lfs` 扩展 |
+| **Git** | 需安装 `git-lfs` 扩展 |
 | **Python 3.11+** | 如果缺失，uv 会安装它 |
 | **uv** | 快速的 Python 包管理器（[安装](https://docs.astral.sh/uv/)） |
 | **Node.js 20+** | 可选 — 浏览器工具和 WhatsApp 桥接需要（与根目录 `package.json` 中的 engines 字段匹配） |
@@ -41,7 +41,7 @@ description: "如何为 Hermes Agent 做贡献 — 开发环境设置、代码�
 ### 克隆与安装
 
 ```bash
-git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git
+git clone https://github.com/NousResearch/hermes-agent.git
 cd hermes-agent
 
 # 使用 Python 3.11 创建虚拟环境
@@ -62,7 +62,7 @@ mkdir -p ~/.hermes/{cron,sessions,logs,memories,skills}
 cp cli-config.yaml.example ~/.hermes/config.yaml
 touch ~/.hermes/.env
 
-# 至少添加一个 LLM 提供商密钥：
+# 至少添加一个 LLM 提供商的密钥：
 echo 'OPENROUTER_API_KEY=sk-or-v1-your-key' >> ~/.hermes/.env
 ```
 
@@ -86,23 +86,23 @@ pytest tests/ -v
 
 ## 代码风格
 
--   **PEP 8**，但有实际例外（不严格强制行长限制）
--   **注释**：仅在解释非显而易见的意图、权衡或 API 特性时使用
--   **错误处理**：捕获特定异常。对于意外错误，使用 `logger.warning()`/`logger.error()` 并设置 `exc_info=True`
--   **跨平台**：切勿假设 Unix 环境（见下文）
--   **配置文件安全路径**：切勿硬编码 `~/.hermes` — 对于代码路径，使用 `hermes_constants` 中的 `get_hermes_home()`；对于面向用户的消息，使用 `display_hermes_home()`。完整规则请参见 [AGENTS.md](https://github.com/NousResearch/hermes-agent/blob/main/AGENTS.md#profiles-multi-instance-support)。
+- **PEP 8**，但有实际例外（不强制严格的代码行长度限制）
+- **注释**：仅在解释非显而易见的意图、权衡或 API 特性时使用
+- **错误处理**：捕获特定异常。对于意外错误，使用 `logger.warning()`/`logger.error()` 并设置 `exc_info=True`
+- **跨平台**：切勿假设 Unix 环境（见下文）
+- **配置文件安全路径**：切勿硬编码 `~/.hermes` — 对于代码路径，使用 `hermes_constants` 中的 `get_hermes_home()`；对于面向用户的消息，使用 `display_hermes_home()`。完整规则请参见 [AGENTS.md](https://github.com/NousResearch/hermes-agent/blob/main/AGENTS.md#profiles-multi-instance-support)。
 
 ## 跨平台兼容性
 
-Hermes 官方支持 **Linux、macOS、WSL2 和原生 Windows（通过 PowerShell 安装）**。原生 Windows 使用 Git Bash（来自 [Git for Windows](https://git-scm.com/download/win)）执行 shell 命令。少数功能需要 POSIX 内核原语并受限制：仪表板的嵌入式 PTY 终端窗格（`/chat` 标签页）仅限 WSL2。如果您主要进行 Windows 开发，请在推送前运行 Windows 隐患检查脚本（`scripts/check-windows-footguns.py`）。
+Hermes 官方支持 **Linux、macOS、WSL2 和原生 Windows（通过 PowerShell 安装）**。原生 Windows 使用 Git Bash（来自 [Git for Windows](https://git-scm.com/download/win)）执行 shell 命令。少数功能需要 POSIX 内核原语，因此受到限制：仪表板的嵌入式 PTY 终端窗格（`/chat` 标签页）仅限 WSL2。如果您主要进行 Windows 开发，请在推送代码前运行 Windows 隐患检查脚本（`scripts/check-windows-footguns.py`）。
 
 贡献代码时，请牢记以下规则：
 
--   **不要添加未经保护的 `signal.SIGKILL` 引用。** 它在 Windows 上未定义。要么通过 `gateway.status.terminate_pid(pid, force=True)` 路由（这是在 Windows 上执行 `taskkill /T /F` 和在 POSIX 上发送 SIGKILL 的集中化原语），要么使用 `getattr(signal, "SIGKILL", signal.SIGTERM)` 回退。
--   **在 `os.kill(pid, 0)` 探测时，同时捕获 `OSError` 和 `ProcessLookupError`。** Windows 对于已不存在的 PID 会引发 `OSError`（WinError 87，"参数不正确"）而不是 `ProcessLookupError`。
--   **不要强制终端使用 POSIX 语义。** `os.setsid`、`os.killpg`、`os.getpgid`、`os.fork` 在 Windows 上都会引发异常 — 使用 `if sys.platform != "win32":` 或 `if os.name != "nt":` 来限制它们。
--   **使用显式的 `encoding="utf-8"` 打开文件。** Python 在 Windows 上的默认编码是系统区域设置（通常是 cp1252），这会导致非拉丁文本乱码或崩溃。
--   **使用 `pathlib.Path` / `os.path.join` — 切勿手动用 `/` 拼接。** 这对于操作系统返回给我们的字符串影响较小，但对于我们构造并传递给子进程的字符串则很重要。
+- **不要添加未经保护的 `signal.SIGKILL` 引用。** 它在 Windows 上未定义。要么通过 `gateway.status.terminate_pid(pid, force=True)` 路由（这是集中化的原语，在 Windows 上执行 `taskkill /T /F`，在 POSIX 上发送 SIGKILL），要么使用 `getattr(signal, "SIGKILL", signal.SIGTERM)` 作为后备。
+- **在 `os.kill(pid, 0)` 探测时，同时捕获 `OSError` 和 `ProcessLookupError`。** Windows 对于已不存在的 PID 会引发 `OSError`（WinError 87，"参数不正确"），而不是 `ProcessLookupError`。
+- **不要强制终端使用 POSIX 语义。** `os.setsid`、`os.killpg`、`os.getpgid`、`os.fork` 在 Windows 上都会引发异常 — 使用 `if sys.platform != "win32":` 或 `if os.name != "nt":` 来限制它们。
+- **使用显式的 `encoding="utf-8"` 打开文件。** Python 在 Windows 上的默认编码是系统区域设置（通常是 cp1252），这会导致非拉丁文本乱码或崩溃。
+- **使用 `pathlib.Path` / `os.path.join` — 切勿手动用 `/` 拼接。** 对于操作系统返回给我们的字符串，这影响较小；但对于我们构造并传递给子进程的字符串，这很重要。
 
 关键模式：
 
@@ -116,7 +116,7 @@ try:
     menu = TerminalMenu(options)
     idx = menu.show()
 except (ImportError, NotImplementedError):
-    # 回退方案：编号菜单
+    # 后备方案：编号菜单
     for i, opt in enumerate(options):
         print(f"  {i+1}. {opt}")
     idx = int(input("Choice: ")) - 1
@@ -149,29 +149,29 @@ if platform.system() != "Windows":
 
 ## 安全注意事项
 
-Hermes 具有终端访问权限。安全至关重要。
+Hermes 拥有终端访问权限。安全至关重要。
 
 ### 现有保护措施
 
 | 层级 | 实现 |
 |-------|---------------|
-| **Sudo 密码管道** | 使用 `shlex.quote()` 防止 shell 注入 |
+| **Sudo 密码管道** | 使用 `shlex.quote()` 防止命令注入 |
 | **危险命令检测** | `tools/approval.py` 中的正则表达式模式，配合用户审批流程 |
 | **定时任务提示词注入** | 扫描器阻止指令覆盖模式 |
 | **写入拒绝列表** | 通过 `os.path.realpath()` 解析受保护路径，防止符号链接绕过 |
-| **技能防护** | 对 hub 安装的技能进行安全扫描 |
+| **技能防护** | 对中心安装的技能进行安全扫描 |
 | **代码执行沙盒** | 子进程运行时剥离 API 密钥 |
-| **容器加固** | Docker：所有能力被丢弃，无权限提升，PID 限制 |
+| **容器加固** | Docker：丢弃所有 capabilities，无权限提升，限制 PID |
 
 ### 贡献安全敏感代码
 
--   将用户输入插入 shell 命令时，始终使用 `shlex.quote()`
--   在进行访问控制检查前，使用 `os.path.realpath()` 解析符号链接
--   不要记录密钥
--   在工具执行周围捕获广泛的异常
--   如果您的更改涉及文件路径或进程，请在所有平台上测试
+- 将用户输入插入 shell 命令时，始终使用 `shlex.quote()`
+- 在进行访问控制检查前，使用 `os.path.realpath()` 解析符号链接
+- 不要记录密钥
+- 在工具执行周围捕获宽泛的异常
+- 如果您的更改涉及文件路径或进程，请在所有平台上进行测试
 
-## Pull Request 流程
+## 拉取请求流程
 
 ### 分支命名
 
@@ -193,17 +193,17 @@ refactor/description   # 代码重构
 ### PR 描述
 
 请包含：
--   **什么**改变了以及**为什么**改变
--   **如何测试**它
--   您在**哪些平台**上进行了测试
--   引用任何相关的问题
+- **什么** 改变了以及 **为什么**
+- **如何测试** 它
+- 您在 **哪些平台** 上测试过
+- 引用任何相关的问题
 
 ### 提交信息
 
-我们使用[约定式提交](https://www.conventionalcommits.org/)：
+我们使用 [Conventional Commits](https://www.conventionalcommits.org/)：
 
 ```
-<type>(<scope>): <description>
+<类型>(<范围>): <描述>
 ```
 
 | 类型 | 用于 |
@@ -215,29 +215,29 @@ refactor/description   # 代码重构
 | `refactor` | 代码重构 |
 | `chore` | 构建、CI、依赖项更新 |
 
-作用域：`cli`、`gateway`、`tools`、`skills`、`agent`、`install`、`whatsapp`、`security`
+范围：`cli`、`gateway`、`tools`、`skills`、`agent`、`install`、`whatsapp`、`security`
 
 示例：
 ```
-fix(cli): prevent crash in save_config_value when model is a string
-feat(gateway): add WhatsApp multi-user session isolation
-fix(security): prevent shell injection in sudo password piping
+fix(cli): 修复 save_config_value 中当 model 为字符串时崩溃的问题
+feat(gateway): 添加 WhatsApp 多用户会话隔离
+fix(security): 防止 sudo 密码管道中的命令注入
 ```
 
 ## 报告问题
 
--   使用 [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
--   请包含：操作系统、Python 版本、Hermes 版本（`hermes version`）、完整的错误回溯
--   包含复现步骤
--   创建问题前检查现有问题
--   对于安全漏洞，请私下报告
+- 使用 [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
+- 请包含：操作系统、Python 版本、Hermes 版本（`hermes version`）、完整的错误回溯
+- 包含复现步骤
+- 创建问题前请检查现有问题是否重复
+- 对于安全漏洞，请私下报告
 
 ## 社区
 
--   **Discord**：[discord.gg/NousResearch](https://discord.gg/NousResearch)
--   **GitHub Discussions**：用于设计提案和架构讨论
--   **技能中心**：上传专业技能并与社区分享
+- **Discord**：[discord.gg/NousResearch](https://discord.gg/NousResearch)
+- **GitHub Discussions**：用于设计提案和架构讨论
+- **技能中心**：上传专业技能并与社区分享
 
 ## 许可证
 
-通过贡献，您同意您的贡献将根据 [MIT 许可证](https://github.com/NousResearch/hermes-agent/blob/main/LICENSE)进行许可。
+通过贡献，您同意您的贡献将根据 [MIT 许可证](https://github.com/NousResearch/hermes-agent/blob/main/LICENSE) 进行许可。

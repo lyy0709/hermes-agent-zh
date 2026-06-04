@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4
 title: "记忆提供商"
-description: "外部记忆提供商插件 — Honcho, OpenViking, Mem0, Hindsight, Holographic, RetainDB, ByteRover, Supermemory"
+description: "外部记忆提供商插件 — Honcho、OpenViking、Mem0、Hindsight、Holographic、RetainDB、ByteRover、Supermemory"
 ---
 
 # 记忆提供商
 
-Hermes Agent 内置了 8 个外部记忆提供商插件，为 Agent 提供超越内置 MEMORY.md 和 USER.md 的持久化、跨会话知识。一次只能激活**一个**外部提供商 —— 内置记忆始终与其同时处于活动状态。
+Hermes Agent 内置了 8 个外部记忆提供商插件，为 Agent 提供超越内置 MEMORY.md 和 USER.md 的持久化、跨会话知识。一次只能激活**一个**外部提供商 —— 内置记忆始终与其同时处于激活状态。
 
 ## 快速开始
 
@@ -30,11 +30,11 @@ memory:
 当记忆提供商激活时，Hermes 会自动：
 
 1.  **注入提供商上下文**到系统提示词中（提供商知道的内容）
-2.  **在每轮对话前预取相关记忆**（后台、非阻塞）
-3.  **在每次响应后将对话轮次同步**给提供商
-4.  **在会话结束时提取记忆**（对于支持此功能的提供商）
+2.  **在每次对话轮次前预取相关记忆**（后台、非阻塞）
+3.  **在每次响应后将对话轮次同步**到提供商
+4.  **在会话结束时提取记忆**（适用于支持此功能的提供商）
 5.  **将内置记忆的写入操作镜像**到外部提供商
-6.  **添加提供商特定的工具**，以便 Agent 可以搜索、存储和管理记忆
+6.  **添加提供商特定的工具**，使 Agent 能够搜索、存储和管理记忆
 
 内置记忆（MEMORY.md / USER.md）继续像以前一样工作。外部提供商是附加的。
 
@@ -42,7 +42,7 @@ memory:
 
 ### Honcho
 
-具有辩证推理、会话范围上下文注入、语义搜索和持久化结论的 AI 原生跨会话用户建模。基础上下文现在包含会话摘要以及用户表征和同伴卡片，让 Agent 了解已经讨论过的内容。
+具有辩证推理、会话范围上下文注入、语义搜索和持久化结论的 AI 原生跨会话用户建模。基础上下文现在包括会话摘要以及用户表示和同伴卡片，使 Agent 能够了解已经讨论过的内容。
 
 | | |
 |---|---|
@@ -51,24 +51,24 @@ memory:
 | **数据存储** | Honcho Cloud 或自托管 |
 | **成本** | Honcho 定价（云端）/ 免费（自托管） |
 
-**工具 (5):** `honcho_profile`（读取/更新同伴卡片），`honcho_search`（语义搜索），`honcho_context`（会话上下文 —— 摘要、表征、卡片、消息），`honcho_reasoning`（LLM 合成），`honcho_conclude`（创建/删除结论）
+**工具 (5):** `honcho_profile` (读取/更新同伴卡片), `honcho_search` (语义搜索), `honcho_context` (会话上下文 — 摘要、表示、卡片、消息), `honcho_reasoning` (LLM 合成), `honcho_conclude` (创建/删除结论)
 
-**架构:** 两层上下文注入 —— 基础层（会话摘要 + 表征 + 同伴卡片，根据 `contextCadence` 刷新）加上辩证补充层（LLM 推理，根据 `dialecticCadence` 刷新）。辩证层根据是否存在基础上下文，自动选择冷启动提示词（通用用户事实）或热启动提示词（会话范围上下文）。
+**架构:** 两层上下文注入 —— 基础层（会话摘要 + 表示 + 同伴卡片，按 `contextCadence` 刷新）加上辩证补充层（LLM 推理，按 `dialecticCadence` 刷新）。辩证层根据是否存在基础上下文，自动选择冷启动提示词（通用用户事实）或热启动提示词（会话范围上下文）。
 
 **三个正交的配置旋钮**独立控制成本和深度：
 
-- `contextCadence` —— 基础层刷新的频率（API 调用频率）
-- `dialecticCadence` —— 辩证 LLM 触发的频率（LLM 调用频率）
-- `dialecticDepth` —— 每次辩证调用中 `.chat()` 传递的次数（1–3，推理深度）
+- `contextCadence` — 基础层刷新的频率（API 调用频率）
+- `dialecticCadence` — 辩证 LLM 触发的频率（LLM 调用频率）
+- `dialecticDepth` — 每次辩证调用中 `.chat()` 传递的次数（1–3，推理深度）
 
 **设置向导:**
 ```bash
-hermes memory setup        # 选择 "honcho" —— 运行 Honcho 特定的安装后设置
+hermes memory setup        # 选择 "honcho" — 运行 Honcho 特定的安装后设置
 ```
 
-在新安装时，可以直接使用 `hermes memory setup honcho` 配置 Honcho。旧的 `hermes honcho setup` 命令仍然有效（现在会重定向到 `hermes memory setup`），但只有在 Honcho 被选为激活的记忆提供商后才会注册。
+旧的 `hermes honcho setup` 命令仍然有效（现在会重定向到 `hermes memory setup`），但只有在 Honcho 被选为激活的记忆提供商后才会注册。
 
-**配置:** `$HERMES_HOME/honcho.json`（配置文件本地）或 `~/.honcho/config.json`（全局）。解析顺序：`$HERMES_HOME/honcho.json` > `~/.hermes/honcho.json` > `~/.honcho/config.json`。请参阅 [配置参考](https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/honcho/README.md) 和 [Honcho 集成指南](https://docs.honcho.dev/v3/guides/integrations/hermes)。
+**配置:** `$HERMES_HOME/honcho.json` (配置文件本地) 或 `~/.honcho/config.json` (全局)。解析顺序：`$HERMES_HOME/honcho.json` > `~/.hermes/honcho.json` > `~/.honcho/config.json`。请参阅 [配置参考](https://github.com/NousResearch/hermes-agent/blob/main/plugins/memory/honcho/README.md) 和 [Honcho 集成指南](https://docs.honcho.dev/v3/guides/integrations/hermes)。
 
 <details>
 <summary>完整配置参考</summary>
@@ -80,26 +80,26 @@ hermes memory setup        # 选择 "honcho" —— 运行 Honcho 特定的安�
 | `peerName` | -- | 用户同伴身份 |
 | `aiPeer` | host key | AI 同伴身份（每个配置文件一个） |
 | `workspace` | host key | 共享工作区 ID |
-| `contextTokens` | `null`（无上限） | 每轮自动注入上下文的 Token 预算。在单词边界处截断 |
-| `contextCadence` | `1` | `context()` API 调用（基础层刷新）之间的最小轮次数 |
+| `contextTokens` | `null` (无上限) | 每轮自动注入上下文的 Token 预算。在单词边界处截断 |
+| `contextCadence` | `1` | `context()` API 调用之间的最小轮次数（基础层刷新） |
 | `dialecticCadence` | `2` | `peer.chat()` LLM 调用之间的最小轮次数。建议 1–5。仅适用于 `hybrid`/`context` 模式 |
 | `dialecticDepth` | `1` | 每次辩证调用中 `.chat()` 传递的次数。限制在 1–3。传递 0：冷/热启动提示词，传递 1：自我审核，传递 2：调和 |
-| `dialecticDepthLevels` | `null` | 可选的每轮推理级别数组，例如 `["minimal", "low", "medium"]`。覆盖比例默认值 |
+| `dialecticDepthLevels` | `null` | 可选的每次传递的推理级别数组，例如 `["minimal", "low", "medium"]`。覆盖比例默认值 |
 | `dialecticReasoningLevel` | `'low'` | 基础推理级别：`minimal`, `low`, `medium`, `high`, `max` |
 | `dialecticDynamic` | `true` | 当为 `true` 时，模型可以通过工具参数覆盖每次调用的推理级别 |
 | `dialecticMaxChars` | `600` | 注入系统提示词的辩证结果的最大字符数 |
-| `recallMode` | `'hybrid'` | `hybrid`（自动注入 + 工具），`context`（仅注入），`tools`（仅工具） |
-| `writeFrequency` | `'async'` | 何时刷新消息：`async`（后台线程），`turn`（同步），`session`（结束时批量），或整数 N |
+| `recallMode` | `'hybrid'` | `hybrid` (自动注入 + 工具), `context` (仅注入), `tools` (仅工具) |
+| `writeFrequency` | `'async'` | 何时刷新消息：`async` (后台线程), `turn` (同步), `session` (结束时批量), 或整数 N |
 | `saveMessages` | `true` | 是否将消息持久化到 Honcho API |
-| `observationMode` | `'directional'` | `directional`（全部开启）或 `unified`（共享池）。使用 `observation` 对象覆盖 |
+| `observationMode` | `'directional'` | `directional` (全部开启) 或 `unified` (共享池)。用 `observation` 对象覆盖 |
 | `messageMaxChars` | `25000` | 每条消息的最大字符数（如果超过则分块） |
 | `dialecticMaxInputChars` | `10000` | 辩证查询输入到 `peer.chat()` 的最大字符数 |
 | `sessionStrategy` | `'per-directory'` | `per-directory`, `per-repo`, `per-session`, `global` |
+
 </details>
 
 <details>
-<summary>最小 honcho.json（云端）</summary>
-
+<summary>最小 honcho.json 配置（云端）</summary>
 ```json
 {
   "apiKey": "your-key-from-app.honcho.dev",
@@ -117,7 +117,7 @@ hermes memory setup        # 选择 "honcho" —— 运行 Honcho 特定的安�
 </details>
 
 <details>
-<summary>最小 honcho.json（自托管）</summary>
+<summary>最小化 honcho.json（自托管）</summary>
 
 ```json
 {
@@ -141,24 +141,24 @@ hermes memory setup        # 选择 "honcho" —— 运行 Honcho 特定的安�
 
 **多对等体设置：**
 
-Honcho 将会话建模为交换消息的对等体——每个 Hermes 配置文件有一个用户对等体加一个 AI 对等体，所有对等体共享一个工作区。工作区是共享的执行环境：用户对等体在所有配置文件中是全局的，每个 AI 对等体是其独立的身份。每个 AI 对等体根据其自身的观察构建独立的表示/卡片，因此 `coder` 配置文件保持代码导向，而 `writer` 配置文件在相同的用户面前保持编辑导向。
+Honcho 将会话建模为交换消息的对等体——每个 Hermes 配置文件对应一个用户对等体加上一个 AI 对等体，所有对等体共享一个工作空间。工作空间是共享的执行环境：用户对等体在所有配置文件中是全局的，每个 AI 对等体是其独立的身份。每个 AI 对等体都根据自己的观察构建独立的表示/卡片，因此 `coder` 配置文件保持面向代码，而 `writer` 配置文件针对同一用户保持面向编辑。
 
 映射关系：
 
-| 概念 | 含义 |
+| 概念 | 说明 |
 |---------|-----------|
-| **工作区** | 共享的执行环境。同一工作区下的所有 Hermes 配置文件看到相同的用户身份。 |
-| **用户对等体** (`peerName`) | 人类用户。在工作区内的所有配置文件中共享。 |
+| **工作空间** | 共享的执行环境。同一工作空间下的所有 Hermes 配置文件看到相同的用户身份。 |
+| **用户对等体** (`peerName`) | 人类用户。在工作空间内的所有配置文件中共享。 |
 | **AI 对等体** (`aiPeer`) | 每个 Hermes 配置文件一个。主机键 `hermes` → 默认；`hermes.<profile>` 用于其他配置文件。 |
-| **观察** | 每个对等体的开关，控制 Honcho 从谁的消息中建模。`directional`（默认，所有四个开关开启）或 `unified`（单一观察者池）。 |
+| **观察** | 每个对等体的开关，控制 Honcho 从谁的消息中建模。`directional`（默认，所有四个开关开启）或 `unified`（单观察者池）。 |
 
-### 新配置文件，全新的 Honcho 对等体
+### 新建配置文件，创建新的 Honcho 对等体
 
 ```bash
 hermes profile create coder --clone
 ```
 
-`--clone` 在 `honcho.json` 中创建一个 `hermes.coder` 主机块，包含 `aiPeer: "coder"`、共享的 `workspace`、继承的 `peerName`、`recallMode`、`writeFrequency`、`observation` 等。AI 对等体会在 Honcho 中预先创建，以便在第一条消息之前就存在。
+`--clone` 会在 `honcho.json` 中创建一个 `hermes.coder` 主机块，包含 `aiPeer: "coder"`、共享的 `workspace`、继承的 `peerName`、`recallMode`、`writeFrequency`、`observation` 等。AI 对等体会在 Honcho 中预先创建，以便在第一条消息之前就存在。
 
 ### 现有配置文件，回填 Honcho 对等体
 
@@ -186,13 +186,13 @@ hermes honcho sync
 
 | 开关 | 效果 |
 |--------|--------|
-| `observeMe` | Honcho 从该对等体自身的消息中构建其表示 |
-| `observeOthers` | 该对等体观察其他对等体的消息（支持跨对等体推理） |
+| `observeMe` | Honcho 根据此对等体自己的消息构建其表示 |
+| `observeOthers` | 此对等体观察另一个对等体的消息（支持跨对等体推理） |
 
 通过 `observationMode` 预设：
 
-- **`"directional"`**（默认）—— 所有四个标志开启。完全相互观察；启用跨对等体辩证。
-- **`"unified"`** —— 用户 `observeMe: true`，AI `observeOthers: true`，其余为 false。单一观察者池；AI 对用户建模但不自我建模，用户对等体仅自我建模。
+- **`"directional"`**（默认）—— 所有四个标志开启。完全相互观察；支持跨对等体辩证。
+- **`"unified"`** —— 用户 `observeMe: true`，AI `observeOthers: true`，其余为 false。单观察者池；AI 对用户建模但不自我建模，用户对等体仅自我建模。
 
 通过 [Honcho 仪表板](https://app.honcho.dev) 设置的服务器端开关优先于本地默认值——在会话初始化时同步回来。
 
@@ -267,7 +267,7 @@ hermes honcho sync
 | **最适合** | 具有结构化浏览功能的自托管知识管理 |
 | **要求** | `pip install openviking` + 运行服务器 |
 | **数据存储** | 自托管（本地或云端） |
-| **成本** | 免费（开源，AGPL-3.0 许可证） |
+| **成本** | 免费（开源，AGPL-3.0） |
 
 **工具：** `viking_search`（语义搜索）、`viking_read`（分层：摘要/概览/全文）、`viking_browse`（文件系统导航）、`viking_remember`（存储事实）、`viking_add_resource`（摄取 URL/文档）
 
@@ -279,25 +279,25 @@ openviking-server
 
 # 然后配置 Hermes
 hermes memory setup    # 选择 "openviking"
-# 或者手动配置：
+# 或者手动设置：
 hermes config set memory.provider openviking
 echo "OPENVIKING_ENDPOINT=http://localhost:1933" >> ~/.hermes/.env
 ```
 **核心特性：**
-- 分层上下文加载：L0（约 100 Token）→ L1（约 2k）→ L2（完整）
+- 分层上下文加载：L0（约 100 个 Token）→ L1（约 2k）→ L2（完整）
 - 会话提交时自动提取记忆（个人资料、偏好、实体、事件、案例、模式）
-- 用于分层知识浏览的 `viking://` URI 方案
+- `viking://` URI 方案用于分层知识浏览
 
 ---
 
 ### Mem0
 
-具备语义搜索、重排序和自动去重功能的服务器端 LLM 事实提取。
+服务端 LLM 事实提取，具备语义搜索、重排序和自动去重功能。
 
 | | |
 |---|---|
 | **最适合** | 无需手动干预的记忆管理 — Mem0 自动处理提取 |
-| **需要** | `pip install mem0ai` + API 密钥 |
+| **要求** | `pip install mem0ai` + API 密钥 |
 | **数据存储** | Mem0 Cloud |
 | **成本** | Mem0 定价 |
 
@@ -306,7 +306,7 @@ echo "OPENVIKING_ENDPOINT=http://localhost:1933" >> ~/.hermes/.env
 **设置：**
 ```bash
 hermes memory setup    # 选择 "mem0"
-# 或手动：
+# 或手动设置：
 hermes config set memory.provider mem0
 echo "MEM0_API_KEY=your-key" >> ~/.hermes/.env
 ```
@@ -322,12 +322,12 @@ echo "MEM0_API_KEY=your-key" >> ~/.hermes/.env
 
 ### Hindsight
 
-具备知识图谱、实体解析和多策略检索的长期记忆。`hindsight_reflect` 工具提供跨记忆的综合分析，这是其他提供商所不具备的。自动保留完整的对话轮次（包括工具调用），并具有会话级别的文档跟踪。
+具备知识图谱、实体解析和多策略检索的长期记忆。`hindsight_reflect` 工具提供跨记忆的综合分析，这是其他提供商所不具备的。自动保留完整的对话轮次（包括工具调用），并跟踪会话级别的文档。
 
 | | |
 |---|---|
 | **最适合** | 基于知识图谱的、包含实体关系的记忆召回 |
-| **需要** | 云端：来自 [ui.hindsight.vectorize.io](https://ui.hindsight.vectorize.io) 的 API 密钥。本地：LLM API 密钥（OpenAI、Groq、OpenRouter 等） |
+| **要求** | 云端：来自 [ui.hindsight.vectorize.io](https://ui.hindsight.vectorize.io) 的 API 密钥。本地：LLM API 密钥（OpenAI、Groq、OpenRouter 等） |
 | **数据存储** | Hindsight Cloud 或本地嵌入式 PostgreSQL |
 | **成本** | Hindsight 定价（云端）或免费（本地） |
 
@@ -336,12 +336,12 @@ echo "MEM0_API_KEY=your-key" >> ~/.hermes/.env
 **设置：**
 ```bash
 hermes memory setup    # 选择 "hindsight"
-# 或手动：
+# 或手动设置：
 hermes config set memory.provider hindsight
 echo "HINDSIGHT_API_KEY=your-key" >> ~/.hermes/.env
 ```
 
-设置向导会自动安装依赖项，并且只安装所选模式所需的包（云端模式安装 `hindsight-client`，本地模式安装 `hindsight-all`）。需要 `hindsight-client >= 0.4.22`（如果版本过旧，会在会话启动时自动升级）。
+设置向导会自动安装依赖项，并且只安装所选模式所需的包（云端模式安装 `hindsight-client`，本地模式安装 `hindsight-all`）。要求 `hindsight-client >= 0.4.22`（如果版本过旧，会在会话启动时自动升级）。
 
 **本地模式 UI：** `hindsight-embed -p hermes ui start`
 
@@ -358,7 +358,7 @@ echo "HINDSIGHT_API_KEY=your-key" >> ~/.hermes/.env
 | `retain_async` | `true` | 在服务器上异步处理保留操作 |
 | `retain_context` | `conversation between Hermes Agent and the User` | 为保留的记忆添加的上下文标签 |
 | `retain_tags` | — | 应用于保留记忆的默认标签；与每次工具调用时的标签合并 |
-| `retain_source` | — | 附加到保留记忆的可选 `metadata.source` |
+| `retain_source` | — | 可选附加到保留记忆的 `metadata.source` |
 | `retain_user_prefix` | `User` | 在自动保留的对话记录中，用户轮次前使用的标签 |
 | `retain_assistant_prefix` | `Assistant` | 在自动保留的对话记录中，助手轮次前使用的标签 |
 | `recall_tags` | — | 召回时用于过滤的标签 |
@@ -374,20 +374,20 @@ echo "HINDSIGHT_API_KEY=your-key" >> ~/.hermes/.env
 | | |
 |---|---|
 | **最适合** | 仅限本地、具备高级检索功能的记忆，无外部依赖 |
-| **需要** | 无（SQLite 始终可用）。NumPy 可选，用于 HRR 代数运算。 |
+| **要求** | 无（SQLite 始终可用）。NumPy 可选，用于 HRR 代数运算。 |
 | **数据存储** | 本地 SQLite |
 | **成本** | 免费 |
 
-**工具：** `fact_store`（9 个操作：添加、搜索、探查、相关、推理、矛盾、更新、移除、列表）、`fact_feedback`（有用/无用评分，用于训练信任度分数）
+**工具：** `fact_store`（9 个操作：添加、搜索、探查、相关、推理、矛盾、更新、删除、列表）、`fact_feedback`（有用/无用评分，用于训练信任度分数）
 
 **设置：**
 ```bash
 hermes memory setup    # 选择 "holographic"
-# 或手动：
+# 或手动设置：
 hermes config set memory.provider holographic
 ```
 
-**配置：** `plugins.hermes-memory-store` 下的 `config.yaml`
+**配置：** `config.yaml` 位于 `plugins.hermes-memory-store` 下
 
 | 键 | 默认值 | 描述 |
 |-----|---------|-------------|
@@ -396,21 +396,21 @@ hermes config set memory.provider holographic
 | `default_trust` | `0.5` | 默认信任度分数（0.0–1.0） |
 
 **独特能力：**
-- `probe` — 针对特定实体的代数式召回（关于一个人/事物的所有事实）
-- `reason` — 跨多个实体的组合式 AND 查询
+- `probe` — 针对特定实体的代数召回（关于一个人/事物的所有事实）
+- `reason` — 跨多个实体的组合 AND 查询
 - `contradict` — 自动检测冲突事实
-- 带有非对称反馈的信任度评分（+0.05 有用 / -0.10 无用）
+- 信任度评分，带有非对称反馈（+0.05 有用 / -0.10 无用）
 
 ---
 
 ### RetainDB
 
-具备混合搜索（向量 + BM25 + 重排序）、7 种记忆类型和增量压缩的云端记忆 API。
+云端记忆 API，具备混合搜索（向量 + BM25 + 重排序）、7 种记忆类型和增量压缩功能。
 
 | | |
 |---|---|
 | **最适合** | 已经在使用 RetainDB 基础设施的团队 |
-| **需要** | RetainDB 账户 + API 密钥 |
+| **要求** | RetainDB 账户 + API 密钥 |
 | **数据存储** | RetainDB Cloud |
 | **成本** | $20/月 |
 
@@ -419,7 +419,7 @@ hermes config set memory.provider holographic
 **设置：**
 ```bash
 hermes memory setup    # 选择 "retaindb"
-# 或手动：
+# 或手动设置：
 hermes config set memory.provider retaindb
 echo "RETAINDB_API_KEY=your-key" >> ~/.hermes/.env
 ```
@@ -428,12 +428,12 @@ echo "RETAINDB_API_KEY=your-key" >> ~/.hermes/.env
 
 ### ByteRover
 
-通过 `brv` CLI 实现的持久化记忆 — 具备分层检索（模糊文本 → LLM 驱动搜索）的分层知识树。本地优先，可选云端同步。
+通过 `brv` CLI 实现的持久化记忆 — 分层知识树，具备分层检索（模糊文本 → LLM 驱动的搜索）。本地优先，可选云端同步。
 
 | | |
 |---|---|
 | **最适合** | 希望拥有便携、本地优先记忆并习惯使用 CLI 的开发者 |
-| **需要** | ByteRover CLI (`npm install -g byterover-cli` 或 [安装脚本](https://byterover.dev)) |
+| **要求** | ByteRover CLI (`npm install -g byterover-cli` 或 [安装脚本](https://byterover.dev)) |
 | **数据存储** | 本地（默认）或 ByteRover Cloud（可选同步） |
 | **成本** | 免费（本地）或 ByteRover 定价（云端） |
 **工具：** `brv_query`（搜索知识树）、`brv_curate`（存储事实/决策/模式）、`brv_status`（CLI 版本 + 树统计信息）
@@ -458,7 +458,7 @@ hermes config set memory.provider byterover
 
 ### Supermemory
 
-具备用户画像召回、语义搜索、显式记忆工具以及通过 Supermemory 图 API 进行会话结束对话摄取功能的语义长期记忆。
+具备配置文件召回、语义搜索、显式记忆工具以及通过 Supermemory 图 API 进行会话结束对话摄取功能的语义长期记忆。
 
 | | |
 |---|---|
@@ -467,7 +467,7 @@ hermes config set memory.provider byterover
 | **数据存储** | Supermemory Cloud |
 | **成本** | Supermemory 定价 |
 
-**工具：** `supermemory_store`（保存显式记忆）、`supermemory_search`（语义相似性搜索）、`supermemory_forget`（按 ID 或最佳匹配查询遗忘）、`supermemory_profile`（持久化画像 + 近期上下文）
+**工具：** `supermemory_store`（保存显式记忆）、`supermemory_search`（语义相似性搜索）、`supermemory_forget`（按 ID 或最佳匹配查询遗忘）、`supermemory_profile`（持久化配置文件 + 近期上下文）
 
 **设置：**
 ```bash
@@ -483,9 +483,9 @@ echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env
 |-----|---------|-------------|
 | `container_tag` | `hermes` | 用于搜索和写入的容器标签。支持 `{identity}` 模板用于配置文件作用域的标签。 |
 | `auto_recall` | `true` | 在每次轮次前注入相关记忆上下文 |
-| `auto_capture` | `true` | 在每次响应后存储清理后的用户-助手轮次 |
-| `max_recall_results` | `10` | 格式化到上下文中的最大召回项数 |
-| `profile_frequency` | `50` | 在首次轮次及每 N 轮次中包含画像事实 |
+| `auto_capture` | `true` | 每次响应后存储清理后的用户-助手轮次 |
+| `max_recall_results` | `10` | 格式化到上下文中的最大召回条目数 |
+| `profile_frequency` | `50` | 在首次轮次和每 N 次轮次中包含配置文件事实 |
 | `capture_mode` | `all` | 默认跳过微小或琐碎的轮次 |
 | `search_mode` | `hybrid` | 搜索模式：`hybrid`、`memories` 或 `documents` |
 | `api_timeout` | `5.0` | SDK 和摄取请求的超时时间 |
@@ -494,11 +494,11 @@ echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env
 
 **主要特性：**
 - 自动上下文隔离 —— 从捕获的轮次中剥离召回的回忆，以防止递归记忆污染
-- 会话结束对话摄取，用于更丰富的图级知识构建
-- 在首次轮次和可配置的间隔注入画像事实
-- 琐碎消息过滤（跳过“好的”、“谢谢”等）
-- **配置文件作用域的容器** —— 在 `container_tag` 中使用 `{identity}`（例如 `hermes-{identity}` → `hermes-coder`）以按 Hermes 配置文件隔离记忆
-- **多容器模式** —— 启用 `enable_custom_container_tags` 并配置 `custom_containers` 列表，以允许 Agent 跨命名容器进行读写。自动操作（同步、预取）保持在主容器上。
+- 全会话摄取 —— 整个对话在会话边界一次性发送
+- 会话结束对话摄取（发送到 `/v4/conversations`），用于在 Supermemory 中构建更丰富的配置文件和图
+- 配置文件事实在首次轮次和可配置的间隔注入
+- **配置文件作用域的容器** —— 在 `container_tag` 中使用 `{identity}`（例如 `hermes-{identity}` → `hermes-coder`）以隔离每个 Hermes 配置文件的记忆
+- **多容器模式** —— 启用 `enable_custom_container_tags` 并设置 `custom_containers` 列表，允许 Agent 跨命名容器进行读写。自动操作保持在主容器上。
 
 <details>
 <summary>多容器示例</summary>
@@ -518,7 +518,7 @@ echo 'SUPERMEMORY_API_KEY=***' >> ~/.hermes/.env
 
 ### Memori
 
-使用 Memori Cloud 的结构化长期记忆，具备后台已完成轮次捕获、工具感知的轮次上下文，以及用于事实、摘要、配额、注册和反馈的显式召回工具。
+使用 Memori Cloud 的结构化长期记忆，具有后台已完成轮次捕获、工具感知的轮次上下文以及用于事实、摘要、配额、注册和反馈的显式召回工具。
 
 | | |
 |---|---|
@@ -555,7 +555,7 @@ hermes memory setup
 
 ## 配置文件隔离
 
-每个提供商的数据都按[配置文件](/user-guide/profiles)隔离：
+每个提供商的数据都按[配置文件](/user-guide/profiles)进行隔离：
 
 - **本地存储提供商**（Holographic、ByteRover）使用 `$HERMES_HOME/` 路径，该路径因配置文件而异
 - **配置文件提供商**（Honcho、Mem0、Hindsight、Supermemory）将配置存储在 `$HERMES_HOME/` 中，因此每个配置文件都有自己的凭据
