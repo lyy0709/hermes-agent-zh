@@ -1,14 +1,14 @@
 ---
-title: "Hermes Agent — 配置、扩展或为 Hermes Agent 做贡献"
+title: "Hermes Agent — 配置、扩展或贡献给 Hermes Agent"
 sidebar_label: "Hermes Agent"
-description: "配置、扩展或为 Hermes Agent 做贡献"
+description: "配置、扩展或贡献给 Hermes Agent"
 ---
 
 {/* 此页面由技能的 SKILL.md 通过 website/scripts/generate-skill-docs.py 自动生成。请编辑源文件 SKILL.md，而非此页面。 */}
 
 # Hermes Agent
 
-配置、扩展或为 Hermes Agent 做贡献。
+配置、扩展或贡献给 Hermes Agent。
 
 ## 技能元数据
 
@@ -31,20 +31,20 @@ description: "配置、扩展或为 Hermes Agent 做贡献"
 
 # Hermes Agent
 
-Hermes Agent 是 Nous Research 开发的一个开源 AI Agent 框架，可在你的终端、消息平台和 IDE 中运行。它属于与 Claude Code (Anthropic)、Codex (OpenAI) 和 OpenClaw 相同的类别——这些是使用工具调用来与你的系统交互的自主编码和任务执行 Agent。Hermes 可与任何 LLM 提供商（OpenRouter、Anthropic、OpenAI、DeepSeek、本地模型等 15 家以上）配合使用，并运行在 Linux、macOS 和 WSL 上。
+Hermes Agent 是 Nous Research 开发的开源 AI Agent 框架，可在你的终端、消息平台和 IDE 中运行。它与 Claude Code (Anthropic)、Codex (OpenAI) 和 OpenClaw 属于同一类别——这些是使用工具调用来与你的系统交互的自主编码和任务执行 Agent。Hermes 可与任何 LLM 提供商（OpenRouter、Anthropic、OpenAI、DeepSeek、本地模型等 15 家以上）配合使用，并运行在 Linux、macOS 和 WSL 上。
 
 Hermes 的不同之处：
 
-- **通过技能自我改进** — Hermes 通过将可重复使用的过程保存为技能来从经验中学习。当它解决了一个复杂问题、发现了一个工作流或被纠正时，它可以将这些知识持久化为技能文档，加载到未来的会话中。技能随时间积累，使 Agent 在你特定的任务和环境中表现得更好。
+- **通过技能自我改进** — Hermes 通过将可重用过程保存为技能来从经验中学习。当它解决复杂问题、发现工作流或被纠正时，可以将该知识持久化为技能文档，加载到未来的会话中。技能会随时间积累，使 Agent 更擅长你的特定任务和环境。
 - **跨会话的持久记忆** — 记住你是谁、你的偏好、环境细节和学到的经验教训。可插拔的记忆后端（内置、Honcho、Mem0 等）让你可以选择记忆的工作方式。
 - **多平台消息网关** — 同一个 Agent 可在 Telegram、Discord、Slack、WhatsApp、Signal、Matrix、Email 等 10 多个平台上运行，并拥有完整的工具访问权限，而不仅仅是聊天。
-- **提供商无关** — 在工作流中随时更换模型和提供商，无需更改其他任何内容。凭证池会自动在多个 API 密钥之间轮换。
-- **配置文件** — 运行多个独立的 Hermes 实例，拥有隔离的配置、会话、技能和记忆。
-- **可扩展** — 插件、MCP 服务器、自定义工具、webhook 触发器、cron 调度以及完整的 Python 生态系统。
+- **提供商无关** — 在工作流中更换模型和提供商，无需更改其他任何内容。凭证池会自动在多个 API 密钥之间轮换。
+- **配置文件** — 运行多个独立的 Hermes 实例，具有隔离的配置、会话、技能和记忆。
+- **可扩展** — 插件、MCP 服务器、自定义工具、Webhook 触发器、定时任务调度以及完整的 Python 生态系统。
 
-人们使用 Hermes 进行软件开发、研究、系统管理、数据分析、内容创作、家庭自动化，以及任何其他受益于具有持久上下文和完整系统访问权限的 AI Agent 的任务。
+人们使用 Hermes 进行软件开发、研究、系统管理、数据分析、内容创作、家庭自动化，以及任何受益于具有持久上下文和完整系统访问权限的 AI Agent 的任务。
 
-**此技能帮助你高效地使用 Hermes Agent** — 设置它、配置功能、生成额外的 Agent 实例、排查问题、找到正确的命令和设置，以及在你需要扩展或为其做贡献时理解系统的工作原理。
+**此技能帮助你高效地使用 Hermes Agent** — 设置它、配置功能、生成额外的 Agent 实例、排查问题、找到正确的命令和设置，以及在你需要扩展或贡献时理解系统的工作原理。
 
 **文档：** https://hermes-agent.nousresearch.com/docs/
 
@@ -52,7 +52,7 @@ Hermes 的不同之处：
 
 ```bash
 # 安装
-curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 
 # 交互式聊天（默认）
 hermes
@@ -81,9 +81,9 @@ hermes [flags] [command]
 
   --version, -V             显示版本
   --resume, -r SESSION      通过 ID 或标题恢复会话
-  --continue, -c [NAME]     通过名称恢复，或恢复最近的会话
+  --continue, -c [NAME]     按名称恢复，或恢复最近的会话
   --worktree, -w            隔离的 git worktree 模式（并行 Agent）
-  --skills, -s SKILL        预加载技能（逗号分隔或重复使用）
+  --skills, -s SKILL        预加载技能（逗号分隔或重复）
   --profile, -p NAME        使用命名的配置文件
   --yolo                    跳过危险命令确认
   --pass-session-id         在系统提示词中包含会话 ID
@@ -143,7 +143,7 @@ hermes skills update        更新过时的技能
 hermes skills uninstall N   移除一个中心技能
 hermes skills publish PATH  发布到注册表
 hermes skills browse        浏览所有可用技能
-hermes skills tap add REPO  添加一个 GitHub 仓库作为技能源
+hermes skills tap add REPO  添加 GitHub 仓库作为技能源
 ```
 ### MCP 服务器
 
@@ -156,6 +156,8 @@ hermes mcp test NAME        测试连接
 hermes mcp configure NAME   切换工具选择
 ```
 
+内置 MCP 客户端如何连接服务器（stdio/HTTP）、自动发现其工具并将其作为一等工具公开，以及目录安装（`hermes mcp install <name>`）：`skill_view(name="hermes-agent", file_path="references/native-mcp.md")`。
+
 ### 消息网关（消息平台）
 
 ```
@@ -167,7 +169,7 @@ hermes gateway status       检查状态
 hermes gateway setup        配置平台
 ```
 
-支持平台：Telegram、Discord、Slack、WhatsApp、Signal、Email、SMS、Matrix、Mattermost、Home Assistant、钉钉、飞书、企业微信、BlueBubbles（iMessage）、微信、API 服务器、Webhooks。Open WebUI 通过 API 服务器适配器连接。
+支持的平台：Telegram、Discord、Slack、WhatsApp、Signal、Email、SMS、Matrix、Mattermost、Home Assistant、DingTalk、Feishu、WeCom、BlueBubbles (iMessage)、Weixin (WeChat)、API Server、Webhooks。Open WebUI 通过 API Server 适配器连接。
 
 平台文档：https://hermes-agent.nousresearch.com/docs/user-guide/messaging/
 
@@ -204,6 +206,8 @@ hermes webhook remove NAME  移除订阅
 hermes webhook test NAME    发送测试 POST 请求
 ```
 
+完整设置、路由配置、负载模板和事件驱动的 Agent 运行模式：`skill_view(name="hermes-agent", file_path="references/webhooks.md")`。
+
 ### 配置文件
 
 ```
@@ -232,27 +236,27 @@ hermes auth reset PROVIDER  清除耗尽状态
 ```
 hermes insights [--days N]  使用情况分析
 hermes update               更新到最新版本
-hermes pairing list/approve/revoke  私信授权管理
+hermes pairing list/approve/revoke  私信授权
 hermes plugins list/install/remove  插件管理
 hermes honcho setup/status  Honcho 记忆集成（需要 honcho 插件）
 hermes memory setup/status/off  记忆提供商配置
 hermes completion bash|zsh  Shell 自动补全
 hermes acp                  ACP 服务器（IDE 集成）
 hermes claw migrate         从 OpenClaw 迁移
-hermes uninstall           卸载 Hermes
+hermes uninstall            卸载 Hermes
 ```
 
 ---
 
 ## 斜杠命令（会话内）
 
-在交互式聊天会话中输入这些命令。新命令会频繁添加；如果下面的内容看起来过时了，请在会话中运行 `/help` 获取权威列表，或查看[实时斜杠命令参考](https://hermes-agent.nousresearch.com/docs/reference/slash-commands)。权威注册表是 `hermes_cli/commands.py` — 所有消费者（自动补全、Telegram 菜单、Slack 映射、`/help`）都从中派生。
+在交互式聊天会话中输入这些命令。新命令会频繁添加；如果下面的内容看起来过时了，请在会话内运行 `/help` 获取权威列表，或查看[实时斜杠命令参考](https://hermes-agent.nousresearch.com/docs/reference/slash-commands)。权威注册表是 `hermes_cli/commands.py` — 所有消费者（自动补全、Telegram 菜单、Slack 映射、`/help`）都从中派生。
 
 ### 会话控制
 ```
 /new (/reset)        新会话
 /clear               清屏 + 新会话（CLI）
-/retry               重新发送最后一条消息
+/retry               重新发送上一条消息
 /undo                移除最后一次交互
 /title [name]        为会话命名
 /compress            手动压缩上下文
@@ -264,7 +268,7 @@ hermes uninstall           卸载 Hermes
 /steer <prompt>      在下一次工具调用后注入一条消息而不中断
 /agents (/tasks)     显示活跃的 Agent 和运行中的任务
 /resume [name]       恢复一个已命名的会话
-/goal [text|sub]     设置一个 Hermes 在后续轮次中持续努力直到达成的长期目标
+/goal [text|sub]     设置一个 Hermes 在多个回合中持续努力直到达成的长期目标
                      （子命令：status、pause、resume、clear）
 /redraw              强制完全重绘 UI（CLI）
 ```
@@ -275,14 +279,14 @@ hermes uninstall           卸载 Hermes
 /model [name]        显示或更改模型
 /personality [name]  设置人格
 /reasoning [level]   设置推理级别（none|minimal|low|medium|high|xhigh|show|hide）
-/verbose             循环切换：off → new → all → verbose
+/verbose             循环：关闭 → 新消息 → 全部 → 详细
 /voice [on|off|tts]  语音模式
 /yolo                切换绕过批准
 /busy [sub]          控制 Hermes 工作时 Enter 键的行为（CLI）
                      （子命令：queue、steer、interrupt、status）
 /indicator [style]   选择 TUI 忙碌指示器样式（CLI）
                      （样式：kaomoji、emoji、unicode、ascii）
-/footer [on|off]     切换在最终回复中显示消息网关运行时元数据页脚
+/footer [on|off]     切换在最终回复上显示消息网关运行时元数据页脚
 /skin [name]         更改主题（CLI）
 /statusbar           切换状态栏（CLI）
 ```
@@ -293,8 +297,8 @@ hermes uninstall           卸载 Hermes
 /toolsets            列出工具集（CLI）
 /skills              搜索/安装技能（CLI）
 /skill <name>        将技能加载到会话中
-/reload-skills       重新扫描 ~/.hermes/skills/ 以查找新增/移除的技能
-/reload              将 .env 变量重新加载到正在运行的会话中（CLI）
+/reload-skills       重新扫描 ~/.hermes/skills/ 以获取新增/移除的技能
+/reload              将 .env 变量重新加载到运行中的会话（CLI）
 /reload-mcp          重新加载 MCP 服务器
 /cron                管理定时任务（CLI）
 /curator [sub]       后台技能维护（status、run、pin、archive、…）
@@ -319,7 +323,7 @@ hermes uninstall           卸载 Hermes
 /browser             打开 CDP 浏览器连接
 /history             显示对话历史记录（CLI）
 /save                将对话保存到文件（CLI）
-/copy [N]            将最后一条助手回复复制到剪贴板（CLI）
+/copy [N]            将最后一条助手响应复制到剪贴板（CLI）
 /paste               附加剪贴板中的图片（CLI）
 /image               附加本地图片文件（CLI）
 ```
@@ -347,13 +351,13 @@ hermes uninstall           卸载 Hermes
 
 ```
 ~/.hermes/config.yaml       主配置文件
-~/.hermes/.env             API 密钥和密钥
-$HERMES_HOME/skills/       已安装的技能
-~/.hermes/sessions/        消息网关路由索引、请求转储、*.jsonl 对话记录（以及当 `sessions.write_json_snapshots: true` 时可选的单会话 JSON 快照）
-~/.hermes/state.db         规范的会话存储（SQLite + FTS5）
-~/.hermes/logs/            消息网关和错误日志
-~/.hermes/auth.json        OAuth Token 和凭证池
-~/.hermes/hermes-agent/    源代码（如果是通过 git 安装）
+~/.hermes/.env              API 密钥和密钥
+$HERMES_HOME/skills/        已安装的技能
+~/.hermes/sessions/         消息网关路由索引、请求转储、*.jsonl 对话记录（以及当 sessions.write_json_snapshots: true 时可选的单会话 JSON 快照）
+~/.hermes/state.db          规范会话存储（SQLite + FTS5）
+~/.hermes/logs/             消息网关和错误日志
+~/.hermes/auth.json         OAuth Token 和凭证池
+~/.hermes/hermes-agent/     源代码（如果是通过 git 安装）
 ```
 
 配置文件使用 `~/.hermes/profiles/<name>/` 目录，布局相同。
@@ -432,7 +436,7 @@ $HERMES_HOME/skills/       已安装的技能
 | `clarify` | 向用户询问澄清性问题 |
 | `messaging` | 跨平台消息发送 |
 | `todo` | 会话内任务规划和跟踪 |
-| `kanban` | 多 Agent 工作队列工具（仅限工作节点） |
+| `kanban` | 多 Agent 工作队列工具（仅限工作节点使用） |
 | `debugging` | 额外的内省/调试工具（默认关闭） |
 | `safe` | 用于锁定会话的最小化、低风险工具集 |
 | `spotify` | Spotify 播放和播放列表控制 |
@@ -443,7 +447,7 @@ $HERMES_HOME/skills/       已安装的技能
 | `feishu_drive` | 飞书（Lark）云盘工具 |
 | `yuanbao` | 元宝集成工具 |
 | `rl` | 强化学习工具（默认关闭） |
-| `moa` | 混合 Agent（默认关闭） |
+| `moa` | Agent 混合（默认关闭） |
 
 完整枚举位于 `toolsets.py` 中的 `TOOLSETS` 字典；`_HERMES_CORE_TOOLS` 是大多数平台继承的默认捆绑包。
 工具变更在 `/reset`（新会话）时生效。它们不会在对话中途应用，以保留提示词缓存。
@@ -452,17 +456,17 @@ $HERMES_HOME/skills/       已安装的技能
 
 ## 安全与隐私开关
 
-常见的“为什么 Hermes 要对我的输出/工具调用/命令执行 X 操作？”开关——以及更改它们的精确命令。大多数这些开关需要新的会话（在聊天中使用 `/reset`，或启动新的 `hermes` 调用），因为它们只在启动时读取一次。
+常见的“为什么 Hermes 要对我的输出/工具调用/命令执行 X 操作？”开关——以及更改它们的精确命令。大多数这些开关需要一个新的会话（在聊天中使用 `/reset`，或启动一个新的 `hermes` 调用），因为它们只在启动时读取一次。
 
-### 工具输出中的密钥脱敏
+### 工具输出中的秘密信息脱敏
 
-密钥脱敏**默认开启**——工具输出（终端 stdout、`read_file`、网页内容、子 Agent 摘要等）在进入对话上下文和日志之前，会被扫描以查找类似 API 密钥、Token 和密钥的字符串。正常使用时请保持启用：
+秘密信息脱敏**默认开启**——工具输出（终端 stdout、`read_file`、网页内容、子 Agent 摘要等）在进入对话上下文和日志之前，会被扫描以查找看起来像 API 密钥、Token 和秘密信息的字符串。正常使用时请保持启用：
 
 ```bash
 hermes config set security.redact_secrets true       # 全局保持启用
 ```
 
-**需要重启。** `security.redact_secrets` 在导入时被快照——在会话中途切换它（例如，通过工具调用中的 `export HERMES_REDACT_SECRETS=false`）将不会对正在运行的进程生效。告诉用户在终端中通过配置更改它，然后启动新会话。这是有意为之——防止 LLM 在任务中途自行切换开关。
+**需要重启。** `security.redact_secrets` 在导入时被快照——在会话中途切换它（例如，通过工具调用中的 `export HERMES_REDACT_SECRETS=false`）将不会对正在运行的进程生效。告诉用户在终端中通过配置更改它，然后启动一个新会话。这是有意为之——防止 LLM 在任务中途自行切换开关。
 
 仅在您故意需要原始凭据类字符串进行调试或脱敏器开发时禁用：
 ```bash
@@ -471,7 +475,7 @@ hermes config set security.redact_secrets false
 
 ### 消息网关消息中的 PII 脱敏
 
-与密钥脱敏分开。启用后，消息网关会在用户 ID 到达模型之前对其进行哈希处理，并从会话上下文中移除电话号码：
+与秘密信息脱敏分开。启用后，消息网关会在用户 ID 到达模型之前对其进行哈希处理，并从会话上下文中移除电话号码：
 
 ```bash
 hermes config set privacy.redact_pii true    # 启用
@@ -491,19 +495,19 @@ hermes config set approvals.mode smart       # 推荐的折中方案
 hermes config set approvals.mode off         # 绕过所有检查（不推荐）
 ```
 
-不更改配置的情况下，每次调用绕过：
+在不更改配置的情况下，每次调用绕过：
 - `hermes --yolo …`
 - `export HERMES_YOLO_MODE=1`
 
-注意：YOLO / `approvals.mode: off` 不会关闭密钥脱敏。它们是独立的。
+注意：YOLO / `approvals.mode: off` 不会关闭秘密信息脱敏。它们是独立的。
 
 ### Shell 钩子允许列表
 
-某些 shell 钩子集成在触发前需要显式允许。通过 `~/.hermes/shell-hooks-allowlist.json` 管理——首次有钩子想要运行时，会进行交互式提示。
+某些 shell 钩子集成需要在触发前明确允许。通过 `~/.hermes/shell-hooks-allowlist.json` 管理——首次有钩子想要运行时，会进行交互式提示。
 
-### 禁用网页/浏览器/图像生成工具
+### 禁用网络/浏览器/图像生成工具
 
-为了让模型完全无法访问网络或媒体工具，打开 `hermes tools` 并按平台切换。在下一次会话（`/reset`）时生效。请参阅上文的工具与技能部分。
+要完全阻止模型访问网络或媒体工具，请打开 `hermes tools` 并按平台切换。在下一个会话（`/reset`）时生效。请参阅上文的工具与技能部分。
 
 ---
 
@@ -537,15 +541,15 @@ stt:
 | OpenAI | `VOICE_TOOLS_OPENAI_KEY` | 付费 |
 | MiniMax | `MINIMAX_API_KEY` | 付费 |
 | Mistral (Voxtral) | `MISTRAL_API_KEY` | 付费 |
-| NeuTTS (本地) | 无 (`pip install neutts[all]` + `espeak-ng`) | 免费 |
+| NeuTTS (本地) | 无（`pip install neutts[all]` + `espeak-ng`） | 免费 |
 
-语音命令：`/voice on`（语音到语音）、`/voice tts`（始终语音）、`/voice off`。
+语音命令：`/voice on`（语音到语音），`/voice tts`（始终语音），`/voice off`。
 
 ---
 
 ## 生成额外的 Hermes 实例
 
-将额外的 Hermes 进程作为完全独立的子进程运行——独立的会话、工具和执行环境。
+将额外的 Hermes 进程作为完全独立的子进程运行——拥有独立的会话、工具和执行环境。
 
 ### 何时使用此功能 vs delegate_task
 
@@ -615,8 +619,8 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 ### 提示
 
 - **快速子任务优先使用 `delegate_task`** — 比生成完整进程开销更小
-- **生成编辑代码的 Agent 时使用 `-w`（工作树模式）** — 防止 git 冲突
-- **为一次性模式设置超时** — 复杂任务可能需要 5-10 分钟
+- **编辑代码的 Agent 生成时使用 `-w`（工作树模式）** — 防止 git 冲突
+- **单次运行模式设置超时** — 复杂任务可能需要 5-10 分钟
 - **使用 `hermes chat -q` 实现“发射后不管”** — 无需 PTY
 - **交互式会话使用 tmux** — 原始 PTY 模式在 prompt_toolkit 中存在 `\r` 与 `\n` 的问题
 - **对于定时任务**，使用 `cronjob` 工具而非生成进程 — 处理交付和重试
@@ -631,10 +635,10 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 
 同步子 Agent 生成 — 父 Agent 等待子 Agent 的摘要后再继续其自身循环。隔离的上下文 + 终端会话。
 
-- **单个：** `delegate_task(goal, context, toolsets)`。
+- **单任务：** `delegate_task(goal, context, toolsets)`。
 - **批量：** `delegate_task(tasks=[{goal, ...}, ...])` 并行运行子任务，上限由 `delegation.max_concurrent_children` 控制（默认 3）。
 - **角色：** `leaf`（默认；不能重新委派）与 `orchestrator`（可以生成自己的工作者，受 `delegation.max_spawn_depth` 限制）。
-- **非持久化。** 如果父进程被中断，子进程将被取消。对于必须持续到本轮之后的工作，请使用 `cronjob` 或 `terminal(background=True, notify_on_complete=True)`。
+- **非持久化。** 如果父进程被中断，子进程会被取消。对于必须持续到本轮之后的工作，请使用 `cronjob` 或 `terminal(background=True, notify_on_complete=True)`。
 
 配置：`config.yaml` 中的 `delegation.*`。
 
@@ -643,18 +647,18 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 持久化调度器 — `cron/jobs.py` + `cron/scheduler.py`。通过 `cronjob` 工具、`hermes cron` CLI（`list`、`add`、`edit`、`pause`、`resume`、`run`、`remove`）或 `/cron` 斜杠命令驱动。
 
 - **调度：** 时长（`"30m"`、`"2h"`）、“every”短语（`"every monday 9am"`）、5字段 cron（`"0 9 * * *"`）或 ISO 时间戳。
-- **每任务配置：** `skills`、`model`/`provider` 覆盖、`script`（运行前数据收集；`no_agent=True` 使脚本成为整个任务）、`context_from`（将任务 A 的输出链接到任务 B）、`workdir`（在特定目录中运行，并加载其 `AGENTS.md` / `CLAUDE.md`）、多平台交付。
+- **每任务配置：** `skills`、`model`/`provider` 覆盖、`script`（运行前数据收集；`no_agent=True` 使脚本成为整个任务）、`context_from`（将任务 A 的输出链接到任务 B）、`workdir`（在特定目录中运行并加载其 `AGENTS.md` / `CLAUDE.md`）、多平台交付。
 - **不变性：** 每次运行有 3 分钟硬中断限制、`.tick.lock` 文件防止跨进程重复执行、cron 会话默认传递 `skip_memory=True`，并且 cron 交付内容带有页眉/页脚，而不是直接镜像到目标消息网关会话（保持角色交替的完整性）。
 
 用户文档：https://hermes-agent.nousresearch.com/docs/user-guide/features/cron
 
 ### Curator（技能生命周期）
 
-对 Agent 创建的技能进行后台维护。跟踪使用情况，标记闲置技能为陈旧，归档陈旧技能，保留运行前的 tar.gz 备份，确保无数据丢失。
+对 Agent 创建的技能进行后台维护。跟踪使用情况，标记闲置技能为陈旧，归档陈旧技能，保留运行前的 tar.gz 备份以防数据丢失。
 
 - **CLI：** `hermes curator <verb>` — `status`、`run`、`pause`、`resume`、`pin`、`unpin`、`archive`、`restore`、`prune`、`backup`、`rollback`。
 - **斜杠命令：** `/curator <subcommand>` 镜像 CLI 功能。
-- **范围：** 仅处理来源为 `created_by: "agent"` 的技能。捆绑 + 从 hub 安装的技能不受影响。**永不删除** — 最具破坏性的操作是归档。已固定的技能免于所有自动转换和所有 LLM 审查流程。
+- **范围：** 仅处理来源为 `created_by: "agent"` 的技能。捆绑的 + 从 hub 安装的技能不受影响。**永不删除** — 最具破坏性的操作是归档。已固定的技能免于所有自动转换和所有 LLM 审查流程。
 - **遥测：** 位于 `~/.hermes/skills/.usage.json` 的 sidecar 文件保存每个技能的 `use_count`、`view_count`、`patch_count`、`last_activity_at`、`state`、`pinned`。
 
 配置：`curator.*`（`enabled`、`interval_hours`、`min_idle_hours`、`stale_after_days`、`archive_after_days`、`backup.*`）。
@@ -662,11 +666,11 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 
 ### Kanban（多 Agent 工作队列）
 
-用于多配置文件 / 多工作者协作的持久化 SQLite 看板。用户通过 `hermes kanban <verb>` 驱动；由调度器生成的工作者会看到一个受 `HERMES_KANBAN_TASK` 限制的聚焦型 `kanban_*` 工具集，而编排器配置文件可以选择加入更广泛的 `kanban` 工具集。除非配置，否则普通会话仍然具有零 `kanban_*` 架构占用。
+用于多配置文件 / 多工作者协作的持久化 SQLite 看板。用户通过 `hermes kanban <verb>` 驱动；由调度器生成的工作者会看到一个受 `HERMES_KANBAN_TASK` 限制的聚焦 `kanban_*` 工具集，而编排器配置文件可以选择加入更广泛的 `kanban` 工具集。除非配置，否则普通会话仍然具有零 `kanban_*` 架构占用。
 
 - **CLI 动词（常用）：** `init`、`create`、`list`（别名 `ls`）、`show`、`assign`、`link`、`unlink`、`comment`、`complete`、`block`、`unblock`、`archive`、`tail`。不常用：`watch`、`stats`、`runs`、`log`、`dispatch`、`daemon`、`gc`。
 - **工作者/编排器工具集：** `kanban_show`、`kanban_complete`、`kanban_block`、`kanban_heartbeat`、`kanban_comment`、`kanban_create`、`kanban_link`；在调度器生成的任务之外明确启用 `kanban` 工具集的配置文件还会获得 `kanban_list` 和 `kanban_unblock` 用于看板路由。
-- **调度器** 默认在消息网关内运行（`kanban.dispatch_in_gateway: true`）— 回收陈旧的认领，提升就绪任务，原子化认领，生成分配到的配置文件。在连续生成失败 `failure_limit` 次后自动阻塞任务（默认 2；可通过 `kanban.failure_limit` 或每任务 `max_retries` 配置）。
+- **调度器** 默认在消息网关内运行（`kanban.dispatch_in_gateway: true`）— 回收陈旧的认领，提升就绪任务，原子化认领，生成已分配配置文件。在连续 `failure_limit` 次生成失败后自动阻塞任务（默认 2；可通过 `kanban.failure_limit` 或每任务 `max_retries` 配置）。
 - **隔离：** 看板是硬边界（工作者在环境中固定了 `HERMES_KANBAN_BOARD`）；租户是看板内的软命名空间，用于工作空间路径 + 记忆键隔离。
 
 用户文档：https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban
@@ -675,14 +679,14 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 
 ## Windows 特定注意事项
 
-Hermes 在 Windows 上原生运行（PowerShell、cmd、Windows Terminal、git-bash mintty、VS Code 集成终端）。大部分功能都能正常工作，但 Win32 和 POSIX 之间存在一些差异，我们曾因此遇到问题 — 当你遇到新的差异时，请在此处记录，以便下一个人（或下一个会话）不必从头重新发现它们。
+Hermes 原生运行于 Windows（PowerShell、cmd、Windows Terminal、git-bash mintty、VS Code 集成终端）。大部分功能都能正常工作，但 Win32 和 POSIX 之间存在一些差异曾给我们带来麻烦 — 当你遇到新的差异时，请在此记录，以便下一个人（或下一个会话）不必从头重新发现它们。
 
 ### 输入 / 键绑定
 
-**Alt+Enter 不会插入换行符。** Windows Terminal 在终端层拦截 Alt+Enter 以切换全屏 — 该按键永远不会到达 prompt_toolkit。请改用 **Ctrl+Enter**。Windows Terminal 将 Ctrl+Enter 作为 LF（`c-j`）传递，与普通 Enter（`c-m` / CR）不同，并且 CLI 仅在 `win32` 上将 `c-j` 绑定到换行插入（参见 `_bind_prompt_submit_keys` + `cli.py` 中仅限 Windows 的 `c-j` 绑定）。副作用：原始的 Ctrl+J 按键在 Windows 上也会插入换行符 — 这是不可避免的，因为 Windows Terminal 在 Win32 控制台 API 层将 Ctrl+Enter 和 Ctrl+J 折叠为相同的键码。在 Windows 上，Ctrl+J 没有冲突的绑定，因此这是一个无害的副作用。
-mintty / git-bash 的行为相同（Alt+Enter 全屏），除非你在 选项 → 键 中禁用 Alt+Fn 快捷键。更简单的做法是直接使用 Ctrl+Enter。
+**Alt+Enter 不会插入换行符。** Windows Terminal 在终端层拦截 Alt+Enter 以切换全屏 — 该按键永远不会到达 prompt_toolkit。请改用 **Ctrl+Enter**。Windows Terminal 将 Ctrl+Enter 作为 LF（`c-j`）传递，与普通 Enter（`c-m` / CR）不同，并且 CLI 仅在 `win32` 上将 `c-j` 绑定到换行符插入（参见 `_bind_prompt_submit_keys` + `cli.py` 中仅限 Windows 的 `c-j` 绑定）。副作用：在 Windows 上，原始的 Ctrl+J 按键也会插入换行符 — 这是不可避免的，因为 Windows Terminal 在 Win32 控制台 API 层将 Ctrl+Enter 和 Ctrl+J 折叠为相同的键码。在 Windows 上，Ctrl+J 没有冲突的绑定，所以这是一个无害的副作用。
+mintty / git-bash 的行为相同（Alt+Enter 全屏），除非你在选项 → 键中禁用 Alt+Fn 快捷键。更简单的方法是直接使用 Ctrl+Enter。
 
-**诊断键位绑定。** 运行 `python scripts/keystroke_diagnostic.py`（仓库根目录）以查看 prompt_toolkit 在当前终端中如何精确识别每个击键。这可以回答诸如“Shift+Enter 是否作为独立按键传入？”（几乎从不——大多数终端将其折叠为普通 Enter）或“我的终端为 Ctrl+Enter 发送什么字节序列？”等问题。这就是如何确定 Ctrl+Enter = c-j 这一事实的。
+**诊断键位绑定。** 运行 `python scripts/keystroke_diagnostic.py`（仓库根目录）以查看 prompt_toolkit 在当前终端中如何精确识别每个击键。可以回答诸如“Shift+Enter 是否作为独立按键传入？”（几乎从不——大多数终端将其折叠为普通 Enter）或“我的终端为 Ctrl+Enter 发送什么字节序列？”等问题。这就是 Ctrl+Enter = c-j 这一事实的确定方式。
 
 ### 配置 / 文件
 
@@ -690,11 +694,11 @@ mintty / git-bash 的行为相同（Alt+Enter 全屏），除非你在 选项 �
 
 ### `execute_code` / 沙盒
 
-来自沙盒子进程的 **WinError 10106**（“无法加载或初始化请求的服务提供程序”）——它无法创建 `AF_INET` 套接字，因此回环 TCP RPC 回退在 `connect()` 之前就失败了。根本原因通常**不是**损坏的 Winsock LSP；而是 Hermes 自身的环境清理器从子进程环境中删除了 `SYSTEMROOT` / `WINDIR` / `COMSPEC`。Python 的 `socket` 模块需要 `SYSTEMROOT` 来定位 `mswsock.dll`。已通过 `tools/code_execution_tool.py` 中的 `_WINDOWS_ESSENTIAL_ENV_VARS` 允许列表修复。如果仍然遇到此问题，请在 `execute_code` 块内回显 `os.environ` 以确认 `SYSTEMROOT` 已设置。完整的诊断方法见 `references/execute-code-sandbox-env-windows.md`。
+沙盒子进程出现 **WinError 10106**（“无法加载或初始化请求的服务提供程序”）——它无法创建 `AF_INET` 套接字，因此环回 TCP RPC 回退在 `connect()` 之前就失败了。根本原因通常**不是**损坏的 Winsock LSP；而是 Hermes 自身的环境清理器从子进程环境中删除了 `SYSTEMROOT` / `WINDIR` / `COMSPEC`。Python 的 `socket` 模块需要 `SYSTEMROOT` 来定位 `mswsock.dll`。已通过 `tools/code_execution_tool.py` 中的 `_WINDOWS_ESSENTIAL_ENV_VARS` 允许列表修复。如果仍然遇到此问题，请在 `execute_code` 块内回显 `os.environ` 以确认 `SYSTEMROOT` 已设置。完整的诊断方法在 `references/execute-code-sandbox-env-windows.md` 中。
 
 ### 测试 / 贡献
 
-**`scripts/run_tests.sh` 在 Windows 上无法直接运行** —— 它查找的是 POSIX 虚拟环境布局（`.venv/bin/activate`）。安装在 `venv/Scripts/` 的 Hermes 虚拟环境中也没有 pip 或 pytest（为减小安装体积而剥离）。变通方法：将 `pytest + pytest-xdist + pyyaml` 安装到系统 Python 3.11 的用户站点，然后设置 `PYTHONPATH` 直接调用 pytest：
+**`scripts/run_tests.sh` 在 Windows 上无法直接运行**——它查找的是 POSIX 虚拟环境布局（`.venv/bin/activate`）。Hermes 安装在 `venv/Scripts/` 的虚拟环境中也没有 pip 或 pytest（为减小安装体积而剥离）。变通方法：将 `pytest + pytest-xdist + pyyaml` 安装到系统 Python 3.11 的用户站点，然后设置 `PYTHONPATH` 直接调用 pytest：
 
 ```bash
 "/c/Program Files/Python311/python" -m pip install --user pytest pytest-xdist pyyaml
@@ -702,21 +706,21 @@ export PYTHONPATH="$(pwd)"
 "/c/Program Files/Python311/python" -m pytest tests/foo/test_bar.py -v --tb=short -n 0
 ```
 
-使用 `-n 0`，而不是 `-n 4` —— `pyproject.toml` 的默认 `addopts` 已经包含了 `-n`，并且包装器的 CI 对等保证不适用于非 POSIX 环境。
+使用 `-n 0`，而不是 `-n 4`——`pyproject.toml` 的默认 `addopts` 已经包含了 `-n`，并且包装器的 CI 对等保证在非 POSIX 系统上不适用。
 
 **仅限 POSIX 的测试需要跳过保护。** 代码库中已有的常见标记：
-- 符号链接 —— Windows 上需要提升权限
-- `0o600` 文件模式 —— 默认情况下 NTFS 不强制执行 POSIX 模式位
-- `signal.SIGALRM` —— 仅限 Unix（参见 `tests/conftest.py::_enforce_test_timeout`）
-- Winsock / Windows 特定的回归问题 —— `@pytest.mark.skipif(sys.platform != "win32", ...)`
+- 符号链接——在 Windows 上需要提升权限
+- `0o600` 文件模式——默认情况下 NTFS 不强制执行 POSIX 模式位
+- `signal.SIGALRM`——仅限 Unix（参见 `tests/conftest.py::_enforce_test_timeout`）
+- Winsock / Windows 特定的回归问题——`@pytest.mark.skipif(sys.platform != "win32", ...)`
 
 使用现有的跳过模式风格（`sys.platform == "win32"` 或 `sys.platform.startswith("win")`）以保持与测试套件其余部分的一致性。
 
 ### 路径 / 文件系统
 
-**行尾符。** Git 可能会警告 `LF 将在 Git 下次接触该文件时被替换为 CRLF`。这只是表面现象 —— 仓库的 `.gitattributes` 会进行规范化。不要让编辑器自动将已提交的 POSIX 换行符文件转换为 CRLF。
+**行尾。** Git 可能会警告 `LF 将在 Git 下次接触它时被替换为 CRLF`。这只是表面问题——仓库的 `.gitattributes` 会进行规范化。不要让编辑器自动将已提交的 POSIX 换行文件转换为 CRLF。
 
-**正斜杠几乎在任何地方都有效。** `C:/Users/...` 被所有 Hermes 工具和大多数 Windows API 接受。在代码和日志中优先使用正斜杠 —— 可以避免在 bash 中转义反斜杠。
+**正斜杠几乎在任何地方都有效。** `C:/Users/...` 被所有 Hermes 工具和大多数 Windows API 接受。在代码和日志中优先使用正斜杠——可以避免在 bash 中转义反斜杠。
 
 ---
 
@@ -762,7 +766,7 @@ grep -i "failed to send\|error" ~/.hermes/logs/gateway.log | tail -20
 ### 平台特定问题
 - **Discord 机器人静默：** 必须在 Bot → Privileged Gateway Intents 中启用 **Message Content Intent**。
 - **Slack 机器人仅在私聊中工作：** 必须订阅 `message.channels` 事件。没有它，机器人会忽略公共频道。
-- **Windows 特定问题**（`Alt+Enter` 换行、WinError 10106、UTF-8 BOM 配置、测试套件、行尾符）：请参阅上面专门的 **Windows 特定注意事项** 部分。
+- **Windows 特定问题**（`Alt+Enter` 换行、WinError 10106、UTF-8 BOM 配置、测试套件、行尾）：请参阅上面的 **Windows 特定注意事项** 部分。
 
 ### 辅助模型不工作
 如果 `auxiliary` 任务（vision, compression, session_search）静默失败，`auto` 提供商无法找到后端。请设置 `OPENROUTER_API_KEY` 或 `GOOGLE_API_KEY`，或者显式配置每个辅助任务的提供商：
@@ -863,7 +867,7 @@ registry.register(
 
 所有消费者（帮助文本、自动补全、Telegram 菜单、Slack 映射）都会自动从中央注册表派生。
 
-### Agent 循环 (高层概览)
+### Agent 循环 (高层概述)
 
 ```
 run_conversation():
@@ -886,7 +890,7 @@ python -m pytest tests/tools/ -q            # 特定区域
 - 推送任何更改前运行完整测试套件
 - 使用 `-o 'addopts='` 清除任何内置的 pytest 标志
 
-**Windows 贡献者：** `scripts/run_tests.sh` 目前查找 POSIX 虚拟环境 (`.venv/bin/activate` / `venv/bin/activate`)，在 Windows 上会出错，因为 Windows 的布局是 `venv/Scripts/activate` + `python.exe`。安装在 `venv/Scripts/` 的 Hermes 虚拟环境也没有 `pip` 或 `pytest` —— 为了最终用户安装包大小进行了精简。变通方法：将 pytest + pytest-xdist + pyyaml 安装到系统 Python 3.11 的用户站点 (`/c/Program Files/Python311/python -m pip install --user pytest pytest-xdist pyyaml`)，然后直接运行测试：
+**Windows 贡献者：** `scripts/run_tests.sh` 目前查找 POSIX 虚拟环境 (`.venv/bin/activate` / `venv/bin/activate`)，在 Windows 上会出错，因为 Windows 的布局是 `venv/Scripts/activate` + `python.exe`。此外，安装在 `venv/Scripts/` 的 Hermes 虚拟环境也没有 `pip` 或 `pytest` —— 为了最终用户安装包大小，它被精简了。解决方法：将 pytest + pytest-xdist + pyyaml 安装到系统 Python 3.11 的用户站点 (`/c/Program Files/Python311/python -m pip install --user pytest pytest-xdist pyyaml`)，然后直接运行测试：
 
 ```bash
 export PYTHONPATH="$(pwd)"
@@ -901,7 +905,7 @@ export PYTHONPATH="$(pwd)"
 - `signal.SIGALRM` → 仅限 Unix (参见 `tests/conftest.py::_enforce_test_timeout`)
 - 实时 Winsock / Windows 特定回归测试 → `@pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific regression")`
 
-**仅对 `sys.platform` 进行 Monkeypatch 是不够的**，当被测试的代码也调用 `platform.system()` / `platform.release()` / `platform.mac_ver()` 时。这些函数会独立地重新读取真实操作系统，因此，在 Windows 运行器上设置 `sys.platform = "linux"` 的测试仍然会看到 `platform.system() == "Windows"` 并进入 Windows 分支。需要同时修补这三者：
+**仅对 `sys.platform` 进行 Monkeypatch 是不够的**，当被测试的代码也调用 `platform.system()` / `platform.release()` / `platform.mac_ver()` 时。这些函数会独立地重新读取真实操作系统，因此，在 Windows 运行器上将 `sys.platform` 设置为 `"linux"` 的测试，仍然会看到 `platform.system() == "Windows"` 并进入 Windows 分支。需要同时修补这三者：
 
 ```python
 monkeypatch.setattr(sys, "platform", "linux")
@@ -913,20 +917,20 @@ monkeypatch.setattr(platform, "release", lambda: "6.8.0-generic")
 
 ### 扩展系统提示词中的执行环境块
 
-关于主机操作系统、用户主目录、当前工作目录、终端后端以及 shell (Windows 上是 bash 与 PowerShell) 的事实性指导信息由 `agent/prompt_builder.py::build_environment_hints()` 生成。这也是 WSL 提示和每个后端探测逻辑所在的位置。约定如下：
+关于主机操作系统、用户主目录、当前工作目录、终端后端以及 shell (Windows 上是 bash 与 PowerShell) 的事实性指导信息，由 `agent/prompt_builder.py::build_environment_hints()` 生成。这也是 WSL 提示和每个后端的探测逻辑所在的位置。约定如下：
 
-- **本地终端后端** → 输出主机信息 (操作系统, `$HOME`, 当前工作目录) + Windows 特定说明 (主机名 ≠ 用户名, `terminal` 使用 bash 而非 PowerShell)。
+- **本地终端后端** → 发出主机信息 (操作系统, `$HOME`, 当前工作目录) + Windows 特定说明 (主机名 ≠ 用户名，`terminal` 使用 bash 而非 PowerShell)。
 - **远程终端后端** (`_REMOTE_TERMINAL_BACKENDS` 中的任何内容：`docker, singularity, modal, daytona, ssh, managed_modal`) → **完全抑制** 主机信息，仅描述后端。通过 `tools.environments.get_environment(...).execute(...)` 在后端内部运行实时的 `uname`/`whoami`/`pwd` 探测，每个进程缓存在 `_BACKEND_PROBE_CACHE` 中，如果探测超时则使用静态回退。
 - **提示词编写的关键事实：** 当 `TERMINAL_ENV != "local"` 时，*每个* 文件工具 (`read_file`, `write_file`, `patch`, `search_files`) 都在后端容器内运行，而不是在主机上。在这种情况下，系统提示词绝不能描述主机 —— Agent 无法触及它。
 完整的设计说明、确切的输出字符串和测试陷阱：
 `references/prompt-builder-environment-hints.md`。
 
-**重构安全模式（POSIX 等效性防护）：** 当你将内联逻辑提取到添加了 Windows/平台特定行为的辅助函数时，请在测试文件中保留一个 `_legacy_<name>` 的预言函数，该函数是旧代码的逐字副本，然后对其进行参数化差异比较。示例：`tests/tools/test_code_execution_windows_env.py::TestPosixEquivalence`。这锁定了 POSIX 行为逐位相同的约束，并使任何未来的偏差因清晰的差异而明显失败。
+**重构安全模式（POSIX 等效性防护）：** 当你将内联逻辑提取到添加了 Windows/平台特定行为的辅助函数时，请在测试文件中保留一个 `_legacy_<name>` 的预言函数，它是旧代码的逐字副本，然后对其进行参数化差异比较。示例：`tests/tools/test_code_execution_windows_env.py::TestPosixEquivalence`。这确保了 POSIX 行为是逐位相同的，并且任何未来的偏差都会通过清晰的差异对比而显著失败。
 
-### 提交规范
+### 提交约定
 
 ```
-类型: 简洁的主题行
+type: 简洁的主题行
 
 可选的正文。
 ```

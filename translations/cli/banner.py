@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 
 # rich 和 prompt_toolkit 是延迟导入的（在需要使用它们的函数内部），而不是在模块级别。
 # 导入此模块位于 TUI 消息网关的关键启动路径上，纯粹是为了访问轻量级的更新检查
-# 辅助函数（``prefetch_update_check``）；在 ``gateway.ready`` 可以触发之前，
-# 急切地拉取 rich.console + prompt_toolkit 增加了约 50ms 的浪费导入时间。
+# 辅助函数（``prefetch_update_check``）；急切地拉取 rich.console + prompt_toolkit
+# 在 ``gateway.ready`` 可以触发之前增加了约 50ms 的浪费导入。
 # 保持仅类型引用可供检查器使用，而无需运行时成本。
 if TYPE_CHECKING:
     from rich.console import Console
@@ -36,7 +36,7 @@ _RST = "\033[0m"
 
 
 def cprint(text: str):
-    """通过 prompt_toolkit 的渲染器打印 ANSI 彩色文本。"""
+    """通过 prompt_toolkit 的渲染器打印 ANSI 着色的文本。"""
     from prompt_toolkit import print_formatted_text as _pt_print
     from prompt_toolkit.formatted_text import ANSI as _PT_ANSI
     _pt_print(_PT_ANSI(text))
@@ -111,11 +111,11 @@ def get_available_skills() -> Dict[str, List[str]]:
 # 更新检查
 # =========================================================================
 
-# 缓存更新检查结果 6 小时，避免重复的 git 获取
+# 缓存更新检查结果6小时，避免重复的 git fetch
 _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 
-# 当我们知道存在更新但无法统计提交数时返回的标记
-# (例如 nix 构建的 hermes — 没有本地 git 历史记录可用来计数)。
+# 当我们知道有更新但无法统计提交数时返回的标记值
+# (例如通过 nix 构建的 hermes — 没有本地 git 历史记录来统计)。
 UPDATE_AVAILABLE_NO_COUNT = -1
 
 _UPSTREAM_REPO_URL = "https://github.com/NousResearch/hermes-agent.git"
@@ -209,16 +209,32 @@ def check_via_pypi() -> Optional[int]:
 def check_for_updates() -> Optional[int]:
     """检查是否有 Hermes 更新可用。
 
-    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 将其与上游 main 分支进行比较。否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数。
+    两条路径：如果设置了 ``HERMES_REVISION``（Nix 构建会嵌入它），则通过 ``git ls-remote`` 与上游 main 分支比较。
+    否则，查找本地 git 仓库并计算落后于 ``origin/main`` 的提交数。
 
-    返回落后的提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
+    返回落后提交数，如果落后但数量未知则返回 ``UPDATE_AVAILABLE_NO_COUNT`` (-1)，
+    如果是最新则返回 ``0``，如果检查失败或不适用则返回 ``None``。缓存 6 小时。
     """
     hermes_home = get_hermes_home()
     cache_file = hermes_home / ".update_check"
     embedded_rev = os.environ.get("HERMES_REVISION") or None
 
-    # 读取缓存 — 如果自上次检查以来，嵌入的修订版本或已安装版本发生了变化，则使缓存失效。版本保护对于 pip 安装很重要：
-    # `check_via_pypi()` 与 VERSION 进行比较，因此 `pip install --upgrade` 会改变 VERSION 但保持 rev 不变（两者均为 None），如果没有这个保护，过时的“落后”计数将在升级后存活长达 6 小时。参见 #34491。
+    # Docker 镜像没有可用于计算提交的工作树 —— 发布的镜像排除了 `.git`（见 .dockerignore）且未设置 HERMES_REVISION（仅 Nix 构建设置）。
+    # 没有此防护，下面的检查会回退到 `check_via_pypi()`，其 PyPI 版本不匹配标志 (1) 会被 CLI 横幅和 TUI 徽章渲染为虚假的
+    # "落后 1 个提交" —— 即使没有涉及 git 仓库或提交计算，并且 `hermes update` 在容器内也会正确拒绝原地运行。
+    # 仪表板的 REST `/api/hermes/update/check` 端点已经以相同方式短路了 docker 检查（web_server.py）；
+    # 在此处镜像该行为，以便横幅/TUI 显示一致。返回 None 会使 Rich 横幅 (build_welcome_banner) 和 Ink 徽章
+    # (branding.tsx, 受 `typeof === 'number' && > 0` 保护) 都不显示任何内容。
+    try:
+        from hermes_cli.config import detect_install_method
+        if detect_install_method() == "docker":
+            return None
+    except Exception:
+        pass
+
+    # 读取缓存 —— 如果自上次检查以来，嵌入的修订版本或已安装版本发生了变化，则使缓存失效。
+    # 版本防护对于 pip 安装很重要：`check_via_pypi()` 与 VERSION 比较，因此 `pip install --upgrade`
+    # 会改变 VERSION 但保持修订版本不变（两者均为 None），如果没有此防护，过时的"落后"计数会在升级后存活长达 6 小时。参见 #34491。
     now = time.time()
     try:
         if cache_file.exists():
@@ -235,9 +251,9 @@ def check_for_updates() -> Optional[int]:
     if embedded_rev:
         behind = _check_via_rev(embedded_rev)
     else:
-        # 优先使用运行代码的位置，而非配置文件作用域的路径。
+        # 优先使用运行代码的位置而非配置文件作用域的路径。
         # $HERMES_HOME/hermes-agent/ 可能是来自 --clone-all 的陈旧副本；
-        # Path(__file__) 始终解析到实际安装的仓库。
+        # Path(__file__) 始终解析到实际安装的检出位置。
         repo_dir = Path(__file__).parent.parent.resolve()
         if not (repo_dir / ".git").exists():
             repo_dir = hermes_home / "hermes-agent"
@@ -254,21 +270,22 @@ def check_for_updates() -> Optional[int]:
         pass
 
     return behind
-
-
 def _resolve_repo_dir() -> Optional[Path]:
-    """返回活动的 Hermes git 仓库，如果这不是 git 安装则返回 None。
+    """Return the active Hermes git checkout, or None if this isn't a git install.
 
-    优先使用运行代码的位置，而非配置文件作用域的路径，
-    因为 ``$HERMES_HOME/hermes-agent/`` 可能是由 ``--clone-all`` 携带过来的陈旧副本。
+    Prefers the running code's location over the profile-scoped path
+    because ``$HERMES_HOME/hermes-agent/`` may be a stale copy carried
+    over by ``--clone-all``.
     """
     repo_dir = Path(__file__).parent.parent.resolve()
     if not (repo_dir / ".git").exists():
         hermes_home = get_hermes_home()
         repo_dir = hermes_home / "hermes-agent"
     return repo_dir if (repo_dir / ".git").exists() else None
+
+
 def _git_short_hash(repo_dir: Path, rev: str) -> Optional[str]:
-    """Resolve a git revision to an 8-character short hash."""
+    """将 git 修订版本解析为 8 字符短哈希值。"""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--short=8", rev],
@@ -286,21 +303,16 @@ def _git_short_hash(repo_dir: Path, rev: str) -> Optional[str]:
 
 
 def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
-    """Return upstream/local git hashes for the startup banner.
+    """返回启动横幅所需的上下游/本地 git 哈希值。
 
-    For source installs and dev images this runs ``git rev-parse`` against
-    the active checkout.  When no checkout is available — the canonical case
-    is the published Docker image, which excludes ``.git`` from the build
-    context — we fall back to the baked-in build SHA (see
-    ``hermes_cli/build_info.py``) and return it as a frozen
-    ``upstream == local`` state with ``ahead=0``.  A built image is by
-    definition pinned to one commit, so "ahead" is always zero and the
-    banner correctly shows ``· upstream <sha>`` with no carried-commits
-    annotation.
+    对于源码安装和开发镜像，此函数会针对活动代码库运行 ``git rev-parse``。
+    当没有可用的代码库时——典型情况是已发布的 Docker 镜像，它在构建上下文中排除了 ``.git``——我们会回退到内建的构建 SHA（参见
+    ``hermes_cli/build_info.py``）并将其作为冻结的 ``upstream == local`` 状态返回，其中 ``ahead=0``。
+    构建镜像本质上固定于某个提交，因此“领先提交数”始终为零，横幅会正确显示 ``· upstream <sha>`` 且不带携带提交的注解。
     """
     repo_dir = repo_dir or _resolve_repo_dir()
     if repo_dir is None:
-        # No git checkout — try the baked build SHA (Docker image path).
+        # 无 git 代码库 — 尝试使用内建的构建 SHA（Docker 镜像路径）。
         try:
             from hermes_cli.build_info import get_build_sha
             baked = get_build_sha(short=8)
@@ -313,8 +325,8 @@ def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
     upstream = _git_short_hash(repo_dir, "origin/main")
     local = _git_short_hash(repo_dir, "HEAD")
     if not upstream or not local:
-        # Live-git lookup failed (e.g. shallow clone without origin/main).
-        # Fall back to the baked build SHA if available.
+        # 实时 git 查找失败（例如，没有 origin/main 的浅克隆）。
+        # 如果可用，回退到内建的构建 SHA。
         try:
             from hermes_cli.build_info import get_build_sha
             baked = get_build_sha(short=8)
@@ -343,8 +355,6 @@ def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
 
 _RELEASE_URL_BASE = "https://github.com/NousResearch/hermes-agent/releases/tag"
 _latest_release_cache: Optional[tuple] = None  # (tag, url) once resolved
-
-
 def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
     """Return ``(tag, release_url)`` for the latest git tag, or None.
 
@@ -385,6 +395,8 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
     url = f"{_RELEASE_URL_BASE}/{tag}"
     _latest_release_cache = (tag, url)
     return _latest_release_cache
+
+
 def format_banner_version_label() -> str:
     """Return the version label shown in the startup banner title."""
     base = f"Hermes Agent v{VERSION} ({RELEASE_DATE})"
@@ -397,10 +409,10 @@ def format_banner_version_label() -> str:
     ahead = int(state.get("ahead") or 0)
 
     if ahead <= 0 or upstream == local:
-        return f"{base} · 上游 {upstream}"
+        return f"{base} · upstream {upstream}"
 
-    carried_word = "提交" if ahead == 1 else "提交"
-    return f"{base} · 上游 {upstream} · 本地 {local} (+{ahead} 个待合并 {carried_word})"
+    carried_word = "commit" if ahead == 1 else "commits"
+    return f"{base} · upstream {upstream} · local {local} (+{ahead} carried {carried_word})"
 
 
 # =========================================================================
@@ -412,7 +424,7 @@ _update_check_done = threading.Event()
 
 
 def prefetch_update_check():
-    """在后台守护线程中启动更新检查。"""
+    """Kick off update check in a background daemon thread."""
     def _run():
         global _update_result
         _update_result = check_for_updates()
@@ -422,7 +434,7 @@ def prefetch_update_check():
 
 
 def get_update_result(timeout: float = 0.5) -> Optional[int]:
-    """获取预取检查的结果。如果未就绪则返回 None。"""
+    """Get result of prefetched check. Returns None if not ready."""
     _update_check_done.wait(timeout=timeout)
     return _update_result
 
@@ -432,7 +444,7 @@ def get_update_result(timeout: float = 0.5) -> Optional[int]:
 # =========================================================================
 
 def _format_context_length(tokens: int) -> str:
-    """格式化 Token 计数以便显示（例如 128000 → '128K', 1048576 → '1M'）。"""
+    """Format a token count for display (e.g. 128000 → '128K', 1048576 → '1M')."""
     if tokens >= 1_000_000:
         val = tokens / 1_000_000
         rounded = round(val)
@@ -446,10 +458,8 @@ def _format_context_length(tokens: int) -> str:
             return f"{rounded}K"
         return f"{val:.1f}K"
     return str(tokens)
-
-
 def _display_toolset_name(toolset_name: str) -> str:
-    """规范化内部/遗留工具集标识符以便在横幅中显示。"""
+    """Normalize internal/legacy toolset identifiers for banner display."""
     if not toolset_name:
         return "未知"
     return (
@@ -465,17 +475,17 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
                          session_id: str = None,
                          get_toolset_for_tool=None,
                          context_length: int = None):
-    """构建并打印欢迎横幅，左侧为蛇杖，右侧为信息。
+    """Build and print a welcome banner with caduceus on left and info on right.
 
     Args:
-        console: Rich Console 实例。
-        model: 当前模型名称。
-        cwd: 当前工作目录。
-        tools: 工具定义列表。
-        enabled_toolsets: 已启用的工具集名称列表。
-        session_id: 会话标识符。
-        get_toolset_for_tool: 将工具名称映射到工具集名称的可调用对象。
-        context_length: 模型的上下文窗口大小（以 Token 计）。
+        console: Rich Console instance.
+        model: Current model name.
+        cwd: Current working directory.
+        tools: List of tool definitions.
+        enabled_toolsets: List of enabled toolset names.
+        session_id: Session identifier.
+        get_toolset_for_tool: Callable to map tool name -> toolset name.
+        context_length: Model's context window size in tokens.
     """
     from model_tools import check_tool_availability, TOOLSET_REQUIREMENTS
     from rich.panel import Panel
@@ -488,7 +498,9 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
 
     _, unavailable_toolsets = check_tool_availability(quiet=True)
     disabled_tools = set()
-    # 那些工具集具有 check_fn 的工具是延迟初始化的（例如 honcho, homeassistant）——它们在横幅显示时显示为不可用，因为检查尚未运行，但它们并未配置错误。
+    # Tools whose toolset has a check_fn are lazy-initialized (e.g. honcho,
+    # homeassistant) — they show as unavailable at banner time because the
+    # check hasn't run yet, but they aren't misconfigured.
     lazy_tools = set()
     for item in unavailable_toolsets:
         toolset_name = item.get("name", "")
@@ -503,13 +515,13 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     layout_table.add_column("left", justify="center")
     layout_table.add_column("right", justify="left")
 
-    # 为整个横幅解析一次皮肤颜色
+    # Resolve skin colors once for the entire banner
     accent = _skin_color("banner_accent", "#FFBF00")
     dim = _skin_color("banner_dim", "#B8860B")
     text = _skin_color("banner_text", "#FFF8DC")
     session_color = _skin_color("session_border", "#8B8682")
 
-    # 如果皮肤提供了自定义蛇杖艺术，则使用它
+    # Use skin's custom caduceus art if provided
     try:
         from hermes_cli.skin_engine import get_active_skin
         _bskin = get_active_skin()
@@ -538,7 +550,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
 
     for tool in tools:
         tool_name = tool["function"]["name"]
-        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "其他")
+        toolset = _display_toolset_name(get_toolset_for_tool(tool_name) or "other")
         toolsets_dict.setdefault(toolset, []).append(tool_name)
 
     for item in unavailable_toolsets:
@@ -592,7 +604,7 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     if remaining_toolsets > 0:
         right_lines.append(f"[dim {dim}](以及 {remaining_toolsets} 个更多工具集...)[/]")
 
-    # MCP 服务器部分（仅在配置时显示）
+    # MCP Servers section (only if configured)
     try:
         from tools.mcp_tool import get_mcp_status
         mcp_status = get_mcp_status()
@@ -644,7 +656,9 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
     if mcp_connected:
         summary_parts.append(f"{mcp_connected} 个 MCP 服务器")
     summary_parts.append("/help 查看命令")
-    # 当 codex_app_server 运行时处于活动状态时进行指示，以便用户理解为什么工具数量可能与实际可用的不匹配（codex 在其生成的子进程内部构建自己的工具列表）。
+    # Indicate when the codex_app_server runtime is active so users
+    # understand why tool counts may not match what's actually reachable
+    # (codex builds its own tool list inside the spawned subprocess).
     try:
         from hermes_cli.codex_runtime_switch import get_current_runtime
         from hermes_cli.config import load_config as _load_cfg
@@ -655,49 +669,54 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
             )
     except Exception:
         pass
-    # 当活动配置文件不是 'default' 时显示其名称
+    # Show active profile name when not 'default'
     try:
         from hermes_cli.profiles import get_active_profile_name
         _profile_name = get_active_profile_name()
         if _profile_name and _profile_name != "default":
             right_lines.append(f"[bold {accent}]配置文件:[/] [{text}]{_profile_name}[/]")
     except Exception:
-        pass  # 绝不让配置文件错误破坏横幅
+        pass  # Never break the banner over a profiles.py bug
 
     right_lines.append(f"[dim {dim}]{' · '.join(summary_parts)}[/]")
 
-    # 更新检查 — 如果可用，使用预取的结果
+    # Update check — use prefetched result if available
     try:
         behind = get_update_result(timeout=0.5)
         if behind is not None and behind != 0:
             from hermes_cli.config import get_managed_update_command, recommended_update_command
             if behind > 0:
-                commits_word = "提交" if behind == 1 else "提交"
+                commits_word = "commit" if behind == 1 else "commits"
                 right_lines.append(
                     f"[bold yellow]⚠ 落后 {behind} 个 {commits_word}[/]"
                     f"[dim yellow] — 运行 [bold]{recommended_update_command()}[/bold] 以更新[/]"
                 )
             else:
-                # UPDATE_AVAILABLE_NO_COUNT: nix 构建的 hermes；我们知道存在更新但不知道具体落后多少，并且我们不知道用户是如何安装的（nix run, profile, system flake, home-manager）。
+                # UPDATE_AVAILABLE_NO_COUNT: nix-built hermes; we know an update
+                # exists but not by how much, and we don't know how the user
+                # installed it (nix run, profile, system flake, home-manager).
                 managed_cmd = get_managed_update_command()
                 line = "[bold yellow]⚠ 有可用更新[/]"
                 if managed_cmd:
                     line += f"[dim yellow] — 运行 [bold]{managed_cmd}[/bold][/]"
                 right_lines.append(line)
     except Exception:
-        pass  # 绝不让更新检查破坏横幅
+        pass  # Never break the banner over an update check
 
-    # Pip 安装警告 — `pip install hermes-agent` 不是受支持的安装路径（它在 PyPI 上存在是出于内部/CI 原因，而非面向最终用户）。此类安装会缺少 git 检出和安装程序管理的依赖项，因此更新、自我更新和问题排查无法正常工作。发出警告，但不阻止。
+    # Pip-install warning — `pip install hermes-agent` is not the supported
+    # install path (it exists on PyPI for internal/CI reasons, not end users).
+    # Such installs miss the git checkout + installer-managed deps, so updates,
+    # self-update, and issue triage don't behave correctly. Warn, don't block.
     try:
         from hermes_cli.config import detect_install_method
         if detect_install_method() == "pip":
             right_lines.append(
                 "[bold yellow]⚠ pip 安装非官方支持[/]"
-                "[dim yellow] — 存在的原因并非面向用户安装；"
+                "[dim yellow] — 存在的原因并非用于用户安装；"
                 "请预期不稳定性和无法支持问题[/]"
             )
     except Exception:
-        pass  # 绝不让安装方法检查破坏横幅
+        pass  # Never break the banner over the install-method check
 
     right_content = "\n".join(right_lines)
     layout_table.add_row(left_content, right_content)
