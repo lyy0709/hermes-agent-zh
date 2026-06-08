@@ -6,11 +6,11 @@ description: "Hermes Agent 附带的内置技能目录"
 
 # 内置技能目录
 
-Hermes 附带一个大型内置技能库，在安装时会复制到 `~/.hermes/skills/` 目录中。下面的每个技能都链接到一个专用页面，其中包含其完整定义、设置和使用方法。
+Hermes 附带一个大型内置技能库，安装时会复制到 `~/.hermes/skills/` 目录中。下面的每个技能都链接到一个专用页面，其中包含其完整定义、设置和使用方法。
 
-Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊重本地删除和用户编辑。如果此处列出的某个技能在您配置文件的 `~/.hermes/skills/` 目录树中缺失，它仍然随 Hermes 一起提供；您可以使用 `hermes skills reset <name> --restore` 命令恢复它。
+Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊重本地删除和用户编辑。如果此处列出的某个技能在你的配置文件的 `~/.hermes/skills/` 目录树中缺失，它仍然随 Hermes 一起提供；你可以使用 `hermes skills reset <name> --restore` 命令来恢复它。
 
-如果一个技能在此列表中缺失但存在于代码仓库中，目录可以通过运行 `website/scripts/generate-skill-docs.py` 重新生成。
+如果一个技能在此列表中缺失但存在于代码仓库中，可以通过运行 `website/scripts/generate-skill-docs.py` 来重新生成目录。
 
 ## apple
 
@@ -57,37 +57,37 @@ Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊�
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
 | [`jupyter-live-kernel`](/docs/user-guide/skills/bundled/data-science/data-science-jupyter-live-kernel) | 通过实时 Jupyter 内核（hamelnb）进行迭代式 Python 编程。 | `data-science/jupyter-live-kernel` |
-## DevOps
+## devops
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| [`kanban-orchestrator`](/docs/user-guide/skills/bundled/devops/devops-kanban-orchestrator) | 用于通过看板路由工作的编排器配置文件的分解剧本和防诱惑规则。"不要自己动手"规则和基本生命周期会自动注入到每个看板工作者的系统提示词中；此技能... | `devops/kanban-orchestrator` |
-| [`kanban-worker`](/docs/user-guide/skills/bundled/devops/devops-kanban-worker) | Hermes 看板工作者的陷阱、示例和边缘情况。生命周期本身会作为 KANBAN_GUIDANCE（来自 agent/prompt_builder.py）自动注入到每个工作者的系统提示词中；当您需要更深入的细节时，可以加载此技能... | `devops/kanban-worker` |
+| [`kanban-orchestrator`](/docs/user-guide/skills/bundled/devops/devops-kanban-orchestrator) | 用于通过看板管理工作路由的编排器配置文件的分解剧本和防诱惑规则。"不要自己动手"规则和基本生命周期会自动注入到每个看板工作者的系统提示词中；此技能... | `devops/kanban-orchestrator` |
+| [`kanban-worker`](/docs/user-guide/skills/bundled/devops/devops-kanban-worker) | Hermes 看板工作者的陷阱、示例和边界情况。生命周期本身会作为 KANBAN_GUIDANCE（来自 agent/prompt_builder.py）自动注入到每个工作者的系统提示词中；当您需要更深入的细节时，可以加载此技能... | `devops/kanban-worker` |
 
-## Dogfood
-
-| 技能 | 描述 | 路径 |
-|-------|-------------|------|
-| [`dogfood`](/docs/user-guide/skills/bundled/dogfood/dogfood-dogfood) | Web 应用的探索性质量保证：查找错误、证据、报告。 | `dogfood` |
-
-## 邮件
+## dogfood
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| [`himalaya`](/docs/user-guide/skills/bundled/email/email-himalaya) | Himalaya CLI：通过终端进行 IMAP/SMTP 邮件操作。 | `email/himalaya` |
+| [`dogfood`](/docs/user-guide/skills/bundled/dogfood/dogfood-dogfood) | Web 应用的探索性质量保证：查找错误、证据和报告。 | `dogfood` |
 
-## GitHub
+## email
+
+| 技能 | 描述 | 路径 |
+|-------|-------------|------|
+| [`himalaya`](/docs/user-guide/skills/bundled/email/email-himalaya) | Himalaya CLI：在终端中处理 IMAP/SMTP 电子邮件。 | `email/himalaya` |
+
+## github
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
 | [`codebase-inspection`](/docs/user-guide/skills/bundled/github/github-codebase-inspection) | 使用 pygount 检查代码库：代码行数、语言、比例。 | `github/codebase-inspection` |
-| [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth) | GitHub 身份验证设置：HTTPS 令牌、SSH 密钥、gh CLI 登录。 | `github/github-auth` |
-| [`github-code-review`](/docs/user-guide/skills/bundled/github/github-github-code-review) | 审查 PR：通过 gh 或 REST API 查看差异、添加行内评论。 | `github/github-code-review` |
-| [`github-issues`](/docs/user-guide/skills/bundled/github/github-github-issues) | 通过 gh 或 REST API 创建、分类、标记、分配 GitHub issues。 | `github/github-issues` |
+| [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth) | GitHub 认证设置：HTTPS Token、SSH 密钥、gh CLI 登录。 | `github/github-auth` |
+| [`github-code-review`](/docs/user-guide/skills/bundled/github/github-github-code-review) | 审查 PR：通过 gh 或 REST API 处理差异和行内评论。 | `github/github-code-review` |
+| [`github-issues`](/docs/user-guide/skills/bundled/github/github-github-issues) | 通过 gh 或 REST API 创建、分类、标记、分配 GitHub Issues。 | `github/github-issues` |
 | [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow) | GitHub PR 生命周期：分支、提交、打开、CI、合并。 | `github/github-pr-workflow` |
-| [`github-repo-management`](/docs/user-guide/skills/bundled/github/github-github-repo-management) | 克隆/创建/分叉仓库；管理远程仓库、发布。 | `github/github-repo-management` |
+| [`github-repo-management`](/docs/user-guide/skills/bundled/github/github-github-repo-management) | 克隆/创建/分叉仓库；管理远程仓库、发布版本。 | `github/github-repo-management` |
 
-## 媒体
+## media
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
@@ -96,7 +96,7 @@ Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊�
 | [`songsee`](/docs/user-guide/skills/bundled/media/media-songsee) | 通过 CLI 生成音频频谱图/特征（梅尔频谱、色度、MFCC）。 | `media/songsee` |
 | [`youtube-content`](/docs/user-guide/skills/bundled/media/media-youtube-content) | 将 YouTube 转录稿转换为摘要、主题帖、博客文章。 | `media/youtube-content` |
 
-## MLOps
+## mlops
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
@@ -104,25 +104,25 @@ Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊�
 | [`huggingface-hub`](/docs/user-guide/skills/bundled/mlops/mlops-huggingface-hub) | HuggingFace hf CLI：搜索/下载/上传模型、数据集。 | `mlops/huggingface-hub` |
 | [`llama-cpp`](/docs/user-guide/skills/bundled/mlops/mlops-inference-llama-cpp) | llama.cpp 本地 GGUF 推理 + HF Hub 模型发现。 | `mlops/inference/llama-cpp` |
 | [`evaluating-llms-harness`](/docs/user-guide/skills/bundled/mlops/mlops-evaluation-lm-evaluation-harness) | lm-eval-harness：基准测试 LLM（MMLU、GSM8K 等）。 | `mlops/evaluation/lm-evaluation-harness` |
-| [`obliteratus`](/docs/user-guide/skills/bundled/mlops/mlops-inference-obliteratus) | OBLITERATUS：消除 LLM 拒绝响应（均值差异法）。 | `mlops/inference/obliteratus` |
+| [`obliteratus`](/docs/user-guide/skills/bundled/mlops/mlops-inference-obliteratus) | OBLITERATUS：消除 LLM 拒绝（均值差异）。 | `mlops/inference/obliteratus` |
 | [`segment-anything-model`](/docs/user-guide/skills/bundled/mlops/mlops-models-segment-anything) | SAM：通过点、框、掩码进行零样本图像分割。 | `mlops/models/segment-anything` |
 | [`serving-llms-vllm`](/docs/user-guide/skills/bundled/mlops/mlops-inference-vllm) | vLLM：高吞吐量 LLM 服务、OpenAI API、量化。 | `mlops/inference/vllm` |
 | [`weights-and-biases`](/docs/user-guide/skills/bundled/mlops/mlops-evaluation-weights-and-biases) | W&B：记录 ML 实验、超参数搜索、模型注册表、仪表板。 | `mlops/evaluation/weights-and-biases` |
 
-## 笔记
+## note-taking
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
 | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian) | 在 Obsidian 知识库中读取、搜索、创建和编辑笔记。 | `note-taking/obsidian` |
 
-## 生产力
+## productivity
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| [`airtable`](/docs/user-guide/skills/bundled/productivity/productivity-airtable) | 通过 curl 使用 Airtable REST API。记录增删改查、筛选、更新插入。 | `productivity/airtable` |
+| [`airtable`](/docs/user-guide/skills/bundled/productivity/productivity-airtable) | 通过 curl 使用 Airtable REST API。记录 CRUD、过滤器、更新插入。 | `productivity/airtable` |
 | [`google-workspace`](/docs/user-guide/skills/bundled/productivity/productivity-google-workspace) | 通过 gws CLI 或 Python 使用 Gmail、日历、云端硬盘、文档、表格。 | `productivity/google-workspace` |
 | [`maps`](/docs/user-guide/skills/bundled/productivity/productivity-maps) | 通过 OpenStreetMap/OSRM 进行地理编码、查找兴趣点、路线、时区。 | `productivity/maps` |
-| [`nano-pdf`](/docs/user-guide/skills/bundled/productivity/productivity-nano-pdf) | 通过 nano-pdf CLI（自然语言提示）编辑 PDF 文本/拼写错误/标题。 | `productivity/nano-pdf` |
+| [`nano-pdf`](/docs/user-guide/skills/bundled/productivity/productivity-nano-pdf) | 通过 nano-pdf CLI（自然语言提示词）编辑 PDF 文本/拼写错误/标题。 | `productivity/nano-pdf` |
 | [`notion`](/docs/user-guide/skills/bundled/productivity/productivity-notion) | Notion API + ntn CLI：页面、数据库、Markdown、Workers。 | `productivity/notion` |
 | [`ocr-and-documents`](/docs/user-guide/skills/bundled/productivity/productivity-ocr-and-documents) | 从 PDF/扫描件中提取文本（pymupdf、marker-pdf）。 | `productivity/ocr-and-documents` |
 | [`powerpoint`](/docs/user-guide/skills/bundled/productivity/productivity-powerpoint) | 创建、读取、编辑 .pptx 演示文稿、幻灯片、备注、模板。 | `productivity/powerpoint` |
@@ -162,8 +162,9 @@ Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊�
 | [`hermes-agent-skill-authoring`](/docs/user-guide/skills/bundled/software-development/software-development-hermes-agent-skill-authoring) | 在仓库内编写 SKILL.md：frontmatter、验证器、结构。 | `software-development/hermes-agent-skill-authoring` |
 | [`node-inspect-debugger`](/docs/user-guide/skills/bundled/software-development/software-development-node-inspect-debugger) | 通过 --inspect + Chrome DevTools Protocol CLI 调试 Node.js。 | `software-development/node-inspect-debugger` |
 | [`plan`](/docs/user-guide/skills/bundled/software-development/software-development-plan) | 计划模式：编写可执行的 Markdown 计划到 .hermes/plans/，不执行。任务分解、精确路径、完整代码。 | `software-development/plan` |
-| [`python-debugpy`](/docs/user-guide/skills/bundled/software-development/software-development-python-debugpy) | 调试 Python：pdb REPL + debugpy 远程（DAP）。 | `software-development/python-debugpy` |
+| [`python-debugpy`](/docs/user-guide/skills/bundled/software-development/software-development-python-debugpy) | 调试 Python：pdb REPL + debugpy 远程调试（DAP）。 | `software-development/python-debugpy` |
 | [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) | 提交前审查：安全扫描、质量门禁、自动修复。 | `software-development/requesting-code-review` |
+| [`simplify-code`](/docs/user-guide/skills/bundled/software-development/software-development-simplify-code) | 并行 3-Agent 清理近期代码变更。 | `software-development/simplify-code` |
 | [`spike`](/docs/user-guide/skills/bundled/software-development/software-development-spike) | 在构建前进行一次性实验以验证想法。 | `software-development/spike` |
 | [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging) | 4 阶段根本原因调试：在修复前理解错误。 | `software-development/systematic-debugging` |
 | [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development) | TDD：强制执行 RED-GREEN-REFACTOR，先写测试再写代码。 | `software-development/test-driven-development` |
@@ -172,4 +173,4 @@ Hermes 还会在 `hermes update` 时同步内置技能，但同步清单会尊�
 
 | 技能 | 描述 | 路径 |
 |-------|-------------|------|
-| [`yuanbao`](/docs/user-guide/skills/bundled/yuanbao/yuanbao-yuanbao) | 元宝群组：@提及用户、查询信息/成员。 | `yuanbao` |
+| [`yuanbao`](/docs/user-guide/skills/bundled/yuanbao/yuanbao-yuanbao) | 元宝群组：@提及用户，查询信息/成员。 | `yuanbao` |

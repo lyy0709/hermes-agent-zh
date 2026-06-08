@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # 同时运行多个消息网关
 
-在一台机器上以托管服务的形式运行多个[配置文件](./profiles.md)——每个配置文件都有自己的机器人令牌、会话和记忆。本页涵盖运维相关事项：同时启动所有配置文件、跨配置文件查看日志、防止主机休眠以及处理常见的 launchd/systemd 异常。
+在单台机器上以托管服务的形式运行多个[配置文件](./profiles.md)——每个配置文件都有自己的机器人令牌、会话和记忆。本页涵盖运维相关事项：同时启动所有网关、跨配置文件查看日志、防止主机休眠以及处理常见的 launchd/systemd 异常。
 
 如果你只运行一个 Hermes Agent，则不需要此页面——请参阅[配置文件](./profiles.md)了解基础知识。
 
@@ -12,9 +12,9 @@ sidebar_position: 4
 
 当你需要两个或更多 Hermes Agent 同时在线时，就需要此设置。常见原因包括：
 
-- 一个 Telegram 机器人上运行个人助理，另一个上运行编程 Agent
+- 一个 Telegram 机器人用于个人助理，另一个用于代码助手
 - 每个家庭成员一个 Agent，或每个 Slack 工作区一个 Agent
-- 同一配置的沙盒 + 生产实例
+- 同一配置的沙盒环境 + 生产环境实例
 - 研究 Agent + 写作 Agent + 定时任务驱动的机器人——每个都有独立的记忆和技能
 
 每个配置文件已经拥有自己的平台特定 LaunchAgent（`ai.hermes.gateway-<name>.plist`）或 systemd 用户服务（`hermes-gateway-<name>.service`）。本指南增加了集中管理它们的模式。
@@ -32,22 +32,22 @@ coder setup
 personal-bot setup
 research setup
 
-# 将每个消息网关安装为托管服务
+# 将每个网关安装为托管服务
 coder gateway install
 personal-bot gateway install
 research gateway install
 
-# 启动所有消息网关
+# 启动所有网关
 coder gateway start
 personal-bot gateway start
 research gateway start
 ```
 
-就这样——三个独立的 Agent，每个都在自己的进程中运行，崩溃时和用户登录时会自动重启。
+完成——三个独立的 Agent，每个都在自己的进程中运行，崩溃时和用户登录时会自动重启。
 
-## 同时启动、停止或重启所有消息网关
+## 同时启动、停止或重启所有网关
 
-CLI 提供了单配置文件的生命周期命令。要对每个配置文件执行操作，请将它们包装在 shell 循环中。将下面的代码片段放入 `~/.local/bin/hermes-gateways` 并执行 `chmod +x`：
+CLI 提供了单配置文件的生命周期命令。要对所有配置文件执行操作，请将它们包装在 shell 循环中。将以下代码片段放入 `~/.local/bin/hermes-gateways` 并执行 `chmod +x`：
 
 ```sh
 #!/bin/sh
@@ -93,8 +93,8 @@ esac
 ```bash
 hermes-gateways start      # 启动每个已配置的配置文件
 hermes-gateways stop       # 停止每个已配置的配置文件
-hermes-gateways restart    # 重启所有配置文件
-hermes-gateways status     # 查看所有配置文件的状态
+hermes-gateways restart    # 重启所有
+hermes-gateways status     # 查看所有状态
 hermes-gateways list       # 委托给 `hermes gateway list`
 ```
 
@@ -122,10 +122,10 @@ coder gateway uninstall  # 删除服务文件
 
 每个配置文件都以其唯一名称安装自己的服务，因此安装永远不会冲突：
 
-| 平台 | 路径                                                              |
-| -------- | ----------------------------------------------------------------- |
-| macOS    | `~/Library/LaunchAgents/ai.hermes.gateway-<profile>.plist`        |
-| Linux    | `~/.config/systemd/user/hermes-gateway-<profile>.service`         |
+| 平台     | 路径                                                                  |
+| -------- | --------------------------------------------------------------------- |
+| macOS    | `~/Library/LaunchAgents/ai.hermes.gateway-<profile>.plist`            |
+| Linux    | `~/.config/systemd/user/hermes-gateway-<profile>.service`             |
 
 默认配置文件保留历史名称：`ai.hermes.gateway.plist` / `hermes-gateway.service`。
 
@@ -152,32 +152,32 @@ tail -f ~/.hermes/logs/gateway.log ~/.hermes/profiles/*/logs/gateway.log
 CLI 还有一个结构化的日志查看器：
 
 ```bash
-hermes logs --tail              # 跟踪默认配置文件
-hermes -p coder logs --tail     # 跟踪一个配置文件
+hermes logs -f                  # 跟踪默认配置文件
+hermes -p coder logs -f         # 跟踪一个配置文件
 hermes logs --help              # 过滤器、级别、JSON 输出
 ```
 
 ## 识别实际运行的内容
 
 ```bash
-hermes profile list             # 配置文件 + 模型 + 消息网关状态
+hermes profile list             # 配置文件 + 模型 + 网关状态
 hermes-gateways status          # 每个配置文件的完整状态
-launchctl list | grep hermes    # macOS —— PID 和标签
-systemctl --user list-units 'hermes-gateway-*'   # Linux —— 单元
+launchctl list | grep hermes    # macOS — PID 和标签
+systemctl --user list-units 'hermes-gateway-*'   # Linux — 单元
 ```
 
 ## 编辑配置
 
-每个配置文件在其自己的目录中保存其配置：
+每个配置文件在其自己的目录中保存配置：
 
 ```
 ~/.hermes/profiles/<name>/
 ├── .env              # API 密钥、机器人令牌 (chmod 600)
-├── config.yaml       # 模型、提供商、工具集、消息网关设置
+├── config.yaml       # 模型、提供商、工具集、网关设置
 └── SOUL.md           # 灵魂（人格）/ 系统提示词
 ```
 
-默认配置文件直接使用 `~/.hermes/` 目录下的相同三个文件。
+默认配置文件直接使用 `~/.hermes/`，包含相同的三个文件。
 
 使用任何编辑器或通过 CLI 编辑它们：
 
@@ -186,26 +186,26 @@ hermes config set model.model anthropic/claude-sonnet-4    # 默认配置文件
 coder config set model.model openai/gpt-5                  # 命名配置文件
 ```
 
-编辑 `.env` 或 `config.yaml` 后，重启受影响的消息网关：
+编辑 `.env` 或 `config.yaml` 后，重启受影响的网关：
 
 ```bash
 coder gateway restart
-# 或者，对于所有配置文件：
+# 或者，对于所有网关：
 hermes-gateways restart
 ```
 
 ## 保持主机唤醒
 
-消息网关进程可以全天运行，但操作系统在空闲时仍会尝试休眠。两种模式：
+网关进程可以全天运行，但操作系统在空闲时仍会尝试休眠。两种模式：
 
-### macOS —— `caffeinate`
+### macOS — `caffeinate`
 
 `caffeinate` 内置于 macOS 中，运行时可以防止休眠。无需安装。
 
 ```bash
 caffeinate -dis                    # 阻止显示器、空闲和系统休眠
 caffeinate -dis -t 28800           # 同上，8 小时后自动退出
-caffeinate -i -w $(cat ~/.hermes/gateway.pid) &   # 默认消息网关运行时保持唤醒
+caffeinate -i -w $(cat ~/.hermes/gateway.pid) &   # 默认网关运行时保持唤醒
 
 # 持久化：在后台运行并忘记
 nohup caffeinate -dis >/dev/null 2>&1 &
@@ -216,22 +216,21 @@ pmset -g assertions | grep -iE 'caffeinate|prevent|user is active'
 pkill caffeinate
 ```
 
-| 标志   | 效果                                            |
-| ------ | ------------------------------------------------- |
-| `-d`   | 阻止显示器休眠                               |
-| `-i`   | 阻止空闲系统休眠（默认）                 |
-| `-m`   | 阻止磁盘休眠                                  |
-| `-s`   | 阻止系统休眠（仅限交流电源供电的 Mac）         |
-| `-u`   | 模拟用户活动（防止屏幕锁定）     |
-| `-t N` | `N` 秒后自动退出                       |
-| `-w P` | 当 PID `P` 退出时退出                           |
+| 标志     | 效果                                            |
+| -------- | ----------------------------------------------- |
+| `-d`     | 阻止显示器休眠                                  |
+| `-i`     | 阻止空闲系统休眠（默认）                        |
+| `-m`     | 阻止磁盘休眠                                    |
+| `-s`     | 阻止系统休眠（仅限交流电源供电的 Mac）          |
+| `-u`     | 模拟用户活动（防止屏幕锁定）                    |
+| `-t N`   | `N` 秒后自动退出                                |
+| `-w P`   | 当 PID `P` 退出时退出                           |
 
 :::warning 合盖仍会使 Mac 休眠
-`caffeinate` 无法覆盖 MacBook 上由硬件驱动的合盖休眠。
-对于合盖操作，请更改你的“节能”/“电池”偏好设置或使用第三方工具。
+`caffeinate` 无法覆盖 MacBook 上由硬件驱动的合盖休眠。对于合盖操作，请更改你的“节能”/“电池”偏好设置或使用第三方工具。
 :::
 
-### Linux —— `systemd-inhibit` 或 `loginctl`
+### Linux — `systemd-inhibit` 或 `loginctl`
 
 ```bash
 # 在命令运行时禁止挂起
@@ -246,7 +245,7 @@ sudo loginctl enable-linger "$USER"
 
 ## 令牌冲突安全
 
-每个配置文件必须为每个平台使用唯一的机器人令牌。如果两个配置文件共享 Telegram、Discord、Slack、WhatsApp 或 Signal 令牌，第二个消息网关将拒绝启动，并显示错误信息指出冲突的配置文件。
+每个配置文件必须为每个平台使用唯一的机器人令牌。如果两个配置文件共享 Telegram、Discord、Slack、WhatsApp 或 Signal 令牌，第二个网关将拒绝启动，并显示错误信息指出冲突的配置文件。
 
 进行审计：
 
@@ -257,7 +256,7 @@ grep -H 'TELEGRAM_BOT_TOKEN\|DISCORD_BOT_TOKEN' \
 
 ## 更新代码
 
-`hermes update` 拉取最新代码一次，并将新的捆绑技能同步到每个配置文件中：
+`hermes update` 拉取最新代码一次，并将新的捆绑技能同步到每个配置文件：
 
 ```bash
 hermes update
@@ -274,7 +273,7 @@ hermes-gateways restart
 
 ### 崩溃后残留的 PID
 
-如果一个配置文件的消息网关显示 `not running` 但进程仍然存活：
+如果某个配置文件的网关显示 `not running`，但进程仍然存活：
 
 ```bash
 ps -ef | grep "hermes_cli.*-p <profile>"
@@ -284,7 +283,7 @@ kill -KILL <pid>          # 如果几秒后失败
 <profile> gateway start
 ```
 
-### 强制硬重置一个服务
+### 强制硬重置单个服务
 
 ```bash
 # macOS

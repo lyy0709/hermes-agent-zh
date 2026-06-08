@@ -4,27 +4,27 @@ sidebar_position: 9
 
 # 添加平台适配器
 
-本指南介绍如何向 Hermes 消息网关添加新的消息平台。平台适配器将 Hermes 连接到外部消息服务（Telegram、Discord、企业微信等），以便用户可以通过该服务与 Agent 交互。
+本指南介绍如何为 Hermes 消息网关添加新的消息平台。平台适配器将 Hermes 连接到外部消息服务（Telegram、Discord、企业微信等），以便用户可以通过该服务与 Agent 交互。
 
 :::tip
 添加平台有两种方式：
 - **插件**（推荐用于社区/第三方）：将插件目录放入 `~/.hermes/plugins/` —— 无需修改任何核心代码。请参阅下面的[插件路径](#插件路径推荐)。
-- **内置**：修改代码、配置和文档中的 20 多个文件。使用下面的[内置清单](#逐步检查清单内置路径)。
+- **内置**：修改代码、配置和文档中的 20 多个文件。使用下面的[内置清单](#逐步清单内置路径)。
 :::
 
 ## 架构概述
 
 ```
-用户 ↔ 消息平台 ↔ 平台适配器 ↔ 网关运行器 ↔ AI Agent
+用户 ↔ 消息平台 ↔ 平台适配器 ↔ 网关运行器 ↔ AIAgent
 ```
 
 每个适配器都继承自 `gateway/platforms/base.py` 中的 `BasePlatformAdapter` 并实现：
 
-- **`connect()`** — 建立连接（WebSocket、长轮询、HTTP 服务器等）*（抽象方法）*
-- **`disconnect()`** — 清理并关闭连接 *（抽象方法）*
-- **`send()`** — 向聊天发送文本消息 *（抽象方法）*
-- **`send_typing()`** — 显示“正在输入”指示器（可选重写）
-- **`get_chat_info()`** — 返回聊天元数据（可选重写）
+- **`connect()`** — 建立连接（WebSocket、长轮询、HTTP 服务器等）*(抽象)*
+- **`disconnect()`** — 清理并关闭连接 *(抽象)*
+- **`send()`** — 向聊天发送文本消息 *(抽象)*
+- **`send_typing()`** — 显示“正在输入”指示器（可选覆盖）
+- **`get_chat_info()`** — 返回聊天元数据（可选覆盖）
 
 入站消息由适配器接收，并通过 `self.handle_message(event)` 转发，基类会将其路由到网关运行器。
 
@@ -34,13 +34,13 @@ sidebar_position: 9
 
 ```
 ~/.hermes/plugins/my-platform/
-  PLUGIN.yaml      # 插件元数据
+  plugin.yaml      # 插件元数据
   adapter.py       # 适配器类 + register() 入口点
 ```
 
-### PLUGIN.yaml
+### plugin.yaml
 
-插件元数据。`requires_env` 和 `optional_env` 块会自动填充 `hermes config` UI 中的条目（请参阅下面的[在 Hermes 配置中暴露环境变量](#在-hermes-配置中暴露环境变量)）。
+插件元数据。`requires_env` 和 `optional_env` 块会自动填充 `hermes config` UI 中的条目（请参阅下面的[在 Hermes 配置中展示环境变量](#在-hermes-配置中展示环境变量)）。
 
 ```yaml
 name: my-platform
@@ -133,7 +133,7 @@ def register(ctx):
         # 每个平台的用户授权环境变量
         allowed_users_env="MY_PLATFORM_ALLOWED_USERS",
         allow_all_env="MY_PLATFORM_ALLOW_ALL_USERS",
-        # 用于智能分块的消息长度限制（0 = 无限制）
+        # 智能分块的消息长度限制（0 = 无限制）
         max_message_length=4000,
         # 注入到系统提示词中的 LLM 指导信息
         platform_hint=(
@@ -180,14 +180,14 @@ gateway:
 | 已连接平台验证 | 调用注册表的 `validate_config()` |
 | 用户授权 | 检查 `allowed_users_env` / `allow_all_env` |
 | 仅环境变量自动启用 | `env_enablement_fn` 填充 `PlatformConfig.extra` + `home_channel` |
-| YAML 配置桥接 | `apply_yaml_config_fn` 将 `config.yaml` 键转换为环境变量 / extras |
+| YAML 配置桥接 | `apply_yaml_config_fn` 将 `config.yaml` 中的键转换为环境变量 / extras |
 | 定时任务投递 | `cron_deliver_env_var` 使 `deliver=<name>` 生效 |
 | `hermes config` UI 条目 | `plugin.yaml` 中的 `requires_env` / `optional_env` 自动填充 |
 | send_message 工具 | 通过活动的网关适配器路由 |
-| Webhook 跨平台投递 | 检查注册表中已知的平台 |
+| Webhook 跨平台投递 | 检查注册表以识别已知平台 |
 | `/update` 命令访问 | `allow_update_command` 标志 |
 | 频道目录 | 插件平台包含在枚举中 |
-| 系统提示词提示 | `platform_hint` 注入到 LLM 上下文中 |
+| 系统提示词提示 | `platform_hint` 注入到 LLM 上下文 |
 | 消息分块 | `max_message_length` 用于智能分割 |
 | PII 脱敏 | `pii_safe` 标志 |
 | `hermes status` | 显示带有 `(plugin)` 标签的插件平台 |
@@ -197,14 +197,14 @@ gateway:
 | 孤立配置警告 | 插件缺失时记录描述性日志 |
 ## 基于环境变量的自动配置
 
-大多数用户通过将环境变量放入 `~/.hermes/.env` 来设置平台，而不是编辑 `config.yaml`。`env_enablement_fn` 钩子允许你的插件在适配器构造**之前**获取这些环境变量，这样 `hermes gateway status`、`get_connected_platforms()` 和定时任务交付就能看到正确的状态，而无需实例化平台 SDK。
+大多数用户通过将环境变量放入 `~/.hermes/.env` 来设置平台，而不是编辑 `config.yaml`。`env_enablement_fn` 钩子允许你的插件在适配器构建**之前**获取这些环境变量，这样 `hermes gateway status`、`get_connected_platforms()` 和定时任务交付就能看到正确的状态，而无需实例化平台 SDK。
 
 ```python
 def _env_enablement() -> dict | None:
     """从环境变量填充 PlatformConfig.extra。
 
     由平台注册表在 load_gateway_config() 期间调用。
-    当平台未进行最小配置时返回 None —— 调用方随后跳过自动启用。返回一个字典以填充 extras。
+    当平台未进行最低限度配置时返回 None —— 调用方随后跳过自动启用。返回一个字典来填充 extras。
 
     特殊的 'home_channel' 键会被提取出来，并在 PlatformConfig 上成为一个适当的 HomeChannel 数据类；其他所有键都会合并到 PlatformConfig.extra 中。
     """
@@ -234,7 +234,7 @@ def register(ctx):
     )
 ```
 
-## YAML→环境变量配置桥接
+## YAML 到环境变量的配置桥接
 
 一些用户更喜欢设置 `config.yaml` 键（`my_platform.require_mention`、`my_platform.allowed_channels` 等），而不是环境变量。`apply_yaml_config_fn` 钩子允许你的插件拥有此转换逻辑，而不是强制核心的 `gateway/config.py` 了解你平台的 YAML 模式。
 
@@ -268,7 +268,7 @@ def register(ctx):
 
 该钩子在 `load_gateway_config()` 期间，在通用的共享键循环（处理常见键，如 `unauthorized_dm_behavior`、`notice_delivery`、`reply_prefix`、`require_mention` 等）之后，以及在 `_apply_env_overrides()` 之前被调用，因此你的插件只需要桥接**平台特定的**键。
 
-钩子抛出的异常会被捕获并在调试级别记录 —— 行为不当的插件永远不会中止消息网关配置的加载。
+钩子抛出的异常会被捕获并在调试级别记录 —— 行为不当的插件永远不会中止消息网关配置加载。
 
 ## 定时任务交付
 
@@ -282,11 +282,11 @@ ctx.register_platform(
 )
 ```
 
-调度器在解析 `deliver=my_platform` 任务的主目标时会读取此环境变量，并且在 `_KNOWN_DELIVERY_PLATFORMS` 风格的检查中也将该平台视为有效的定时任务目标。如果你的 `env_enablement_fn` 填充了一个 `home_channel` 字典（见上文），则其具有优先权 —— `cron_deliver_env_var` 是在环境变量填充之前运行的定时任务的备用方案。
+调度器在解析 `deliver=my_platform` 作业的主目标时会读取此环境变量，并且在 `_KNOWN_DELIVERY_PLATFORMS` 风格的检查中也将该平台视为有效的定时任务目标。如果你的 `env_enablement_fn` 填充了一个 `home_channel` 字典（见上文），则其优先级更高 —— `cron_deliver_env_var` 是在环境变量填充之前运行的定时任务的备用方案。
 
 ### 进程外定时任务交付
 
-`cron_deliver_env_var` 使你的平台成为可识别的 `deliver=` 目标。为了使定时任务在与消息网关分离的进程中运行时（即 `hermes cron run` 与 `hermes gateway` 分离）实际发送成功，请注册一个 `standalone_sender_fn`：
+`cron_deliver_env_var` 使你的平台成为可识别的 `deliver=` 目标。为了使定时任务在与消息网关分离的进程中运行时（即 `hermes cron run` 与 `hermes gateway` 分离）能够成功发送，请注册一个 `standalone_sender_fn`：
 
 ```python
 async def _standalone_send(
@@ -298,7 +298,7 @@ async def _standalone_send(
     media_files=None,
     force_document=False,
 ):
-    """打开一个临时连接 / 获取一个新的 Token，发送，然后关闭。"""
+    """打开一个临时连接 / 获取新的 Token，发送，然后关闭。"""
     # ... 打开连接，发送消息，返回结果 ...
     return {"success": True, "message_id": "..."}
     # 或 {"error": "..."}
@@ -316,7 +316,7 @@ ctx.register_platform(
 该函数接收与实时适配器相同的 `pconfig` 和 `chat_id`，以及可选的 `thread_id`、`media_files` 和 `force_document` 关键字参数。返回 `{"success": True, "message_id": ...}` 被视为成功交付；返回 `{"error": "..."}` 会在定时任务的 `delivery_errors` 中显示该消息。函数内部抛出的异常会被调度器捕获并报告为 `Plugin standalone send failed: <reason>`。参考实现位于 `plugins/platforms/{irc,teams,google_chat}/adapter.py`。
 ## 在 `hermes config` 中展示环境变量
 
-`hermes_cli/config.py` 在导入时会扫描 `plugins/platforms/*/plugin.yaml`，并自动从 `requires_env` 和（可选的）`optional_env` 块中填充 `OPTIONAL_ENV_VARS`。使用富字典形式来提供适当的描述、提示、密码标志和 URL——CLI 设置界面会自动识别它们。
+`hermes_cli/config.py` 在导入时会扫描 `plugins/platforms/*/plugin.yaml`，并根据 `requires_env` 和（可选的）`optional_env` 块自动填充 `OPTIONAL_ENV_VARS`。使用富字典形式来提供适当的描述、提示、密码标志和 URL——CLI 设置界面会自动识别它们。
 
 ```yaml
 # plugins/platforms/my_platform/plugin.yaml
@@ -356,7 +356,7 @@ optional_env:
 
 某些平台有限制，会改变慢速 LLM 响应的呈现方式：
 
-- **LINE** 会发出一个一次性使用的*回复令牌*，该令牌在入站事件后大约 60 秒过期。使用该令牌回复是免费的；回退到计费的 Push API 则不是。如果 LLM 在截止时间前没有完成，选择是“消耗付费的 Push 配额”或“在回复令牌过期前用它做些更聪明的事情”。
+- **LINE** 会发出一个一次性使用的*回复令牌*，该令牌在入站事件后大约 60 秒过期。使用该令牌回复是免费的；回退到计费的 Push API 则不是。如果 LLM 在截止时间前未完成，选择是“消耗付费的 Push 配额”或“在回复令牌过期前更巧妙地处理它”。
 - **WhatsApp** 在 24 小时后将会话标记为非活动状态，之后只接受模板消息。
 - **SMS** 没有打字指示器或渐进式更新的概念——长响应看起来就像机器人离线了。
 
@@ -364,7 +364,7 @@ optional_env:
 
 ### 模式：子类化 `_keep_typing` 以叠加运行中的用户体验
 
-`BasePlatformAdapter._keep_typing` 是打字指示器的心跳——它在 LLM 生成时作为后台任务运行，并在响应交付时取消。要在某个阈值（例如在 45 秒时发送一个“仍在思考”的气泡）叠加平台特定的行为，请在适配器中重写 `_keep_typing`，安排你自己的任务与 `super()._keep_typing()` 一起运行，并在 `finally` 中清理它：
+`BasePlatformAdapter._keep_typing` 是打字指示器的心跳——它在 LLM 生成时作为后台任务运行，并在响应交付时取消。要在某个阈值（例如在 45 秒时发送一个“仍在思考”的气泡）叠加平台特定的行为，请在适配器中重写 `_keep_typing`，安排你自己的任务与 `super()._keep_typing()` 并行运行，并在 `finally` 中清理它：
 
 ```python
 class LineAdapter(BasePlatformAdapter):
@@ -378,10 +378,9 @@ class LineAdapter(BasePlatformAdapter):
                 await asyncio.sleep(self.slow_response_threshold)
             except asyncio.CancelledError:
                 raise
-            # Platform-specific work here — for LINE, send a Template
-            # Buttons "Get answer" bubble using the cached reply token
-            # so the user can fetch the cached response later via a
-            # fresh (free) reply token from the postback callback.
+            # 平台特定的工作在这里——对于 LINE，使用缓存的回复令牌发送一个模板
+            # 按钮“获取答案”气泡，以便用户稍后可以通过来自回调查回调的
+            # 新的（免费的）回复令牌获取缓存的响应。
             await self._send_slow_response_button(chat_id)
 
         side_task = asyncio.create_task(_fire_at_threshold())
@@ -400,15 +399,15 @@ class LineAdapter(BasePlatformAdapter):
 
 - **始终 `await super()._keep_typing(...)`。** 打字心跳本身是有用的——不要替换它，而是在它之上叠加。
 - **在 `finally` 中清理侧任务。** 当 LLM 完成（或 `/stop` 取消运行）时，消息网关会取消打字任务。你的侧任务也必须观察该取消，否则它会残留，并可能在响应已经交付后触发。
-- **与 `interrupt_session_activity` 配对使用**，以便在用户发出 `/stop` 时解决任何孤立的用户体验状态。对于 LINE，这意味着将回调查找缓存条目从 `PENDING` 转换为 `ERROR`，以便持久的“获取答案”按钮传递“运行被中断”的消息，而不是循环。
+- **与 `interrupt_session_activity` 配对使用**，以便在用户发出 `/stop` 时解决任何孤立的用户体验状态。对于 LINE，这意味着将回调查缓存条目从 `PENDING` 转换为 `ERROR`，以便持久的“获取答案”按钮传递“运行被中断”的消息，而不是循环。
 
 ### 模式：子类化 `send` 以通过缓存路由而不是立即发送
 
-如果你的慢速响应用户体验将响应缓存以供稍后检索（LINE 的回调查找流程），你的 `send` 重写需要识别三种模式：
+如果你的慢速响应用户体验将响应缓存以供稍后检索（LINE 的回调查流程），你的 `send` 重写需要识别三种模式：
 
-1.  **此聊天的待处理回调查找处于活动状态** → 将响应缓存在 request_id 下，不发送任何可见内容。
-2.  **系统繁忙确认**（`⚡ Interrupting`、`⏳ Queued`、`⏩ Steered`）→ 绕过缓存并可见地发送，以便用户看到消息网关对其输入的响应。
-3.  **正常响应** → 像往常一样通过回复令牌或推送发送。
+1. **此聊天的待处理回调查处于活动状态** → 将响应缓存在 request_id 下，不发送任何可见内容。
+2. **系统繁忙确认**（`⚡ Interrupting`、`⏳ Queued`、`⏩ Steered`）→ 绕过缓存并可见地发送，以便用户看到消息网关对其输入的响应。
+3. **正常响应** → 像往常一样通过回复令牌或推送发送。
 
 ```python
 async def send(self, chat_id: str, content: str, **kw) -> SendResult:
@@ -425,29 +424,29 @@ async def send(self, chat_id: str, content: str, **kw) -> SendResult:
 ### 何时适用此模式
 
 在以下情况下使用打字循环覆盖方法：
-- 平台的出站 API 有严格的时间窗口限制（一次性回复 Token、过期的粘性会话等）**并且**
+- 平台的外发 API 有严格的时间窗口限制（一次性回复 Token、过期的粘性会话等）**并且**
 - 在该平台上，*可见的飞行中气泡*是可接受的 UX。
 
-在以下情况下使用更简单的 `slow_response_threshold = 0` 的始终推送路径：
+在以下情况下使用更简单的 `slow_response_threshold = 0` 始终推送路径：
 - 平台没有有意义的免费与付费区分，**或者**
 - 用户社区更喜欢“加载中…加载中…完成”这种先静默后响应的方式，而不是交互式的中间气泡。
 
-LINE 两者都支持：对于免费的回传获取，阈值默认为 45 秒，而 `LINE_SLOW_RESPONSE_THRESHOLD=0` 则恢复为“始终推送回退”。
+LINE 两者都支持：对于免费的回传获取，阈值默认为 45 秒，而 `LINE_SLOW_RESPONSE_THRESHOLD=0` 则恢复为“始终使用推送回退”。
 
 ### 参考实现
 
-完整的 LINE 回传实现请参见 `plugins/platforms/line/adapter.py` —— 一个 `RequestCache` 状态机（`PENDING → READY → DELIVERED`，加上用于 `/stop` 的 `ERROR` 状态），一个在阈值时触发模板按钮气泡的 `_keep_typing` 覆盖，一个通过缓存路由的 `send` 覆盖，以及一个解析孤立 PENDING 条目的 `interrupt_session_activity` 覆盖。
+完整的 LINE 回传实现请参见 `plugins/platforms/line/adapter.py` —— 一个 `RequestCache` 状态机（`PENDING → READY → DELIVERED`，加上用于 `/stop` 的 `ERROR`），一个在阈值时触发模板按钮气泡的 `_keep_typing` 覆盖，一个通过缓存路由的 `send` 覆盖，以及一个解析孤立 PENDING 条目的 `interrupt_session_activity` 覆盖。
 
 ### 参考实现（插件路径）
 
-仓库中的 `plugins/platforms/irc/` 提供了一个完整的工作示例 —— 一个零外部依赖的完整异步 IRC 适配器。`plugins/platforms/teams/` 涵盖了 Bot Framework / Adaptive Cards，`plugins/platforms/google_chat/` 涵盖了基于 OAuth 的 REST API，`plugins/platforms/line/` 涵盖了具有平台特定慢速 LLM UX 的 webhook 驱动的消息 API。
+仓库中的 `plugins/platforms/irc/` 提供了一个完整的工作示例 —— 一个零外部依赖的完整异步 IRC 适配器。`plugins/platforms/teams/` 涵盖了 Bot Framework / Adaptive Cards，`plugins/platforms/google_chat/` 涵盖了基于 OAuth 的 REST API，而 `plugins/platforms/line/` 涵盖了具有平台特定慢速 LLM UX 的 Webhook 驱动的消息 API。
 
 ---
 
 ## 逐步检查清单（内置路径）
 
 :::note
-此检查清单用于将平台直接添加到 Hermes 核心代码库 —— 通常由核心贡献者为官方支持的平台完成。社区/第三方平台应使用上面的[插件路径](#插件路径-推荐)。
+此检查清单适用于将平台直接添加到 Hermes 核心代码库 —— 通常由核心贡献者为官方支持的平台完成。社区/第三方平台应使用上面的[插件路径](#插件路径-推荐)。
 :::
 
 ### 1. 平台枚举
@@ -532,13 +531,13 @@ await self.handle_message(event)
 1.  **`_create_adapter()`** —— 添加一个 `elif platform == Platform.NEWPLAT:` 分支
 2.  **`_is_user_authorized()` allowed_users 映射** —— `Platform.NEWPLAT: "NEWPLAT_ALLOWED_USERS"`
 3.  **`_is_user_authorized()` allow_all 映射** —— `Platform.NEWPLAT: "NEWPLAT_ALLOW_ALL_USERS"`
-4.  **早期环境检查 `_any_allowlist` 元组** —— 添加 `"NEWPLAT_ALLOWED_USERS"`
-5.  **早期环境检查 `_allow_all` 元组** —— 添加 `"NEWPLAT_ALLOW_ALL_USERS"`
+4.  **早期环境变量检查 `_any_allowlist` 元组** —— 添加 `"NEWPLAT_ALLOWED_USERS"`
+5.  **早期环境变量检查 `_allow_all` 元组** —— 添加 `"NEWPLAT_ALLOW_ALL_USERS"`
 6.  **`_UPDATE_ALLOWED_PLATFORMS` frozenset** —— 添加 `Platform.NEWPLAT`
 
-### 5. 跨平台投递
+### 5. 跨平台交付
 
-1.  **`gateway/platforms/webhook.py`** —— 在投递类型元组中添加 `"newplat"`
+1.  **`gateway/platforms/webhook.py`** —— 在交付类型元组中添加 `"newplat"`
 2.  **`cron/scheduler.py`** —— 添加到 `_KNOWN_DELIVERY_PLATFORMS` frozenset 和 `_deliver_result()` 平台映射
 
 ### 6. CLI 集成
@@ -553,7 +552,7 @@ await self.handle_message(event)
 ### 7. 工具
 
 1.  **`tools/send_message_tool.py`** —— 在平台映射中添加 `"newplat": Platform.NEWPLAT`
-2.  **`tools/cronjob_tools.py`** —— 在投递目标描述字符串中添加 `newplat`
+2.  **`tools/cronjob_tools.py`** —— 在交付目标描述字符串中添加 `newplat`
 
 ### 8. 工具集
 
@@ -562,12 +561,12 @@ await self.handle_message(event)
 
 ### 9. 可选：平台提示
 
-**`agent/prompt_builder.py`** —— 如果你的平台有特定的渲染限制（不支持 markdown、消息长度限制等），请在 `_PLATFORM_HINTS` 字典中添加一个条目。这会将平台特定的指导注入到系统提示词中：
+**`agent/prompt_builder.py`** —— 如果你的平台有特定的渲染限制（不支持 Markdown、消息长度限制等），请在 `_PLATFORM_HINTS` 字典中添加一个条目。这会将平台特定的指导信息注入到系统提示词中：
 ```python
 _PLATFORM_HINTS = {
     # ...
     "newplat": (
-        "您正在通过 NewPlat 聊天。它支持 Markdown 格式，"
+        "你正在通过 NewPlat 聊天。它支持 Markdown 格式，"
         "但有 4000 字符的消息长度限制。"
     ),
 }
@@ -589,7 +588,7 @@ _PLATFORM_HINTS = {
 | 文件 | 需要添加的内容 |
 |------|-------------|
 | `website/docs/user-guide/messaging/newplat.md` | 完整的平台设置页面 |
-| `website/docs/user-guide/messaging/index.md` | 平台对比表、架构图、工具集表、安全部分、下一步链接 |
+| `website/docs/user-guide/messaging/index.md` | 平台对比表格、架构图、工具集表格、安全部分、下一步链接 |
 | `website/docs/reference/environment-variables.md` | 所有 NEWPLAT_* 环境变量 |
 | `website/docs/reference/toolsets-reference.md` | hermes-newplat 工具集 |
 | `website/docs/integrations/index.md` | 平台链接 |
@@ -597,9 +596,9 @@ _PLATFORM_HINTS = {
 | `website/docs/developer-guide/architecture.md` | 适配器数量 + 列表 |
 | `website/docs/developer-guide/gateway-internals.md` | 适配器文件列表 |
 
-## 功能对等性审计
+## 功能对等性审查
 
-在将新平台 PR 标记为完成之前，请对照一个已建立的平台运行功能对等性审计：
+在将新平台 PR 标记为完成之前，请对照一个已建立的平台进行功能对等性审查：
 
 ```bash
 # 查找所有提及参考平台的 .py 文件
@@ -611,7 +610,7 @@ search_files "newplat" output_mode="files_only" file_glob="*.py"
 # 出现在第一组但不在第二组中的任何文件都是潜在的遗漏
 ```
 
-对 `.md` 和 `.ts` 文件重复此过程。调查每个遗漏——它是平台枚举（需要更新）还是平台特定的引用（跳过）？
+对 `.md` 和 `.ts` 文件重复此过程。调查每个遗漏——它是平台枚举（需要更新）还是平台特定引用（跳过）？
 
 ## 常见模式
 
@@ -648,18 +647,18 @@ async def _handle_callback(self, request):
     return web.Response(text="success")  # 立即确认
 ```
 
-对于响应截止时间严格的平台（例如，WeCom 的 5 秒限制），请始终立即确认，并通过 API 稍后主动发送 Agent 的回复。Agent 会话运行 3-30 分钟——在回调响应窗口内进行内联回复是不可行的。
+对于响应截止时间严格的平台（例如，WeCom 的 5 秒限制），请始终立即确认，然后稍后通过 API 主动发送 Agent 的回复。Agent 会话运行时间为 3-30 分钟——在回调响应窗口内进行内联回复是不可行的。
 
 ### Token 锁
 
-如果适配器使用唯一凭证持有持久连接，请添加一个作用域锁，以防止两个配置文件使用相同的凭证：
+如果适配器使用唯一的凭证持有持久连接，请添加一个作用域锁，以防止两个配置文件使用相同的凭证：
 
 ```python
 from gateway.status import acquire_scoped_lock, release_scoped_lock
 
 async def connect(self):
     if not acquire_scoped_lock("newplat", self._token):
-        logger.error("Token already in use by another profile")
+        logger.error("Token 已被另一个配置文件使用")
         return False
     # ... 连接
 
@@ -674,4 +673,4 @@ async def disconnect(self):
 | `bluebubbles.py` | REST + webhook | 中等 | 简单的 REST API 集成 |
 | `weixin.py` | 长轮询 + CDN | 高 | 媒体处理、加密 |
 | `wecom_callback.py` | 回调/webhook | 中等 | HTTP 服务器、AES 加密、多应用 |
-| `telegram.py` | 长轮询 + Bot API | 高 | 具有群组、线程等功能的完整适配器 |
+| `telegram.py` | 长轮询 + Bot API | 高 | 功能齐全的适配器，支持群组、线程 |

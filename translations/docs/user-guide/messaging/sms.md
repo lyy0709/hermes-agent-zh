@@ -9,8 +9,8 @@ description: "通过 Twilio 将 Hermes Agent 设置为短信聊天机器人"
 
 Hermes 通过 [Twilio](https://www.twilio.com/) API 连接到短信服务。人们向您的 Twilio 电话号码发送短信，即可获得 AI 回复——与 Telegram 或 Discord 相同的对话体验，但通过标准短信实现。
 
-:::info 共享凭证
-短信消息网关与可选的[电话技能](/reference/skills-catalog)共享凭证。如果您已经为语音通话或一次性短信设置了 Twilio，该网关可以使用相同的 `TWILIO_ACCOUNT_SID`、`TWILIO_AUTH_TOKEN` 和 `TWILIO_PHONE_NUMBER`。
+:::info 共享凭据
+短信消息网关与可选的[电话技能](/reference/skills-catalog)共享凭据。如果您已经为语音通话或一次性短信设置了 Twilio，该网关将使用相同的 `TWILIO_ACCOUNT_SID`、`TWILIO_AUTH_TOKEN` 和 `TWILIO_PHONE_NUMBER`。
 :::
 
 ---
@@ -24,7 +24,7 @@ Hermes 通过 [Twilio](https://www.twilio.com/) API 连接到短信服务。人�
 
 ---
 
-## 步骤 1：获取您的 Twilio 凭证
+## 步骤 1：获取您的 Twilio 凭据
 
 1.  前往 [Twilio 控制台](https://console.twilio.com/)
 2.  从仪表板复制您的 **Account SID** 和 **Auth Token**
@@ -40,7 +40,7 @@ Hermes 通过 [Twilio](https://www.twilio.com/) API 连接到短信服务。人�
 hermes gateway setup
 ```
 
-从平台列表中选择 **SMS (Twilio)**。向导将提示您输入凭证。
+从平台列表中选择 **SMS (Twilio)**。向导将提示您输入凭据。
 
 ### 手动设置
 
@@ -54,7 +54,7 @@ TWILIO_PHONE_NUMBER=+15551234567
 # 安全性：限制为特定电话号码（推荐）
 SMS_ALLOWED_USERS=+15559876543,+15551112222
 
-# 可选：为定时任务交付设置一个主频道
+# 可选：为定时任务投递设置一个主频道
 SMS_HOME_CHANNEL=+15559876543
 ```
 
@@ -71,7 +71,7 @@ Twilio 需要知道将接收到的消息发送到哪里。在 [Twilio 控制台]
     - **HTTP Method**: `POST`
 
 :::tip 暴露您的 Webhook
-如果您在本地运行 Hermes，请使用隧道来暴露 Webhook：
+如果您在本地运行 Hermes，请使用隧道暴露 webhook：
 
 ```bash
 # 使用 cloudflared
@@ -81,13 +81,13 @@ cloudflared tunnel --url http://localhost:8080
 ngrok http 8080
 ```
 
-将生成的公共 URL 设置为您的 Twilio Webhook。
+将生成的公共 URL 设置为您的 Twilio webhook。
 :::
 
-**将 `SMS_WEBHOOK_URL` 设置为与您在 Twilio 中配置的 URL 相同。** 这是 Twilio 签名验证所必需的——没有它，适配器将拒绝启动：
+**将 `SMS_WEBHOOK_URL` 设置为与您在 Twilio 控制台中配置的 URL 相同。** 这是 Twilio 签名验证所必需的——没有它，适配器将拒绝启动：
 
 ```bash
-# 必须与 Twilio 控制台中的 Webhook URL 匹配
+# 必须与您 Twilio 控制台中的 webhook URL 匹配
 SMS_WEBHOOK_URL=https://your-server:8080/webhooks/twilio
 ```
 
@@ -122,24 +122,24 @@ hermes gateway
 | 变量 | 必需 | 描述 |
 |----------|----------|-------------|
 | `TWILIO_ACCOUNT_SID` | 是 | Twilio Account SID（以 `AC` 开头） |
-| `TWILIO_AUTH_TOKEN` | 是 | Twilio Auth Token（也用于 Webhook 签名验证） |
+| `TWILIO_AUTH_TOKEN` | 是 | Twilio Auth Token（也用于 webhook 签名验证） |
 | `TWILIO_PHONE_NUMBER` | 是 | 您的 Twilio 电话号码（E.164 格式） |
-| `SMS_WEBHOOK_URL` | 是 | 用于 Twilio 签名验证的公共 URL——必须与 Twilio 控制台中的 Webhook URL 匹配 |
+| `SMS_WEBHOOK_URL` | 是 | 用于 Twilio 签名验证的公共 URL——必须与 Twilio 控制台中的 webhook URL 匹配 |
 | `SMS_WEBHOOK_PORT` | 否 | Webhook 监听端口（默认：`8080`） |
-| `SMS_WEBHOOK_HOST` | 否 | Webhook 绑定地址（默认：`0.0.0.0`） |
+| `SMS_WEBHOOK_HOST` | 否 | Webhook 绑定地址（默认：`127.0.0.1`） |
 | `SMS_INSECURE_NO_SIGNATURE` | 否 | 设置为 `true` 以禁用签名验证（仅限本地开发——**不适用于生产环境**） |
 | `SMS_ALLOWED_USERS` | 否 | 允许聊天的逗号分隔的 E.164 格式电话号码 |
 | `SMS_ALLOW_ALL_USERS` | 否 | 设置为 `true` 以允许任何人（不推荐） |
-| `SMS_HOME_CHANNEL` | 否 | 用于定时任务/通知交付的电话号码 |
+| `SMS_HOME_CHANNEL` | 否 | 用于定时任务/通知投递的电话号码 |
 | `SMS_HOME_CHANNEL_NAME` | 否 | 主频道的显示名称（默认：`Home`） |
 
 ---
 
-## 短信特定行为
+## SMS 特定行为
 
-- **仅纯文本** — Markdown 会自动被剥离，因为短信会将其渲染为字面字符
+- **仅纯文本** — Markdown 会被自动剥离，因为 SMS 会将其渲染为字面字符
 - **1600 字符限制** — 较长的回复会在自然边界（换行符，然后是空格）处拆分为多条消息
-- **防止回声** — 来自您自己 Twilio 号码的消息会被忽略，以防止循环
+- **防止回显** — 来自您自己 Twilio 号码的消息会被忽略，以防止循环
 - **电话号码脱敏** — 电话号码在日志中会被脱敏以保护隐私
 
 ---
@@ -148,7 +148,7 @@ hermes gateway
 
 ### Webhook 签名验证
 
-Hermes 通过验证 `X-Twilio-Signature` 标头（HMAC-SHA1）来验证入站 Webhook 确实来自 Twilio。这可以防止攻击者注入伪造消息。
+Hermes 通过验证 `X-Twilio-Signature` 头（HMAC-SHA1）来验证入站 webhook 确实来自 Twilio。这可以防止攻击者注入伪造消息。
 
 **`SMS_WEBHOOK_URL` 是必需的。** 将其设置为在 Twilio 控制台中配置的公共 URL。没有它，适配器将拒绝启动。
 
@@ -172,7 +172,7 @@ SMS_ALLOW_ALL_USERS=true
 ```
 
 :::warning
-短信没有内置加密。除非您了解安全影响，否则不要将短信用于敏感操作。对于敏感用例，请优先使用 Signal 或 Telegram。
+SMS 没有内置加密。除非您了解安全影响，否则不要将 SMS 用于敏感操作。对于敏感用例，请优先使用 Signal 或 Telegram。
 :::
 
 ---
@@ -181,15 +181,15 @@ SMS_ALLOW_ALL_USERS=true
 
 ### 消息未到达
 
-1.  检查您的 Twilio Webhook URL 是否正确且可公开访问
+1.  检查您的 Twilio webhook URL 是否正确且可公开访问
 2.  验证 `TWILIO_ACCOUNT_SID` 和 `TWILIO_AUTH_TOKEN` 是否正确
-3.  检查 Twilio 控制台 → **Monitor → Logs → Messaging** 中的交付错误
+3.  检查 Twilio 控制台 → **Monitor → Logs → Messaging** 中的投递错误
 4.  确保您的电话号码在 `SMS_ALLOWED_USERS` 中（或设置了 `SMS_ALLOW_ALL_USERS=true`）
 
 ### 回复未发送
 
 1.  检查 `TWILIO_PHONE_NUMBER` 是否正确设置（E.164 格式，带 `+`）
-2.  验证您的 Twilio 账户是否具有支持短信的号码
+2.  验证您的 Twilio 账户是否有支持短信的号码
 3.  检查 Hermes 消息网关日志中是否有 Twilio API 错误
 
 ### Webhook 端口冲突
@@ -200,4 +200,4 @@ SMS_ALLOW_ALL_USERS=true
 SMS_WEBHOOK_PORT=3001
 ```
 
-更新 Twilio 控制台中的 Webhook URL 以匹配。
+更新 Twilio 控制台中的 webhook URL 以匹配。

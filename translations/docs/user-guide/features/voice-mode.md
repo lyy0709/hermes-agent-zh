@@ -6,24 +6,24 @@ description: "与 Hermes Agent 进行实时语音对话 — 支持 CLI、Telegra
 
 # 语音模式
 
-Hermes Agent 支持在 CLI 和消息平台上进行完整的语音交互。使用麦克风与 Agent 对话，收听语音回复，并在 Discord 语音频道中进行实时语音对话。
+Hermes Agent 支持在 CLI 和消息平台上进行完整的语音交互。您可以使用麦克风与 Agent 对话，听到语音回复，并在 Discord 语音频道中进行实时语音对话。
 
-如果你想了解包含推荐配置和实际使用模式的实用设置步骤，请参阅[使用 Hermes 的语音模式](/guides/use-voice-mode-with-hermes)。
+如果您想要一个包含推荐配置和实际使用模式的实用设置教程，请参阅[使用 Hermes 的语音模式](/guides/use-voice-mode-with-hermes)。
 
 ## 前提条件
 
-在使用语音功能之前，请确保你已具备：
+在使用语音功能之前，请确保您已具备：
 
-1.  **已安装 Hermes Agent** — `pip install hermes-agent`（参见[安装](/getting-started/installation)）
-2.  **已配置 LLM 提供商** — 运行 `hermes model` 或在 `~/.hermes/.env` 中设置你偏好的提供商凭据
+1.  **已安装 Hermes Agent** — `pip install hermes-agent`（请参阅[安装](/getting-started/installation)）
+2.  **已配置 LLM 提供商** — 运行 `hermes model` 或在 `~/.hermes/.env` 中设置您首选的提供商凭据
 3.  **基础设置正常工作** — 运行 `hermes` 以验证 Agent 在启用语音前能响应文本
 
 :::tip
-`~/.hermes/` 目录和默认的 `config.yaml` 会在你首次运行 `hermes` 时自动创建。你只需要为 API 密钥手动创建 `~/.hermes/.env`。
+`~/.hermes/` 目录和默认的 `config.yaml` 会在您首次运行 `hermes` 时自动创建。您只需为 API 密钥手动创建 `~/.hermes/.env`。
 :::
 
 :::tip Nous Portal 两者兼备
-付费的 [Nous Portal](/user-guide/features/tool-gateway) 订阅通过工具网关提供 LLM（步骤 2）**和** OpenAI TTS —— 无需单独的 OpenAI 密钥。在新安装时，`hermes setup --portal` 会一次性配置好两者。
+付费的 [Nous Portal](/user-guide/features/tool-gateway) 订阅通过工具网关同时提供 LLM（步骤 2）**和** OpenAI TTS — 无需单独的 OpenAI 密钥。在新安装时，`hermes setup --portal` 会一次性配置好两者。
 :::
 
 ## 概述
@@ -45,10 +45,10 @@ pip install "hermes-agent[voice]"
 # Discord + Telegram 消息传递（包含 discord.py[voice] 以支持语音频道）
 pip install "hermes-agent[messaging]"
 
-# 高级 TTS (ElevenLabs)
+# 高级 TTS（ElevenLabs）
 pip install "hermes-agent[tts-premium]"
 
-# 本地 TTS (NeuTTS，可选)
+# 本地 TTS（NeuTTS，可选）
 python -m pip install -U neutts[all]
 
 # 一次性安装所有
@@ -82,7 +82,7 @@ sudo apt install espeak-ng   # 用于 NeuTTS
 | 依赖项 | 用途 | 所需用途 |
 |-----------|---------|-------------|
 | **PortAudio** | 麦克风输入和音频播放 | CLI 语音模式 |
-| **ffmpeg** | 音频格式转换 (MP3 → Opus, PCM → WAV) | 所有平台 |
+| **ffmpeg** | 音频格式转换（MP3 → Opus, PCM → WAV） | 所有平台 |
 | **Opus** | Discord 语音编解码器 | Discord 语音频道 |
 | **espeak-ng** | 音素化后端 | 本地 NeuTTS 提供商 |
 
@@ -93,7 +93,7 @@ sudo apt install espeak-ng   # 用于 NeuTTS
 ```bash
 # 语音转文本 — 本地提供商完全不需要密钥
 # pip install faster-whisper          # 免费，本地运行，推荐
-GROQ_API_KEY=your-key                 # Groq Whisper — 快速，免费额度（云端）
+GROQ_API_KEY=your-key                 # Groq Whisper — 快速，有免费额度（云端）
 VOICE_TOOLS_OPENAI_KEY=your-key       # OpenAI Whisper — 付费（云端）
 
 # 文本转语音（可选 — Edge TTS 和 NeuTTS 无需任何密钥即可工作）
@@ -102,14 +102,14 @@ ELEVENLABS_API_KEY=***           # ElevenLabs — 高品质
 ```
 
 :::tip
-如果安装了 `faster-whisper`，语音模式可以在 **零 API 密钥** 的情况下进行语音转文本。模型（`base` 约 150 MB）会在首次使用时自动下载。
+如果安装了 `faster-whisper`，语音模式可以在 **零 API 密钥** 的情况下进行 STT。模型（`base` 约 150 MB）会在首次使用时自动下载。
 :::
 
 ---
 
 ## CLI 语音模式
 
-语音模式在 **经典 CLI** (`hermes chat`) 和 **TUI** (`hermes --tui`) 中均可用。两者行为一致 —— 相同的斜杠命令、相同的 VAD 静默检测、相同的流式 TTS、相同的幻觉过滤器。TUI 还会将崩溃诊断日志转发到 `~/.hermes/logs/`，以便在奇特的音频后端上出现按键通话失败时，可以报告完整的堆栈跟踪，而不是悄无声息地消失。
+语音模式在 **经典 CLI** (`hermes chat`) 和 **TUI** (`hermes --tui`) 中均可用。两者行为一致 — 相同的斜杠命令、相同的 VAD 静默检测、相同的流式 TTS、相同的幻觉过滤器。TUI 还会将崩溃诊断日志转发到 `~/.hermes/logs/`，以便在特殊音频后端上出现按键通话失败时，可以报告完整的堆栈跟踪，而不是悄无声息地消失。
 
 ### 快速开始
 
@@ -131,34 +131,34 @@ hermes                # 启动交互式 CLI
 
 ### 工作原理
 
-1.  使用 `hermes` 启动 CLI，并用 `/voice on` 启用语音模式
-2.  **按下 Ctrl+B** —— 播放一声提示音（880Hz），开始录音
-3.  **说话** —— 显示实时音频电平条：`● [▁▂▃▅▇▇▅▂] ❯`
-4.  **停止说话** —— 静默 3 秒后，录音自动停止
+1.  使用 `hermes` 启动 CLI，并通过 `/voice on` 启用语音模式
+2.  **按 Ctrl+B** — 播放一声提示音（880Hz），开始录音
+3.  **说话** — 显示实时音频电平条：`● [▁▂▃▅▇▇▅▂] ❯`
+4.  **停止说话** — 静默 3 秒后，录音自动停止
 5.  播放**两声提示音**（660Hz）确认录音结束
 6.  音频通过 Whisper 转录并发送给 Agent
 7.  如果启用了 TTS，Agent 的回复会被朗读出来
-8.  录音**自动重新开始** —— 无需按任何键即可再次说话
+8.  录音**自动重新开始** — 无需按任何键即可再次说话
 
-此循环将持续进行，直到你在录音期间按下 **Ctrl+B**（退出连续模式）或连续 3 次录音未检测到语音。
+此循环将持续进行，直到您在录音期间按下 **Ctrl+B**（退出连续模式）或连续 3 次录音未检测到语音。
 
 :::tip
-录音键可通过 `~/.hermes/config.yaml` 中的 `voice.record_key` 配置（默认：`ctrl+b`）。
+录音键可通过 `~/.hermes/config.yaml` 中的 `voice.record_key` 配置（默认值：`ctrl+b`）。
 :::
 
 ### 静默检测
 
-两阶段算法检测你何时说完话：
+两阶段算法检测您何时说完话：
 
-1.  **语音确认** —— 等待音频超过 RMS 阈值（200）至少 0.3 秒，容忍音节间的短暂下降
-2.  **结束检测** —— 一旦确认有语音，在连续静默 3.0 秒后触发
+1.  **语音确认** — 等待音频超过 RMS 阈值（200）至少 0.3 秒，容忍音节间的短暂下降
+2.  **结束检测** — 一旦语音被确认，在连续静默 3.0 秒后触发
 如果 15 秒内完全没有检测到语音，录音将自动停止。
 
 `silence_threshold` 和 `silence_duration` 都可以在 `config.yaml` 中配置。你也可以通过设置 `voice.beep_enabled: false` 来禁用录音开始/结束的提示音。
 
 ### 流式 TTS
 
-当 TTS 启用时，Agent 会**逐句**生成并说出它的回复——你无需等待完整的响应：
+当启用 TTS 时，Agent 会在生成文本时**逐句**说出其回复——你无需等待完整的响应：
 
 1.  将文本增量缓冲成完整的句子（最少 20 个字符）
 2.  去除 Markdown 格式和 `<think>` 代码块
@@ -166,13 +166,13 @@ hermes                # 启动交互式 CLI
 
 ### 幻觉过滤器
 
-Whisper 有时会从静默或背景噪音中生成幻听文本（"Thank you for watching"、"Subscribe" 等）。Agent 会使用一组包含多种语言的 26 个已知幻觉短语，再加上一个用于捕获重复变体的正则表达式模式，来过滤掉这些内容。
+Whisper 有时会从静默或背景噪音中生成幻听文本（"Thank you for watching"、"Subscribe" 等）。Agent 会使用一组包含多种语言的 26 个已知幻觉短语，再加上一个能捕获重复变体的正则表达式模式来过滤掉这些内容。
 
 ---
 
 ## 消息网关语音回复 (Telegram & Discord)
 
-如果你还没有设置好你的消息机器人，请参阅平台特定的指南：
+如果你还没有设置好你的消息机器人，请参阅特定平台的指南：
 - [Telegram 设置指南](../messaging/telegram.md)
 - [Discord 设置指南](../messaging/discord.md)
 
@@ -197,7 +197,7 @@ hermes gateway setup  # 首次配置的交互式设置向导
 **服务器频道：** 机器人只在你 @提及它时才会响应（例如 `@hermesbyt4 hello`）。请确保从提及弹出窗口中选择**机器人用户**，而不是同名的角色。
 
 :::tip
-要禁用服务器频道中的提及要求，请在 `~/.hermes/.env` 中添加：
+要在服务器频道中禁用提及要求，请在 `~/.hermes/.env` 中添加：
 ```bash
 DISCORD_REQUIRE_MENTION=false
 ```
@@ -224,8 +224,8 @@ DISCORD_FREE_RESPONSE_CHANNELS=123456789,987654321
 | 模式 | 命令 | 行为 |
 |------|---------|----------|
 | `off` | `/voice off` | 仅文本（默认） |
-| `voice_only` | `/voice on` | 仅当你发送语音消息时才语音回复 |
-| `all` | `/voice tts` | 对每条消息都语音回复 |
+| `voice_only` | `/voice on` | 仅在你发送语音消息时说出回复 |
+| `all` | `/voice tts` | 对每条消息都说出回复 |
 
 语音模式设置会在消息网关重启后保留。
 
@@ -271,10 +271,10 @@ DISCORD_FREE_RESPONSE_CHANNELS=123456789,987654321
 https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&scope=bot+applications.commands&permissions=274881432640
 ```
 
-将 `YOUR_APP_ID` 替换为你在开发者门户中的 Application ID。
+将 `YOUR_APP_ID` 替换为你在开发者门户中的应用程序 ID。
 
 :::warning
-将机器人重新邀请到它已在的服务器只会更新其权限，而不会移除它。你不会丢失任何数据或配置。
+将机器人重新邀请到它已在的服务器将更新其权限而不会移除它。你不会丢失任何数据或配置。
 :::
 
 #### 2. 特权网关意图
@@ -287,7 +287,7 @@ https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&scope=bot+application
 | **Server Members Intent** | 将 `DISCORD_ALLOWED_USERS` 中的用户名解析为数字 ID（有条件需要） |
 | **Message Content Intent** | 读取频道中的文本消息内容 |
 
-**Message Content Intent** 是必需的。**Server Members Intent** 仅在 `DISCORD_ALLOWED_USERS` 列表使用用户名时才需要——如果你使用数字用户 ID，可以将其关闭。语音频道 SSRC → user_id 的映射来自 Discord 语音 WebSocket 上的 SPEAKING 操作码，**不**需要 Server Members Intent。
+**Message Content Intent** 是必需的。**Server Members Intent** 仅在 `DISCORD_ALLOWED_USERS` 列表使用用户名时才需要——如果你使用数字用户 ID，可以将其关闭。语音频道 SSRC → user_id 的映射来自 Discord 语音 WebSocket 上的 SPEAKING 操作码，并**不**需要 Server Members Intent。
 
 #### 3. Opus 编解码器
 
@@ -314,7 +314,7 @@ DISCORD_BOT_TOKEN=your-bot-token
 DISCORD_ALLOWED_USERS=your-user-id
 
 # STT — 本地提供商无需密钥 (pip install faster-whisper)
-# GROQ_API_KEY=your-key            # 替代方案：基于云端，快速，有免费额度
+# GROQ_API_KEY=your-key            # 替代方案：基于云端、快速、有免费额度
 
 # TTS — 可选。Edge TTS 和 NeuTTS 无需密钥。
 # ELEVENLABS_API_KEY=***      # 高品质
@@ -337,7 +337,7 @@ hermes gateway        # 使用现有配置启动
 /voice join      机器人加入你当前的语音频道
 /voice channel   /voice join 的别名
 /voice leave     机器人断开与语音频道的连接
-/voice status    显示语音模式及连接的频道
+/voice status    显示语音模式和已连接的频道
 ```
 
 :::info
@@ -348,19 +348,19 @@ hermes gateway        # 使用现有配置启动
 
 当机器人加入语音频道时，它会：
 
-1.  **监听** 每个用户的音频流（独立处理）
-2.  **检测静音** — 至少 0.5 秒语音后出现 1.5 秒静音即触发处理
-3.  **转录** 音频（通过 Whisper STT，支持本地、Groq 或 OpenAI）
-4.  **处理** 完整的 Agent 流水线（会话、工具、记忆）
-5.  **说话** 通过 TTS 在语音频道中回复
+1.  **独立监听**每个用户的音频流
+2.  **检测静音** — 在至少 0.5 秒的语音后，持续 1.5 秒的静音会触发处理
+3.  **转录**音频（通过 Whisper STT，可以是本地、Groq 或 OpenAI）
+4.  **通过完整的 Agent 流水线处理**（会话、工具、记忆）
+5.  **通过 TTS 在语音频道中说出**回复
 
 ### 文本频道集成
 
-当机器人在语音频道时：
+当机器人在语音频道中时：
 
-*   转录文本会出现在文本频道中：`[语音] @用户: 你说的话`
-*   Agent 的回复会以文本形式发送到频道，并在语音频道中说出来
-*   文本频道是执行 `/voice join` 命令的那个频道
+*   转录文本会出现在文本频道中：`[Voice] @user: what you said`
+*   Agent 的回复会作为文本发送到频道中，**并且**在语音频道中说出
+*   文本频道是发出 `/voice join` 命令的那个频道
 
 ### 回声预防
 
@@ -368,7 +368,7 @@ hermes gateway        # 使用现有配置启动
 
 ### 访问控制
 
-只有列在 `DISCORD_ALLOWED_USERS` 中的用户才能通过语音交互。其他用户的音频会被静默忽略。
+只有列在 `DISCORD_ALLOWED_USERS` 中的用户才能通过语音进行交互。其他用户的音频会被静默忽略。
 
 ```bash
 # ~/.hermes/.env
@@ -385,25 +385,25 @@ DISCORD_ALLOWED_USERS=284102345871466496
 # 语音录制 (CLI)
 voice:
   record_key: "ctrl+b"            # 开始/停止录制的按键
-  max_recording_seconds: 120       # 最大录制时长
+  max_recording_seconds: 120       # 最大录制长度
   auto_tts: false                  # 语音模式启动时自动启用 TTS
-  beep_enabled: true               # 播放录制开始/结束提示音
-  silence_threshold: 200           # RMS 级别 (0-32767)，低于此值视为静音
+  beep_enabled: true               # 播放录制开始/结束的提示音
+  silence_threshold: 200           # RMS 电平 (0-32767)，低于此值视为静音
   silence_duration: 3.0            # 自动停止前的静音秒数
 
 # 语音转文本
 stt:
-  enabled: true                     # 设为 false 以跳过自动转录 —
+  enabled: true                     # 设置为 false 以跳过自动转录 —
                                     # 消息网关仍会缓存音频文件，并将其路径作为入站消息的一部分传递给 Agent，
                                     # 这对于自定义流水线（说话人分离、对齐、归档等）很有用
-  provider: "local"                  # "local" (免费) | "groq" | "openai"
+  provider: "local"                  # "local" (免费) | "groq" | "openai" | "mistral" | "xai"
   local:
     model: "base"                    # tiny, base, small, medium, large-v3
-  # model: "whisper-1"              # 旧版：当 provider 未设置时使用
+  # model: "whisper-1"              # 旧版：当未设置 provider 时使用
 
 # 文本转语音
 tts:
-  provider: "edge"                 # "edge" (免费) | "elevenlabs" | "openai" | "neutts" | "minimax"
+  provider: "edge"                 # "edge" (免费) | "elevenlabs" | "openai" | "neutts" | "minimax" | "mistral" | "gemini" | "xai" | "kittentts" | "piper"
   edge:
     voice: "en-US-AriaNeural"      # 322 种语音，74 种语言
   elevenlabs:
@@ -454,6 +454,8 @@ DISCORD_ALLOWED_USERS=...
 | **Groq** | `whisper-large-v3` | 快 (~1s) | 更好 | 免费额度 | 是 |
 | **OpenAI** | `whisper-1` | 快 (~1s) | 良好 | 付费 | 是 |
 | **OpenAI** | `gpt-4o-transcribe` | 中等 (~2s) | 最佳 | 付费 | 是 |
+| **Mistral** | `voxtral-mini-latest` | 快 | 良好 | 付费 | 是 |
+| **xAI** | `grok-stt` | 快 | 良好 | 付费 | 是 |
 
 提供商优先级（自动回退）：**本地** > **groq** > **openai**
 
@@ -466,8 +468,7 @@ DISCORD_ALLOWED_USERS=...
 | **OpenAI TTS** | 良好 | 付费 | ~1.5s | 是 |
 | **NeuTTS** | 良好 | 免费 | 取决于 CPU/GPU | 否 |
 
-NeuTTS 使用上面 `tts.neutts` 配置块。
-
+NeuTTS 使用上面 `tts.neutts` 配置块中的设置。
 ---
 
 ## 故障排除
@@ -480,21 +481,22 @@ NeuTTS 使用上面 `tts.neutts` 配置块。
 brew install portaudio    # macOS
 sudo apt install portaudio19-dev  # Ubuntu
 ```
-如果您在 Linux 桌面上的 Docker 内运行 Hermes，容器还需要访问您主机的音频套接字。有关 PulseAudio/PipeWire 兼容的设置，请参阅 [Docker 音频桥接](/user-guide/docker#optional-linux-desktop-audio-bridge)说明。
+
+如果您在 Linux 桌面上的 Docker 容器内运行 Hermes，容器还需要访问您主机的音频套接字。请参阅 [Docker 音频桥接](/user-guide/docker#optional-linux-desktop-audio-bridge) 说明，了解与 PulseAudio/PipeWire 兼容的设置。
 
 ### Bot 在 Discord 服务器频道中不响应
 
-默认情况下，Bot 在服务器频道中需要被 @提及。请确保您：
+默认情况下，bot 在服务器频道中需要被 @提及。请确保：
 
 1. 输入 `@` 并选择 **bot 用户**（带有 #discriminator），而不是同名的 **角色**
-2. 或者改用私信 — 无需提及
+2. 或者改用私信（DM）—— 无需提及
 3. 或者在 `~/.hermes/.env` 中设置 `DISCORD_REQUIRE_MENTION=false`
 
 ### Bot 加入了语音频道但听不到我说话
 
 - 检查您的 Discord 用户 ID 是否在 `DISCORD_ALLOWED_USERS` 中
 - 确保您在 Discord 中没有静音
-- Bot 需要从 Discord 收到 SPEAKING 事件才能映射您的音频 — 请在加入频道后的几秒钟内开始说话
+- bot 需要收到来自 Discord 的 SPEAKING 事件才能映射您的音频 —— 请在加入后几秒钟内开始说话
 
 ### Bot 能听到我说话但不响应
 
@@ -504,14 +506,14 @@ sudo apt install portaudio19-dev  # Ubuntu
 
 ### Bot 以文本形式响应但不在语音频道中说话
 
-- TTS 提供商可能失败 — 检查 API 密钥和配额
+- TTS 提供商可能失败 —— 检查 API 密钥和配额
 - Edge TTS（免费，无需密钥）是默认的后备方案
-- 检查日志中是否有 TTS 错误
+- 检查日志中的 TTS 错误
 
 ### Whisper 返回乱码文本
 
 幻觉过滤器会自动捕获大多数情况。如果您仍然收到虚假的转录文本：
 
-- 使用更安静的环境
+- 在更安静的环境中使用
 - 调整配置中的 `silence_threshold`（值越高 = 越不敏感）
 - 尝试不同的 STT 模型

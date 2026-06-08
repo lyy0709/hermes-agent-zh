@@ -6,15 +6,15 @@ description: "Hermes Agent 如何在会话间保持记忆 — MEMORY.md、USER.m
 
 # 持久化记忆
 
-Hermes Agent 拥有有限的、经过筛选的记忆，这些记忆在会话间持久存在。这使得它可以记住您的偏好、您的项目、您的执行环境以及它学到的东西。
+Hermes Agent 拥有有限的、经过筛选的记忆，这些记忆在会话间持久存在。这使得它能够记住您的偏好、您的项目、您的环境以及它学到的东西。
 
 ## 工作原理
 
-Agent 的记忆由两个文件构成：
+两个文件构成了 Agent 的记忆：
 
 | 文件 | 用途 | 字符限制 |
 |------|---------|------------|
-| **MEMORY.md** | Agent 的个人笔记 — 环境事实、约定、学到的东西 | 2,200 字符 (~800 Token) |
+| **MEMORY.md** | Agent 的个人笔记 — 环境事实、惯例、学到的东西 | 2,200 字符 (~800 Token) |
 | **USER.md** | 用户档案 — 您的偏好、沟通风格、期望 | 1,375 字符 (~500 Token) |
 
 两者都存储在 `~/.hermes/memories/` 目录下，并在会话开始时作为冻结的快照注入到系统提示词中。Agent 通过 `memory` 工具管理自己的记忆 — 它可以添加、替换或删除条目。
@@ -25,7 +25,7 @@ Agent 的记忆由两个文件构成：
 
 ## 记忆在系统提示词中的呈现方式
 
-在每个会话开始时，记忆条目会从磁盘加载，并作为一个冻结的块渲染到系统提示词中：
+在每个会话开始时，记忆条目会从磁盘加载，并作为一个冻结块渲染到系统提示词中：
 
 ```
 ══════════════════════════════════════════════
@@ -41,24 +41,24 @@ User prefers concise responses, dislikes verbose explanations
 格式包括：
 - 一个标题，显示是哪个存储（MEMORY 或 USER PROFILE）
 - 使用百分比和字符计数，以便 Agent 了解容量
-- 各个条目由 `§`（节符号）分隔符分隔
+- 各个条目由 `§`（节号）分隔符分隔
 - 条目可以是多行的
 
-**冻结快照模式：** 系统提示词注入在会话开始时捕获一次，在会话中永不改变。这是有意为之 — 它保留了 LLM 的前缀缓存以提高性能。当 Agent 在会话期间添加/删除记忆条目时，更改会立即持久化到磁盘，但直到下一个会话开始时才会出现在系统提示词中。工具响应始终显示实时状态。
+**冻结快照模式：** 系统提示词注入在会话开始时捕获一次，并且在会话中途永不更改。这是有意为之 — 它保留了 LLM 的前缀缓存以提高性能。当 Agent 在会话期间添加/删除记忆条目时，更改会立即持久化到磁盘，但直到下一个会话开始时才会出现在系统提示词中。工具响应始终显示实时状态。
 
 ## 记忆工具操作
 
 Agent 使用 `memory` 工具执行以下操作：
 
 - **add** — 添加新的记忆条目
-- **replace** — 用更新的内容替换现有条目（通过 `old_text` 使用子字符串匹配）
+- **replace** — 用更新后的内容替换现有条目（通过 `old_text` 使用子字符串匹配）
 - **remove** — 删除不再相关的条目（通过 `old_text` 使用子字符串匹配）
 
-没有 `read` 操作 — 记忆内容在会话开始时自动注入到系统提示词中。Agent 将其记忆视为其对话上下文的一部分。
+没有 `read` 操作 — 记忆内容会在会话开始时自动注入到系统提示词中。Agent 将其记忆视为其对话上下文的一部分。
 
 ### 子字符串匹配
 
-`replace` 和 `remove` 操作使用简短、唯一的子字符串匹配 — 您不需要完整的条目文本。`old_text` 参数只需要是一个唯一的子字符串，能精确标识一个条目：
+`replace` 和 `remove` 操作使用简短、唯一的子字符串匹配 — 您不需要完整的条目文本。`old_text` 参数只需要是一个唯一的子字符串，能够精确标识一个条目：
 
 ```python
 # 如果记忆包含 "User prefers dark mode in all editors"
@@ -76,8 +76,8 @@ memory(action="replace", target="memory",
 用于 Agent 需要记住的关于环境、工作流程和所学经验的信息：
 
 - 环境事实（操作系统、工具、项目结构）
-- 项目约定和配置
-- 发现的工具怪癖和解决方法
+- 项目惯例和配置
+- 发现的工具怪癖和变通方法
 - 已完成任务的日记条目
 - 有效的技能和技术
 
@@ -95,22 +95,22 @@ memory(action="replace", target="memory",
 
 ### 保存这些（主动）
 
-Agent 会自动保存 — 您无需要求。它在学到以下内容时保存：
+Agent 会自动保存 — 您无需请求。它在学到以下内容时保存：
 
 - **用户偏好：** "我更喜欢 TypeScript 而不是 JavaScript" → 保存到 `user`
-- **环境事实：** "这台服务器运行 Debian 12 和 PostgreSQL 16" → 保存到 `memory`
+- **环境事实：** "此服务器运行 Debian 12 和 PostgreSQL 16" → 保存到 `memory`
 - **更正：** "不要对 Docker 命令使用 `sudo`，用户属于 docker 组" → 保存到 `memory`
-- **约定：** "项目使用制表符、120 字符行宽、Google 风格文档字符串" → 保存到 `memory`
+- **惯例：** "项目使用制表符、120 字符行宽、Google 风格文档字符串" → 保存到 `memory`
 - **已完成的工作：** "于 2026-01-15 将数据库从 MySQL 迁移到 PostgreSQL" → 保存到 `memory`
 - **明确请求：** "记住我的 API 密钥每月轮换一次" → 保存到 `memory`
 
 ### 跳过这些
 
-- **琐碎/明显的信息：** "用户询问了 Python" — 太模糊，没有用处
-- **容易重新发现的事实：** "Python 3.12 支持 f-string 嵌套" — 可以通过网络搜索找到
+- **琐碎/明显的信息：** "用户询问了 Python" — 太模糊，无用
+- **容易重新发现的事实：** "Python 3.12 支持 f-string 嵌套" — 可以网络搜索这个
 - **原始数据转储：** 大型代码块、日志文件、数据表 — 对于记忆来说太大
 - **特定于会话的临时信息：** 临时文件路径、一次性调试上下文
-- **已存在于上下文文件中的信息：** SOUL.md 和 AGENTS.md 的内容
+- **已在上下文文件中的信息：** SOUL.md 和 AGENTS.md 的内容
 
 ## 容量管理
 
@@ -128,7 +128,7 @@ Agent 会自动保存 — 您无需要求。它在学到以下内容时保存：
 ```json
 {
   "success": false,
-  "error": "Memory at 2,100/2,200 chars. Adding this entry (250 chars) would exceed the limit. Replace or remove existing entries first.",
+  "error": "Memory at 2,100/2,200 chars. Adding this entry (250 chars) would exceed the limit. Consolidate now: use 'replace' to merge overlapping entries into shorter ones or 'remove' stale or less important entries (see current_entries below), then retry this add — all in this turn.",
   "current_entries": ["..."],
   "usage": "2,100/2,200"
 }
@@ -147,20 +147,20 @@ Agent 会自动保存 — 您无需要求。它在学到以下内容时保存：
 **紧凑、信息密集的条目效果最佳：**
 
 ```
-# 良好：打包多个相关事实
-用户运行 macOS 14 Sonoma，使用 Homebrew，安装了 Docker Desktop 和 Podman。Shell：zsh 搭配 oh-my-zsh。编辑器：VS Code 搭配 Vim 键绑定。
+# 好：打包多个相关事实
+用户运行 macOS 14 Sonoma，使用 Homebrew，安装了 Docker Desktop 和 Podman。Shell：zsh 配合 oh-my-zsh。编辑器：VS Code 配合 Vim 键绑定。
 
-# 良好：具体、可操作的约定
+# 好：具体、可操作的惯例
 项目 ~/code/api 使用 Go 1.22、sqlc 进行数据库查询、chi 路由器。使用 'make test' 运行测试。CI 通过 GitHub Actions。
 
-# 良好：附带上下文的经验教训
+# 好：带有上下文的经验教训
 暂存服务器 (10.0.1.50) 需要 SSH 端口 2222，而不是 22。密钥位于 ~/.ssh/staging_ed25519。
 
-# 不好：太模糊
+# 差：太模糊
 用户有一个项目。
 
-# 不好：太冗长
-在 2026 年 1 月 5 日，用户要求我查看他们的项目，该项目位于 ~/code/api。我发现它使用 Go 版本 1.22 并且...
+# 差：太冗长
+2026年1月5日，用户让我查看他们的项目，该项目位于 ~/code/api。我发现它使用 Go 版本 1.22，并且...
 ```
 
 ## 重复项预防
@@ -197,7 +197,7 @@ hermes sessions list    # 浏览过去的会话
 | **管理** | 由 Agent 手动筛选 | 自动 — 存储所有会话 |
 | **Token 成本** | 每个会话固定（约 1,300 Token） | 按需（需要时搜索） |
 
-**记忆**用于应始终存在于上下文中的关键事实。**会话搜索**用于 "我们上周讨论过 X 吗？" 这类查询，此时 Agent 需要回忆过去对话中的具体细节。
+**记忆**用于应始终在上下文中的关键事实。**会话搜索**用于 "我们上周讨论过 X 吗？" 这类查询，其中 Agent 需要回忆过去对话中的具体细节。
 
 ## 配置
 
@@ -218,7 +218,7 @@ memory:
 
 ```bash
 hermes memory setup      # 选择一个提供商并进行配置
-hermes memory status     # 检查哪些处于活动状态
+hermes memory status     # 检查当前激活的提供商
 ```
 
 有关每个提供商的完整详细信息、设置说明和比较，请参阅[记忆提供商](./memory-providers.md)指南。

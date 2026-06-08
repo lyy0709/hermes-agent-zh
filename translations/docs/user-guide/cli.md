@@ -1,19 +1,19 @@
 ---
 sidebar_position: 1
 title: "CLI 界面"
-description: "掌握 Hermes Agent 终端界面 — 命令、快捷键、人格设置等"
+description: "掌握 Hermes Agent 终端界面 —— 命令、快捷键、人格设定等"
 ---
 
 # CLI 界面
 
-Hermes Agent 的 CLI 是一个完整的终端用户界面 (TUI) — 而非网页 UI。它具备多行编辑、斜杠命令自动补全、对话历史、中断与重定向以及流式工具输出等功能。专为终端用户打造。
+Hermes Agent 的 CLI 是一个完整的终端用户界面（TUI）—— 而非网页 UI。它具备多行编辑、斜杠命令自动补全、对话历史、中断与重定向以及流式工具输出等功能。专为生活在终端中的人打造。
 
 :::tip 首次设置
-只需一条命令 — `hermes setup --portal` — 即可开始使用 `hermes chat`。请参阅 [Nous Portal](/integrations/nous-portal)。
+只需一条命令 —— `hermes setup --portal` —— 即可开始使用 `hermes chat`。请参阅 [Nous Portal](/integrations/nous-portal)。
 :::
 
 :::tip
-Hermes 还附带了一个现代化的 TUI，具有模态叠加层、鼠标选择和非阻塞输入功能。使用 `hermes --tui` 启动 — 请参阅 [TUI](tui.md) 指南。
+Hermes 还附带了一个现代化的 TUI，具有模态叠加层、鼠标选择和非阻塞输入功能。使用 `hermes --tui` 启动它 —— 请参阅 [TUI](tui.md) 指南。
 :::
 
 ## 运行 CLI
@@ -48,13 +48,13 @@ hermes chat --verbose
 
 # 隔离的 git 工作树（用于并行运行多个 Agent）
 hermes -w                         # 工作树中的交互模式
-hermes -w -q "Fix issue #123"     # 工作树中的单次查询
+hermes -w -z "Fix issue #123"     # 工作树中的单次查询
 ```
 
 ## 界面布局
 
 <img className="docs-terminal-figure" src="/docs/img/docs/cli-layout.svg" alt="Hermes CLI 布局的样式化预览，展示了横幅、对话区域和固定的输入提示符。" />
-<p className="docs-figure-caption">Hermes CLI 横幅、对话流和固定输入提示符，以稳定的文档图形而非脆弱的文本艺术形式呈现。</p>
+<p className="docs-figure-caption">Hermes CLI 横幅、对话流和固定输入提示符，渲染为稳定的文档图形而非脆弱的文本艺术。</p>
 
 欢迎横幅一目了然地显示您的模型、终端后端、工作目录、可用工具和已安装的技能。
 
@@ -72,12 +72,12 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 | Token 计数 | 已使用的上下文 Token / 最大上下文窗口 |
 | 上下文条 | 带有颜色编码阈值的视觉填充指示器 |
 | 成本 | 预估的会话成本（对于未知/零成本模型显示 `n/a`） |
-| 🗜️ N | **上下文压缩次数** — 当前运行会话已自动压缩的次数。首次压缩后出现。 |
-| ▶ N | **活跃的后台任务** — 当前会话中仍在运行的 `/background` 提示词数量。只要有至少一个任务在进行中就会显示。 |
+| 🗜️ N | **上下文压缩计数** —— 当前运行会话已自动压缩的次数。在首次压缩触发后出现。 |
+| ▶ N | **活跃的后台任务** —— 当前会话中仍在运行的 `/background` 提示词数量。只要有至少一个任务在进行中就会显示。 |
 | 持续时间 | 已用会话时间 |
-| ⚠ YOLO | **YOLO 模式警告** — 当 `HERMES_YOLO_MODE` 开启时显示（无论是启动时使用 `hermes --yolo` 还是会话中途切换 `/yolo`）。镜像横幅行警告，确保您不会忘记自己处于自动批准模式。 |
+| ⚠ YOLO | **YOLO 模式警告** —— 当 `HERMES_YOLO_MODE` 开启时显示（无论是启动时的 `hermes --yolo` 还是会话中途切换的 `/yolo`）。镜像横幅行的警告，确保您不会忘记自己处于自动批准模式。 |
 
-状态栏会根据终端宽度自适应 — 在 ≥ 76 列时显示完整布局，52–75 列时显示紧凑布局，低于 52 列时显示最小布局（模型 + 持续时间，加上 YOLO 徽章（如果激活））。
+状态栏会根据终端宽度自适应 —— 在 ≥ 76 列时显示完整布局，52–75 列时显示紧凑布局，低于 52 列时显示最小布局（模型 + 持续时间，加上 YOLO 徽章（如果激活））。
 
 **上下文颜色编码：**
 
@@ -86,33 +86,33 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 | 绿色 | < 50% | 空间充足 |
 | 黄色 | 50–80% | 即将填满 |
 | 橙色 | 80–95% | 接近限制 |
-| 红色 | ≥ 95% | 即将溢出 — 考虑使用 `/compress` |
+| 红色 | ≥ 95% | 即将溢出 —— 考虑使用 `/compress` |
 
-使用 `/usage` 获取详细分解，包括按类别（输入 Token 与输出 Token）的成本。
+使用 `/usage` 获取详细分类（包括输入与输出 Token 的成本）。
 
 ### 会话恢复显示
 
-当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示符之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 — 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
+当恢复之前的会话时（`hermes -c` 或 `hermes --resume <id>`），一个“先前对话”面板会出现在横幅和输入提示符之间，显示对话历史的紧凑摘要。详情和配置请参阅 [会话 —— 恢复时的对话摘要](sessions.md#conversation-recap-on-resume)。
 
 ## 快捷键
 
 | 按键 | 操作 |
 |-----|--------|
 | `Enter` | 发送消息 |
-| `Alt+Enter`、`Ctrl+J` 或 `Shift+Enter` | 新行（多行输入）。`Shift+Enter` 需要终端能将其与 `Enter` 区分开 — 见下文。在 Windows Terminal 上，`Alt+Enter` 被终端捕获（全屏切换）；请改用 `Ctrl+Enter` 或 `Ctrl+J`。 |
+| `Alt+Enter`、`Ctrl+J` 或 `Shift+Enter` | 新行（多行输入）。`Shift+Enter` 需要终端能将其与 `Enter` 区分开 —— 见下文。在 Windows Terminal 上，`Alt+Enter` 被终端捕获（全屏切换）；请改用 `Ctrl+Enter` 或 `Ctrl+J`。 |
 | `Alt+V` | 从剪贴板粘贴图像（当终端支持时） |
 | `Ctrl+V` | 粘贴文本并视情况附加剪贴板图像 |
 | `Ctrl+B` | 当语音模式启用时，开始/停止语音录制（`voice.record_key`，默认：`ctrl+b`） |
-| `Ctrl+G` | 在 `$EDITOR`（vim/nvim/nano/VS Code 等）中打开当前输入缓冲区。保存并退出以将编辑后的文本作为下一个提示词发送 — 非常适合长篇、多段落的提示词。 |
+| `Ctrl+G` | 在 `$EDITOR`（vim/nvim/nano/VS Code 等）中打开当前输入缓冲区。保存并退出以将编辑后的文本作为下一个提示词发送 —— 非常适合长篇、多段落的提示词。 |
 | `Ctrl+X Ctrl+E` | Emacs 风格的外部编辑器备用绑定（行为与 `Ctrl+G` 相同）。 |
 | `Ctrl+C` | 中断 Agent（2 秒内按两次以强制退出） |
 | `Ctrl+D` | 退出 |
 | `Ctrl+Z` | 将 Hermes 挂起到后台（仅限 Unix）。在 shell 中运行 `fg` 以恢复。 |
 | `Tab` | 接受自动建议（幽灵文本）或自动补全斜杠命令 |
 
-**多行粘贴预览。** 当您粘贴一个多行文本块时，CLI 会回显一个紧凑的单行预览（`[pasted: 47 lines, 1,842 chars — press Enter to send]`），而不是将整个内容转储到滚动缓冲区中。发送的仍然是完整内容；这只是显示上的优化。
+**多行粘贴预览。** 当您粘贴一个多行文本块时，CLI 会回显一个紧凑的单行预览（`[pasted: 47 lines, 1,842 chars — press Enter to send]`），而不是将整个内容转储到滚动历史中。完整内容仍会被发送；这只是显示上的优化。
 
-**最终响应中的 Markdown 剥离。** CLI 会从 *最终* Agent 回复中剥离最冗长的 Markdown 围栏和 `**粗体**` / `*斜体*` 包装，以便它们呈现为可读的终端散文，而非原始源代码。代码块和列表会被保留。这不影响消息网关平台或工具结果 — 它们会保留其 Markdown 以供原生渲染。
+**最终响应中的 Markdown 剥离。** CLI 会从 *最终* Agent 回复中剥离最冗长的 Markdown 围栏和 `**粗体**` / `*斜体*` 包装，使其呈现为可读的终端散文而非原始源代码。代码块和列表会被保留。这不影响消息网关平台或工具结果 —— 它们会保留其 Markdown 以进行原生渲染。
 
 ## 斜杠命令
 
@@ -131,10 +131,10 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 | `/voice tts` | 切换 Hermes 回复的语音播放 |
 | `/reasoning high` | 增加推理力度 |
 | `/title My Session` | 为当前会话命名 |
-| `/status` | 显示会话信息 — 模型/配置文件/Token/持续时间 — 后跟一个本地的**会话回顾**块（最近的轮次计数、使用最多的工具、触及的文件、最新的用户提示词 + 助手回复）。纯本地计算；不调用 LLM。 |
+| `/status` | 显示会话信息 — 模型/配置文件/Token/持续时间 — 后跟一个本地的**会话回顾**块（最近轮次计数、使用最多的工具、触及的文件、最新的用户提示词 + 助手回复）。纯本地计算；不调用 LLM。 |
 | `/sessions` | 在经典 CLI 内打开交互式会话选择器（与 TUI 使用的界面相同）。输入以筛选，使用方向键导航，按 Enter 键恢复。 |
 
-完整的 CLI 内置命令和消息列表，请参阅[斜杠命令参考](../reference/slash-commands.md)。
+完整的 CLI 内置命令和消息命令列表，请参阅[斜杠命令参考](../reference/slash-commands.md)。
 
 关于设置、提供商、静音调优以及消息平台/Discord 语音使用，请参阅[语音模式](features/voice-mode.md)。
 
@@ -144,7 +144,7 @@ hermes -w -q "Fix issue #123"     # 工作树中的单次查询
 
 ## 快速命令
 
-你可以定义自定义命令，这些命令会立即运行 shell 命令而无需调用 LLM。这些命令在 CLI 和消息平台（Telegram、Discord 等）中均可使用。
+你可以定义自定义命令，无需调用 LLM 即可立即运行 shell 命令。这些命令在 CLI 和消息平台（Telegram、Discord 等）中均可使用。
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -171,7 +171,7 @@ hermes -s hermes-agent-dev,github-auth
 hermes chat -s github-pr-workflow -s github-auth
 ```
 
-Hermes 会在第一轮交互之前将每个命名的技能加载到会话提示词中。该标志在交互模式和单次查询模式下都有效。
+Hermes 会在第一轮交互之前，将每个命名的技能加载到会话提示词中。该标志在交互模式和单次查询模式下均有效。
 
 ## 技能斜杠命令
 
@@ -212,8 +212,8 @@ personalities:
 
 有两种方式输入多行消息：
 
-1.  **`Alt+Enter`、`Ctrl+J` 或 `Shift+Enter`** — 插入新行
-2.  **反斜杠续行** — 在行尾输入 `\` 以继续：
+1. **`Alt+Enter`、`Ctrl+J` 或 `Shift+Enter`** — 插入新行
+2. **反斜杠续行** — 在行尾输入 `\` 以继续：
 
 ```
 ❯ Write a function that:\
@@ -222,7 +222,7 @@ personalities:
 ```
 
 :::info
-支持粘贴多行文本 — 使用上述任意换行键，或直接粘贴内容。
+支持粘贴多行文本 — 使用上述任意换行键，或直接粘贴内容即可。
 :::
 
 ### Shift+Enter 兼容性
@@ -232,28 +232,28 @@ personalities:
 | 终端 | 状态 |
 |---|---|
 | Kitty, foot, WezTerm, Ghostty | 默认启用不同的 `Shift+Enter` |
-| iTerm2（新版）, Alacritty, VS Code 终端, Warp | 在设置中启用 Kitty 协议后支持 |
+| iTerm2（新版）, Alacritty, VS Code terminal, Warp | 在设置中启用 Kitty 协议后支持 |
 | Windows Terminal Preview 1.25+ | 在设置中启用 Kitty 协议后支持 |
-| macOS Terminal.app, 稳定版 Windows Terminal | 不支持 — `Shift+Enter` 与 `Enter` 无法区分 |
+| macOS Terminal.app, stock Windows Terminal（稳定版） | 不支持 — `Shift+Enter` 与 `Enter` 无法区分 |
 
-在终端无法区分的情况下，`Alt+Enter` 和 `Ctrl+J` 在所有地方都有效。**特别地，在 Windows Terminal 上，`Alt+Enter` 被终端捕获（切换全屏）而无法到达 Hermes — 请使用 `Ctrl+Enter`（作为 `Ctrl+J` 传递）或直接使用 `Ctrl+J` 来换行。**
+在终端无法区分的情况下，`Alt+Enter` 和 `Ctrl+J` 在所有地方都有效。**特别地，在 Windows Terminal 上，`Alt+Enter` 会被终端捕获（切换全屏）而无法到达 Hermes — 请使用 `Ctrl+Enter`（作为 `Ctrl+J` 传递）或直接使用 `Ctrl+J` 来换行。**
 
 ## 中断 Agent
 
-你可以在任何时候中断 Agent：
+你可以随时中断 Agent：
 
-*   **输入新消息 + 回车** 当 Agent 正在工作时 — 它会中断并处理你的新指令
-*   **`Ctrl+C`** — 中断当前操作（2 秒内按两次强制退出）
-*   正在进行的终端命令会立即被终止（SIGTERM，1 秒后 SIGKILL）
-*   中断期间输入的多个消息会合并为一个提示词
+- 当 Agent 正在工作时**输入新消息 + 按 Enter** — 它会中断并处理你的新指令
+- **`Ctrl+C`** — 中断当前操作（2 秒内按两次强制退出）
+- 正在运行的终端命令会立即被终止（SIGTERM，1 秒后 SIGKILL）
+- 中断期间输入的多个消息会合并为一个提示词
 
 ### 忙碌输入模式
 
-`display.busy_input_mode` 配置键控制当你在 Agent 工作时按下回车键会发生什么：
+`display.busy_input_mode` 配置键控制当 Agent 工作时你按下 Enter 键的行为：
 
 | 模式 | 行为 |
 |------|----------|
-| `"interrupt"`（默认） | 你的消息会中断当前操作并立即被处理 |
+| `"interrupt"`（默认） | 你的消息会中断当前操作并立即处理 |
 | `"queue"` | 你的消息会被静默排队，并在 Agent 完成后作为下一轮发送 |
 | `"steer"` | 你的消息通过 `/steer` 注入到当前运行中，在下一次工具调用后到达 Agent — 不中断，不创建新轮次 |
 
@@ -263,8 +263,8 @@ display:
   busy_input_mode: "steer"   # 或 "queue" 或 "interrupt"（默认）
 ```
 
-`"queue"` 模式在你想要准备后续消息而不意外取消正在进行的任务时很有用。`"steer"` 模式在你想要在不中断的情况下重定向正在执行任务的 Agent 时很有用 — 例如，当它仍在编辑代码时说“实际上，也检查一下测试”。未知值会回退到 `"interrupt"`。
-`"steer"` 有两个自动回退机制：如果 Agent 尚未启动，或者消息附带了图片，消息将回退到 `"queue"` 行为，以确保内容不会丢失。
+`"queue"` 模式在你想要准备后续消息而不意外取消正在进行的任务时很有用。`"steer"` 模式在你想要在不中断的情况下重定向 Agent 的任务中途时很有用 — 例如，当它仍在编辑代码时说“实际上，也检查一下测试”。未知值会回退到 `"interrupt"`。
+`"steer"` 有两种自动回退机制：如果 Agent 尚未启动，或者消息附带了图片，消息将回退到 `"queue"` 行为，以确保内容不会丢失。
 
 你也可以在 CLI 内部更改此设置：
 
@@ -287,11 +287,11 @@ display:
 Hermes Agent 已被挂起。运行 `fg` 将 Hermes Agent 带回前台。
 ```
 
-在 shell 中输入 `fg` 即可恢复到你离开时的会话。Windows 不支持此功能。
+在 Shell 中输入 `fg` 即可恢复会话，回到离开时的状态。Windows 不支持此功能。
 
 ## 工具进度显示
 
-CLI 会在 Agent 工作时显示动画反馈：
+CLI 在 Agent 工作时显示动画反馈：
 
 **思考动画**（在 API 调用期间）：
 ```
@@ -307,7 +307,7 @@ CLI 会在 Agent 工作时显示动画反馈：
   ┊ 📄 web_extract (2.1s)
 ```
 
-使用 `/verbose` 循环切换显示模式：`off → new → all → verbose`。此命令也可以为消息平台启用 —— 请参阅[配置](/user-guide/configuration#display-settings)。
+使用 `/verbose` 循环切换显示模式：`off → new → all → verbose`。此命令也可以为消息平台启用 —— 参见[配置](/user-guide/configuration#display-settings)。
 
 ### 工具预览长度
 
@@ -341,15 +341,15 @@ display:
 ```bash
 hermes --continue                          # 恢复最近的 CLI 会话
 hermes -c                                  # 简写形式
-hermes -c "my project"                     # 恢复一个命名会话（谱系中最新的）
+hermes -c "my project"                     # 恢复一个命名会话（谱系中的最新会话）
 hermes --resume 20260225_143052_a1b2c3     # 按 ID 恢复特定会话
 hermes --resume "refactoring auth"         # 按标题恢复
 hermes -r 20260225_143052_a1b2c3           # 简写形式
 ```
 
-恢复操作会从 SQLite 中还原完整的对话历史。Agent 会看到所有先前的消息、工具调用和响应 —— 就像你从未离开过一样。
+恢复会从 SQLite 中还原完整的对话历史。Agent 会看到所有先前的消息、工具调用和响应 —— 就像你从未离开过一样。
 
-在聊天中使用 `/title My Session Name` 来命名当前会话，或从命令行使用 `hermes sessions rename <id> <title>`。使用 `hermes sessions list` 浏览过去的会话。
+在聊天中使用 `/title My Session Name` 为当前会话命名，或从命令行使用 `hermes sessions rename <id> <title>`。使用 `hermes sessions list` 浏览过去的会话。
 
 ### 会话存储
 
@@ -382,7 +382,7 @@ auxiliary:
 
 ## 后台会话
 
-在单独的**后台会话**中运行一个提示，同时继续使用 CLI 进行其他工作：
+在单独的**后台会话**中运行提示，同时继续使用 CLI 进行其他工作：
 
 ```
 /background Analyze the logs in /var/log and summarize any errors from today
@@ -410,14 +410,14 @@ Hermes 会立即确认任务并返回提示符：
 
 ```
 ╭─ ⚕ Hermes (后台 #1) ──────────────────────────────────╮
-│ 今天在 syslog 中发现 3 个错误：                         │
-│ 1. OOM killer 在 03:22 被调用 —— 杀死了进程 nginx        │
-│ 2. 在 07:15 时 /dev/sda1 出现磁盘 I/O 错误               │
-│ 3. 在 14:30 时来自 192.168.1.50 的失败 SSH 登录尝试      │
+│ Found 3 errors in syslog from today:                         │
+│ 1. OOM killer invoked at 03:22 — killed process nginx        │
+│ 2. Disk I/O error on /dev/sda1 at 07:15                      │
+│ 3. Failed SSH login attempts from 192.168.1.50 at 14:30      │
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
-如果任务失败，你将看到错误通知。如果你的配置中启用了 `display.bell_on_complete`，任务完成时终端铃会响。
+如果任务失败，你会看到一个错误通知。如果你的配置中启用了 `display.bell_on_complete`，任务完成时终端铃会响。
 
 ### 使用场景
 

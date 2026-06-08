@@ -10,7 +10,7 @@ ntfy 是 Hermes 一个很好的轻量级推送通道：从 [ntfy 手机应用](h
 
 - 一个主题名称（任何唯一的字符串——`hermes-myname-2026` 就可以）
 - 安装 [ntfy 手机应用](https://ntfy.sh/docs/subscribe/phone/) 并订阅该主题
-- 可选：一个自托管的 ntfy 服务器，或一个用于私有/保留主题的 `ntfy.sh` 账户 Token
+- 可选：一个自托管的 ntfy 服务器，或用于私有/保留主题的 `ntfy.sh` 账户 Token
 
 就这样。不需要 SDK，不需要守护进程，不需要 Node.js。适配器使用 `httpx`，它已经是 Hermes 的依赖项。
 
@@ -19,7 +19,7 @@ ntfy 是 Hermes 一个很好的轻量级推送通道：从 [ntfy 手机应用](h
 ### 通过设置向导
 
 ```bash
-hermes setup gateway
+hermes gateway setup
 ```
 
 选择 **ntfy** 并按照提示操作。
@@ -44,13 +44,13 @@ NTFY_HOME_CHANNEL=hermes-myname-2026
 | `NTFY_ALLOWED_USERS` | 推荐 | 允许的逗号分隔的主题名称（视为用户 ID；见下文） |
 | `NTFY_ALLOW_ALL_USERS` | 可选 | 设置为 `true` 以允许所有发布者——仅对带有读取 Token 的私有主题安全 |
 | `NTFY_HOME_CHANNEL` | 可选 | 用于定时任务 / 通知传递的默认主题 |
-| `NTFY_HOME_CHANNEL_NAME` | 可选 | 主通道的人工标签 |
+| `NTFY_HOME_CHANNEL_NAME` | 可选 | 主通道的人类可读标签 |
 
 ## 身份模型——部署前请阅读
 
 ntfy 没有原生的认证用户身份。已发布消息上的 `title` 字段是**发布者控制的**，可以是发送者想要的任何内容。Hermes 适配器**不**使用 `title` 进行授权——这将允许任何知道主题的发布者冒充允许的用户。
 
-相反，**主题名称本身就是身份**。发布到该主题的每条消息都被视为来自同一个逻辑用户（即该主题）。因此，`NTFY_ALLOWED_USERS` 通常只是主题名称本身——一个单条目允许列表，用于控制整个通道的访问。
+相反，**主题名称本身就是身份**。发布到该主题的每条消息都被视为来自同一个逻辑用户（即该主题）。因此，`NTFY_ALLOWED_USERS` 通常就是主题名称本身——一个单一条目的允许列表，用于控制整个通道的访问。
 
 这意味着**任何知道该主题的人都可以与 Agent 对话**。要使其成为真正的信任边界：
 
@@ -62,17 +62,17 @@ ntfy 没有原生的认证用户身份。已发布消息上的 `title` 字段是
 
 ## 快速开始——从手机与你的 Agent 对话
 
-1.  选择一个主题名称：`hermes-myname-2026`
-2.  在你的手机上：安装 [ntfy 应用](https://ntfy.sh/docs/subscribe/phone/)，点击 **+**，输入 `hermes-myname-2026`
-3.  在主机上：
-    ```bash
-    echo 'NTFY_TOPIC=hermes-myname-2026' >> ~/.hermes/.env
-    echo 'NTFY_ALLOWED_USERS=hermes-myname-2026' >> ~/.hermes/.env
-    hermes gateway restart
-    ```
-4.  从 ntfy 应用，向该主题发送一条消息。Agent 的回复会作为推送通知送达。
+1. 选择一个主题名称：`hermes-myname-2026`
+2. 在你的手机上：安装 [ntfy 应用](https://ntfy.sh/docs/subscribe/phone/)，点击 **+**，输入 `hermes-myname-2026`
+3. 在主机上：
+   ```bash
+   echo 'NTFY_TOPIC=hermes-myname-2026' >> ~/.hermes/.env
+   echo 'NTFY_ALLOWED_USERS=hermes-myname-2026' >> ~/.hermes/.env
+   hermes gateway restart
+   ```
+4. 从 ntfy 应用向该主题发送一条消息。Agent 的回复将作为推送通知送达。
 
-## 将 ntfy 与定时任务一起使用
+## 将 ntfy 用于定时任务
 
 一旦设置了 `NTFY_HOME_CHANNEL`，定时任务就可以向 ntfy 传递消息：
 
@@ -114,7 +114,7 @@ NTFY_TOPIC=hermes
 NTFY_TOKEN=tk_abc123  # 如果你设置了访问控制
 ```
 
-自托管为你提供主题访问控制、消息持久化策略、附件和表情符号标签。请参阅 [ntfy 服务器文档](https://docs.ntfy.sh/install/)。
+自托管为你提供主题访问控制、消息持久化策略、附件和表情符号标签。参见 [ntfy 服务器文档](https://docs.ntfy.sh/install/)。
 
 ## Markdown 格式化
 
@@ -133,25 +133,25 @@ platforms:
       markdown: true
 ```
 
-手机应用支持 CommonMark 的一个子集——粗体、斜体、列表、链接、围栏代码块。确切的集合请参阅 [ntfy 的 markdown 文档](https://docs.ntfy.sh/publish/#markdown-formatting)。
+手机应用支持 CommonMark 的一个子集——粗体、斜体、列表、链接、围栏代码块。确切的集合请参见 [ntfy 的 markdown 文档](https://docs.ntfy.sh/publish/#markdown-formatting)。
 
-## 仅发送设置（无入站的通知）
+## 仅发送设置（无入站消息的通知）
 
-如果你只希望 Hermes *推送* 通知到 ntfy（定时任务摘要、警报）而从不接受返回的消息，请将 `NTFY_TOPIC` 和 `NTFY_PUBLISH_TOPIC` 都设置为相同的值，并完全跳过 `NTFY_ALLOWED_USERS`。没有允许列表，Agent 永远不会响应入站消息——你的手机会收到推送，但对话是单向的。
+如果你只希望 Hermes *推送* 通知到 ntfy（定时任务摘要、警报）而从不接收消息，请将 `NTFY_TOPIC` 和 `NTFY_PUBLISH_TOPIC` 设置为相同的值，并完全跳过 `NTFY_ALLOWED_USERS`。没有允许列表，Agent 永远不会响应入站消息——你的手机会收到推送，但对话是单向的。
 
 ## 限制
 
-- **消息大小**：ntfy 将消息正文限制在 4096 个字符。当超过此限制时，Hermes 会发出警告并截断。
+- **消息大小**：ntfy 将消息正文限制在 4096 个字符。当超过此限制时，Hermes 会截断并发出警告。
 - **无输入指示器**：协议不提供此功能；`send_typing` 是无操作。
 - **无线程或附件**：ntfy 是纯推送通知。长回复保留在消息正文中，没有线程展开。
 - **无原生用户身份**：请参阅上面的身份模型部分。
 
 ## 故障排除
 
-**认证失败 / 401** —— `NTFY_TOKEN` 错误，或者该 Token 在此主题上没有发布/订阅权限。适配器在遇到 401 时会停止其重连循环，消息网关运行时状态将显示 `fatal: ntfy_unauthorized`。修复 Token 并重启消息网关。
+**认证失败 / 401** —— `NTFY_TOKEN` 错误，或者该 Token 没有此主题的发布/订阅权限。适配器在遇到 401 时会停止其重连循环，消息网关运行时状态将显示 `fatal: ntfy_unauthorized`。修复 Token 并重启消息网关。
 
 **主题未找到 / 404** —— `NTFY_TOPIC` 在配置的服务器上不存在。对于 ntfy.sh，主题在首次发布时自动创建，所以出现 404 意味着你指向了一个没有预置该主题的自托管服务器。适配器会停止其重连循环并显示 `fatal: ntfy_topic_not_found`。
 
 **已连接但无消息** —— 检查 `NTFY_ALLOWED_USERS` 是否包含主题名称本身。根据 ntfy 的身份模型，主题就是用户；允许列表为空会拒绝所有消息。
 
-**每 60 秒重连一次** —— 流保活默认是 55 秒；ntfy 可能存在间歇性网络问题。适配器应用指数退避（2 → 5 → 10 → 30 → 60 秒），一旦流保持活动状态 ≥60 秒，就会重置为 0。
+**每 60 秒重连** —— 流保活默认是 55 秒；ntfy 可能存在间歇性网络问题。适配器应用指数退避（2 → 5 → 10 → 30 → 60 秒），一旦流保持活动状态 ≥60 秒，则重置为 0。
